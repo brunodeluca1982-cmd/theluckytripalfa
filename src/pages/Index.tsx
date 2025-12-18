@@ -22,27 +22,59 @@ const Index = () => {
           A calm guide to finding the perfect place to stay in the world's most beautiful destinations.
         </p>
 
-        <Link
-          to="/city-view"
-          className="inline-flex items-center justify-between w-full max-w-xs py-4 px-6 bg-card border border-border rounded-lg text-foreground hover:bg-accent transition-colors mb-4"
-        >
-          <div>
-            <p className="text-sm text-muted-foreground mb-1">Onde Ficar</p>
-            <p className="text-lg font-serif font-medium">Rio de Janeiro</p>
-          </div>
-          <span className="text-muted-foreground">→</span>
-        </Link>
+        {/* Destination: Rio de Janeiro */}
+        <div className="mb-6">
+          <p className="text-xs tracking-widest text-muted-foreground uppercase mb-3">
+            Rio de Janeiro
+          </p>
+        </div>
 
-        <Link
-          to="/eat-map-view"
-          className="inline-flex items-center justify-between w-full max-w-xs py-4 px-6 bg-card border border-border rounded-lg text-foreground hover:bg-accent transition-colors"
-        >
-          <div>
-            <p className="text-sm text-muted-foreground mb-1">Onde Comer</p>
-            <p className="text-lg font-serif font-medium">Rio de Janeiro</p>
-          </div>
-          <span className="text-muted-foreground">→</span>
-        </Link>
+        <div className="space-y-3 max-w-xs">
+          {/* Where to Stay */}
+          <Link
+            to="/city-view"
+            className="inline-flex items-center justify-between w-full py-4 px-6 bg-card border border-border rounded-lg text-foreground hover:bg-accent transition-colors"
+          >
+            <p className="text-lg font-serif font-medium">Onde Ficar</p>
+            <span className="text-muted-foreground">→</span>
+          </Link>
+
+          {/* Where to Eat */}
+          <Link
+            to="/eat-map-view"
+            className="inline-flex items-center justify-between w-full py-4 px-6 bg-card border border-border rounded-lg text-foreground hover:bg-accent transition-colors"
+          >
+            <p className="text-lg font-serif font-medium">Onde Comer</p>
+            <span className="text-muted-foreground">→</span>
+          </Link>
+
+          {/* What to Do */}
+          <Link
+            to="/o-que-fazer"
+            className="inline-flex items-center justify-between w-full py-4 px-6 bg-card border border-border rounded-lg text-foreground hover:bg-accent transition-colors"
+          >
+            <p className="text-lg font-serif font-medium">O Que Fazer</p>
+            <span className="text-muted-foreground">→</span>
+          </Link>
+
+          {/* Lucky List */}
+          <Link
+            to="/lucky-list"
+            className="inline-flex items-center justify-between w-full py-4 px-6 bg-card border border-border rounded-lg text-foreground hover:bg-accent transition-colors"
+          >
+            <p className="text-lg font-serif font-medium">The Lucky List</p>
+            <span className="text-muted-foreground">→</span>
+          </Link>
+
+          {/* How to Get There */}
+          <Link
+            to="/como-chegar"
+            className="inline-flex items-center justify-between w-full py-4 px-6 bg-card border border-border rounded-lg text-foreground hover:bg-accent transition-colors"
+          >
+            <p className="text-lg font-serif font-medium">Como Chegar</p>
+            <span className="text-muted-foreground">→</span>
+          </Link>
+        </div>
       </main>
 
       {/* Footer */}

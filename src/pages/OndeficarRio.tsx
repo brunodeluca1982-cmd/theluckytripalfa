@@ -1,19 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { ChevronLeft, ChevronDown } from "lucide-react";
-
-const neighborhoods = [
-  { id: "copacabana", name: "Copacabana" },
-  { id: "ipanema", name: "Ipanema" },
-  { id: "leblon", name: "Leblon" },
-  { id: "leme", name: "Leme" },
-  { id: "arpoador", name: "Arpoador" },
-  { id: "barra-da-tijuca", name: "Barra da Tijuca" },
-  { id: "recreio", name: "Recreio" },
-  { id: "sao-conrado", name: "São Conrado" },
-  { id: "santa-teresa", name: "Santa Teresa" },
-  { id: "centro", name: "Centro" },
-];
+import { RIO_NEIGHBORHOODS } from "@/data/rio-neighborhoods";
 
 const placeholderHotels = [
   { name: "Hotel Placeholder", price: "$$$$" },
@@ -54,7 +42,7 @@ const OndeficarRio = () => {
       {/* Neighborhood List */}
       <main className="px-6 py-6">
         <div className="space-y-3">
-          {neighborhoods.map((neighborhood) => {
+          {RIO_NEIGHBORHOODS.map((neighborhood) => {
             const isExpanded = expandedId === neighborhood.id;
             
             return (

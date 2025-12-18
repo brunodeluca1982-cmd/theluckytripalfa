@@ -1,59 +1,23 @@
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { ChevronLeft } from "lucide-react";
 import RestaurantCard from "@/components/RestaurantCard";
+import { getNeighborhoodById } from "@/data/rio-neighborhoods";
 
-const neighborhoodData: Record<string, { name: string; description: string }> = {
-  copacabana: {
-    name: "Copacabana",
-    description: "From traditional Portuguese taverns to contemporary seafood restaurants, Copacabana offers an eclectic dining scene shaped by decades of cultural diversity.",
-  },
-  ipanema: {
-    name: "Ipanema",
-    description: "A refined food scene where organic bistros meet inventive fusion kitchens, reflecting the neighborhood's sophisticated yet laid-back character.",
-  },
-  leblon: {
-    name: "Leblon",
-    description: "Rio's most exclusive dining destination, home to award-winning chefs and intimate restaurants that define contemporary Brazilian gastronomy.",
-  },
-  leme: {
-    name: "Leme",
-    description: "A quieter culinary pocket with family-run establishments serving generous portions of traditional carioca comfort food.",
-  },
-  "sao-conrado": {
-    name: "São Conrado",
-    description: "An upscale residential enclave with select dining options, from elegant hotel restaurants to casual beachside spots.",
-  },
-  "barra-da-tijuca": {
-    name: "Barra da Tijuca",
-    description: "Modern dining hubs and beachfront restaurants catering to families and groups with diverse international options.",
-  },
-  "santa-teresa": {
-    name: "Santa Teresa",
-    description: "Bohemian eateries and artist-run cafés tucked into colonial buildings, offering creative takes on Brazilian classics.",
-  },
-  centro: {
-    name: "Centro",
-    description: "Historic lunch counters, traditional bars, and century-old confeitarias preserving the flavors of old Rio.",
-  },
+// Neighborhood descriptions for the food scene
+const neighborhoodDescriptions: Record<string, string> = {
+  ipanema: "A refined food scene where organic bistros meet inventive fusion kitchens, reflecting the neighborhood's sophisticated yet laid-back character.",
+  leblon: "Rio's most exclusive dining destination, home to award-winning chefs and intimate restaurants that define contemporary Brazilian gastronomy.",
+  copacabana: "From traditional Portuguese taverns to contemporary seafood restaurants, Copacabana offers an eclectic dining scene shaped by decades of cultural diversity.",
+  leme: "A quieter culinary pocket with family-run establishments serving generous portions of traditional carioca comfort food.",
+  "sao-conrado": "An upscale residential enclave with select dining options, from elegant hotel restaurants to casual beachside spots.",
+  "barra-da-tijuca": "Modern dining hubs and beachfront restaurants catering to families and groups with diverse international options.",
+  recreio: "A laid-back beach neighborhood with casual eateries, fresh seafood spots, and family-friendly dining options.",
+  "santa-teresa": "Bohemian eateries and artist-run cafés tucked into colonial buildings, offering creative takes on Brazilian classics.",
+  centro: "Historic lunch counters, traditional bars, and century-old confeitarias preserving the flavors of old Rio.",
 };
 
+// Restaurant data by neighborhood and cuisine type
 const restaurantsByNeighborhood: Record<string, Record<string, { name: string; description: string }[]>> = {
-  copacabana: {
-    Brazilian: [
-      { name: "Restaurant Placeholder", description: "Traditional feijoada and regional specialties." },
-      { name: "Restaurant Placeholder", description: "Classic churrascaria experience." },
-    ],
-    Japanese: [
-      { name: "Restaurant Placeholder", description: "Fresh sushi with Brazilian influences." },
-    ],
-    Italian: [
-      { name: "Restaurant Placeholder", description: "Handmade pasta in a cozy setting." },
-    ],
-    "Casual / Cafés": [
-      { name: "Restaurant Placeholder", description: "Coffee and pastries with ocean views." },
-      { name: "Restaurant Placeholder", description: "Quick bites and fresh juices." },
-    ],
-  },
   ipanema: {
     Brazilian: [
       { name: "Restaurant Placeholder", description: "Contemporary carioca cuisine." },
@@ -85,6 +49,22 @@ const restaurantsByNeighborhood: Record<string, Record<string, { name: string; d
       { name: "Restaurant Placeholder", description: "Upscale café and patisserie." },
     ],
   },
+  copacabana: {
+    Brazilian: [
+      { name: "Restaurant Placeholder", description: "Traditional feijoada and regional specialties." },
+      { name: "Restaurant Placeholder", description: "Classic churrascaria experience." },
+    ],
+    Japanese: [
+      { name: "Restaurant Placeholder", description: "Fresh sushi with Brazilian influences." },
+    ],
+    Italian: [
+      { name: "Restaurant Placeholder", description: "Handmade pasta in a cozy setting." },
+    ],
+    "Casual / Cafés": [
+      { name: "Restaurant Placeholder", description: "Coffee and pastries with ocean views." },
+      { name: "Restaurant Placeholder", description: "Quick bites and fresh juices." },
+    ],
+  },
   leme: {
     Brazilian: [
       { name: "Restaurant Placeholder", description: "Homestyle cooking and generous portions." },
@@ -93,6 +73,7 @@ const restaurantsByNeighborhood: Record<string, Record<string, { name: string; d
       { name: "Restaurant Placeholder", description: "Neighborhood bakery and café." },
     ],
   },
+  "sao-conrado": {},
   "barra-da-tijuca": {
     Brazilian: [
       { name: "Restaurant Placeholder", description: "Family-style churrascaria." },
@@ -107,7 +88,7 @@ const restaurantsByNeighborhood: Record<string, Record<string, { name: string; d
       { name: "Restaurant Placeholder", description: "Beachfront juice bar." },
     ],
   },
-  "sao-conrado": {},
+  recreio: {},
   "santa-teresa": {
     Brazilian: [
       { name: "Restaurant Placeholder", description: "Creative Brazilian in a colonial house." },
@@ -132,11 +113,15 @@ const WhereToEatDetail = () => {
   const { neighborhood } = useParams<{ neighborhood: string }>();
   const [searchParams] = useSearchParams();
   
-  const data = neighborhoodData[neighborhood || ""] || { name: "Neighborhood", description: "" };
+  const neighborhoodData = getNeighborhoodById(neighborhood || "");
+  const name = neighborhoodData?.name || "Neighborhood";
+  const description = neighborhoodDescriptions[neighborhood || ""] || `Placeholder description for ${name}'s food scene.`;
   const restaurants = restaurantsByNeighborhood[neighborhood || ""] || {};
   
   const from = searchParams.get("from");
   const backPath = from === "map" ? "/eat-map-view" : "/eat-map-view";
+
+  const hasRestaurants = Object.keys(restaurants).length > 0;
 
   return (
     <div className="min-h-screen bg-background">
@@ -156,7 +141,7 @@ const WhereToEatDetail = () => {
         {/* Title */}
         <div className="px-6 pt-8 pb-6">
           <h1 className="text-4xl font-serif font-semibold text-foreground leading-tight">
-            Where to eat in {data.name}
+            Where to eat in {name}
           </h1>
         </div>
 
@@ -168,7 +153,7 @@ const WhereToEatDetail = () => {
         {/* Description */}
         <div className="px-6 pt-8 pb-10">
           <p className="text-base text-muted-foreground leading-relaxed">
-            {data.description || `Placeholder description for ${data.name}'s food scene.`}
+            {description}
           </p>
         </div>
 
@@ -176,29 +161,37 @@ const WhereToEatDetail = () => {
         <div className="mx-6 border-t border-border" />
 
         {/* Restaurants by Cuisine Type */}
-        {Object.entries(restaurants).map(([cuisineType, restaurantList]) => (
-          <section key={cuisineType} className="px-6 pt-8">
-            <h2 className="text-xl font-serif font-medium text-foreground mb-6">
-              {cuisineType}
-            </h2>
-            
-            <div>
-              {restaurantList.map((restaurant, index) => (
-                <RestaurantCard
-                  key={index}
-                  name={restaurant.name}
-                  description={restaurant.description}
-                />
-              ))}
-            </div>
-          </section>
-        ))}
+        {hasRestaurants ? (
+          Object.entries(restaurants).map(([cuisineType, restaurantList]) => (
+            <section key={cuisineType} className="px-6 pt-8">
+              <h2 className="text-xl font-serif font-medium text-foreground mb-6">
+                {cuisineType}
+              </h2>
+              
+              <div>
+                {restaurantList.map((restaurant, index) => (
+                  <RestaurantCard
+                    key={index}
+                    name={restaurant.name}
+                    description={restaurant.description}
+                  />
+                ))}
+              </div>
+            </section>
+          ))
+        ) : (
+          <div className="px-6 pt-8">
+            <p className="text-sm text-muted-foreground">
+              Restaurant recommendations coming soon.
+            </p>
+          </div>
+        )}
       </main>
 
       {/* Footer */}
       <footer className="px-6 py-8 border-t border-border">
         <p className="text-xs text-muted-foreground">
-          The Lucky Trip — {data.name}
+          The Lucky Trip — {name}
         </p>
       </footer>
     </div>
