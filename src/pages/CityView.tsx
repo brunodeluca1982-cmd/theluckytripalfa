@@ -49,7 +49,7 @@ const CityView = () => {
       {/* Instruction */}
       <div className="px-6 py-8">
         <p className="text-sm text-muted-foreground text-center">
-          Tap a neighborhood to explore
+          Tap a neighborhood to explore where to stay
         </p>
       </div>
 
