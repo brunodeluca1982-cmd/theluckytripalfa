@@ -14,6 +14,7 @@ const neighborhoodDescriptions: Record<string, string> = {
   recreio: "A laid-back beach neighborhood with casual eateries, fresh seafood spots, and family-friendly dining options.",
   "santa-teresa": "Bohemian eateries and artist-run cafés tucked into colonial buildings, offering creative takes on Brazilian classics.",
   centro: "Historic lunch counters, traditional bars, and century-old confeitarias preserving the flavors of old Rio.",
+  "jardim-botanico": "A leafy, upscale neighborhood with contemporary restaurants and cozy pizzerias nestled near the botanical gardens.",
 };
 
 // Restaurant data by neighborhood and cuisine type
@@ -186,6 +187,28 @@ const restaurantsByNeighborhood: Record<string, Record<string, { name: string; d
     ],
     "Casual / Cafés": [
       { name: "Restaurant Placeholder", description: "Century-old confeitaria." },
+    ],
+  },
+  "jardim-botanico": {
+    "Contemporary / Authorial": [
+      { 
+        name: "Elena", 
+        description: "Restaurante contemporâneo, sofisticado e animado. Funciona muito bem para casal, mas também para solteiros e paquera. Boa música, público interessante e cozinha autoral.",
+        price: "$$$$",
+        address: "https://maps.google.com/?q=Elena+Jardim+Botânico",
+        instagram: "@elenarestaurante.rj",
+        externalLink: ""
+      },
+    ],
+    Pizzeria: [
+      { 
+        name: "Ella Pizzaria", 
+        description: "Pizza de personalidade. Massa leve, borda crocante e sabor marcante. Uma das minhas preferidas do Rio.",
+        price: "$$",
+        address: "https://maps.google.com/?q=Ella+Pizzaria+Jardim+Botânico",
+        instagram: "@ellapizzaria",
+        externalLink: ""
+      },
     ],
   },
 };
