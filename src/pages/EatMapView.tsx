@@ -6,6 +6,7 @@ const neighborhoods = [
   { id: "copacabana", path: "/onde-comer/copacabana?from=map", top: "25%", left: "70%" },
   { id: "ipanema", path: "/onde-comer/ipanema?from=map", top: "38%", left: "52%" },
   { id: "leblon", path: "/onde-comer/leblon?from=map", top: "45%", left: "38%" },
+  { id: "sao-conrado", path: "/onde-comer/sao-conrado?from=map", top: "55%", left: "28%" },
   { id: "barra-da-tijuca", path: "/onde-comer/barra-da-tijuca?from=map", top: "68%", left: "15%" },
   { id: "santa-teresa", path: "/onde-comer/santa-teresa?from=map", top: "22%", left: "45%" },
   { id: "centro", path: "/onde-comer/centro?from=map", top: "18%", left: "55%" },
