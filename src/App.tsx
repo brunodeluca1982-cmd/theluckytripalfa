@@ -7,15 +7,14 @@ import Index from "./pages/Index";
 import OndeficarRio from "./pages/OndeficarRio";
 import CityView from "./pages/CityView";
 import EatMapView from "./pages/EatMapView";
+import WhereToStayDetail from "./pages/WhereToStayDetail";
 import WhereToEatDetail from "./pages/WhereToEatDetail";
-import BairroDetail from "./pages/BairroDetail";
+import LuckyList from "./pages/LuckyList";
+import LuckyListDetail from "./pages/LuckyListDetail";
+import HowToGetThere from "./pages/HowToGetThere";
+import WhatToDo from "./pages/WhatToDo";
+import WhatToDoDetail from "./pages/WhatToDoDetail";
 import NotFound from "./pages/NotFound";
-import Copacabana from "./pages/neighborhoods/Copacabana";
-import Ipanema from "./pages/neighborhoods/Ipanema";
-import Leblon from "./pages/neighborhoods/Leblon";
-import Leme from "./pages/neighborhoods/Leme";
-import Arpoador from "./pages/neighborhoods/Arpoador";
-import BarraDaTijuca from "./pages/neighborhoods/BarraDaTijuca";
 
 const queryClient = new QueryClient();
 
@@ -26,18 +25,30 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
+          {/* Home */}
           <Route path="/" element={<Index />} />
-          <Route path="/onde-ficar-rio" element={<OndeficarRio />} />
+          
+          {/* Where to Stay */}
           <Route path="/city-view" element={<CityView />} />
+          <Route path="/onde-ficar-rio" element={<OndeficarRio />} />
+          <Route path="/onde-ficar/:neighborhood" element={<WhereToStayDetail />} />
+          
+          {/* Where to Eat */}
           <Route path="/eat-map-view" element={<EatMapView />} />
           <Route path="/onde-comer/:neighborhood" element={<WhereToEatDetail />} />
-          <Route path="/bairro/:id" element={<BairroDetail />} />
-          <Route path="/copacabana" element={<Copacabana />} />
-          <Route path="/ipanema" element={<Ipanema />} />
-          <Route path="/leblon" element={<Leblon />} />
-          <Route path="/leme" element={<Leme />} />
-          <Route path="/arpoador" element={<Arpoador />} />
-          <Route path="/barra-da-tijuca" element={<BarraDaTijuca />} />
+          
+          {/* What to Do */}
+          <Route path="/o-que-fazer" element={<WhatToDo />} />
+          <Route path="/o-que-fazer/:neighborhood" element={<WhatToDoDetail />} />
+          
+          {/* Lucky List */}
+          <Route path="/lucky-list" element={<LuckyList />} />
+          <Route path="/lucky-list/:id" element={<LuckyListDetail />} />
+          
+          {/* How to Get There */}
+          <Route path="/como-chegar" element={<HowToGetThere />} />
+          
+          {/* Fallback */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

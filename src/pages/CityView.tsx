@@ -1,16 +1,6 @@
 import { Link } from "react-router-dom";
 import { ChevronLeft } from "lucide-react";
-
-const neighborhoods = [
-  { id: "leme", path: "/leme?from=map", top: "15%", left: "82%" },
-  { id: "copacabana", path: "/copacabana?from=map", top: "25%", left: "70%" },
-  { id: "ipanema", path: "/ipanema?from=map", top: "38%", left: "52%" },
-  { id: "leblon", path: "/leblon?from=map", top: "45%", left: "38%" },
-  { id: "barra-da-tijuca", path: "/barra-da-tijuca?from=map", top: "68%", left: "15%" },
-  { id: "recreio", path: "/bairro/recreio?from=map", top: "78%", left: "8%" },
-  { id: "santa-teresa", path: "/bairro/santa-teresa?from=map", top: "22%", left: "45%" },
-  { id: "centro", path: "/bairro/centro?from=map", top: "18%", left: "55%" },
-];
+import { RIO_NEIGHBORHOODS } from "@/data/rio-neighborhoods";
 
 const CityView = () => {
   return (
@@ -35,13 +25,13 @@ const CityView = () => {
         </div>
 
         {/* Tappable neighborhood markers */}
-        {neighborhoods.map((neighborhood) => (
+        {RIO_NEIGHBORHOODS.map((neighborhood) => (
           <Link
             key={neighborhood.id}
-            to={neighborhood.path}
+            to={`/onde-ficar/${neighborhood.id}?from=map`}
             className="absolute w-10 h-10 -ml-5 -mt-5 rounded-full bg-foreground/10 border border-foreground/20 hover:bg-foreground/20 hover:border-foreground/40 transition-colors flex items-center justify-center"
-            style={{ top: neighborhood.top, left: neighborhood.left }}
-            aria-label={`Explore ${neighborhood.id.replace(/-/g, ' ')}`}
+            style={{ top: neighborhood.mapPosition.top, left: neighborhood.mapPosition.left }}
+            aria-label={`Explore ${neighborhood.name}`}
           >
             <div className="w-2 h-2 rounded-full bg-foreground/60" />
           </Link>

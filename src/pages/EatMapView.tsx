@@ -1,16 +1,6 @@
 import { Link } from "react-router-dom";
 import { ChevronLeft } from "lucide-react";
-
-const neighborhoods = [
-  { id: "leme", path: "/onde-comer/leme?from=map", top: "15%", left: "82%" },
-  { id: "copacabana", path: "/onde-comer/copacabana?from=map", top: "25%", left: "70%" },
-  { id: "ipanema", path: "/onde-comer/ipanema?from=map", top: "38%", left: "52%" },
-  { id: "leblon", path: "/onde-comer/leblon?from=map", top: "45%", left: "38%" },
-  { id: "sao-conrado", path: "/onde-comer/sao-conrado?from=map", top: "55%", left: "28%" },
-  { id: "barra-da-tijuca", path: "/onde-comer/barra-da-tijuca?from=map", top: "68%", left: "15%" },
-  { id: "santa-teresa", path: "/onde-comer/santa-teresa?from=map", top: "22%", left: "45%" },
-  { id: "centro", path: "/onde-comer/centro?from=map", top: "18%", left: "55%" },
-];
+import { RIO_NEIGHBORHOODS } from "@/data/rio-neighborhoods";
 
 const EatMapView = () => {
   return (
@@ -35,13 +25,13 @@ const EatMapView = () => {
         </div>
 
         {/* Tappable neighborhood markers */}
-        {neighborhoods.map((neighborhood) => (
+        {RIO_NEIGHBORHOODS.map((neighborhood) => (
           <Link
             key={neighborhood.id}
-            to={neighborhood.path}
+            to={`/onde-comer/${neighborhood.id}?from=map`}
             className="absolute w-10 h-10 -ml-5 -mt-5 rounded-full bg-foreground/10 border border-foreground/20 hover:bg-foreground/20 hover:border-foreground/40 transition-colors flex items-center justify-center"
-            style={{ top: neighborhood.top, left: neighborhood.left }}
-            aria-label={`Explore restaurants in ${neighborhood.id.replace(/-/g, ' ')}`}
+            style={{ top: neighborhood.mapPosition.top, left: neighborhood.mapPosition.left }}
+            aria-label={`Explore restaurants in ${neighborhood.name}`}
           >
             <div className="w-2 h-2 rounded-full bg-foreground/60" />
           </Link>
