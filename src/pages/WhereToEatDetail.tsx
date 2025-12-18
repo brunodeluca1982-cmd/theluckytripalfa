@@ -77,18 +77,53 @@ const restaurantsByNeighborhood: Record<string, Record<string, { name: string; d
     ],
   },
   leblon: {
-    Brazilian: [
-      { name: "Restaurant Placeholder", description: "Fine dining Brazilian tasting menu." },
-      { name: "Restaurant Placeholder", description: "Modern interpretations of regional dishes." },
+    "Peixes & Frutos do Mar": [
+      { 
+        name: "Satyricon", 
+        description: "Meu restaurante de peixes. Não passo um fim de semana sem vir. Clássico, elegante, produto impecável e constância rara.",
+        price: "$$$$",
+        address: "https://maps.google.com/?q=Satyricon+Leblon",
+        instagram: "@satyriconrio",
+        externalLink: ""
+      },
     ],
-    Japanese: [
-      { name: "Restaurant Placeholder", description: "High-end omakase." },
+    "Brasileiro / Carioca": [
+      { 
+        name: "Boteco Rainha", 
+        description: "Comida brasileira muito bem executada. Ambiente animado, perfeito pra almoço longo ou jantar descontraído.",
+        price: "$$$",
+        address: "https://maps.google.com/?q=Boteco+Rainha+Leblon",
+        instagram: "@botecorainhaleblon",
+        externalLink: ""
+      },
+      { 
+        name: "Gula Gula", 
+        description: "Restaurante carioca raiz. Funciona sempre. Vou há anos, tanto na Zona Sul quanto na Barra.",
+        price: "$$",
+        address: "https://maps.google.com/?q=Gula+Gula+Leblon",
+        instagram: "@gulagulaoficial",
+        externalLink: ""
+      },
     ],
     Italian: [
-      { name: "Restaurant Placeholder", description: "Elegant Italian with local ingredients." },
+      { 
+        name: "Casa Tua", 
+        description: "Italiano com clima de casa. Massas bem feitas, serviço próximo, sem afetação. Ótimo pra encontros tranquilos.",
+        price: "$$$",
+        address: "https://maps.google.com/?q=Casa+Tua+Leblon",
+        instagram: "@casatua",
+        externalLink: ""
+      },
     ],
-    "Casual / Cafés": [
-      { name: "Restaurant Placeholder", description: "Upscale café and patisserie." },
+    "Praia / Carioca": [
+      { 
+        name: "Belmonte Praia", 
+        description: "Clássico de frente pro mar. O rooftop é um espetáculo. Se tiver fila lá em cima, sentar embaixo também vale muito a pena.",
+        price: "$$",
+        address: "https://maps.google.com/?q=Belmonte+Praia+Leblon",
+        instagram: "@belmonteoficial",
+        externalLink: ""
+      },
     ],
   },
   copacabana: {
