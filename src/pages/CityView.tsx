@@ -2,12 +2,14 @@ import { Link } from "react-router-dom";
 import { ChevronLeft } from "lucide-react";
 
 const neighborhoods = [
-  { id: "leme", name: "Leme", top: "18%", left: "78%" },
-  { id: "copacabana", name: "Copacabana", top: "28%", left: "65%" },
-  { id: "arpoador", name: "Arpoador", top: "42%", left: "52%" },
-  { id: "ipanema", name: "Ipanema", top: "48%", left: "38%" },
-  { id: "leblon", name: "Leblon", top: "55%", left: "22%" },
-  { id: "barra-da-tijuca", name: "Barra da Tijuca", top: "72%", left: "12%" },
+  { id: "leme", path: "/leme", top: "15%", left: "82%" },
+  { id: "copacabana", path: "/copacabana", top: "25%", left: "70%" },
+  { id: "ipanema", path: "/ipanema", top: "38%", left: "52%" },
+  { id: "leblon", path: "/leblon", top: "45%", left: "38%" },
+  { id: "barra-da-tijuca", path: "/barra-da-tijuca", top: "68%", left: "15%" },
+  { id: "recreio", path: "/bairro/recreio", top: "78%", left: "8%" },
+  { id: "santa-teresa", path: "/bairro/santa-teresa", top: "22%", left: "45%" },
+  { id: "centro", path: "/bairro/centro", top: "18%", left: "55%" },
 ];
 
 const CityView = () => {
@@ -36,10 +38,10 @@ const CityView = () => {
         {neighborhoods.map((neighborhood) => (
           <Link
             key={neighborhood.id}
-            to={`/${neighborhood.id}`}
+            to={neighborhood.path}
             className="absolute w-10 h-10 -ml-5 -mt-5 rounded-full bg-foreground/10 border border-foreground/20 hover:bg-foreground/20 hover:border-foreground/40 transition-colors flex items-center justify-center"
             style={{ top: neighborhood.top, left: neighborhood.left }}
-            aria-label={`Explore ${neighborhood.name}`}
+            aria-label={`Explore ${neighborhood.id.replace(/-/g, ' ')}`}
           >
             <div className="w-2 h-2 rounded-full bg-foreground/60" />
           </Link>
