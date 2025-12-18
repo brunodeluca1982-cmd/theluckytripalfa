@@ -127,19 +127,23 @@ const restaurantsByNeighborhood: Record<string, Record<string, { name: string; d
     ],
   },
   copacabana: {
-    Brazilian: [
-      { name: "Restaurant Placeholder", description: "Traditional feijoada and regional specialties." },
-      { name: "Restaurant Placeholder", description: "Classic churrascaria experience." },
-    ],
-    Japanese: [
-      { name: "Restaurant Placeholder", description: "Fresh sushi with Brazilian influences." },
-    ],
-    Italian: [
-      { name: "Restaurant Placeholder", description: "Handmade pasta in a cozy setting." },
-    ],
-    "Casual / Cafés": [
-      { name: "Restaurant Placeholder", description: "Coffee and pastries with ocean views." },
-      { name: "Restaurant Placeholder", description: "Quick bites and fresh juices." },
+    "Fine Dining": [
+      { 
+        name: "Mee", 
+        description: "Alta gastronomia asiática dentro do Copacabana Palace. Preciso, elegante e silencioso. Experiência especial, sem pressa.",
+        price: "$$$$",
+        address: "https://maps.google.com/?q=Mee+Copacabana+Palace",
+        instagram: "@meerestaurante",
+        externalLink: ""
+      },
+      { 
+        name: "Cipriani", 
+        description: "Italiano clássico, serviço de alto nível e ambiente sofisticado. Restaurante para ocasiões marcantes.",
+        price: "$$$$",
+        address: "https://maps.google.com/?q=Cipriani+Copacabana+Palace",
+        instagram: "@ciprianiristorante",
+        externalLink: ""
+      },
     ],
   },
   leme: {
