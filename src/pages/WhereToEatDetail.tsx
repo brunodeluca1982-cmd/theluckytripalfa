@@ -216,10 +216,26 @@ const restaurantsByNeighborhood: Record<string, Record<string, { name: string; d
     "Boteco / Carioca": [
       { 
         name: "Braseiro da Gávea", 
-        description: "Traditional neighborhood boteco. Meat, cold beer and long conversations. Always busy. Always good.",
+        description: "Traditional neighborhood boteco. Meat, cold beer and conversation. Always busy. Always good.",
         price: "$$",
         address: "https://maps.google.com/?q=Braseiro+da+Gávea",
         instagram: "@braseirodagavea",
+        externalLink: ""
+      },
+      { 
+        name: "Guimas", 
+        description: "Classic Gávea meeting point. Simple food, cold beer and tables that turn into long nights.",
+        price: "$$",
+        address: "https://maps.google.com/?q=Guimas+Gávea",
+        instagram: "@guimas",
+        externalLink: ""
+      },
+      { 
+        name: "Brewteco", 
+        description: "Craft beer bar with a lively atmosphere. Good food, rotating taps and a social crowd.",
+        price: "$$",
+        address: "https://maps.google.com/?q=Brewteco+Gávea",
+        instagram: "@brewteco",
         externalLink: ""
       },
     ],
