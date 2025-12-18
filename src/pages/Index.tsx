@@ -23,7 +23,7 @@ const Index = () => {
         </p>
 
         <Link
-          to="/onde-ficar-rio"
+          to="/city-view"
           className="inline-flex items-center justify-between w-full max-w-xs py-4 px-6 bg-card border border-border rounded-lg text-foreground hover:bg-accent transition-colors"
         >
           <div>
