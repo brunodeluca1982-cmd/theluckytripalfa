@@ -184,8 +184,22 @@ const hotelsByNeighborhood: Record<string, {
     },
   ],
   "santa-teresa": [
-    { name: "Hotel Placeholder", price: "$$$", description: "Colonial mansion with city views." },
-    { name: "Hotel Placeholder", price: "$$", description: "Artistic guesthouse in the hills." },
+    { 
+      name: "Santa Teresa Hotel RJ MGallery", 
+      price: "$$$$", 
+      description: "Refúgio criativo. Amy Winehouse, Alicia Keys e Alanis Morissette já se hospedaram aqui.",
+      address: "https://maps.google.com/?q=Santa+Teresa+Hotel+RJ",
+      instagram: "@santateresahotel",
+      externalLink: ""
+    },
+    { 
+      name: "Mama Shelter Rio", 
+      price: "$$", 
+      description: "Colorido, jovem e animado. Boa mistura de hospedagem e vida social.",
+      address: "https://maps.google.com/?q=Mama+Shelter+Rio",
+      instagram: "@mamashelterrj",
+      externalLink: ""
+    },
   ],
   centro: [
     { name: "Hotel Placeholder", price: "$$", description: "Business hotel near cultural sites." },
