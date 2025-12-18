@@ -2,14 +2,14 @@ import { Link } from "react-router-dom";
 import { ChevronLeft } from "lucide-react";
 
 const neighborhoods = [
-  { id: "leme", path: "/leme", top: "15%", left: "82%" },
-  { id: "copacabana", path: "/copacabana", top: "25%", left: "70%" },
-  { id: "ipanema", path: "/ipanema", top: "38%", left: "52%" },
-  { id: "leblon", path: "/leblon", top: "45%", left: "38%" },
-  { id: "barra-da-tijuca", path: "/barra-da-tijuca", top: "68%", left: "15%" },
-  { id: "recreio", path: "/bairro/recreio", top: "78%", left: "8%" },
-  { id: "santa-teresa", path: "/bairro/santa-teresa", top: "22%", left: "45%" },
-  { id: "centro", path: "/bairro/centro", top: "18%", left: "55%" },
+  { id: "leme", path: "/leme?from=map", top: "15%", left: "82%" },
+  { id: "copacabana", path: "/copacabana?from=map", top: "25%", left: "70%" },
+  { id: "ipanema", path: "/ipanema?from=map", top: "38%", left: "52%" },
+  { id: "leblon", path: "/leblon?from=map", top: "45%", left: "38%" },
+  { id: "barra-da-tijuca", path: "/barra-da-tijuca?from=map", top: "68%", left: "15%" },
+  { id: "recreio", path: "/bairro/recreio?from=map", top: "78%", left: "8%" },
+  { id: "santa-teresa", path: "/bairro/santa-teresa?from=map", top: "22%", left: "45%" },
+  { id: "centro", path: "/bairro/centro?from=map", top: "18%", left: "55%" },
 ];
 
 const CityView = () => {

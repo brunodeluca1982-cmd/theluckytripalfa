@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { ChevronLeft } from "lucide-react";
+import { useBackNavigation } from "@/hooks/use-back-navigation";
 
 const placeholderHotels = [
   { name: "Hotel Placeholder", price: "$$$$" },
@@ -10,12 +11,14 @@ const placeholderHotels = [
 ];
 
 const Leme = () => {
+  const backPath = useBackNavigation();
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="px-6 py-4 border-b border-border">
         <Link
-          to="/onde-ficar-rio"
+          to={backPath}
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           <ChevronLeft className="w-4 h-4" />
