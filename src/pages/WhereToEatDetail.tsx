@@ -25,110 +25,184 @@ const neighborhoodDescriptions: Record<string, string> = {
 // Restaurant data by neighborhood and cuisine type
 const restaurantsByNeighborhood: Record<string, Record<string, { name: string; description: string; price?: string; address?: string; instagram?: string; externalLink?: string }[]>> = {
   ipanema: {
-    "Cozinha Autoral / Alta Gastronomia": [
-      { 
-        name: "Lasai", 
-        description: "Um dos restaurantes mais impactantes do Brasil. O Lasai não serve só comida — serve uma experiência inteira. Silêncio, precisão, profundidade, Brasil no prato. É o tipo de jantar que muda sua régua gastronômica.",
-        price: "$$$$",
-        address: "https://maps.google.com/?q=Lasai+Rio+de+Janeiro",
-        instagram: "@lasai_rj",
-        externalLink: ""
-      },
-      { 
-        name: "Oteque", 
-        description: "Entrar no Oteque é como entrar numa cena lenta de cinema. Luz baixa, cozinha impecável, ritmo calmo e intensidade em cada detalhe. Um jantar que vira capítulo da vida.",
-        price: "$$$$",
-        address: "https://maps.google.com/?q=Oteque+Rio+de+Janeiro",
-        instagram: "@oteque_rj",
-        externalLink: ""
-      },
-    ],
-    Italiano: [
+    "Italiana": [
       { 
         name: "Nido Ristorante", 
         description: "Meu italiano afetivo. Massas impecáveis, ambiente acolhedor, comida honesta. Restaurante de rotina boa, conversa longa e conforto emocional.",
         price: "$$$",
-        address: "https://maps.google.com/?q=Nido+Ristorante+Ipanema",
+        address: "https://maps.google.com/?q=Nido+Ristorante+Av.+Gen.+San+Martin+1011+Leblon+Rio+de+Janeiro",
         instagram: "@nidorestaurante",
-        externalLink: ""
       },
-    ],
-    "Cafés / Bistrôs / Carioca": [
       { 
-        name: "Zazá Bistrô Café", 
-        description: "Delicinhas a qualquer hora do dia. Funciona para almoço leve, café demorado ou jantar sem cerimônia. É aquele lugar que você entra sem planejar e acaba ficando.",
+        name: "Francese Brasserie", 
+        description: "(sem texto editorial no trecho aprovado)",
         price: "$$$",
-        address: "https://maps.google.com/?q=Zazá+Bistrô+Ipanema",
-        instagram: "@zazabistro",
-        externalLink: ""
+        address: "https://maps.google.com/?q=Francese+Brasserie+Ipanema+Rio+de+Janeiro",
+        instagram: "@francesebrasserie",
+      },
+      { 
+        name: "Gero Rio", 
+        description: "(sem texto editorial no trecho aprovado)",
+        price: "$$$$",
+        address: "https://maps.google.com/?q=Gero+Rio+Fasano+Ipanema+Av.+Vieira+Souto+80+Rio+de+Janeiro",
+        instagram: "@fasano",
       },
     ],
-    "Boteco / Carioca": [
+    "Boteco": [
       { 
         name: "Jobi", 
         description: "Clássico absoluto. Chope bem tirado, comida correta e mesas que misturam gerações. Frequento há anos e sempre encontro alguém conhecido.",
         price: "$$",
-        address: "https://maps.google.com/?q=Jobi+Ipanema",
+        address: "https://maps.google.com/?q=Jobi+Rua+Ataulfo+de+Paiva+1166+Leblon+Rio+de+Janeiro",
         instagram: "@jobi_oficial",
-        externalLink: ""
       },
       { 
         name: "Barzin", 
         description: "Boa opção pra começar a noite. Ambiente animado, público bonito e clima de paquera leve, sem exagero.",
         price: "$$$",
-        address: "https://maps.google.com/?q=Barzin+Ipanema",
+        address: "https://maps.google.com/?q=Barzin+Ipanema+Rio+de+Janeiro",
         instagram: "@barzin",
-        externalLink: ""
+      },
+    ],
+    "Vegetariana": [
+      { 
+        name: "Teva", 
+        description: "Vegetariano sofisticado, técnica apurada e apresentação cuidadosa.",
+        price: "$$$",
+        address: "https://maps.google.com/?q=Teva+Ipanema+Rio+de+Janeiro",
+        instagram: "@tevavegetariano",
+      },
+    ],
+    "Portuguesa": [
+      { 
+        name: "Rancho Português", 
+        description: "(sem texto editorial no trecho aprovado)",
+        price: "$$$$",
+        address: "https://maps.google.com/?q=Rancho+Portugu%C3%AAs+Av.+Bartolomeu+Mitre+264+Leblon+Rio+de+Janeiro",
+        instagram: "@ranchoportugues",
       },
     ],
   },
   leblon: {
-    "Peixes & Frutos do Mar": [
+    "Japonesa": [
       { 
-        name: "Satyricon", 
-        description: "Meu restaurante de peixes. Não passo um fim de semana sem vir. Clássico, elegante, produto impecável e constância rara.",
+        name: "Mr. Lam", 
+        description: "Asiático sofisticado, ambiente elegante e execução precisa. Funciona muito bem para jantar especial, com pegada internacional.",
         price: "$$$$",
-        address: "https://maps.google.com/?q=Satyricon+Leblon",
-        instagram: "@satyriconrio",
-        externalLink: ""
+        address: "https://maps.google.com/?q=Mr.+Lam+Rua+Maria+Ang%C3%A9lica+21+Leblon+Rio+de+Janeiro",
+        instagram: "@mrlamrio",
+      },
+      { 
+        name: "San Omakase", 
+        description: "Japonês de precisão. Você senta, confia e deixa a experiência conduzir.",
+        price: "$$$$",
+        address: "https://maps.google.com/?q=San+Omakase+Leblon+Rio+de+Janeiro",
+        instagram: "@sanrestaurante",
+      },
+      { 
+        name: "Mitsubá", 
+        description: "(sem texto editorial no trecho aprovado)",
+        price: "$$$",
+        address: "https://maps.google.com/?q=Mitsub%C3%A1+Rua+Dias+Ferreira+284+Leblon+Rio+de+Janeiro",
+        instagram: "@mitsubarj",
       },
     ],
-    "Brasileiro / Carioca": [
+    "Alta Gastronomia": [
+      { 
+        name: "Satyricon", 
+        description: "Meu restaurante de peixes. Não deixo passar um fim de semana sem vir. Clássico, elegante, produto impecável e constância rara.",
+        price: "$$$$",
+        address: "https://maps.google.com/?q=Satyricon+Rua+Bar%C3%A3o+da+Torre+192+Ipanema+Rio+de+Janeiro",
+        instagram: "@satyriconrio",
+      },
+      { 
+        name: "Ocyá", 
+        description: "Quando eu quero marisco bem tratado, sem firula, penso aqui. Sabor, técnica e clima de noite bem vivida.",
+        price: "$$$$",
+        address: "https://maps.google.com/?q=Ocy%C3%A1+Leblon+Rio+de+Janeiro",
+        instagram: "@ocya.rio",
+      },
+    ],
+    "Brasileira": [
       { 
         name: "Boteco Rainha", 
-        description: "Comida brasileira muito bem executada. Ambiente animado, perfeito pra almoço longo ou jantar descontraído.",
+        description: "Comida brasileira muito bem executada. Ambiente animado, ótimo para almoço longo ou jantar descontraído.",
         price: "$$$",
-        address: "https://maps.google.com/?q=Boteco+Rainha+Leblon",
+        address: "https://maps.google.com/?q=Boteco+Rainha+Leblon+Rio+de+Janeiro",
         instagram: "@botecorainhaleblon",
-        externalLink: ""
       },
       { 
         name: "Gula Gula", 
-        description: "Restaurante carioca raiz. Funciona sempre. Vou há anos, tanto na Zona Sul quanto na Barra.",
+        description: "Restaurante carioca raiz. Funciona sempre. Vou há anos.",
         price: "$$",
-        address: "https://maps.google.com/?q=Gula+Gula+Leblon",
+        address: "https://maps.google.com/?q=Gula+Gula+Leblon+Rio+de+Janeiro",
         instagram: "@gulagulaoficial",
-        externalLink: ""
       },
-    ],
-    Italiano: [
       { 
-        name: "Casa Tua", 
-        description: "Italiano com clima de casa. Massas bem feitas, serviço próximo, sem afetação. Ótimo pra encontros tranquilos.",
-        price: "$$$",
-        address: "https://maps.google.com/?q=Casa+Tua+Leblon",
-        instagram: "@casatua",
-        externalLink: ""
+        name: "Academia da Cachaça", 
+        description: "Instituição carioca. Comida brasileira, chope gelado e clima democrático.",
+        price: "$$",
+        address: "https://maps.google.com/?q=Academia+da+Cacha%C3%A7a+Leblon+Rio+de+Janeiro",
+        instagram: "@academiadacachaca",
       },
     ],
-    "Praia / Carioca": [
+    "Italiana": [
+      { 
+        name: "Casa Tua – Leblon", 
+        description: "Italiano para ir sem pressa. Clima de casa, massa bem feita e conversa que dura.",
+        price: "$$$",
+        address: "https://maps.google.com/?q=Casa+Tua+Leblon+Rio+de+Janeiro",
+        instagram: "@casatua",
+      },
+    ],
+    "Carnes": [
+      { 
+        name: "Malta Steakhouse", 
+        description: "Boa carne, ambiente confortável e serviço direto.",
+        price: "$$$",
+        address: "https://maps.google.com/?q=Malta+Steakhouse+Leblon+Rio+de+Janeiro",
+        instagram: "@maltasteakhouse",
+      },
+      { 
+        name: "Giuseppe Grill", 
+        description: "Clássico da carne bem feita, sem firula.",
+        price: "$$$",
+        address: "https://maps.google.com/?q=Giuseppe+Grill+Leblon+Rio+de+Janeiro",
+        instagram: "@giuseppegrill",
+      },
+      { 
+        name: "Rufino Parrilla", 
+        description: "(sem texto editorial no trecho aprovado)",
+        price: "$$$$",
+        address: "https://maps.google.com/?q=Rufino+Parrilla+Leblon+Rua+Dias+Ferreira+84+Rio+de+Janeiro",
+        instagram: "@rufinorj",
+      },
+    ],
+    "Boteco": [
       { 
         name: "Belmonte Praia", 
-        description: "Clássico de frente pro mar. O rooftop é um espetáculo. Se tiver fila lá em cima, sentar embaixo também vale muito a pena.",
+        description: "Clássico de frente para o mar. O rooftop é um espetáculo.",
         price: "$$",
-        address: "https://maps.google.com/?q=Belmonte+Praia+Leblon",
+        address: "https://maps.google.com/?q=Belmonte+Praia+Leblon+Rio+de+Janeiro",
         instagram: "@belmonteoficial",
-        externalLink: ""
+      },
+    ],
+  },
+  botafogo: {
+    "Alta Gastronomia": [
+      { 
+        name: "Lasai", 
+        description: "Um dos restaurantes mais impactantes do Brasil. O Lasai não serve só comida, serve uma experiência inteira. Silêncio, precisão, profundidade e Brasil no prato. É o tipo de jantar que muda sua régua gastronômica.",
+        price: "$$$$",
+        address: "https://maps.google.com/?q=Lasai+Rua+Conde+de+Iraj%C3%A1+191+Botafogo+Rio+de+Janeiro",
+        instagram: "@lasai_rj",
+      },
+      { 
+        name: "Oteque", 
+        description: "Entrar no Oteque é como entrar numa cena lenta de cinema. Luz baixa, cozinha impecável, ritmo calmo e intensidade em cada detalhe. Um jantar que vira capítulo da vida.",
+        price: "$$$$",
+        address: "https://maps.google.com/?q=Oteque+Rua+Conde+de+Iraj%C3%A1+581+Botafogo+Rio+de+Janeiro",
+        instagram: "@oteque_rj",
       },
     ],
   },
@@ -136,185 +210,267 @@ const restaurantsByNeighborhood: Record<string, Record<string, { name: string; d
     "Alta Gastronomia": [
       { 
         name: "Mee", 
-        description: "Alta gastronomia asiática dentro do Copacabana Palace. Preciso, elegante e silencioso. Experiência especial, sem pressa.",
+        description: "Alta gastronomia asiática, precisa e silenciosa. Experiência para ocasiões especiais.",
         price: "$$$$",
-        address: "https://maps.google.com/?q=Mee+Copacabana+Palace",
+        address: "https://maps.google.com/?q=Mee+Copacabana+Palace+Rio+de+Janeiro",
         instagram: "@meerestaurante",
-        externalLink: ""
       },
       { 
         name: "Cipriani", 
-        description: "Italiano clássico, serviço de alto nível e ambiente sofisticado. Restaurante para ocasiões marcantes.",
+        description: "Italiano clássico, serviço impecável e clima sofisticado.",
         price: "$$$$",
-        address: "https://maps.google.com/?q=Cipriani+Copacabana+Palace",
+        address: "https://maps.google.com/?q=Cipriani+Copacabana+Palace+Rio+de+Janeiro",
         instagram: "@ciprianiristorante",
-        externalLink: ""
       },
     ],
-  },
-  leme: {
-    Brasileiro: [
-      { name: "Placeholder de Restaurante", description: "Cozinha caseira e porções generosas." },
-    ],
-    "Casual / Cafés": [
-      { name: "Placeholder de Restaurante", description: "Padaria e café do bairro." },
-    ],
-  },
-  "sao-conrado": {
-    "Hotel / Experiência": [
+    "Carnes": [
       { 
-        name: "A Sereia", 
-        description: "Restaurante dentro do icônico Hotel Nacional. Foco em vista, atmosfera e ritmo calmo. Funciona mais como experiência do que como destino gastronômico. Ideal para hóspedes do hotel ou para uma refeição ao pôr do sol com a paisagem como protagonista.",
-        price: "$$$",
-        address: "https://maps.google.com/?q=A+Sereia+Hotel+Nacional+São+Conrado",
-        instagram: "@hotelnacionalrio",
-        externalLink: ""
+        name: "Esplanada Grill", 
+        description: "Carne no ponto, serviço rodado e casa com história.",
+        price: "$$$$",
+        address: "https://maps.google.com/?q=Esplanada+Grill+Rio+de+Janeiro",
+        instagram: "@esplanadagrillrio",
       },
     ],
-    "Japonês / Contemporâneo": [
+    "Boteco": [
       { 
-        name: "Gurumê – Fashion Mall", 
-        description: "Culinária japonesa contemporânea confiável. Confortável, preciso e consistente. Frequentemente escolhido para almoços de negócios ou jantares fáceis sem surpresas. A localização no shopping facilita a logística em um bairro com poucas opções gastronômicas.",
-        price: "$$$",
-        address: "https://maps.google.com/?q=Gurumê+Fashion+Mall+São+Conrado",
-        instagram: "@gurume_oficial",
-        externalLink: ""
-      },
-    ],
-    "Praia / Casual": [
-      { 
-        name: "Qui Qui", 
-        description: "Experiência de quiosque de praia na Praia do Pepino. Casual, informal e conectado à cena local de surfe e voo livre. Funciona melhor durante o dia, entre o tempo de praia e o pôr do sol. Não é sobre alta gastronomia — é sobre atmosfera e lugar.",
+        name: "Adega Pérola", 
+        description: "Mais bar que restaurante. Petiscos portugueses e noites cheias.",
         price: "$$",
-        address: "https://maps.google.com/?q=Qui+Qui+Praia+do+Pepino+São+Conrado",
-        instagram: "",
-        externalLink: ""
+        address: "https://maps.google.com/?q=Adega+P%C3%A9rola+Copacabana+Rio+de+Janeiro",
+        instagram: "@adegaperola",
+      },
+    ],
+    "Peixes e Frutos do Mar": [
+      { 
+        name: "Polvo Bar", 
+        description: "Frutos do mar com clima animado para a noite.",
+        price: "$$$",
+        address: "https://maps.google.com/?q=Polvo+Bar+Copacabana+Rio+de+Janeiro",
+        instagram: "@polvobar",
+      },
+      { 
+        name: "Labuta Mar", 
+        description: "Produto bom, clima informal e começo de noite leve.",
+        price: "$$",
+        address: "https://maps.google.com/?q=Labuta+Mar+Copacabana+Rio+de+Janeiro",
+        instagram: "@labutamar",
+      },
+    ],
+    "Japonesa": [
+      { 
+        name: "Haru", 
+        description: "Japonês tradicional, discreto e consistente.",
+        price: "$$$",
+        address: "https://maps.google.com/?q=Haru+Sushi+Copacabana+Rio+de+Janeiro",
+        instagram: "@haru_sushi",
       },
     ],
   },
-  "barra-da-tijuca": {
-    Brasileiro: [
-      { name: "Placeholder de Restaurante", description: "Churrascaria familiar." },
-    ],
-    Japonês: [
-      { name: "Placeholder de Restaurante", description: "Fusão japonesa contemporânea." },
-    ],
-    Italiano: [
-      { name: "Placeholder de Restaurante", description: "Pizzas de forno a lenha." },
-    ],
-    "Casual / Cafés": [
-      { name: "Placeholder de Restaurante", description: "Bar de sucos à beira-mar." },
-    ],
-  },
-  recreio: {},
-  "santa-teresa": {
-    Brasileiro: [
-      { name: "Placeholder de Restaurante", description: "Brasileiro criativo em casarão colonial." },
-    ],
-    "Casual / Cafés": [
-      { name: "Placeholder de Restaurante", description: "Café de artista com música ao vivo." },
-      { name: "Placeholder de Restaurante", description: "Bar boêmio com petiscos." },
-    ],
-  },
-  centro: {
-    Brasileiro: [
-      { name: "Placeholder de Restaurante", description: "Balcão de almoço histórico desde 1920." },
-      { name: "Placeholder de Restaurante", description: "Experiência de boteco tradicional." },
-    ],
-    "Casual / Cafés": [
-      { name: "Placeholder de Restaurante", description: "Confeitaria centenária." },
-    ],
-  },
+  leme: {},
   "jardim-botanico": {
-    "Contemporâneo / Autoral": [
+    "Alta Gastronomia": [
+      { 
+        name: "Chez Claude", 
+        description: "Francês contemporâneo sólido e sofisticado.",
+        price: "$$$$",
+        address: "https://maps.google.com/?q=Chez+Claude+Jardim+Bot%C3%A2nico+Rio+de+Janeiro",
+        instagram: "@chezclauderio",
+      },
+      { 
+        name: "Rubaiyat", 
+        description: "(sem texto editorial no trecho aprovado)",
+        price: "$$$$",
+        address: "https://maps.google.com/?q=Rubaiyat+Rio+Rua+Jardim+Bot%C3%A2nico+971+Rio+de+Janeiro",
+        instagram: "@rubaiyat",
+      },
+      { 
+        name: "Casa 201", 
+        description: "(sem texto editorial no trecho aprovado)",
+        price: "$$$",
+        address: "https://maps.google.com/?q=Casa+201+Rua+Lopes+Quint%C3%A3s+201+Jardim+Bot%C3%A2nico+Rio+de+Janeiro",
+        instagram: "@casa201rj",
+      },
+      { 
+        name: "Grado", 
+        description: "(sem texto editorial no trecho aprovado)",
+        price: "$$$",
+        address: "https://maps.google.com/?q=Grado+Rua+Visconde+de+Caranda%C3%AD+31+Jardim+Bot%C3%A2nico+Rio+de+Janeiro",
+        instagram: "@grado",
+      },
+    ],
+    "Experiência Gastronômica": [
       { 
         name: "Elena", 
-        description: "Restaurante contemporâneo, sofisticado e animado. Funciona muito bem para casal, mas também para solteiros e paquera. Boa música, público interessante e cozinha autoral.",
+        description: "Funciona para casal, solteiro e paquera. Boa música, público interessante e energia boa.",
         price: "$$$$",
-        address: "https://maps.google.com/?q=Elena+Jardim+Botânico",
+        address: "https://maps.google.com/?q=Elena+Jardim+Bot%C3%A2nico+Rio+de+Janeiro",
         instagram: "@elenarestaurante.rj",
-        externalLink: ""
       },
     ],
-    Pizzaria: [
+    "Casual": [
       { 
         name: "Ella Pizzaria", 
-        description: "Pizza de personalidade. Massa leve, borda crocante e sabor marcante. Uma das minhas preferidas do Rio.",
+        description: "Pizza de personalidade, massa leve e borda crocante.",
         price: "$$",
-        address: "https://maps.google.com/?q=Ella+Pizzaria+Jardim+Botânico",
+        address: "https://maps.google.com/?q=Ella+Pizzaria+Rua+Pacheco+Le%C3%A3o+656+Jardim+Bot%C3%A2nico+Rio+de+Janeiro",
         instagram: "@ellapizzaria",
-        externalLink: ""
       },
     ],
     "Café / Brunch": [
       { 
         name: "Empório Jardim", 
-        description: "Café da manhã e brunch dos mais consistentes do Rio. Bom pra ir sem pressa, inclusive com crianças.",
+        description: "Café da manhã e brunch consistentes, inclusive com crianças.",
         price: "$$",
-        address: "https://maps.google.com/?q=Empório+Jardim",
+        address: "https://maps.google.com/?q=Emp%C3%B3rio+Jardim+Rua+Maria+Ang%C3%A9lica+120+Jardim+Bot%C3%A2nico+Rio+de+Janeiro",
         instagram: "@emporiojardim",
-        externalLink: ""
       },
     ],
   },
   gavea: {
-    "Boteco / Carioca": [
+    "Boteco": [
       { 
         name: "Braseiro da Gávea", 
-        description: "Boteco tradicional do bairro. Carne, cerveja gelada e conversa. Sempre cheio. Sempre bom.",
+        description: "Carne, chope e conversa. Sempre cheio, sempre bom.",
         price: "$$",
-        address: "https://maps.google.com/?q=Braseiro+da+Gávea",
+        address: "https://maps.google.com/?q=Braseiro+da+G%C3%A1vea+Pra%C3%A7a+Santos+Dumont+116+G%C3%A1vea+Rio+de+Janeiro",
         instagram: "@braseirodagavea",
-        externalLink: ""
-      },
-      { 
-        name: "Guimas", 
-        description: "Ponto de encontro clássico da Gávea. Comida simples, cerveja gelada e mesas que viram noites longas.",
-        price: "$$",
-        address: "https://maps.google.com/?q=Guimas+Gávea",
-        instagram: "@guimas",
-        externalLink: ""
-      },
-      { 
-        name: "Brewteco", 
-        description: "Bar de cerveja artesanal com atmosfera animada. Boa comida, torneiras rotativas e público sociável.",
-        price: "$$",
-        address: "https://maps.google.com/?q=Brewteco+Gávea",
-        instagram: "@brewteco",
-        externalLink: ""
       },
     ],
   },
-  lagoa: {
-    "Contemporâneo / Autor": [
+  "barra-da-tijuca": {
+    "Vegetariana": [
       { 
-        name: "Capricciosa", 
-        description: "Italiano contemporâneo com vista privilegiada da Lagoa. Ambiente bonito, cardápio variado e clima que funciona tanto de dia quanto à noite.",
+        name: "Org Bistrô", 
+        description: "Opção leve, saudável e informal para o dia a dia.",
+        price: "$$",
+        address: "https://maps.google.com/?q=Org+Bistr%C3%B4+Av.+Oleg%C3%A1rio+Maciel+175+Loja+G+Barra+da+Tijuca+Rio+de+Janeiro",
+        instagram: "@orgbistro",
+      },
+    ],
+    "Carnes": [
+      { 
+        name: "Mocellin", 
+        description: "Carne de verdade, tradição e constância. A Barra cresceu junto com o Mocellin.",
         price: "$$$",
-        address: "https://maps.google.com/?q=Capricciosa+Lagoa",
-        instagram: "@capricciosaoficial",
-        externalLink: ""
+        address: "https://maps.google.com/?q=Mocellin+Steak+Av.+Armando+Lombardi+1010+Barra+da+Tijuca+Rio+de+Janeiro",
+        instagram: "@mocelinrestaurante",
       },
       { 
-        name: "CT Boucherie – Claude Troisgros", 
-        description: "Cozinha autoral com técnica francesa e produto brasileiro. Experiência gastronômica sólida, elegante e sem exageros.",
-        price: "$$$$",
-        address: "https://maps.google.com/?q=CT+Boucherie+Lagoa",
-        instagram: "@ctboucherie",
-        externalLink: ""
+        name: "Barra Grill Steakhouse", 
+        description: "Churrasco premium, ambiente grande e serviço eficiente.",
+        price: "$$$",
+        address: "https://maps.google.com/?q=Barra+Grill+Steakhouse+Barra+da+Tijuca+Rio+de+Janeiro",
+        instagram: "@barragrillrestaurante",
+      },
+      { 
+        name: "Churrascaria Tourão", 
+        description: "Clássico sem frescura. Come bem e sai feliz.",
+        price: "$$",
+        address: "https://maps.google.com/?q=Churrascaria+Tour%C3%A3o+Barra+da+Tijuca+Rio+de+Janeiro",
+        instagram: "@churrascariatourao",
       },
     ],
-    "Brasileiro / Carioca": [
+    "Peixes e Frutos do Mar": [
       { 
-        name: "Gula Gula", 
-        description: "Restaurante carioca de rotina boa. Funciona sempre, com cardápio democrático e ambiente leve.",
+        name: "Mocellin Mar", 
+        description: "Peixe de frente para o mar. Vista aberta e fim de tarde perfeito.",
+        price: "$$$",
+        address: "https://maps.google.com/?q=Mocellin+Mar+Av.+do+Pep%C3%AA+32+Barra+da+Tijuca+Rio+de+Janeiro",
+        instagram: "@mocelinmar",
+      },
+    ],
+    "Japonesa": [
+      { 
+        name: "Gurumê – Barra da Tijuca", 
+        description: "Japonês moderno, constante e confiável.",
+        price: "$$$",
+        address: "https://maps.google.com/?q=Gurum%C3%AA+Barra+da+Tijuca+Rio+de+Janeiro",
+        instagram: "@gurume_oficial",
+      },
+      { 
+        name: "Naga", 
+        description: "Elegante, preciso e sempre constante.",
+        price: "$$$",
+        address: "https://maps.google.com/?q=Naga+VillageMall+Barra+da+Tijuca+Rio+de+Janeiro",
+        instagram: "@nagarestaurante",
+      },
+    ],
+    "Casual": [
+      { 
+        name: "TT Burger", 
+        description: "Hambúrguer direto ao ponto e sempre cheio.",
         price: "$$",
-        address: "https://maps.google.com/?q=Gula+Gula+Lagoa",
-        instagram: "@gulagulaoficial",
-        externalLink: ""
+        address: "https://maps.google.com/?q=TT+Burger+Barra+da+Tijuca+Rio+de+Janeiro",
+        instagram: "@ttburger",
+      },
+    ],
+    "Café / Brunch": [
+      { 
+        name: "Golden Sucos", 
+        description: "Clássico absoluto do pós-praia da Barra.",
+        price: "$",
+        address: "https://maps.google.com/?q=Golden+Sucos+Posto+7+Barra+da+Tijuca+Rio+de+Janeiro",
+        instagram: "@goldensucos",
+      },
+      { 
+        name: "João Padeiro", 
+        description: "Padaria com alma de bairro e café bem tirado.",
+        price: "$",
+        address: "https://maps.google.com/?q=Jo%C3%A3o+Padeiro+Jardim+Oce%C3%A2nico+Barra+da+Tijuca+Rio+de+Janeiro",
+        instagram: "@joaopadeiro",
+      },
+    ],
+    "Italiana": [
+      { 
+        name: "Casa Tua – Barra da Tijuca", 
+        description: "Italiano para ir sem pressa, com conversa longa.",
+        price: "$$$",
+        address: "https://maps.google.com/?q=Casa+Tua+Barra+da+Tijuca+Rio+de+Janeiro",
+        instagram: "@casatua",
+      },
+    ],
+    "Brasileira": [
+      { 
+        name: "EA Gastronomia", 
+        description: "Brasileiro contemporâneo com proposta autoral.",
+        price: "$$$",
+        address: "https://maps.google.com/?q=EA+Gastronomia+Barra+da+Tijuca+Rio+de+Janeiro",
+        instagram: "@eagastronomia",
+      },
+      { 
+        name: "Proa", 
+        description: "Casual, bem executado e clima leve.",
+        price: "$$",
+        address: "https://maps.google.com/?q=Proa+Restaurante+Barra+da+Tijuca+Rio+de+Janeiro",
+        instagram: "@proarestaurante",
       },
     ],
   },
+  recreio: {},
+  "santa-teresa": {
+    "Experiência Gastronômica": [
+      { 
+        name: "Aprazível", 
+        description: "Vista absurda, cozinha brasileira refinada e clima especial.",
+        price: "$$$$",
+        address: "https://maps.google.com/?q=Apraz%C3%ADvel+Santa+Teresa+Rio+de+Janeiro",
+        instagram: "@aprazivel",
+      },
+    ],
+    "Brasileira": [
+      { 
+        name: "Bar do Mineiro", 
+        description: "Feijoada famosa e ambiente simples e honesto.",
+        price: "$$",
+        address: "https://maps.google.com/?q=Bar+do+Mineiro+Santa+Teresa+Rio+de+Janeiro",
+        instagram: "@bardomineiro",
+      },
+    ],
+  },
+  centro: {},
+  lagoa: {},
+  "sao-conrado": {},
 };
 
 const WhereToEatDetail = () => {
