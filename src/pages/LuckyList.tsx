@@ -1,39 +1,23 @@
 import { Link } from "react-router-dom";
 import { ChevronLeft } from "lucide-react";
+import { luckyListIntro, getLuckyListByNeighborhood } from "@/data/lucky-list-data";
 
 /**
- * Lucky List - Editorial curation
+ * LUCKY LIST — RIO DE JANEIRO
+ * 
+ * PREMIUM LAYER - Subscriber-only content
  * 
  * Rules:
- * - Can be neighborhood-linked OR city-level
- * - Must not duplicate items from "Where to Eat" or "What to Do"
- * - Uses ONE consistent Lucky List Detail template
- * - Media area always exists, even if empty
+ * - Every block labeled: "Lucky List only — premium layer"
+ * - Uses consistent Lucky List Detail template
+ * - Reserved fields: "External booking / partner link", "Media area"
+ * - Items outside base map ONLY live here
  */
 
-// Placeholder Lucky List items
-const luckyListItems = [
-  {
-    id: "sunset-pedra-bonita",
-    title: "Pôr do Sol na Pedra Bonita",
-    neighborhood: null, // City-level
-    teaser: "A hora dourada mais mágica do Rio.",
-  },
-  {
-    id: "morning-swim-arpoador",
-    title: "Mergulho Matinal no Arpoador",
-    neighborhood: "ipanema",
-    teaser: "Junte-se aos locais antes das multidões chegarem.",
-  },
-  {
-    id: "confeitaria-colombo",
-    title: "Café na Confeitaria Colombo",
-    neighborhood: "centro",
-    teaser: "Entre no Rio da Belle Époque.",
-  },
-];
-
 const LuckyList = () => {
+  const groupedItems = getLuckyListByNeighborhood();
+  const neighborhoods = Object.keys(groupedItems);
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -59,45 +43,61 @@ const LuckyList = () => {
           </p>
         </div>
 
-        {/* Media Placeholder - Full Width */}
+        {/* Media Placeholder - Full Width (reserved field) */}
         <div className="w-full aspect-[16/9] bg-muted flex items-center justify-center">
           <p className="text-sm text-muted-foreground">Espaço para imagem ou vídeo</p>
         </div>
 
         {/* Description */}
         <div className="px-6 pt-8 pb-10">
-          <p className="text-base text-muted-foreground leading-relaxed">
-            Uma coleção curada de experiências, lugares e momentos que definem a alma do Rio. São as descobertas que tornam uma viagem verdadeiramente sortuda.
-          </p>
+          {luckyListIntro.split('\n').map((paragraph, index) => (
+            <p key={index} className="text-base text-muted-foreground leading-relaxed mb-2 last:mb-0">
+              {paragraph}
+            </p>
+          ))}
         </div>
 
         {/* Divider */}
         <div className="mx-6 border-t border-border" />
 
-        {/* Lucky List Items */}
-        <section className="px-6 pt-8">
-          <div className="space-y-4">
-            {luckyListItems.map((item) => (
-              <Link
-                key={item.id}
-                to={`/lucky-list/${item.id}`}
-                className="block p-4 bg-card border border-border rounded-lg hover:bg-accent/50 transition-colors"
-              >
-                <h2 className="text-lg font-serif font-medium text-foreground mb-1">
-                  {item.title}
-                </h2>
-                <p className="text-sm text-muted-foreground">
-                  {item.teaser}
-                </p>
-                {item.neighborhood && (
-                  <p className="text-xs text-muted-foreground mt-2 uppercase tracking-widest">
-                    {item.neighborhood}
+        {/* Lucky List Items by Neighborhood */}
+        {neighborhoods.map((neighborhoodName) => (
+          <section key={neighborhoodName} className="px-6 pt-8">
+            {/* Neighborhood Header */}
+            <div className="mb-4">
+              <h2 className="text-xs tracking-widest text-muted-foreground uppercase mb-1">
+                {neighborhoodName}
+              </h2>
+              <p className="text-xs text-muted-foreground/60 italic">
+                Lucky List only — premium layer
+              </p>
+            </div>
+
+            {/* Items */}
+            <div className="space-y-4">
+              {groupedItems[neighborhoodName].map((item) => (
+                <Link
+                  key={item.id}
+                  to={`/lucky-list/${item.id}`}
+                  className="block p-4 bg-card border border-border rounded-lg hover:bg-accent/50 transition-colors"
+                >
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">
+                    {item.category}
                   </p>
-                )}
-              </Link>
-            ))}
-          </div>
-        </section>
+                  <h3 className="text-lg font-serif font-medium text-foreground mb-1">
+                    {item.title}
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    {item.teaser}
+                  </p>
+                </Link>
+              ))}
+            </div>
+
+            {/* Section Divider */}
+            <div className="mt-8 border-t border-border" />
+          </section>
+        ))}
       </main>
 
       {/* Footer */}

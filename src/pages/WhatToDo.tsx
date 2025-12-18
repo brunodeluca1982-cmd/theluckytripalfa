@@ -1,28 +1,19 @@
 import { Link } from "react-router-dom";
 import { ChevronLeft } from "lucide-react";
 import { RIO_NEIGHBORHOODS } from "@/data/rio-neighborhoods";
+import { whatToDoIntro, cityLevelActivities, activitiesByNeighborhood } from "@/data/what-to-do-data";
 
 /**
- * What to Do - Activities and experiences
+ * O QUE FAZER — RIO DE JANEIRO
+ * 
+ * PUBLIC LAYER - Accessible to all users
  * 
  * Rules:
- * - Can be neighborhood-based or city-level
- * - Must support both without duplication
+ * - Organized strictly by neighborhood
+ * - Each item belongs to ONE neighborhood only
+ * - Uses consistent Activity Detail template
+ * - Only BASE MAP neighborhoods appear here
  */
-
-// City-level activities
-const cityActivities = [
-  {
-    id: "christ-the-redeemer",
-    title: "Cristo Redentor",
-    description: "A icônica estátua no topo do Corcovado.",
-  },
-  {
-    id: "sugarloaf",
-    title: "Pão de Açúcar",
-    description: "Passeio de bondinho com vistas panorâmicas.",
-  },
-];
 
 const WhatToDo = () => {
   return (
@@ -57,9 +48,11 @@ const WhatToDo = () => {
 
         {/* Description */}
         <div className="px-6 pt-8 pb-10">
-          <p className="text-base text-muted-foreground leading-relaxed">
-            Dos pontos turísticos icônicos às joias escondidas dos bairros, descubra o que torna o Rio inesquecível.
-          </p>
+          {whatToDoIntro.split('\n').map((paragraph, index) => (
+            <p key={index} className="text-base text-muted-foreground leading-relaxed mb-2 last:mb-0">
+              {paragraph}
+            </p>
+          ))}
         </div>
 
         {/* Divider */}
@@ -71,7 +64,7 @@ const WhatToDo = () => {
             Experiências Icônicas
           </h2>
           <div className="space-y-4">
-            {cityActivities.map((activity) => (
+            {cityLevelActivities.map((activity) => (
               <div
                 key={activity.id}
                 className="p-4 bg-card border border-border rounded-lg"
@@ -96,20 +89,28 @@ const WhatToDo = () => {
             Explorar por Bairro
           </h2>
           <div className="space-y-3">
-            {RIO_NEIGHBORHOODS.map((neighborhood) => (
-              <Link
-                key={neighborhood.id}
-                to={`/o-que-fazer/${neighborhood.id}`}
-                className="block p-4 bg-card border border-border rounded-lg hover:bg-accent/50 transition-colors"
-              >
-                <h3 className="text-lg font-serif font-medium text-foreground">
-                  {neighborhood.name}
-                </h3>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Atividades em breve
-                </p>
-              </Link>
-            ))}
+            {RIO_NEIGHBORHOODS.map((neighborhood) => {
+              const data = activitiesByNeighborhood[neighborhood.id];
+              const activityCount = data?.activities?.length || 0;
+              
+              return (
+                <Link
+                  key={neighborhood.id}
+                  to={`/o-que-fazer/${neighborhood.id}`}
+                  className="block p-4 bg-card border border-border rounded-lg hover:bg-accent/50 transition-colors"
+                >
+                  <h3 className="text-lg font-serif font-medium text-foreground">
+                    {neighborhood.name}
+                  </h3>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {activityCount > 0 
+                      ? `${activityCount} ${activityCount === 1 ? 'atividade' : 'atividades'}`
+                      : 'Atividades em breve'
+                    }
+                  </p>
+                </Link>
+              );
+            })}
           </div>
         </section>
       </main>
