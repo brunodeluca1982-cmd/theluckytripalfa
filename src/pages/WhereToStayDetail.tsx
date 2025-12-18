@@ -140,8 +140,38 @@ const hotelsByNeighborhood: Record<string, {
     },
   ],
   "barra-da-tijuca": [
-    { name: "Hotel Placeholder", price: "$$$", description: "Modern resort with family amenities." },
-    { name: "Hotel Placeholder", price: "$$", description: "Beach hotel with sports facilities." },
+    { 
+      name: "Hyatt Regency Barra", 
+      price: "$$$$", 
+      description: "Clima de resort dentro da cidade. Muito usado por bandas e equipes de grandes shows.",
+      address: "https://maps.google.com/?q=Hyatt+Regency+Barra+da+Tijuca",
+      instagram: "@hyattregencyrio",
+      externalLink: ""
+    },
+    { 
+      name: "Windsor Barra", 
+      price: "$$$", 
+      description: "Clássico da orla. Recebe delegações esportivas e congressos.",
+      address: "https://maps.google.com/?q=Windsor+Barra",
+      instagram: "@windsorhoteis",
+      externalLink: ""
+    },
+    { 
+      name: "LSH Hotel", 
+      price: "$$$", 
+      description: "Compacto, moderno e bem localizado. Ótimo pra quem quer viver o Jardim Oceânico a pé.",
+      address: "https://maps.google.com/?q=LSH+Hotel+Barra",
+      instagram: "@lshhotel",
+      externalLink: ""
+    },
+    { 
+      name: "Laghetto Stilo Barra", 
+      price: "$$", 
+      description: "Boa relação custo-benefício para trabalho e eventos.",
+      address: "https://maps.google.com/?q=Laghetto+Stilo+Barra",
+      instagram: "@laghettostilobarra",
+      externalLink: ""
+    },
   ],
   recreio: [],
   "santa-teresa": [
