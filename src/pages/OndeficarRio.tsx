@@ -2,12 +2,12 @@ import { Link } from "react-router-dom";
 import { ChevronLeft } from "lucide-react";
 
 const neighborhoods = [
-  { id: "copacabana", name: "Copacabana", tagline: "O clássico carioca" },
-  { id: "ipanema", name: "Ipanema", tagline: "Elegância à beira-mar" },
-  { id: "leblon", name: "Leblon", tagline: "Sofisticação e tranquilidade" },
-  { id: "santa-teresa", name: "Santa Teresa", tagline: "Boemia e arte" },
-  { id: "botafogo", name: "Botafogo", tagline: "Vida urbana e cultura" },
-  { id: "lapa", name: "Lapa", tagline: "Noite e tradição" },
+  { id: "copacabana", name: "Copacabana", description: "Placeholder description for Copacabana neighborhood." },
+  { id: "ipanema", name: "Ipanema", description: "Placeholder description for Ipanema neighborhood." },
+  { id: "leblon", name: "Leblon", description: "Placeholder description for Leblon neighborhood." },
+  { id: "santa-teresa", name: "Santa Teresa", description: "Placeholder description for Santa Teresa neighborhood." },
+  { id: "botafogo", name: "Botafogo", description: "Placeholder description for Botafogo neighborhood." },
+  { id: "lapa", name: "Lapa", description: "Placeholder description for Lapa neighborhood." },
 ];
 
 const OndeficarRio = () => {
@@ -21,10 +21,10 @@ const OndeficarRio = () => {
             className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4"
           >
             <ChevronLeft className="w-4 h-4" />
-            Início
+            Home
           </Link>
           <h1 className="text-3xl font-serif font-medium text-foreground">
-            Onde Ficar
+            Where to Stay
           </h1>
           <p className="text-lg text-muted-foreground mt-1">
             Rio de Janeiro
@@ -33,36 +33,40 @@ const OndeficarRio = () => {
       </header>
 
       {/* Neighborhood List */}
-      <main className="px-6 py-8">
-        <p className="text-sm text-muted-foreground mb-6">
-          Escolha um bairro para explorar
-        </p>
-
-        <div className="space-y-3">
+      <main className="px-6 py-6">
+        <div className="space-y-4">
           {neighborhoods.map((neighborhood) => (
-            <Link
+            <div
               key={neighborhood.id}
-              to={`/bairro/${neighborhood.id}`}
-              className="block w-full p-5 bg-card border border-border rounded-lg hover:bg-accent transition-colors"
+              className="bg-card border border-border rounded-lg overflow-hidden"
             >
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-xl font-serif font-medium text-foreground">
-                    {neighborhood.name}
-                  </h2>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    {neighborhood.tagline}
-                  </p>
-                </div>
-                <span className="text-muted-foreground">→</span>
+              {/* Image Placeholder */}
+              <div className="w-full aspect-[16/9] bg-muted flex items-center justify-center">
+                <p className="text-sm text-muted-foreground">Image placeholder</p>
               </div>
-            </Link>
+              
+              {/* Card Content */}
+              <div className="p-4">
+                <h2 className="text-xl font-serif font-medium text-foreground mb-2">
+                  {neighborhood.name}
+                </h2>
+                <p className="text-sm text-muted-foreground mb-4">
+                  {neighborhood.description}
+                </p>
+                <Link
+                  to={`/bairro/${neighborhood.id}`}
+                  className="inline-flex items-center justify-center w-full py-3 px-4 bg-primary text-primary-foreground text-sm font-medium rounded-lg hover:opacity-90 transition-opacity"
+                >
+                  View hotels
+                </Link>
+              </div>
+            </div>
           ))}
         </div>
       </main>
 
       {/* Footer */}
-      <footer className="px-6 py-8 border-t border-border mt-8">
+      <footer className="px-6 py-8 border-t border-border mt-4">
         <p className="text-xs text-muted-foreground">
           The Lucky Trip — Rio de Janeiro
         </p>
