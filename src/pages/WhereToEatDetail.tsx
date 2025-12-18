@@ -25,7 +25,7 @@ const neighborhoodDescriptions: Record<string, string> = {
 // Restaurant data by neighborhood and cuisine type
 const restaurantsByNeighborhood: Record<string, Record<string, { name: string; description: string; price?: string; address?: string; instagram?: string; externalLink?: string }[]>> = {
   ipanema: {
-    "Authorial Cuisine / Fine Dining": [
+    "Cozinha Autoral / Alta Gastronomia": [
       { 
         name: "Lasai", 
         description: "Um dos restaurantes mais impactantes do Brasil. O Lasai não serve só comida — serve uma experiência inteira. Silêncio, precisão, profundidade, Brasil no prato. É o tipo de jantar que muda sua régua gastronômica.",
@@ -226,7 +226,7 @@ const restaurantsByNeighborhood: Record<string, Record<string, { name: string; d
     ],
   },
   "jardim-botanico": {
-    "Contemporary / Authorial": [
+    "Contemporâneo / Autoral": [
       { 
         name: "Elena", 
         description: "Restaurante contemporâneo, sofisticado e animado. Funciona muito bem para casal, mas também para solteiros e paquera. Boa música, público interessante e cozinha autoral.",
