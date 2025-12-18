@@ -16,6 +16,7 @@ const neighborhoodDescriptions: Record<string, string> = {
   centro: "Historic lunch counters, traditional bars, and century-old confeitarias preserving the flavors of old Rio.",
   "jardim-botanico": "A leafy, upscale neighborhood with contemporary restaurants and cozy pizzerias nestled near the botanical gardens.",
   gavea: "A traditional neighborhood where academia meets leisure, known for its lively botecos and neighborhood gathering spots.",
+  lagoa: "Um dos cartões-postais do Rio, com restaurantes sofisticados à beira d'água e opções para todos os momentos do dia.",
 };
 
 // Restaurant data by neighborhood and cuisine type
@@ -246,6 +247,36 @@ const restaurantsByNeighborhood: Record<string, Record<string, { name: string; d
         price: "$$",
         address: "https://maps.google.com/?q=Brewteco+Gávea",
         instagram: "@brewteco",
+        externalLink: ""
+      },
+    ],
+  },
+  lagoa: {
+    "Contemporâneo / Autor": [
+      { 
+        name: "Capricciosa", 
+        description: "Italiano contemporâneo com vista privilegiada da Lagoa. Ambiente bonito, cardápio variado e clima que funciona tanto de dia quanto à noite.",
+        price: "$$$",
+        address: "https://maps.google.com/?q=Capricciosa+Lagoa",
+        instagram: "@capricciosaoficial",
+        externalLink: ""
+      },
+      { 
+        name: "CT Boucherie – Claude Troisgros", 
+        description: "Cozinha autoral com técnica francesa e produto brasileiro. Experiência gastronômica sólida, elegante e sem exageros.",
+        price: "$$$$",
+        address: "https://maps.google.com/?q=CT+Boucherie+Lagoa",
+        instagram: "@ctboucherie",
+        externalLink: ""
+      },
+    ],
+    "Brasileiro / Carioca": [
+      { 
+        name: "Gula Gula", 
+        description: "Restaurante carioca de rotina boa. Funciona sempre, com cardápio democrático e ambiente leve.",
+        price: "$$",
+        address: "https://maps.google.com/?q=Gula+Gula+Lagoa",
+        instagram: "@gulagulaoficial",
         externalLink: ""
       },
     ],
