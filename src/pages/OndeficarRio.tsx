@@ -28,7 +28,7 @@ const OndeficarRio = () => {
             className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4"
           >
             <ChevronLeft className="w-4 h-4" />
-            Home
+            Início
           </Link>
           <h1 className="text-3xl font-serif font-medium text-foreground">
             Onde Ficar
@@ -77,22 +77,22 @@ const OndeficarRio = () => {
 
                     {/* Image/Video Placeholder */}
                     <div className="mx-4 mt-4 aspect-[16/9] bg-muted rounded-lg flex items-center justify-center">
-                      <p className="text-sm text-muted-foreground">
-                        Image or video placeholder
-                      </p>
+                        <p className="text-sm text-muted-foreground">
+                          Espaço para imagem ou vídeo
+                        </p>
                     </div>
 
                     {/* Description */}
                     <div className="px-4 py-4">
                       <p className="text-sm text-muted-foreground leading-relaxed">
-                        Placeholder description for {neighborhood.name}. This section will contain information about the neighborhood, its character, and what makes it a good choice for travelers.
+                        Descrição de {neighborhood.name}. Esta seção conterá informações sobre o bairro, seu caráter e o que o torna uma boa escolha para viajantes.
                       </p>
                     </div>
 
                     {/* Hotels List */}
                     <div className="px-4 pb-4">
                       <h4 className="text-xs tracking-widest text-muted-foreground uppercase mb-3">
-                        Hotels
+                        Hotéis
                       </h4>
                       <div className="space-y-2">
                         {placeholderHotels.map((hotel, index) => (

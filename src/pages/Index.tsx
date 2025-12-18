@@ -6,7 +6,7 @@ const Index = () => {
       {/* Header */}
       <header className="px-6 pt-12 pb-8">
         <p className="text-sm tracking-widest text-muted-foreground uppercase">
-          Travel Guide
+          Guia de Viagem
         </p>
       </header>
 
@@ -19,7 +19,7 @@ const Index = () => {
         </h1>
         
         <p className="text-lg text-muted-foreground leading-relaxed mb-12 max-w-xs">
-          A calm guide to finding the perfect place to stay in the world's most beautiful destinations.
+          Um guia calmo para encontrar o lugar perfeito nos destinos mais bonitos do mundo.
         </p>
 
         {/* Destination: Rio de Janeiro */}

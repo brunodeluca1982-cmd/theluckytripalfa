@@ -22,13 +22,13 @@ const LuckyListPreviewSheet = ({ open, onOpenChange }: LuckyListPreviewSheetProp
         
         <div className="pb-8">
           <p className="text-base text-muted-foreground leading-relaxed mb-6">
-            A special, off-the-obvious tip curated by The Lucky Trip.
+            Uma dica especial, fora do óbvio, curada pelo The Lucky Trip.
           </p>
           
           {/* Inactive CTA Placeholder */}
           <div className="py-3 px-4 bg-amber-50 border border-amber-200/60 rounded-lg text-center">
             <p className="text-sm font-medium text-amber-800/80">
-              Subscribe to unlock
+              Assine para desbloquear
             </p>
           </div>
         </div>

@@ -12,19 +12,19 @@ import { ChevronLeft } from "lucide-react";
 // Placeholder data - will be replaced with real content
 const luckyListData: Record<string, { title: string; neighborhood: string | null; content: string }> = {
   "sunset-pedra-bonita": {
-    title: "Sunset at Pedra Bonita",
+    title: "Pôr do Sol na Pedra Bonita",
     neighborhood: null,
-    content: "Pedra Bonita offers what might be the most spectacular sunset viewpoint in Rio. The hike is moderate and rewards you with 360-degree views of the city, mountains, and ocean.",
+    content: "A Pedra Bonita oferece o que pode ser o mirante de pôr do sol mais espetacular do Rio. A trilha é moderada e recompensa com vistas de 360 graus da cidade, montanhas e oceano.",
   },
   "morning-swim-arpoador": {
-    title: "Morning Swim at Arpoador",
+    title: "Mergulho Matinal no Arpoador",
     neighborhood: "Ipanema",
-    content: "Before the sun gets too strong and the crowds arrive, Arpoador beach offers a perfect morning ritual. The water is calm, the light is golden, and you'll share the waves with dedicated locals.",
+    content: "Antes do sol ficar forte demais e as multidões chegarem, a praia do Arpoador oferece um ritual matinal perfeito. A água é calma, a luz é dourada, e você vai dividir as ondas com os locais dedicados.",
   },
   "confeitaria-colombo": {
-    title: "Coffee at Confeitaria Colombo",
+    title: "Café na Confeitaria Colombo",
     neighborhood: "Centro",
-    content: "Step through the doors of Confeitaria Colombo and travel back to 1894. The ornate mirrors, carved wood, and Belle Époque atmosphere make this more than just a café—it's a living museum.",
+    content: "Atravesse as portas da Confeitaria Colombo e viaje de volta a 1894. Os espelhos ornamentados, a madeira entalhada e a atmosfera Belle Époque fazem deste lugar mais do que apenas um café — é um museu vivo.",
   },
 };
 
@@ -32,9 +32,9 @@ const LuckyListDetail = () => {
   const { id } = useParams<{ id: string }>();
   
   const item = luckyListData[id || ""] || {
-    title: "Lucky List Item",
+    title: "Item da Lucky List",
     neighborhood: null,
-    content: "Content coming soon.",
+    content: "Conteúdo em breve.",
   };
 
   return (
@@ -46,7 +46,7 @@ const LuckyListDetail = () => {
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           <ChevronLeft className="w-4 h-4" />
-          Back
+          Voltar
         </Link>
       </header>
 
@@ -66,7 +66,7 @@ const LuckyListDetail = () => {
 
         {/* Media Placeholder - Full Width (always present) */}
         <div className="w-full aspect-[16/9] bg-muted flex items-center justify-center">
-          <p className="text-sm text-muted-foreground">Image or video placeholder</p>
+          <p className="text-sm text-muted-foreground">Espaço para imagem ou vídeo</p>
         </div>
 
         {/* Content */}
@@ -80,7 +80,7 @@ const LuckyListDetail = () => {
         <div className="px-6 pt-8">
           <div className="py-3 px-4 bg-muted/50 rounded-lg">
             <p className="text-sm text-muted-foreground">
-              Learn more
+              Saiba mais
             </p>
           </div>
         </div>

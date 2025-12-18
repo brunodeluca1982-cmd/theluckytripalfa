@@ -30,7 +30,7 @@ const CityView = () => {
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           <ChevronLeft className="w-4 h-4" />
-          Back
+          Voltar
         </Link>
       </header>
 
@@ -49,7 +49,7 @@ const CityView = () => {
             to={`/onde-ficar/${neighborhood.id}?from=map`}
             className="absolute w-10 h-10 -ml-5 -mt-5 rounded-full bg-foreground/10 border border-foreground/20 hover:bg-foreground/20 hover:border-foreground/40 transition-colors flex items-center justify-center"
             style={{ top: neighborhood.mapPosition.top, left: neighborhood.mapPosition.left }}
-            aria-label={`Explore ${neighborhood.name}`}
+            aria-label={`Explorar ${neighborhood.name}`}
           >
             <div className="w-2 h-2 rounded-full bg-foreground/60" />
           </Link>
@@ -71,7 +71,7 @@ const CityView = () => {
       {/* Instruction */}
       <div className="px-6 py-8">
         <p className="text-sm text-muted-foreground text-center">
-          Tap a neighborhood to explore where to stay
+          Toque em um bairro para explorar onde ficar
         </p>
       </div>
 
