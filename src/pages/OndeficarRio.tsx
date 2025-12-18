@@ -1,20 +1,39 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, ChevronDown } from "lucide-react";
 
 const neighborhoods = [
-  { id: "copacabana", name: "Copacabana", description: "Placeholder description for Copacabana neighborhood." },
-  { id: "ipanema", name: "Ipanema", description: "Placeholder description for Ipanema neighborhood." },
-  { id: "leblon", name: "Leblon", description: "Placeholder description for Leblon neighborhood." },
-  { id: "santa-teresa", name: "Santa Teresa", description: "Placeholder description for Santa Teresa neighborhood." },
-  { id: "botafogo", name: "Botafogo", description: "Placeholder description for Botafogo neighborhood." },
-  { id: "lapa", name: "Lapa", description: "Placeholder description for Lapa neighborhood." },
+  { id: "copacabana", name: "Copacabana" },
+  { id: "ipanema", name: "Ipanema" },
+  { id: "leblon", name: "Leblon" },
+  { id: "leme", name: "Leme" },
+  { id: "arpoador", name: "Arpoador" },
+  { id: "barra-da-tijuca", name: "Barra da Tijuca" },
+  { id: "recreio", name: "Recreio" },
+  { id: "sao-conrado", name: "São Conrado" },
+  { id: "santa-teresa", name: "Santa Teresa" },
+  { id: "centro", name: "Centro" },
+];
+
+const placeholderHotels = [
+  { name: "Hotel Placeholder", price: "$$$$" },
+  { name: "Hotel Placeholder", price: "$$$" },
+  { name: "Hotel Placeholder", price: "$$$" },
+  { name: "Hotel Placeholder", price: "$$" },
+  { name: "Hotel Placeholder", price: "$$" },
 ];
 
 const OndeficarRio = () => {
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+
+  const handleToggle = (id: string) => {
+    setExpandedId(expandedId === id ? null : id);
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="sticky top-0 bg-background/95 backdrop-blur-sm border-b border-border z-10">
+      <header className="sticky top-0 bg-background border-b border-border z-10">
         <div className="px-6 py-4">
           <Link
             to="/"
@@ -24,7 +43,7 @@ const OndeficarRio = () => {
             Home
           </Link>
           <h1 className="text-3xl font-serif font-medium text-foreground">
-            Where to Stay
+            Onde Ficar
           </h1>
           <p className="text-lg text-muted-foreground mt-1">
             Rio de Janeiro
@@ -34,34 +53,80 @@ const OndeficarRio = () => {
 
       {/* Neighborhood List */}
       <main className="px-6 py-6">
-        <div className="space-y-4">
-          {neighborhoods.map((neighborhood) => (
-            <div
-              key={neighborhood.id}
-              className="bg-card border border-border rounded-lg overflow-hidden"
-            >
-              {/* Image Placeholder */}
-              <div className="w-full aspect-[16/9] bg-muted flex items-center justify-center">
-                <p className="text-sm text-muted-foreground">Image placeholder</p>
-              </div>
-              
-              {/* Card Content */}
-              <div className="p-4">
-                <h2 className="text-xl font-serif font-medium text-foreground mb-2">
-                  {neighborhood.name}
-                </h2>
-                <p className="text-sm text-muted-foreground mb-4">
-                  {neighborhood.description}
-                </p>
-                <Link
-                  to={`/bairro/${neighborhood.id}`}
-                  className="inline-flex items-center justify-center w-full py-3 px-4 bg-primary text-primary-foreground text-sm font-medium rounded-lg hover:opacity-90 transition-opacity"
+        <div className="space-y-3">
+          {neighborhoods.map((neighborhood) => {
+            const isExpanded = expandedId === neighborhood.id;
+            
+            return (
+              <div
+                key={neighborhood.id}
+                className="bg-card border border-border rounded-lg overflow-hidden"
+              >
+                {/* Card Header - Tappable */}
+                <button
+                  onClick={() => handleToggle(neighborhood.id)}
+                  className="w-full flex items-center justify-between p-4 text-left hover:bg-accent/50 transition-colors"
                 >
-                  View hotels
-                </Link>
+                  <h2 className="text-lg font-serif font-medium text-foreground">
+                    {neighborhood.name}
+                  </h2>
+                  <ChevronDown 
+                    className={`w-5 h-5 text-muted-foreground transition-transform ${
+                      isExpanded ? "rotate-180" : ""
+                    }`} 
+                  />
+                </button>
+
+                {/* Expanded Detail Section */}
+                {isExpanded && (
+                  <div className="border-t border-border">
+                    {/* Neighborhood Name */}
+                    <div className="px-4 pt-4">
+                      <h3 className="text-2xl font-serif font-medium text-foreground">
+                        {neighborhood.name}
+                      </h3>
+                    </div>
+
+                    {/* Image/Video Placeholder */}
+                    <div className="mx-4 mt-4 aspect-[16/9] bg-muted rounded-lg flex items-center justify-center">
+                      <p className="text-sm text-muted-foreground">
+                        Image or video placeholder
+                      </p>
+                    </div>
+
+                    {/* Description */}
+                    <div className="px-4 py-4">
+                      <p className="text-sm text-muted-foreground leading-relaxed">
+                        Placeholder description for {neighborhood.name}. This section will contain information about the neighborhood, its character, and what makes it a good choice for travelers.
+                      </p>
+                    </div>
+
+                    {/* Hotels List */}
+                    <div className="px-4 pb-4">
+                      <h4 className="text-xs tracking-widest text-muted-foreground uppercase mb-3">
+                        Hotels
+                      </h4>
+                      <div className="space-y-2">
+                        {placeholderHotels.map((hotel, index) => (
+                          <div
+                            key={index}
+                            className="flex items-center justify-between py-3 px-3 bg-background border border-border rounded-md"
+                          >
+                            <p className="text-sm font-medium text-foreground">
+                              {hotel.name}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              {hotel.price}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </main>
 
