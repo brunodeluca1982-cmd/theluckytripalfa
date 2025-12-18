@@ -6,6 +6,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import OndeficarRio from "./pages/OndeficarRio";
 import CityView from "./pages/CityView";
+import EatMapView from "./pages/EatMapView";
+import WhereToEatDetail from "./pages/WhereToEatDetail";
 import BairroDetail from "./pages/BairroDetail";
 import NotFound from "./pages/NotFound";
 import Copacabana from "./pages/neighborhoods/Copacabana";
@@ -27,6 +29,8 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/onde-ficar-rio" element={<OndeficarRio />} />
           <Route path="/city-view" element={<CityView />} />
+          <Route path="/eat-map-view" element={<EatMapView />} />
+          <Route path="/onde-comer/:neighborhood" element={<WhereToEatDetail />} />
           <Route path="/bairro/:id" element={<BairroDetail />} />
           <Route path="/copacabana" element={<Copacabana />} />
           <Route path="/ipanema" element={<Ipanema />} />
