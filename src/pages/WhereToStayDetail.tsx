@@ -120,6 +120,14 @@ const hotelsByNeighborhood: Record<string, {
       instagram: "@windsorhoteis",
       externalLink: ""
     },
+    { 
+      name: "Arena Leme", 
+      price: "$$", 
+      description: "Moderno, funcional e bem localizado. Base frequente de produções que filmam na Urca e no Forte do Leme.",
+      address: "https://maps.google.com/?q=Arena+Leme+Hotel",
+      instagram: "@arenahotels",
+      externalLink: ""
+    },
   ],
   "sao-conrado": [
     { name: "Hotel Placeholder", price: "$$$$", description: "Resort-style luxury with golf access." },
