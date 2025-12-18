@@ -1,13 +1,14 @@
 import { Link } from "react-router-dom";
 import { ChevronLeft } from "lucide-react";
 import { useBackNavigation } from "@/hooks/use-back-navigation";
+import HotelCard from "@/components/HotelCard";
 
 const placeholderHotels = [
-  { name: "Hotel Placeholder", price: "$$$$" },
-  { name: "Hotel Placeholder", price: "$$$" },
-  { name: "Hotel Placeholder", price: "$$$" },
-  { name: "Hotel Placeholder", price: "$$" },
-  { name: "Hotel Placeholder", price: "$$" },
+  { name: "Hotel Placeholder", price: "$$$$", description: "Placeholder description for this hotel." },
+  { name: "Hotel Placeholder", price: "$$$", description: "Placeholder description for this hotel." },
+  { name: "Hotel Placeholder", price: "$$$", description: "Placeholder description for this hotel." },
+  { name: "Hotel Placeholder", price: "$$", description: "Placeholder description for this hotel." },
+  { name: "Hotel Placeholder", price: "$$", description: "Placeholder description for this hotel." },
 ];
 
 const Leblon = () => {
@@ -56,19 +57,14 @@ const Leblon = () => {
             Where to stay
           </h2>
           
-          <div className="space-y-4">
+          <div>
             {placeholderHotels.map((hotel, index) => (
-              <div
+              <HotelCard
                 key={index}
-                className="flex items-center justify-between py-4 border-b border-border last:border-b-0"
-              >
-                <p className="text-base text-foreground">
-                  {hotel.name}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  {hotel.price}
-                </p>
-              </div>
+                name={hotel.name}
+                price={hotel.price}
+                description={hotel.description}
+              />
             ))}
           </div>
         </section>
