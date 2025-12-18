@@ -1,8 +1,25 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { ChevronLeft } from "lucide-react";
 import { RIO_NEIGHBORHOODS } from "@/data/rio-neighborhoods";
+import LuckyListMarker from "@/components/LuckyListMarker";
+import LuckyListPreviewSheet from "@/components/LuckyListPreviewSheet";
+
+// Lucky List items with map positions (editorial placement)
+const luckyListMarkers = [
+  { id: "confeitaria-colombo", top: "20%", left: "60%" },
+];
 
 const EatMapView = () => {
+  const [previewOpen, setPreviewOpen] = useState(false);
+  
+  // Mock subscriber state - replace with actual auth logic
+  const isSubscriber = false;
+
+  const handleLockedTap = () => {
+    setPreviewOpen(true);
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -36,6 +53,18 @@ const EatMapView = () => {
             <div className="w-2 h-2 rounded-full bg-foreground/60" />
           </Link>
         ))}
+
+        {/* Lucky List markers */}
+        {luckyListMarkers.map((marker) => (
+          <LuckyListMarker
+            key={marker.id}
+            id={marker.id}
+            top={marker.top}
+            left={marker.left}
+            isSubscriber={isSubscriber}
+            onLockedTap={handleLockedTap}
+          />
+        ))}
       </div>
 
       {/* Instruction */}
@@ -51,6 +80,9 @@ const EatMapView = () => {
           The Lucky Trip — Rio de Janeiro
         </p>
       </footer>
+
+      {/* Lucky List Preview Sheet */}
+      <LuckyListPreviewSheet open={previewOpen} onOpenChange={setPreviewOpen} />
     </div>
   );
 };
