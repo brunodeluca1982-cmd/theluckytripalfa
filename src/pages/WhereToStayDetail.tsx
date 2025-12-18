@@ -5,7 +5,7 @@ import { getNeighborhoodById } from "@/data/rio-neighborhoods";
 
 // Neighborhood descriptions for staying
 const neighborhoodDescriptions: Record<string, string> = {
-  ipanema: "O auge do charme carioca. Ipanema oferece a mistura perfeita de vida de praia, gastronomia refinada e sofisticação cultural num bairro vibrante e caminhável.",
+  ipanema: "Urbano, vivo e bastante democrático. Mistura moradores antigos, gente jovem, turistas, artistas e famílias modernas. É um dos lugares mais fáceis de entender o Rio pela primeira vez, porque tudo acontece perto e a vida é muito visível na rua. Dá pra fazer quase tudo a pé: praia, restaurantes, cafés, metrô e lojas. Alugar bike é fácil e funciona bem. Carro não é essencial e, muitas vezes, atrapalha. Ideal pra quem quer sentir a cidade acontecendo o tempo todo.",
   leblon: "O endereço mais exclusivo do Rio. Uma alternativa mais tranquila e refinada a Ipanema, com restaurantes de alto nível, compras em boutiques e praias impecáveis.",
   copacabana: "A icônica praia em formato de crescente, com energia infinita. De hotéis históricos a apartamentos modernos, Copacabana oferece o Rio clássico em todas as faixas de preço.",
   leme: "Uma extensão pacífica de Copacabana com atmosfera de vilarejo. Perfeito para quem busca acesso à praia com tranquilidade.",
