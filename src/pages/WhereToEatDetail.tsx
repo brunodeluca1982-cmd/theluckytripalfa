@@ -17,21 +17,63 @@ const neighborhoodDescriptions: Record<string, string> = {
 };
 
 // Restaurant data by neighborhood and cuisine type
-const restaurantsByNeighborhood: Record<string, Record<string, { name: string; description: string }[]>> = {
+const restaurantsByNeighborhood: Record<string, Record<string, { name: string; description: string; price?: string; address?: string; instagram?: string; externalLink?: string }[]>> = {
   ipanema: {
-    Brazilian: [
-      { name: "Restaurant Placeholder", description: "Contemporary carioca cuisine." },
-    ],
-    Japanese: [
-      { name: "Restaurant Placeholder", description: "Omakase experience by the beach." },
-      { name: "Restaurant Placeholder", description: "Casual sushi bar." },
+    "Authorial Cuisine / Fine Dining": [
+      { 
+        name: "Lasai", 
+        description: "Um dos restaurantes mais impactantes do Brasil. O Lasai não serve só comida — serve uma experiência inteira. Silêncio, precisão, profundidade, Brasil no prato. É o tipo de jantar que muda sua régua gastronômica.",
+        price: "$$$$",
+        address: "https://maps.google.com/?q=Lasai+Rio+de+Janeiro",
+        instagram: "@lasai_rj",
+        externalLink: ""
+      },
+      { 
+        name: "Oteque", 
+        description: "Entrar no Oteque é como entrar numa cena lenta de cinema. Luz baixa, cozinha impecável, ritmo calmo e intensidade em cada detalhe. Um jantar que vira capítulo da vida.",
+        price: "$$$$",
+        address: "https://maps.google.com/?q=Oteque+Rio+de+Janeiro",
+        instagram: "@oteque_rj",
+        externalLink: ""
+      },
     ],
     Italian: [
-      { name: "Restaurant Placeholder", description: "Neapolitan pizza and natural wines." },
+      { 
+        name: "Nido Ristorante", 
+        description: "Meu italiano afetivo. Massas impecáveis, ambiente acolhedor, comida honesta. Restaurante de rotina boa, conversa longa e conforto emocional.",
+        price: "$$$",
+        address: "https://maps.google.com/?q=Nido+Ristorante+Ipanema",
+        instagram: "@nidorestaurante",
+        externalLink: ""
+      },
     ],
-    "Casual / Cafés": [
-      { name: "Restaurant Placeholder", description: "Organic brunch spot." },
-      { name: "Restaurant Placeholder", description: "Açaí and healthy bowls." },
+    "Cafés / Bistrôs / Carioca": [
+      { 
+        name: "Zazá Bistrô Café", 
+        description: "Delicinhas a qualquer hora do dia. Funciona para almoço leve, café demorado ou jantar sem cerimônia. É aquele lugar que você entra sem planejar e acaba ficando.",
+        price: "$$$",
+        address: "https://maps.google.com/?q=Zazá+Bistrô+Ipanema",
+        instagram: "@zazabistro",
+        externalLink: ""
+      },
+    ],
+    "Boteco / Carioca": [
+      { 
+        name: "Jobi", 
+        description: "Clássico absoluto. Chope bem tirado, comida correta e mesas que misturam gerações. Frequento há anos e sempre encontro alguém conhecido.",
+        price: "$$",
+        address: "https://maps.google.com/?q=Jobi+Ipanema",
+        instagram: "@jobi_oficial",
+        externalLink: ""
+      },
+      { 
+        name: "Barzin", 
+        description: "Boa opção pra começar a noite. Ambiente animado, público bonito e clima de paquera leve, sem exagero.",
+        price: "$$$",
+        address: "https://maps.google.com/?q=Barzin+Ipanema",
+        instagram: "@barzin",
+        externalLink: ""
+      },
     ],
   },
   leblon: {
