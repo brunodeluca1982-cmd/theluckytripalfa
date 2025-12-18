@@ -15,6 +15,7 @@ const neighborhoodDescriptions: Record<string, string> = {
   "santa-teresa": "Charme boêmio nas colinas. Casarões coloniais, ateliês de artistas e vistas panorâmicas fazem deste o bairro mais atmosférico do Rio.",
   centro: "O coração histórico do Rio. Arquitetura grandiosa, instituições culturais e um vislumbre do passado da cidade. Ideal para viajantes focados em cultura.",
   "jardim-botanico": "Verde, silencioso e mais familiar. Mistura moradores tradicionais com famílias jovens e gente que busca qualidade de vida. É menos turístico e mais local. Não é o melhor lugar pra fazer tudo a pé, mas dá pra circular bem dentro do bairro. Praia exige deslocamento curto de carro ou aplicativo. Ótimo pra quem quer calma e contato com a natureza.",
+  gavea: "Boêmia, universitária e ao mesmo tempo residencial. Mistura jovens, famílias e vida noturna mais informal. É um bairro vivo, mas não turístico. Dá pra circular a pé dentro do bairro, mas praia e outros pontos exigem carro ou aplicativo. Boa escolha pra quem gosta de bares, restaurantes e um clima mais local.",
 };
 
 // Hotel data by neighborhood
