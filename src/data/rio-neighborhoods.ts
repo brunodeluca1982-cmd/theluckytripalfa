@@ -32,6 +32,7 @@ export const RIO_NEIGHBORHOODS: Neighborhood[] = [
   { id: "centro", name: "Centro", mapPosition: { top: "18%", left: "55%" } },
   { id: "gavea", name: "Gávea", mapPosition: { top: "48%", left: "42%" } },
   { id: "lagoa", name: "Lagoa", mapPosition: { top: "35%", left: "48%" } },
+  { id: "sao-conrado", name: "São Conrado", mapPosition: { top: "55%", left: "38%" } },
 ];
 
 // Helper to get neighborhood by ID
