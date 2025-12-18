@@ -3,22 +3,21 @@
  * STRUCTURAL LOCK — SECONDARY OPERATIONAL MODULES
  * ═══════════════════════════════════════════════════════════════════════════
  * 
- * IMPORTANT CONTEXT:
- * The PRIMARY destination screen is defined separately and includes:
- * - Como Chegar
- * - Onde Ficar
- * - Onde Comer
- * - O Que Fazer
- * - Lucky List (featured, non-linear)
+ * CONTEXT VALIDATION:
+ * The FIRST DESTINATION SCREEN is already locked and contains:
+ * 1) Como Chegar
+ * 2) Onde Ficar
+ * 3) Onde Comer
+ * 4) O Que Fazer
+ * 5) Lucky List
  * 
- * This file defines ONLY the SECONDARY operational modules layer.
- * These are distinct from the primary actions.
+ * This file applies ONLY to what comes AFTER the first destination screen.
  * 
  * RULES:
- * - Module order is fixed and must not be changed
- * - Screen grouping is fixed and applies to ALL destinations
- * - Lucky List is NOT a screen — it is a highlighted interstitial element
- * - Back navigation returns to destination context, never to Home
+ * - Module order is FIXED and must not be changed
+ * - Screen grouping is FIXED and applies to ALL destinations
+ * - Lucky List is NOT a screen — it is a highlighted interstitial interruption
+ * - Back navigation returns to FIRST DESTINATION SCREEN, not Home
  * 
  * ═══════════════════════════════════════════════════════════════════════════
  */
@@ -33,16 +32,28 @@ export interface SecondaryModule {
 
 /**
  * ═══════════════════════════════════════════════════════════════════════════
- * PAGINATION LOGIC (ABSTRACT, NON-VISUAL)
+ * PAGINATION LOGIC (NON-VISUAL, STRUCTURAL)
  * ═══════════════════════════════════════════════════════════════════════════
  * 
- * Screen A: MOVER, VIDA NOTURNA, SABORES LOCAIS, DINHEIRO
+ * GROUPING RULE (FIXED):
  * 
- * [Lucky List Interstitial — NOT a screen, but a highlighted element
- *  that interrupts the linear flow between A and B]
+ * Screen A:
+ *   1) MOVER
+ *   2) VIDA NOTURNA
+ *   3) SABORES LOCAIS
+ *   4) DINHEIRO
  * 
- * Screen B: DOCUMENTOS & VISTO, MELHOR ÉPOCA, O QUE LEVAR, GASTOS DA VIAGEM
- * Screen C: LINKS ÚTEIS, CHECKLIST FINAL
+ * [Lucky List Interstitial — highlighted interruption between A and B]
+ * 
+ * Screen B:
+ *   5) DOCUMENTOS & VISTO
+ *   6) MELHOR ÉPOCA
+ *   7) O QUE LEVAR
+ *   8) GASTOS DA VIAGEM
+ * 
+ * Screen C:
+ *   9) LINKS ÚTEIS
+ *   10) CHECKLIST FINAL
  * 
  * ═══════════════════════════════════════════════════════════════════════════
  */
@@ -55,8 +66,9 @@ export const SECONDARY_MODULES: SecondaryModule[] = [
   
   // ─── LUCKY LIST INTERSTITIAL (between A and B) ───
   // Lucky List is NOT part of these modules and is NOT a screen.
-  // It appears as a distinct, highlighted element that interrupts
-  // the linear flow, reinforcing its premium and discovery-based nature.
+  // It appears as a distinct, highlighted INTERRUPTION between Screen A and Screen B.
+  // This reinforces its premium and discovery role.
+  // Lucky List must NEVER be merged into these module groups.
   
   // ─── SCREEN B ───
   { id: 'documentos-visto', label: 'Documentos & Visto', screen: 'B', order: 5, route: '/documentos-visto' },
@@ -80,15 +92,15 @@ export const SCREEN_GROUPS = {
 
 /**
  * ═══════════════════════════════════════════════════════════════════════════
- * LUCKY LIST POSITIONING RULE
+ * LUCKY LIST POSITIONING RULE (SECONDARY FLOW)
  * ═══════════════════════════════════════════════════════════════════════════
  * 
- * - Lucky List is NOT part of these secondary modules
+ * - Lucky List is NOT part of the secondary modules
  * - Lucky List is NOT a screen
- * - Lucky List appears as a distinct, highlighted ELEMENT (not screen)
- *   positioned conceptually between Screen A and Screen B
- * - Lucky List must interrupt the linear flow,
- *   reinforcing its premium and discovery-based nature
+ * - Lucky List must appear as a distinct, highlighted INTERRUPTION
+ *   between Screen A and Screen B
+ * - This reinforces its premium and discovery role
+ * - Lucky List must NEVER be merged into these module groups
  * 
  * ═══════════════════════════════════════════════════════════════════════════
  */
@@ -96,13 +108,18 @@ export const LUCKY_LIST_POSITION = {
   after: 'A',
   before: 'B',
   isScreen: false,
-  type: 'interstitial-element',
+  type: 'interstitial-interruption',
 } as const;
 
 /**
- * Screen navigation order (Lucky List is an interstitial element, not a screen)
+ * Screen navigation order (Lucky List is an interstitial, not a screen)
  */
 export const SCREEN_ORDER = ['A', 'B', 'C'] as const;
+
+/**
+ * First destination screen route (for back navigation)
+ */
+export const FIRST_DESTINATION_SCREEN = '/' as const;
 
 /**
  * Get modules by screen
@@ -134,13 +151,14 @@ export const getPreviousScreen = (currentScreen: 'A' | 'B' | 'C'): 'A' | 'B' | '
  * NAVIGATION RULES
  * ═══════════════════════════════════════════════════════════════════════════
  * 
- * - Navigation between secondary screens may occur via swipe or equivalent gesture
+ * - Navigation between screens may occur via swipe or equivalent gesture
  * - Users must always retain awareness of being inside the same destination
- * - Back navigation returns to the destination context, never to Home
+ * - Back navigation from ANY secondary module returns to:
+ *   the FIRST DESTINATION SCREEN (Index), NOT Home
  * 
  * SCALABILITY RULE:
- * - This grouping logic applies identically to all destinations
- * - Future destinations must respect the same pagination structure
+ * - This pagination logic applies IDENTICALLY to all destinations
+ * - No destination may alter grouping size, order, or Lucky List positioning
  * 
  * ═══════════════════════════════════════════════════════════════════════════
  */
