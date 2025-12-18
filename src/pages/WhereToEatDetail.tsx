@@ -157,7 +157,38 @@ const restaurantsByNeighborhood: Record<string, Record<string, { name: string; d
       { name: "Restaurant Placeholder", description: "Neighborhood bakery and café." },
     ],
   },
-  "sao-conrado": {},
+  "sao-conrado": {
+    "Hotel / Experience": [
+      { 
+        name: "A Sereia", 
+        description: "Restaurant inside the iconic Hotel Nacional. Strong focus on view, atmosphere and calm rhythm. Works more as an experience than a gastronomic destination. Ideal for guests staying in the hotel or for a sunset meal with scenery as the main character.",
+        price: "$$$",
+        address: "https://maps.google.com/?q=A+Sereia+Hotel+Nacional+São+Conrado",
+        instagram: "@hotelnacionalrio",
+        externalLink: ""
+      },
+    ],
+    "Japanese / Contemporary": [
+      { 
+        name: "Gurumê – Fashion Mall", 
+        description: "Reliable contemporary Japanese cuisine. Comfortable, precise and consistent. Often chosen for business lunches or easy dinners without surprises. The mall location makes logistics simple in a neighborhood with few dining options.",
+        price: "$$$",
+        address: "https://maps.google.com/?q=Gurumê+Fashion+Mall+São+Conrado",
+        instagram: "@gurume_oficial",
+        externalLink: ""
+      },
+    ],
+    "Beach / Casual": [
+      { 
+        name: "Qui Qui", 
+        description: "Beach kiosk experience at Praia do Pepino. Casual, informal and connected to the local surf and hang-gliding scene. Works best during the day, between beach time and sunset. Not about haute cuisine — about atmosphere and place.",
+        price: "$$",
+        address: "https://maps.google.com/?q=Qui+Qui+Praia+do+Pepino+São+Conrado",
+        instagram: "",
+        externalLink: ""
+      },
+    ],
+  },
   "barra-da-tijuca": {
     Brazilian: [
       { name: "Restaurant Placeholder", description: "Family-style churrascaria." },
