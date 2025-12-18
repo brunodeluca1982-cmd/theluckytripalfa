@@ -101,6 +101,34 @@ export const getEditorialSections = (): EditorialSection[] => {
 
 /**
  * ═══════════════════════════════════════════════════════════════════════════
+ * POSITIONING RULE
+ * ═══════════════════════════════════════════════════════════════════════════
+ * 
+ * "Entender o Destino" is:
+ * - NOT part of the first screen
+ * - NOT part of operational modules (Como Chegar, Onde Ficar, etc.)
+ * - NOT part of secondary modules (Mover, Vida Noturna, etc.)
+ * 
+ * It must live AFTER all operational and secondary modules.
+ * Access is optional and intentional (reading mode).
+ * 
+ * LAYER HIERARCHY:
+ * 1) First Screen (operational decisions)
+ * 2) Secondary Modules (planning depth)
+ * 3) Entender o Destino (immersion layer - separate)
+ * 
+ * ═══════════════════════════════════════════════════════════════════════════
+ */
+export const EDITORIAL_POSITIONING = {
+  isPartOfFirstScreen: false,
+  isPartOfOperationalModules: false,
+  isPartOfSecondaryModules: false,
+  positionInHierarchy: 'after-all-operational-and-secondary',
+  accessMode: 'optional-intentional-reading-mode',
+} as const;
+
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
  * NAVIGATION RULES
  * ═══════════════════════════════════════════════════════════════════════════
  * 
@@ -134,6 +162,11 @@ export const EDITORIAL_NAVIGATION = {
  * - Activities
  * - Booking/transactions
  * 
+ * LAYER SEPARATION:
+ * - Operational modules = DECISIONS
+ * - Entender o Destino = IMMERSION
+ * - These layers must NEVER be mixed
+ * 
  * ═══════════════════════════════════════════════════════════════════════════
  */
 export const EDITORIAL_CONTENT_RULES = {
@@ -143,8 +176,11 @@ export const EDITORIAL_CONTENT_RULES = {
   allowsMaps: false,
   allowsBookingLinks: false,
   allowsPartnerLinks: false,
+  allowsNeighborhoodsList: false,
+  allowsActivities: false,
   belongsToLuckyList: false,
   belongsToOperationalLayer: false,
+  belongsToSecondaryModules: false,
 } as const;
 
 /**
