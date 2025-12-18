@@ -173,7 +173,16 @@ const hotelsByNeighborhood: Record<string, {
       externalLink: ""
     },
   ],
-  recreio: [],
+  recreio: [
+    { 
+      name: "C Design Hotel", 
+      price: "$$$", 
+      description: "Pé na areia, fachada marcante e clima jovem. Muito usado por surfistas e equipes esportivas.",
+      address: "https://maps.google.com/?q=C+Design+Hotel",
+      instagram: "@cdesignhotel",
+      externalLink: ""
+    },
+  ],
   "santa-teresa": [
     { name: "Hotel Placeholder", price: "$$$", description: "Colonial mansion with city views." },
     { name: "Hotel Placeholder", price: "$$", description: "Artistic guesthouse in the hills." },
