@@ -29,21 +29,51 @@ const Index = () => {
           </p>
         </div>
 
-        {/* ═══════════════════════════════════════════════════════════════
-            STRUCTURAL LOCK — RIO DE JANEIRO DESTINATION HOME
-            ═══════════════════════════════════════════════════════════════
-            This hierarchy is LOCKED and must NOT be reordered, renamed,
-            merged, or extended without explicit authorization.
+        {/* ═══════════════════════════════════════════════════════════════════
+            STRUCTURAL LOCK — FIRST DESTINATION SCREEN
+            Destination: Rio de Janeiro
+            ═══════════════════════════════════════════════════════════════════
             
-            ORDER:
-            1. Como Chegar (PRIMARY — macro arrival logistics)
-            2. Onde Ficar (PRIMARY — accommodation/neighborhood)
-            3. Onde Comer (SECONDARY — gastronomy by neighborhood)
-            4. O Que Fazer (SECONDARY — activities by neighborhood, public layer)
-            5. Lucky List (SPECIAL — premium discovery, visually discreet)
+            This is the user's FIRST CONTACT with the destination.
+            Decision-oriented, anxiety-reducing, and practical.
             
-            REMOVED: "Mover" is NOT a primary action on this screen.
-            ═══════════════════════════════════════════════════════════════ */}
+            FIXED MODULE ORDER (EXACTLY 5, NO MORE):
+            1. Como Chegar — macro arrival logistics
+            2. Onde Ficar — accommodation/neighborhood decision
+            3. Onde Comer — gastronomy by neighborhood
+            4. O Que Fazer — activities by neighborhood, public layer
+            5. Lucky List — premium discovery, visually discreet
+            
+            LUCKY LIST RULES:
+            - Appears as smaller, highlighted element
+            - Signals exclusivity and discovery
+            - May include limited free teaser content
+            - Full access requires subscription
+            - Must NOT dominate or interrupt core decisions
+            
+            EXPLICIT EXCLUSIONS (belong to secondary screens only):
+            - Mover / Como se locomover
+            - Vida Noturna
+            - Sabores Locais
+            - Dinheiro
+            - Documentos & Visto
+            - Melhor Época
+            - O Que Levar
+            - Gastos da Viagem
+            - Links Úteis
+            - Checklist Final
+            - Entender o Destino (Meu Olhar, História, Hoje em Dia)
+            
+            NAVIGATION RULES:
+            - Users may swipe/navigate to secondary modules from here
+            - This screen remains the anchor of the destination
+            - Back navigation from any secondary screen returns here
+            
+            SCALABILITY RULE:
+            - This structure must be IDENTICAL across all destinations
+            - No destination may alter the order or composition
+            
+            ═══════════════════════════════════════════════════════════════════ */}
         
         <div className="space-y-3 max-w-xs">
           {/* ─── PRIMARY ACTION 1: Como Chegar ─── */}
