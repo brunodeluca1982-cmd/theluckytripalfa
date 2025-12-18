@@ -15,21 +15,21 @@ import { ChevronLeft } from "lucide-react";
 const luckyListItems = [
   {
     id: "sunset-pedra-bonita",
-    title: "Sunset at Pedra Bonita",
+    title: "Pôr do Sol na Pedra Bonita",
     neighborhood: null, // City-level
-    teaser: "The most magical golden hour in Rio.",
+    teaser: "A hora dourada mais mágica do Rio.",
   },
   {
     id: "morning-swim-arpoador",
-    title: "Morning Swim at Arpoador",
+    title: "Mergulho Matinal no Arpoador",
     neighborhood: "ipanema",
-    teaser: "Join the locals before the crowds arrive.",
+    teaser: "Junte-se aos locais antes das multidões chegarem.",
   },
   {
     id: "confeitaria-colombo",
-    title: "Coffee at Confeitaria Colombo",
+    title: "Café na Confeitaria Colombo",
     neighborhood: "centro",
-    teaser: "Step into Belle Époque Rio.",
+    teaser: "Entre no Rio da Belle Époque.",
   },
 ];
 
@@ -43,7 +43,7 @@ const LuckyList = () => {
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           <ChevronLeft className="w-4 h-4" />
-          Back
+          Voltar
         </Link>
       </header>
 
@@ -61,13 +61,13 @@ const LuckyList = () => {
 
         {/* Media Placeholder - Full Width */}
         <div className="w-full aspect-[16/9] bg-muted flex items-center justify-center">
-          <p className="text-sm text-muted-foreground">Image or video placeholder</p>
+          <p className="text-sm text-muted-foreground">Espaço para imagem ou vídeo</p>
         </div>
 
         {/* Description */}
         <div className="px-6 pt-8 pb-10">
           <p className="text-base text-muted-foreground leading-relaxed">
-            A curated collection of experiences, places, and moments that define the soul of Rio. These are the discoveries that make a trip truly lucky.
+            Uma coleção curada de experiências, lugares e momentos que definem a alma do Rio. São as descobertas que tornam uma viagem verdadeiramente sortuda.
           </p>
         </div>
 

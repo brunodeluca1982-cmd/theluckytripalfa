@@ -11,19 +11,19 @@ import { ChevronLeft } from "lucide-react";
 
 const transportOptions = [
   {
-    title: "By Air",
-    description: "Rio de Janeiro has two airports: Galeão International (GIG) for most international flights, and Santos Dumont (SDU) for domestic routes.",
-    ctaLabel: "Search flights",
+    title: "Por Avião",
+    description: "O Rio de Janeiro tem dois aeroportos: Galeão Internacional (GIG) para a maioria dos voos internacionais, e Santos Dumont (SDU) para rotas domésticas.",
+    ctaLabel: "Buscar voos",
   },
   {
-    title: "From the Airport",
-    description: "Options include official taxis, rideshare apps, airport buses (BRT), and private transfers. Journey to Zona Sul takes 30-60 minutes depending on traffic.",
-    ctaLabel: "Book transfer",
+    title: "Do Aeroporto",
+    description: "As opções incluem táxis oficiais, aplicativos de transporte, ônibus do aeroporto (BRT) e transfers privados. A viagem até a Zona Sul leva de 30 a 60 minutos dependendo do trânsito.",
+    ctaLabel: "Reservar transfer",
   },
   {
-    title: "Getting Around",
-    description: "The Metro connects key neighborhoods. Taxis and rideshares are affordable. For beaches, walking is often the best option.",
-    ctaLabel: "View transit map",
+    title: "Circulando pela Cidade",
+    description: "O metrô conecta os principais bairros. Táxis e aplicativos são acessíveis. Para as praias, caminhar costuma ser a melhor opção.",
+    ctaLabel: "Ver mapa de transporte",
   },
 ];
 
@@ -37,7 +37,7 @@ const HowToGetThere = () => {
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           <ChevronLeft className="w-4 h-4" />
-          Back
+          Voltar
         </Link>
       </header>
 
@@ -46,7 +46,7 @@ const HowToGetThere = () => {
         {/* Title */}
         <div className="px-6 pt-8 pb-6">
           <h1 className="text-4xl font-serif font-semibold text-foreground leading-tight">
-            How to Get There
+            Como Chegar
           </h1>
           <p className="text-lg text-muted-foreground mt-2">
             Rio de Janeiro
@@ -55,13 +55,13 @@ const HowToGetThere = () => {
 
         {/* Media Placeholder - Full Width */}
         <div className="w-full aspect-[16/9] bg-muted flex items-center justify-center">
-          <p className="text-sm text-muted-foreground">Image or video placeholder</p>
+          <p className="text-sm text-muted-foreground">Espaço para imagem ou vídeo</p>
         </div>
 
         {/* Description */}
         <div className="px-6 pt-8 pb-10">
           <p className="text-base text-muted-foreground leading-relaxed">
-            Everything you need to know about reaching Rio de Janeiro and navigating the city once you arrive.
+            Tudo o que você precisa saber para chegar ao Rio de Janeiro e se locomover pela cidade.
           </p>
         </div>
 

@@ -5,17 +5,17 @@ import { getNeighborhoodById } from "@/data/rio-neighborhoods";
 
 // Neighborhood descriptions for the food scene
 const neighborhoodDescriptions: Record<string, string> = {
-  ipanema: "A refined food scene where organic bistros meet inventive fusion kitchens, reflecting the neighborhood's sophisticated yet laid-back character.",
-  leblon: "Rio's most exclusive dining destination, home to award-winning chefs and intimate restaurants that define contemporary Brazilian gastronomy.",
-  copacabana: "From traditional Portuguese taverns to contemporary seafood restaurants, Copacabana offers an eclectic dining scene shaped by decades of cultural diversity.",
-  leme: "A quieter culinary pocket with family-run establishments serving generous portions of traditional carioca comfort food.",
-  "sao-conrado": "An upscale residential enclave with select dining options, from elegant hotel restaurants to casual beachside spots.",
-  "barra-da-tijuca": "Modern dining hubs and beachfront restaurants catering to families and groups with diverse international options.",
-  recreio: "A laid-back beach neighborhood with casual eateries, fresh seafood spots, and family-friendly dining options.",
-  "santa-teresa": "Bohemian eateries and artist-run cafés tucked into colonial buildings, offering creative takes on Brazilian classics.",
-  centro: "Historic lunch counters, traditional bars, and century-old confeitarias preserving the flavors of old Rio.",
-  "jardim-botanico": "A leafy, upscale neighborhood with contemporary restaurants and cozy pizzerias nestled near the botanical gardens.",
-  gavea: "A traditional neighborhood where academia meets leisure, known for its lively botecos and neighborhood gathering spots.",
+  ipanema: "Uma cena gastronômica refinada onde bistrôs orgânicos encontram cozinhas de fusão inventivas, refletindo o caráter sofisticado e descontraído do bairro.",
+  leblon: "O destino gastronômico mais exclusivo do Rio, lar de chefs premiados e restaurantes intimistas que definem a gastronomia brasileira contemporânea.",
+  copacabana: "De tascas portuguesas tradicionais a restaurantes contemporâneos de frutos do mar, Copacabana oferece uma cena gastronômica eclética moldada por décadas de diversidade cultural.",
+  leme: "Um bolso culinário mais tranquilo com estabelecimentos familiares servindo porções generosas de comida caseira carioca tradicional.",
+  "sao-conrado": "Um enclave residencial sofisticado com opções gastronômicas selecionadas, de elegantes restaurantes de hotel a pontos casuais à beira-mar.",
+  "barra-da-tijuca": "Polos gastronômicos modernos e restaurantes à beira-mar atendendo famílias e grupos com diversas opções internacionais.",
+  recreio: "Um bairro de praia descontraído com restaurantes casuais, pontos de frutos do mar frescos e opções para famílias.",
+  "santa-teresa": "Restaurantes boêmios e cafés de artistas em prédios coloniais, oferecendo releituras criativas de clássicos brasileiros.",
+  centro: "Balcões de almoço históricos, bares tradicionais e confeitarias centenárias preservando os sabores do Rio antigo.",
+  "jardim-botanico": "Um bairro arborizado e sofisticado com restaurantes contemporâneos e pizzarias aconchegantes perto do jardim botânico.",
+  gavea: "Um bairro tradicional onde a academia encontra o lazer, conhecido por seus botecos animados e pontos de encontro do bairro.",
   lagoa: "Um dos cartões-postais do Rio, com restaurantes sofisticados à beira d'água e opções para todos os momentos do dia.",
 };
 
@@ -40,7 +40,7 @@ const restaurantsByNeighborhood: Record<string, Record<string, { name: string; d
         externalLink: ""
       },
     ],
-    Italian: [
+    Italiano: [
       { 
         name: "Nido Ristorante", 
         description: "Meu italiano afetivo. Massas impecáveis, ambiente acolhedor, comida honesta. Restaurante de rotina boa, conversa longa e conforto emocional.",
@@ -108,7 +108,7 @@ const restaurantsByNeighborhood: Record<string, Record<string, { name: string; d
         externalLink: ""
       },
     ],
-    Italian: [
+    Italiano: [
       { 
         name: "Casa Tua", 
         description: "Italiano com clima de casa. Massas bem feitas, serviço próximo, sem afetação. Ótimo pra encontros tranquilos.",
@@ -130,7 +130,7 @@ const restaurantsByNeighborhood: Record<string, Record<string, { name: string; d
     ],
   },
   copacabana: {
-    "Fine Dining": [
+    "Alta Gastronomia": [
       { 
         name: "Mee", 
         description: "Alta gastronomia asiática dentro do Copacabana Palace. Preciso, elegante e silencioso. Experiência especial, sem pressa.",
@@ -150,38 +150,38 @@ const restaurantsByNeighborhood: Record<string, Record<string, { name: string; d
     ],
   },
   leme: {
-    Brazilian: [
-      { name: "Restaurant Placeholder", description: "Homestyle cooking and generous portions." },
+    Brasileiro: [
+      { name: "Placeholder de Restaurante", description: "Cozinha caseira e porções generosas." },
     ],
     "Casual / Cafés": [
-      { name: "Restaurant Placeholder", description: "Neighborhood bakery and café." },
+      { name: "Placeholder de Restaurante", description: "Padaria e café do bairro." },
     ],
   },
   "sao-conrado": {
-    "Hotel / Experience": [
+    "Hotel / Experiência": [
       { 
         name: "A Sereia", 
-        description: "Restaurant inside the iconic Hotel Nacional. Strong focus on view, atmosphere and calm rhythm. Works more as an experience than a gastronomic destination. Ideal for guests staying in the hotel or for a sunset meal with scenery as the main character.",
+        description: "Restaurante dentro do icônico Hotel Nacional. Foco em vista, atmosfera e ritmo calmo. Funciona mais como experiência do que como destino gastronômico. Ideal para hóspedes do hotel ou para uma refeição ao pôr do sol com a paisagem como protagonista.",
         price: "$$$",
         address: "https://maps.google.com/?q=A+Sereia+Hotel+Nacional+São+Conrado",
         instagram: "@hotelnacionalrio",
         externalLink: ""
       },
     ],
-    "Japanese / Contemporary": [
+    "Japonês / Contemporâneo": [
       { 
         name: "Gurumê – Fashion Mall", 
-        description: "Reliable contemporary Japanese cuisine. Comfortable, precise and consistent. Often chosen for business lunches or easy dinners without surprises. The mall location makes logistics simple in a neighborhood with few dining options.",
+        description: "Culinária japonesa contemporânea confiável. Confortável, preciso e consistente. Frequentemente escolhido para almoços de negócios ou jantares fáceis sem surpresas. A localização no shopping facilita a logística em um bairro com poucas opções gastronômicas.",
         price: "$$$",
         address: "https://maps.google.com/?q=Gurumê+Fashion+Mall+São+Conrado",
         instagram: "@gurume_oficial",
         externalLink: ""
       },
     ],
-    "Beach / Casual": [
+    "Praia / Casual": [
       { 
         name: "Qui Qui", 
-        description: "Beach kiosk experience at Praia do Pepino. Casual, informal and connected to the local surf and hang-gliding scene. Works best during the day, between beach time and sunset. Not about haute cuisine — about atmosphere and place.",
+        description: "Experiência de quiosque de praia na Praia do Pepino. Casual, informal e conectado à cena local de surfe e voo livre. Funciona melhor durante o dia, entre o tempo de praia e o pôr do sol. Não é sobre alta gastronomia — é sobre atmosfera e lugar.",
         price: "$$",
         address: "https://maps.google.com/?q=Qui+Qui+Praia+do+Pepino+São+Conrado",
         instagram: "",
@@ -190,36 +190,36 @@ const restaurantsByNeighborhood: Record<string, Record<string, { name: string; d
     ],
   },
   "barra-da-tijuca": {
-    Brazilian: [
-      { name: "Restaurant Placeholder", description: "Family-style churrascaria." },
+    Brasileiro: [
+      { name: "Placeholder de Restaurante", description: "Churrascaria familiar." },
     ],
-    Japanese: [
-      { name: "Restaurant Placeholder", description: "Contemporary Japanese fusion." },
+    Japonês: [
+      { name: "Placeholder de Restaurante", description: "Fusão japonesa contemporânea." },
     ],
-    Italian: [
-      { name: "Restaurant Placeholder", description: "Wood-fired pizzas." },
+    Italiano: [
+      { name: "Placeholder de Restaurante", description: "Pizzas de forno a lenha." },
     ],
     "Casual / Cafés": [
-      { name: "Restaurant Placeholder", description: "Beachfront juice bar." },
+      { name: "Placeholder de Restaurante", description: "Bar de sucos à beira-mar." },
     ],
   },
   recreio: {},
   "santa-teresa": {
-    Brazilian: [
-      { name: "Restaurant Placeholder", description: "Creative Brazilian in a colonial house." },
+    Brasileiro: [
+      { name: "Placeholder de Restaurante", description: "Brasileiro criativo em casarão colonial." },
     ],
     "Casual / Cafés": [
-      { name: "Restaurant Placeholder", description: "Artist-run café with live music." },
-      { name: "Restaurant Placeholder", description: "Bohemian bar with petiscos." },
+      { name: "Placeholder de Restaurante", description: "Café de artista com música ao vivo." },
+      { name: "Placeholder de Restaurante", description: "Bar boêmio com petiscos." },
     ],
   },
   centro: {
-    Brazilian: [
-      { name: "Restaurant Placeholder", description: "Historic lunch counter since 1920." },
-      { name: "Restaurant Placeholder", description: "Traditional boteco experience." },
+    Brasileiro: [
+      { name: "Placeholder de Restaurante", description: "Balcão de almoço histórico desde 1920." },
+      { name: "Placeholder de Restaurante", description: "Experiência de boteco tradicional." },
     ],
     "Casual / Cafés": [
-      { name: "Restaurant Placeholder", description: "Century-old confeitaria." },
+      { name: "Placeholder de Restaurante", description: "Confeitaria centenária." },
     ],
   },
   "jardim-botanico": {
@@ -233,7 +233,7 @@ const restaurantsByNeighborhood: Record<string, Record<string, { name: string; d
         externalLink: ""
       },
     ],
-    Pizzeria: [
+    Pizzaria: [
       { 
         name: "Ella Pizzaria", 
         description: "Pizza de personalidade. Massa leve, borda crocante e sabor marcante. Uma das minhas preferidas do Rio.",
@@ -258,7 +258,7 @@ const restaurantsByNeighborhood: Record<string, Record<string, { name: string; d
     "Boteco / Carioca": [
       { 
         name: "Braseiro da Gávea", 
-        description: "Traditional neighborhood boteco. Meat, cold beer and conversation. Always busy. Always good.",
+        description: "Boteco tradicional do bairro. Carne, cerveja gelada e conversa. Sempre cheio. Sempre bom.",
         price: "$$",
         address: "https://maps.google.com/?q=Braseiro+da+Gávea",
         instagram: "@braseirodagavea",
@@ -266,7 +266,7 @@ const restaurantsByNeighborhood: Record<string, Record<string, { name: string; d
       },
       { 
         name: "Guimas", 
-        description: "Classic Gávea meeting point. Simple food, cold beer and tables that turn into long nights.",
+        description: "Ponto de encontro clássico da Gávea. Comida simples, cerveja gelada e mesas que viram noites longas.",
         price: "$$",
         address: "https://maps.google.com/?q=Guimas+Gávea",
         instagram: "@guimas",
@@ -274,7 +274,7 @@ const restaurantsByNeighborhood: Record<string, Record<string, { name: string; d
       },
       { 
         name: "Brewteco", 
-        description: "Craft beer bar with a lively atmosphere. Good food, rotating taps and a social crowd.",
+        description: "Bar de cerveja artesanal com atmosfera animada. Boa comida, torneiras rotativas e público sociável.",
         price: "$$",
         address: "https://maps.google.com/?q=Brewteco+Gávea",
         instagram: "@brewteco",
@@ -337,7 +337,7 @@ const WhereToEatDetail = () => {
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           <ChevronLeft className="w-4 h-4" />
-          Back
+          Voltar
         </Link>
       </header>
 
@@ -346,13 +346,13 @@ const WhereToEatDetail = () => {
         {/* Title */}
         <div className="px-6 pt-8 pb-6">
           <h1 className="text-4xl font-serif font-semibold text-foreground leading-tight">
-            Where to eat in {name}
+            Onde comer em {name}
           </h1>
         </div>
 
         {/* Media Placeholder - Full Width */}
         <div className="w-full aspect-[16/9] bg-muted flex items-center justify-center">
-          <p className="text-sm text-muted-foreground">Image or video placeholder</p>
+          <p className="text-sm text-muted-foreground">Espaço para imagem ou vídeo</p>
         </div>
 
         {/* Description */}
@@ -387,7 +387,7 @@ const WhereToEatDetail = () => {
         ) : (
           <div className="px-6 pt-8">
             <p className="text-sm text-muted-foreground">
-              Restaurant recommendations coming soon.
+              Recomendações de restaurantes em breve.
             </p>
           </div>
         )}

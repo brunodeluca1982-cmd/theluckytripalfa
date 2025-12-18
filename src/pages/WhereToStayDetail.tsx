@@ -5,15 +5,15 @@ import { getNeighborhoodById } from "@/data/rio-neighborhoods";
 
 // Neighborhood descriptions for staying
 const neighborhoodDescriptions: Record<string, string> = {
-  ipanema: "The epitome of Rio chic. Ipanema offers a perfect blend of beach life, upscale dining, and cultural sophistication in a walkable, vibrant neighborhood.",
-  leblon: "Rio's most exclusive address. A quieter, more refined alternative to Ipanema with top restaurants, boutique shopping, and pristine beaches.",
-  copacabana: "The iconic crescent beach with endless energy. From grand historic hotels to modern apartments, Copacabana offers classic Rio at every price point.",
-  leme: "A peaceful extension of Copacabana with a village-like atmosphere. Perfect for those seeking beach access with tranquility.",
-  "sao-conrado": "An upscale enclave between mountains and sea. Home to luxury condos, a world-class golf course, and dramatic natural beauty.",
-  "barra-da-tijuca": "Modern, spacious, and family-friendly. Long beaches, shopping malls, and contemporary apartments for those who prefer a suburban vibe.",
-  recreio: "The last beach frontier. A laid-back neighborhood with pristine sands, surfer culture, and genuine local character.",
-  "santa-teresa": "Bohemian charm in the hills. Colonial mansions, artist studios, and panoramic views make this Rio's most atmospheric neighborhood.",
-  centro: "The historic heart of Rio. Grand architecture, cultural institutions, and a glimpse into the city's past. Best for culture-focused travelers.",
+  ipanema: "O auge do charme carioca. Ipanema oferece a mistura perfeita de vida de praia, gastronomia refinada e sofisticação cultural num bairro vibrante e caminhável.",
+  leblon: "O endereço mais exclusivo do Rio. Uma alternativa mais tranquila e refinada a Ipanema, com restaurantes de alto nível, compras em boutiques e praias impecáveis.",
+  copacabana: "A icônica praia em formato de crescente, com energia infinita. De hotéis históricos a apartamentos modernos, Copacabana oferece o Rio clássico em todas as faixas de preço.",
+  leme: "Uma extensão pacífica de Copacabana com atmosfera de vilarejo. Perfeito para quem busca acesso à praia com tranquilidade.",
+  "sao-conrado": "Um enclave sofisticado entre montanhas e mar. Condomínios de luxo, campo de golfe de classe mundial e beleza natural dramática.",
+  "barra-da-tijuca": "Moderno, espaçoso e familiar. Praias extensas, shoppings e apartamentos contemporâneos para quem prefere um clima mais suburbano.",
+  recreio: "A última fronteira da praia. Um bairro descontraído com areias intocadas, cultura de surfe e personalidade local autêntica.",
+  "santa-teresa": "Charme boêmio nas colinas. Casarões coloniais, ateliês de artistas e vistas panorâmicas fazem deste o bairro mais atmosférico do Rio.",
+  centro: "O coração histórico do Rio. Arquitetura grandiosa, instituições culturais e um vislumbre do passado da cidade. Ideal para viajantes focados em cultura.",
 };
 
 // Hotel data by neighborhood
@@ -29,7 +29,7 @@ const hotelsByNeighborhood: Record<string, {
     { 
       name: "Hotel Fasano Rio de Janeiro", 
       price: "$$$$", 
-      description: "The most classic luxury address in Rio. The rooftop has become the setting for campaigns, interviews and important meetings. I've seen football players, people from cinema, fashion and music there — all looking for view, discretion and impeccable service.",
+      description: "O endereço de luxo mais clássico do Rio. O rooftop virou cenário de campanhas, entrevistas e reuniões importantes. Já vi jogadores de futebol, gente do cinema, moda e música ali — todos buscando vista, discrição e serviço impecável.",
       address: "https://maps.google.com/?q=Hotel+Fasano+Rio+de+Janeiro",
       instagram: "@fasano",
       externalLink: ""
@@ -37,7 +37,7 @@ const hotelsByNeighborhood: Record<string, {
     { 
       name: "Ipanema Inn", 
       price: "$$$", 
-      description: "Small, welcoming and with a home-like feeling. Perfect for those who come and go all day without depending on a car.",
+      description: "Pequeno, acolhedor e com cara de casa. Perfeito pra quem vai e vem o dia todo sem depender de carro.",
       address: "https://maps.google.com/?q=Ipanema+Inn",
       instagram: "@ipanemainn",
       externalLink: ""
@@ -45,7 +45,7 @@ const hotelsByNeighborhood: Record<string, {
     { 
       name: "Mar Ipanema Hotel", 
       price: "$$$", 
-      description: "Urban, practical and extremely well located. Works very well for those who want to live Ipanema intensely.",
+      description: "Urbano, prático e extremamente bem localizado. Funciona muito bem pra quem quer viver Ipanema intensamente.",
       address: "https://maps.google.com/?q=Mar+Ipanema+Hotel",
       instagram: "@mariipanemahotel",
       externalLink: ""
@@ -242,7 +242,7 @@ const WhereToStayDetail = () => {
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           <ChevronLeft className="w-4 h-4" />
-          Back
+          Voltar
         </Link>
       </header>
 
@@ -251,13 +251,13 @@ const WhereToStayDetail = () => {
         {/* Title */}
         <div className="px-6 pt-8 pb-6">
           <h1 className="text-4xl font-serif font-semibold text-foreground leading-tight">
-            Where to stay in {name}
+            Onde ficar em {name}
           </h1>
         </div>
 
         {/* Media Placeholder - Full Width */}
         <div className="w-full aspect-[16/9] bg-muted flex items-center justify-center">
-          <p className="text-sm text-muted-foreground">Image or video placeholder</p>
+          <p className="text-sm text-muted-foreground">Espaço para imagem ou vídeo</p>
         </div>
 
         {/* Description */}
@@ -273,7 +273,7 @@ const WhereToStayDetail = () => {
         {/* Hotels List */}
         <section className="px-6 pt-8">
           <h2 className="text-xl font-serif font-medium text-foreground mb-6">
-            Hotels
+            Hotéis
           </h2>
           
           {hotels.length > 0 ? (
@@ -292,7 +292,7 @@ const WhereToStayDetail = () => {
             </div>
           ) : (
             <p className="text-sm text-muted-foreground">
-              Hotel recommendations coming soon.
+              Recomendações de hotéis em breve.
             </p>
           )}
         </section>

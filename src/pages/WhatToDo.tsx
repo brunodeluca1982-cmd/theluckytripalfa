@@ -14,13 +14,13 @@ import { RIO_NEIGHBORHOODS } from "@/data/rio-neighborhoods";
 const cityActivities = [
   {
     id: "christ-the-redeemer",
-    title: "Christ the Redeemer",
-    description: "The iconic statue atop Corcovado mountain.",
+    title: "Cristo Redentor",
+    description: "A icônica estátua no topo do Corcovado.",
   },
   {
     id: "sugarloaf",
-    title: "Sugarloaf Mountain",
-    description: "Cable car ride with panoramic views.",
+    title: "Pão de Açúcar",
+    description: "Passeio de bondinho com vistas panorâmicas.",
   },
 ];
 
@@ -34,7 +34,7 @@ const WhatToDo = () => {
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           <ChevronLeft className="w-4 h-4" />
-          Back
+          Voltar
         </Link>
       </header>
 
@@ -43,7 +43,7 @@ const WhatToDo = () => {
         {/* Title */}
         <div className="px-6 pt-8 pb-6">
           <h1 className="text-4xl font-serif font-semibold text-foreground leading-tight">
-            What to Do
+            O Que Fazer
           </h1>
           <p className="text-lg text-muted-foreground mt-2">
             Rio de Janeiro
@@ -52,13 +52,13 @@ const WhatToDo = () => {
 
         {/* Media Placeholder - Full Width */}
         <div className="w-full aspect-[16/9] bg-muted flex items-center justify-center">
-          <p className="text-sm text-muted-foreground">Image or video placeholder</p>
+          <p className="text-sm text-muted-foreground">Espaço para imagem ou vídeo</p>
         </div>
 
         {/* Description */}
         <div className="px-6 pt-8 pb-10">
           <p className="text-base text-muted-foreground leading-relaxed">
-            From iconic landmarks to hidden neighborhood gems, discover what makes Rio unforgettable.
+            Dos pontos turísticos icônicos às joias escondidas dos bairros, descubra o que torna o Rio inesquecível.
           </p>
         </div>
 
@@ -68,7 +68,7 @@ const WhatToDo = () => {
         {/* City-Level Activities */}
         <section className="px-6 pt-8">
           <h2 className="text-xs tracking-widest text-muted-foreground uppercase mb-4">
-            Iconic Experiences
+            Experiências Icônicas
           </h2>
           <div className="space-y-4">
             {cityActivities.map((activity) => (
@@ -93,7 +93,7 @@ const WhatToDo = () => {
         {/* Neighborhood-Based Activities */}
         <section className="px-6 pt-8">
           <h2 className="text-xs tracking-widest text-muted-foreground uppercase mb-4">
-            Explore by Neighborhood
+            Explorar por Bairro
           </h2>
           <div className="space-y-3">
             {RIO_NEIGHBORHOODS.map((neighborhood) => (
@@ -106,7 +106,7 @@ const WhatToDo = () => {
                   {neighborhood.name}
                 </h3>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Activities coming soon
+                  Atividades em breve
                 </p>
               </Link>
             ))}
