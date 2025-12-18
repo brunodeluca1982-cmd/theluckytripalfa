@@ -19,6 +19,10 @@ const neighborhoodData: Record<string, { name: string; description: string }> = 
     name: "Leme",
     description: "A quieter culinary pocket with family-run establishments serving generous portions of traditional carioca comfort food.",
   },
+  "sao-conrado": {
+    name: "São Conrado",
+    description: "An upscale residential enclave with select dining options, from elegant hotel restaurants to casual beachside spots.",
+  },
   "barra-da-tijuca": {
     name: "Barra da Tijuca",
     description: "Modern dining hubs and beachfront restaurants catering to families and groups with diverse international options.",
@@ -103,6 +107,7 @@ const restaurantsByNeighborhood: Record<string, Record<string, { name: string; d
       { name: "Restaurant Placeholder", description: "Beachfront juice bar." },
     ],
   },
+  "sao-conrado": {},
   "santa-teresa": {
     Brazilian: [
       { name: "Restaurant Placeholder", description: "Creative Brazilian in a colonial house." },
