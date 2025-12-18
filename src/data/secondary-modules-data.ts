@@ -162,3 +162,75 @@ export const getPreviousScreen = (currentScreen: 'A' | 'B' | 'C'): 'A' | 'B' | '
  * 
  * ═══════════════════════════════════════════════════════════════════════════
  */
+
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ * NAVIGATION CLARIFICATION LOCK
+ * ═══════════════════════════════════════════════════════════════════════════
+ * 
+ * FIRST SCREEN RULE (LOCKED):
+ * The first screen contains ONLY:
+ *   1) Como Chegar
+ *   2) Onde Ficar
+ *   3) Onde Comer
+ *   4) O Que Fazer
+ *   5) Lucky List (highlighted, premium)
+ * 
+ * SECONDARY MODULE EXCLUSION RULE:
+ * The following modules MUST NOT appear on the first screen.
+ * They exist ONLY on subsequent screens accessed via swipe or equivalent:
+ *   - MOVER (Como se locomover)
+ *   - VIDA NOTURNA
+ *   - SABORES LOCAIS
+ *   - DINHEIRO
+ *   - DOCUMENTOS & VISTO
+ *   - MELHOR ÉPOCA
+ *   - O QUE LEVAR
+ *   - GASTOS DA VIAGEM
+ *   - LINKS ÚTEIS
+ *   - CHECKLIST FINAL
+ * 
+ * NAVIGATION DISCLOSURE RULE:
+ * - Users must be implicitly informed through navigation behavior
+ *   that more content exists beyond the first screen
+ * - Access to secondary modules occurs via swipe or equivalent gesture
+ * - No visual UI instruction is defined here (handled separately)
+ * 
+ * COGNITIVE RULE:
+ * - First screen = DECISION and ACTION
+ * - Subsequent screens = PLANNING DEPTH
+ * - Entender o Destino = SEPARATE EDITORIAL LAYER (never mixed)
+ * 
+ * ═══════════════════════════════════════════════════════════════════════════
+ */
+export const NAVIGATION_CLARIFICATION = {
+  firstScreenModules: [
+    'como-chegar',
+    'onde-ficar',
+    'onde-comer',
+    'o-que-fazer',
+    'lucky-list',
+  ],
+  secondaryModulesExcludedFromFirstScreen: true,
+  accessMethod: 'swipe-or-equivalent',
+  disclosureBehavior: 'implicit-through-navigation',
+  cognitiveModel: {
+    firstScreen: 'decision-and-action',
+    subsequentScreens: 'planning-depth',
+    editorialLayer: 'separate-immersion',
+  },
+} as const;
+
+/**
+ * Check if a module belongs to the first screen
+ */
+export const isFirstScreenModule = (moduleId: string): boolean => {
+  return (NAVIGATION_CLARIFICATION.firstScreenModules as readonly string[]).includes(moduleId);
+};
+
+/**
+ * Check if a module is a secondary module (not on first screen)
+ */
+export const isSecondaryModule = (moduleId: string): boolean => {
+  return SECONDARY_MODULES.some(m => m.id === moduleId);
+};
