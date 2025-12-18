@@ -5,9 +5,13 @@ const neighborhoodData: Record<string, { name: string }> = {
   copacabana: { name: "Copacabana" },
   ipanema: { name: "Ipanema" },
   leblon: { name: "Leblon" },
+  leme: { name: "Leme" },
+  arpoador: { name: "Arpoador" },
+  "barra-da-tijuca": { name: "Barra da Tijuca" },
+  recreio: { name: "Recreio" },
+  "sao-conrado": { name: "São Conrado" },
   "santa-teresa": { name: "Santa Teresa" },
-  botafogo: { name: "Botafogo" },
-  lapa: { name: "Lapa" },
+  centro: { name: "Centro" },
 };
 
 const placeholderHotels = [
@@ -25,52 +29,53 @@ const BairroDetail = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="sticky top-0 bg-background/95 backdrop-blur-sm border-b border-border z-10">
-        <div className="px-6 py-4">
-          <Link
-            to="/onde-ficar-rio"
-            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <ChevronLeft className="w-4 h-4" />
-            Where to Stay
-          </Link>
-        </div>
+      <header className="px-6 py-4 border-b border-border">
+        <Link
+          to="/onde-ficar-rio"
+          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <ChevronLeft className="w-4 h-4" />
+          Back
+        </Link>
       </header>
 
       {/* Content */}
-      <main>
-        {/* Title */}
-        <div className="px-6 pt-6 pb-4">
-          <h1 className="text-4xl font-serif font-medium text-foreground">
+      <main className="pb-12">
+        {/* Neighborhood Name */}
+        <div className="px-6 pt-8 pb-6">
+          <h1 className="text-4xl font-serif font-semibold text-foreground leading-tight">
             {neighborhood.name}
           </h1>
         </div>
 
-        {/* Image/Video Placeholder */}
-        <div className="w-full aspect-[16/10] bg-muted flex items-center justify-center">
+        {/* Media Placeholder - Full Width */}
+        <div className="w-full aspect-[16/9] bg-muted flex items-center justify-center">
           <p className="text-sm text-muted-foreground">Image or video placeholder</p>
         </div>
 
         {/* Description */}
-        <div className="px-6 py-6">
+        <div className="px-6 pt-8 pb-10">
           <p className="text-base text-muted-foreground leading-relaxed">
-            Placeholder description text for {neighborhood.name}. This section will contain a short overview of the neighborhood, its vibe, and what makes it special for travelers.
+            Placeholder description for {neighborhood.name}. A short overview of the neighborhood's character and appeal.
           </p>
         </div>
 
-        {/* Hotels Section */}
-        <section className="px-6 pb-8">
-          <h2 className="text-sm tracking-widest text-muted-foreground uppercase mb-4">
-            Hotels
+        {/* Divider */}
+        <div className="mx-6 border-t border-border" />
+
+        {/* Where to Stay Section */}
+        <section className="px-6 pt-8">
+          <h2 className="text-xl font-serif font-medium text-foreground mb-6">
+            Where to stay
           </h2>
           
-          <div className="space-y-3">
+          <div className="space-y-4">
             {placeholderHotels.map((hotel, index) => (
               <div
                 key={index}
-                className="flex items-center justify-between p-4 bg-card border border-border rounded-lg"
+                className="flex items-center justify-between py-4 border-b border-border last:border-b-0"
               >
-                <p className="text-base font-serif font-medium text-foreground">
+                <p className="text-base text-foreground">
                   {hotel.name}
                 </p>
                 <p className="text-sm text-muted-foreground">
@@ -85,7 +90,7 @@ const BairroDetail = () => {
       {/* Footer */}
       <footer className="px-6 py-8 border-t border-border">
         <p className="text-xs text-muted-foreground">
-          The Lucky Trip — {neighborhood.name}, Rio de Janeiro
+          The Lucky Trip — {neighborhood.name}
         </p>
       </footer>
     </div>
