@@ -24,10 +24,21 @@ const Index = () => {
 
         <Link
           to="/city-view"
-          className="inline-flex items-center justify-between w-full max-w-xs py-4 px-6 bg-card border border-border rounded-lg text-foreground hover:bg-accent transition-colors"
+          className="inline-flex items-center justify-between w-full max-w-xs py-4 px-6 bg-card border border-border rounded-lg text-foreground hover:bg-accent transition-colors mb-4"
         >
           <div>
             <p className="text-sm text-muted-foreground mb-1">Onde Ficar</p>
+            <p className="text-lg font-serif font-medium">Rio de Janeiro</p>
+          </div>
+          <span className="text-muted-foreground">→</span>
+        </Link>
+
+        <Link
+          to="/eat-map-view"
+          className="inline-flex items-center justify-between w-full max-w-xs py-4 px-6 bg-card border border-border rounded-lg text-foreground hover:bg-accent transition-colors"
+        >
+          <div>
+            <p className="text-sm text-muted-foreground mb-1">Onde Comer</p>
             <p className="text-lg font-serif font-medium">Rio de Janeiro</p>
           </div>
           <span className="text-muted-foreground">→</span>
