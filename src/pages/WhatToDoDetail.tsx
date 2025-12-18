@@ -1,44 +1,25 @@
 import { Link, useParams } from "react-router-dom";
 import { ChevronLeft } from "lucide-react";
 import { getNeighborhoodById } from "@/data/rio-neighborhoods";
+import { activitiesByNeighborhood } from "@/data/what-to-do-data";
 
 /**
- * What to Do Detail - Neighborhood-specific activities
+ * O QUE FAZER — ACTIVITY DETAIL
  * 
- * Uses the same template as other neighborhood detail pages
+ * PUBLIC LAYER - Consistent template for all activities
+ * 
+ * Reserved fields (always present, even if empty):
+ * - External booking / partner link
+ * - Media area
  */
-
-// Placeholder activity data by neighborhood
-const activitiesByNeighborhood: Record<string, { title: string; description: string }[]> = {
-  ipanema: [
-    { title: "Placeholder de Atividade", description: "Cultura de praia e surfe." },
-  ],
-  leblon: [
-    { title: "Placeholder de Atividade", description: "Pôr do sol no Mirante do Leblon." },
-  ],
-  copacabana: [
-    { title: "Placeholder de Atividade", description: "Caminhar pelo calçadão icônico." },
-  ],
-  leme: [],
-  "sao-conrado": [
-    { title: "Placeholder de Atividade", description: "Ponto de pouso de parapente." },
-  ],
-  "barra-da-tijuca": [],
-  recreio: [],
-  "santa-teresa": [
-    { title: "Placeholder de Atividade", description: "Explorar as galerias de arte." },
-  ],
-  centro: [
-    { title: "Placeholder de Atividade", description: "Tour histórico a pé." },
-  ],
-};
 
 const WhatToDoDetail = () => {
   const { neighborhood } = useParams<{ neighborhood: string }>();
   
   const neighborhoodData = getNeighborhoodById(neighborhood || "");
-  const name = neighborhoodData?.name || "Neighborhood";
-  const activities = activitiesByNeighborhood[neighborhood || ""] || [];
+  const name = neighborhoodData?.name || "Bairro";
+  const data = activitiesByNeighborhood[neighborhood || ""];
+  const activities = data?.activities || [];
 
   return (
     <div className="min-h-screen bg-background">
@@ -62,28 +43,76 @@ const WhatToDoDetail = () => {
           </h1>
         </div>
 
-        {/* Media Placeholder - Full Width */}
+        {/* Media Placeholder - Full Width (reserved field) */}
         <div className="w-full aspect-[16/9] bg-muted flex items-center justify-center">
           <p className="text-sm text-muted-foreground">Espaço para imagem ou vídeo</p>
         </div>
 
-        {/* Content */}
+        {/* Activities */}
         <div className="px-6 pt-8">
           {activities.length > 0 ? (
-            <div className="space-y-4">
-              {activities.map((activity, index) => (
-                <div key={index} className="p-4 bg-card border border-border rounded-lg">
-                  <h2 className="text-lg font-serif font-medium text-foreground mb-1">
+            <div className="space-y-8">
+              {activities.map((activity) => (
+                <article key={activity.id} className="border-b border-border pb-8 last:border-b-0">
+                  {/* Category */}
+                  <p className="text-xs tracking-widest text-muted-foreground uppercase mb-2">
+                    {activity.category}
+                  </p>
+                  
+                  {/* Title */}
+                  <h2 className="text-2xl font-serif font-medium text-foreground mb-4">
                     {activity.title}
                   </h2>
-                  <p className="text-sm text-muted-foreground">
-                    {activity.description}
-                  </p>
-                </div>
+                  
+                  {/* Description */}
+                  <div className="space-y-2 mb-4">
+                    {activity.description.split('\n').map((paragraph, index) => (
+                      <p key={index} className="text-base text-muted-foreground leading-relaxed">
+                        {paragraph}
+                      </p>
+                    ))}
+                  </div>
+                  
+                  {/* Metadata */}
+                  <div className="space-y-1 text-sm text-muted-foreground">
+                    {activity.googleMaps && (
+                      <p>
+                        <a 
+                          href={activity.googleMaps} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="hover:text-foreground transition-colors underline"
+                        >
+                          Ver no Google Maps
+                        </a>
+                      </p>
+                    )}
+                    {activity.instagram && (
+                      <p>Instagram: {activity.instagram}</p>
+                    )}
+                    {activity.price && (
+                      <p>Preço: {activity.price}</p>
+                    )}
+                  </div>
+                  
+                  {/* External booking / partner link (reserved field) */}
+                  {activity.externalLink && (
+                    <div className="mt-4">
+                      <a 
+                        href={activity.externalLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-block py-2 px-4 bg-primary text-primary-foreground rounded-lg text-sm hover:opacity-90 transition-opacity"
+                      >
+                        Reservar / Saber mais
+                      </a>
+                    </div>
+                  )}
+                </article>
               ))}
             </div>
           ) : (
-            <p className="text-sm text-muted-foreground">
+            <p className="text-base text-muted-foreground">
               Atividades em breve.
             </p>
           )}
