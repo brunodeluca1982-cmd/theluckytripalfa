@@ -6,7 +6,7 @@ import { getNeighborhoodById } from "@/data/rio-neighborhoods";
 // Neighborhood descriptions for staying
 const neighborhoodDescriptions: Record<string, string> = {
   ipanema: "Urbano, vivo e bastante democrático. Mistura moradores antigos, gente jovem, turistas, artistas e famílias modernas. É um dos lugares mais fáceis de entender o Rio pela primeira vez, porque tudo acontece perto e a vida é muito visível na rua. Dá pra fazer quase tudo a pé: praia, restaurantes, cafés, metrô e lojas. Alugar bike é fácil e funciona bem. Carro não é essencial e, muitas vezes, atrapalha. Ideal pra quem quer sentir a cidade acontecendo o tempo todo.",
-  leblon: "O endereço mais exclusivo do Rio. Uma alternativa mais tranquila e refinada a Ipanema, com restaurantes de alto nível, compras em boutiques e praias impecáveis.",
+  leblon: "Mais residencial, organizado e tradicional. Frequentado por famílias antigas, gente que mora há décadas no bairro e um público mais maduro. É elegante, seguro e previsível, no bom sentido. Também dá pra fazer tudo a pé: praia, restaurantes e serviços. É ótimo pra quem quer conforto, tranquilidade e boa estrutura, sem abrir mão da Zona Sul. Menos agitado que Ipanema, mais estável.",
   copacabana: "A icônica praia em formato de crescente, com energia infinita. De hotéis históricos a apartamentos modernos, Copacabana oferece o Rio clássico em todas as faixas de preço.",
   leme: "Uma extensão pacífica de Copacabana com atmosfera de vilarejo. Perfeito para quem busca acesso à praia com tranquilidade.",
   "sao-conrado": "Um enclave sofisticado entre montanhas e mar. Condomínios de luxo, campo de golfe de classe mundial e beleza natural dramática.",
