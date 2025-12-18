@@ -52,8 +52,30 @@ const hotelsByNeighborhood: Record<string, {
     },
   ],
   leblon: [
-    { name: "Hotel Placeholder", price: "$$$$", description: "Ultra-luxury with private beach service." },
-    { name: "Hotel Placeholder", price: "$$$", description: "Elegant suites in a quiet location." },
+    { 
+      name: "Janeiro Hotel", 
+      price: "$$$$", 
+      description: "Minimalista, silencioso e luminoso. Atrai quem gosta de design, arte e acordar com o mar sem perder o clima de bairro do Leblon.",
+      address: "https://maps.google.com/?q=Janeiro+Hotel+Leblon",
+      instagram: "@janeirolifestyle",
+      externalLink: ""
+    },
+    { 
+      name: "Ritz Leblon", 
+      price: "$$$", 
+      description: "Discreto e confortável. Vejo muita gente que grava, escreve ou trabalha na Zona Sul escolhendo o Ritz justamente pelo silêncio e localização.",
+      address: "https://maps.google.com/?q=Ritz+Leblon",
+      instagram: "@ritzleblon",
+      externalLink: ""
+    },
+    { 
+      name: "Promenade Palladium", 
+      price: "$$", 
+      description: "Tem cara de residência do bairro. Muito usado por quem vem trabalhar no Rio e prefere discrição e praticidade.",
+      address: "https://maps.google.com/?q=Promenade+Palladium+Leblon",
+      instagram: "@promenadehotels",
+      externalLink: ""
+    },
   ],
   copacabana: [
     { name: "Hotel Placeholder", price: "$$$$", description: "Historic palace on the promenade." },
