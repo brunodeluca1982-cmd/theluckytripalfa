@@ -211,6 +211,16 @@ const restaurantsByNeighborhood: Record<string, Record<string, { name: string; d
         externalLink: ""
       },
     ],
+    "Café / Brunch": [
+      { 
+        name: "Empório Jardim", 
+        description: "Café da manhã e brunch dos mais consistentes do Rio. Bom pra ir sem pressa, inclusive com crianças.",
+        price: "$$",
+        address: "https://maps.google.com/?q=Empório+Jardim",
+        instagram: "@emporiojardim",
+        externalLink: ""
+      },
+    ],
   },
   gavea: {
     "Boteco / Carioca": [
