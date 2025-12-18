@@ -78,14 +78,48 @@ const hotelsByNeighborhood: Record<string, {
     },
   ],
   copacabana: [
-    { name: "Hotel Placeholder", price: "$$$$", description: "Historic palace on the promenade." },
-    { name: "Hotel Placeholder", price: "$$$", description: "Modern tower with rooftop pool." },
-    { name: "Hotel Placeholder", price: "$$", description: "Budget-friendly with ocean views." },
-    { name: "Hotel Placeholder", price: "$", description: "Backpacker hostel near the beach." },
+    { 
+      name: "Copacabana Palace", 
+      price: "$$$$", 
+      description: "Ícone absoluto do Brasil. Mesmo quando não fico, é referência. Presidentes, artistas, jogadores e grandes eventos passam por aqui há décadas.",
+      address: "https://maps.google.com/?q=Copacabana+Palace",
+      instagram: "@copacabanapalace",
+      externalLink: ""
+    },
+    { 
+      name: "Emiliano Rio", 
+      price: "$$$$", 
+      description: "Arquitetura elegante, serviço preciso e rooftop reservado. Muito escolhido por quem quer luxo discreto e boa localização.",
+      address: "https://maps.google.com/?q=Hotel+Emiliano+Rio",
+      instagram: "@emiliano_rio",
+      externalLink: ""
+    },
+    { 
+      name: "Fairmont Rio", 
+      price: "$$$$", 
+      description: "O antigo Rio Palace. Da piscina, o Pão de Açúcar entra no enquadramento como se fosse cenário montado.",
+      address: "https://maps.google.com/?q=Fairmont+Rio+Copacabana",
+      instagram: "@fairmontricopacabana",
+      externalLink: ""
+    },
+    { 
+      name: "Hilton Copacabana", 
+      price: "$$$", 
+      description: "Hotel grande, vista panorâmica e logística fácil. Muito usado por bandas, equipes esportivas e grandes produções.",
+      address: "https://maps.google.com/?q=Hilton+Copacabana",
+      instagram: "@hiltoncopacabana",
+      externalLink: ""
+    },
   ],
   leme: [
-    { name: "Hotel Placeholder", price: "$$$", description: "Quiet retreat at the end of Copacabana." },
-    { name: "Hotel Placeholder", price: "$$", description: "Family-run hotel with local charm." },
+    { 
+      name: "Windsor Leme", 
+      price: "$$$", 
+      description: "Mais silencioso, com clima de bairro e mar na porta. Boa escolha pra quem quer dormir bem.",
+      address: "https://maps.google.com/?q=Windsor+Leme",
+      instagram: "@windsorhoteis",
+      externalLink: ""
+    },
   ],
   "sao-conrado": [
     { name: "Hotel Placeholder", price: "$$$$", description: "Resort-style luxury with golf access." },
