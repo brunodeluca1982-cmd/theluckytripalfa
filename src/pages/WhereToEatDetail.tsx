@@ -15,6 +15,7 @@ const neighborhoodDescriptions: Record<string, string> = {
   "santa-teresa": "Bohemian eateries and artist-run cafés tucked into colonial buildings, offering creative takes on Brazilian classics.",
   centro: "Historic lunch counters, traditional bars, and century-old confeitarias preserving the flavors of old Rio.",
   "jardim-botanico": "A leafy, upscale neighborhood with contemporary restaurants and cozy pizzerias nestled near the botanical gardens.",
+  gavea: "A traditional neighborhood where academia meets leisure, known for its lively botecos and neighborhood gathering spots.",
 };
 
 // Restaurant data by neighborhood and cuisine type
@@ -207,6 +208,18 @@ const restaurantsByNeighborhood: Record<string, Record<string, { name: string; d
         price: "$$",
         address: "https://maps.google.com/?q=Ella+Pizzaria+Jardim+Botânico",
         instagram: "@ellapizzaria",
+        externalLink: ""
+      },
+    ],
+  },
+  gavea: {
+    "Boteco / Carioca": [
+      { 
+        name: "Braseiro da Gávea", 
+        description: "Traditional neighborhood boteco. Meat, cold beer and long conversations. Always busy. Always good.",
+        price: "$$",
+        address: "https://maps.google.com/?q=Braseiro+da+Gávea",
+        instagram: "@braseirodagavea",
         externalLink: ""
       },
     ],
