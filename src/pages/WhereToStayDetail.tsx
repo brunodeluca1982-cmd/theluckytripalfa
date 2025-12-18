@@ -202,7 +202,22 @@ const hotelsByNeighborhood: Record<string, {
     },
   ],
   centro: [
-    { name: "Hotel Placeholder", price: "$$", description: "Business hotel near cultural sites." },
+    { 
+      name: "Prodigy Santos Dumont by Wish", 
+      price: "$$", 
+      description: "Funcional e estratégico pra quem chega ou sai pelo Santos Dumont. O diferencial é o rooftop com piscina e vista da Baía, mas a proposta aqui é praticidade, não luxo.",
+      address: "https://maps.google.com/?q=Prodigy+Santos+Dumont+by+Wish",
+      instagram: "@prodigysantosdumont",
+      externalLink: ""
+    },
+    { 
+      name: "Windsor Guanabara Hotel", 
+      price: "$$", 
+      description: "Hotel tradicional do Centro, com estrutura grande e operação eficiente. Funciona bem pra quem vai circular entre Centro, Lapa e compromissos de trabalho, sem expectativa de experiência sofisticada.",
+      address: "https://maps.google.com/?q=Windsor+Guanabara+Hotel",
+      instagram: "@windsorhoteis",
+      externalLink: ""
+    },
   ],
 };
 
