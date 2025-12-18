@@ -16,6 +16,7 @@ const neighborhoodDescriptions: Record<string, string> = {
   centro: "O coração histórico do Rio. Arquitetura grandiosa, instituições culturais e um vislumbre do passado da cidade. Ideal para viajantes focados em cultura.",
   "jardim-botanico": "Verde, silencioso e mais familiar. Mistura moradores tradicionais com famílias jovens e gente que busca qualidade de vida. É menos turístico e mais local. Não é o melhor lugar pra fazer tudo a pé, mas dá pra circular bem dentro do bairro. Praia exige deslocamento curto de carro ou aplicativo. Ótimo pra quem quer calma e contato com a natureza.",
   gavea: "Boêmia, universitária e ao mesmo tempo residencial. Mistura jovens, famílias e vida noturna mais informal. É um bairro vivo, mas não turístico. Dá pra circular a pé dentro do bairro, mas praia e outros pontos exigem carro ou aplicativo. Boa escolha pra quem gosta de bares, restaurantes e um clima mais local.",
+  botafogo: "Urbano, prático e diverso. Atrai gente jovem, profissionais, criativos e moradores antigos. Menos \"cartão-postal\" e mais vida real. É fácil andar a pé, usar metrô e aplicativos. Praia não é o foco, mas a logística é excelente. Bom pra quem quer mobilidade, variedade e boa conexão com o resto da cidade.",
 };
 
 // Hotel data by neighborhood
