@@ -130,7 +130,14 @@ const hotelsByNeighborhood: Record<string, {
     },
   ],
   "sao-conrado": [
-    { name: "Hotel Placeholder", price: "$$$$", description: "Resort-style luxury with golf access." },
+    { 
+      name: "Hotel Nacional", 
+      price: "$$$$", 
+      description: "Projeto de Niemeyer à beira-mar. Já recebeu presidentes, músicos internacionais e grandes eventos. Hoje é escolha de quem quer vista e história.",
+      address: "https://maps.google.com/?q=Hotel+Nacional+Rio",
+      instagram: "@hotelnacionalrio",
+      externalLink: ""
+    },
   ],
   "barra-da-tijuca": [
     { name: "Hotel Placeholder", price: "$$$", description: "Modern resort with family amenities." },
