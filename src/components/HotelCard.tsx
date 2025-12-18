@@ -2,9 +2,12 @@ interface HotelCardProps {
   name: string;
   price: string;
   description?: string;
+  address?: string;
+  instagram?: string;
+  externalLink?: string;
 }
 
-const HotelCard = ({ name, price, description }: HotelCardProps) => {
+const HotelCard = ({ name, price, description, address, instagram, externalLink }: HotelCardProps) => {
   return (
     <div className="py-6 border-b border-border last:border-b-0">
       {/* Media Placeholder */}
@@ -24,11 +27,46 @@ const HotelCard = ({ name, price, description }: HotelCardProps) => {
           {description}
         </p>
       )}
+
+      {/* Links */}
+      <div className="flex items-center gap-4 mb-3">
+        {address && (
+          <a 
+            href={address} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+          >
+            View on map
+          </a>
+        )}
+        {instagram && (
+          <a 
+            href={`https://instagram.com/${instagram.replace('@', '')}`} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+          >
+            {instagram}
+          </a>
+        )}
+      </div>
       
-      {/* Inactive CTA Placeholder */}
-      <span className="text-xs text-muted-foreground/60 cursor-default select-none">
-        View availability
-      </span>
+      {/* CTA */}
+      {externalLink ? (
+        <a 
+          href={externalLink} 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="text-xs text-foreground underline"
+        >
+          View availability
+        </a>
+      ) : (
+        <span className="text-xs text-muted-foreground/60 cursor-default select-none">
+          View availability
+        </span>
+      )}
     </div>
   );
 };

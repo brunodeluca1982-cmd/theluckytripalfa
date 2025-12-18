@@ -17,11 +17,39 @@ const neighborhoodDescriptions: Record<string, string> = {
 };
 
 // Hotel data by neighborhood
-const hotelsByNeighborhood: Record<string, { name: string; price: string; description: string }[]> = {
+const hotelsByNeighborhood: Record<string, { 
+  name: string; 
+  price: string; 
+  description: string;
+  address?: string;
+  instagram?: string;
+  externalLink?: string;
+}[]> = {
   ipanema: [
-    { name: "Hotel Placeholder", price: "$$$$", description: "Beachfront luxury with panoramic views." },
-    { name: "Hotel Placeholder", price: "$$$", description: "Boutique hotel in the heart of Ipanema." },
-    { name: "Hotel Placeholder", price: "$$", description: "Charming guesthouse steps from the beach." },
+    { 
+      name: "Hotel Fasano Rio de Janeiro", 
+      price: "$$$$", 
+      description: "The most classic luxury address in Rio. The rooftop has become the setting for campaigns, interviews and important meetings. I've seen football players, people from cinema, fashion and music there — all looking for view, discretion and impeccable service.",
+      address: "https://maps.google.com/?q=Hotel+Fasano+Rio+de+Janeiro",
+      instagram: "@fasano",
+      externalLink: ""
+    },
+    { 
+      name: "Ipanema Inn", 
+      price: "$$$", 
+      description: "Small, welcoming and with a home-like feeling. Perfect for those who come and go all day without depending on a car.",
+      address: "https://maps.google.com/?q=Ipanema+Inn",
+      instagram: "@ipanemainn",
+      externalLink: ""
+    },
+    { 
+      name: "Mar Ipanema Hotel", 
+      price: "$$$", 
+      description: "Urban, practical and extremely well located. Works very well for those who want to live Ipanema intensely.",
+      address: "https://maps.google.com/?q=Mar+Ipanema+Hotel",
+      instagram: "@mariipanemahotel",
+      externalLink: ""
+    },
   ],
   leblon: [
     { name: "Hotel Placeholder", price: "$$$$", description: "Ultra-luxury with private beach service." },
@@ -117,6 +145,9 @@ const WhereToStayDetail = () => {
                   name={hotel.name}
                   price={hotel.price}
                   description={hotel.description}
+                  address={hotel.address}
+                  instagram={hotel.instagram}
+                  externalLink={hotel.externalLink}
                 />
               ))}
             </div>
