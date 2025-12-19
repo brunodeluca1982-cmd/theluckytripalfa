@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useMemo } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import { ChevronLeft, User, Map, Info, Ticket, Utensils } from "lucide-react";
 import {
   DndContext,
@@ -22,8 +22,10 @@ import { PlannerFAB } from "@/components/roteiro/PlannerFAB";
 import { ItineraryCard, ItineraryItem } from "@/components/roteiro/ItineraryCard";
 import { useRoteiroState } from "@/hooks/use-roteiro-state";
 import { useTimelineData } from "@/hooks/use-timeline-data";
+import { useTripSetup } from "@/hooks/use-trip-setup";
 import { getCuratedItinerary, getDestinationDays } from "@/data/curated-itineraries";
 import { getReferenceItinerariesForDestination, ReferenceItem } from "@/data/reference-itineraries";
+import { getDestination } from "@/data/destinations-database";
 import { PlaceData } from "@/components/roteiro/GooglePlacesAutocomplete";
 import { toast } from "@/hooks/use-toast";
 
@@ -39,10 +41,6 @@ import { toast } from "@/hooks/use-toast";
  * - Collapsible reference panel
  */
 
-const destinationNames: Record<string, string> = {
-  'rio-de-janeiro': 'Rio de Janeiro',
-};
-
 // Horizontal axis lock for moving items between days
 const restrictToHorizontalAxis: Modifier = ({ transform }) => ({
   ...transform,
@@ -51,7 +49,12 @@ const restrictToHorizontalAxis: Modifier = ({ transform }) => ({
 
 const RoteiroPlanner = () => {
   const { destinationId = 'rio-de-janeiro' } = useParams();
-  const destinationName = destinationNames[destinationId] || destinationId;
+  const navigate = useNavigate();
+  const { tripSetup, tripDays: setupTripDays } = useTripSetup();
+  
+  // Get destination info
+  const destination = getDestination(destinationId);
+  const destinationName = destination?.name || destinationId;
   
   // Get curated content and reference itineraries
   const curatedItinerary = getCuratedItinerary(destinationId);
@@ -80,13 +83,14 @@ const RoteiroPlanner = () => {
     );
   }, []);
   
-  // Determine total days based on selected reference
+  // Determine total days based on trip setup or reference
   const selectedReference = referenceItineraries.find(r => selectedSources.includes(r.id));
   const sourceTotalDays = selectedReference 
     ? Object.keys(selectedReference.days).length 
     : getDestinationDays(destinationId);
   
-  const totalDays = Math.max(sourceTotalDays, 5);
+  // Use trip setup days if available, otherwise fall back to source/default
+  const totalDays = setupTripDays > 0 ? setupTripDays : Math.max(sourceTotalDays, 5);
   
   // User's roteiro state (with persistence)
   const { 
