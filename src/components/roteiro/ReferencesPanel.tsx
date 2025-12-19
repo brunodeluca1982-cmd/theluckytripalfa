@@ -1,19 +1,21 @@
-import { useState } from "react";
-import { ChevronLeft, ChevronRight, Star, User, Lock } from "lucide-react";
+import { useState, useMemo } from "react";
+import { ChevronLeft, ChevronRight, Star, User, Lock, Users } from "lucide-react";
 import { DayColumn } from "./DayColumn";
 import { ReferenceDayColumn } from "./ReferenceDayColumn";
 import { ItineraryItem } from "./ItineraryCard";
 import { ReferenceItinerary, ReferenceDay } from "@/data/reference-itineraries";
+import { getPartnersForDestination, Partner } from "@/data/partners-data";
 
 /**
- * REFERENCES PANEL
+ * PARTNERS ON TRIP PANEL
  * 
- * Left panel = idea bank, not mandatory itinerary
+ * Left panel displaying partner itineraries the user has access to.
  * 
- * Features:
- * - Toggle show/hide
- * - Source selector (multi-select)
- * - Curated content display
+ * RULES:
+ * - Only show partner itineraries matching the destination(s) in the current trip
+ * - Only show itineraries user has purchased or has access rights to
+ * - Group by destination if multiple
+ * - Collapsible panel
  * - Cards are draggable into user's itinerary
  */
 
@@ -24,31 +26,77 @@ interface Source {
   isDefault?: boolean;
   isPremium?: boolean;
   isLocked?: boolean;
+  destinationId?: string;
 }
 
-interface ReferencesPanelProps {
+interface PartnersOnTripPanelProps {
   sources: Source[];
   selectedSources: string[];
   onSourceToggle: (sourceId: string) => void;
   currentDay: number;
   curatedItems: ItineraryItem[];
   referenceItineraries: ReferenceItinerary[];
+  tripDestinationIds: string[]; // Destinations in the current trip
 }
 
-export const ReferencesPanel = ({
+export const PartnersOnTripPanel = ({
   sources,
   selectedSources,
   onSourceToggle,
   currentDay,
   curatedItems,
   referenceItineraries,
-}: ReferencesPanelProps) => {
+  tripDestinationIds,
+}: PartnersOnTripPanelProps) => {
   const [isVisible, setIsVisible] = useState(true);
 
-  // Get current reference if selected
-  const selectedReference = referenceItineraries.find(r => 
+  // Filter itineraries to only those matching trip destinations
+  const filteredItineraries = useMemo(() => {
+    return referenceItineraries.filter(r => 
+      tripDestinationIds.includes(r.destinationId)
+    );
+  }, [referenceItineraries, tripDestinationIds]);
+
+  // Filter sources to only those with itineraries for trip destinations
+  const filteredSources = useMemo(() => {
+    const validItineraryIds = new Set(filteredItineraries.map(r => r.id));
+    return sources.filter(s => 
+      s.isDefault || // Always show Lucky Trip
+      s.isLocked || // Show locked sources (for awareness)
+      validItineraryIds.has(s.id)
+    );
+  }, [sources, filteredItineraries]);
+
+  // Get partners for the trip destinations
+  const partnersForTrip = useMemo(() => {
+    const allPartners: Partner[] = [];
+    tripDestinationIds.forEach(destId => {
+      const partners = getPartnersForDestination(destId);
+      partners.forEach(p => {
+        if (!allPartners.find(existing => existing.id === p.id)) {
+          allPartners.push(p);
+        }
+      });
+    });
+    return allPartners;
+  }, [tripDestinationIds]);
+
+  // Get selected reference matching trip destinations
+  const selectedReference = filteredItineraries.find(r => 
     selectedSources.includes(r.id)
   );
+
+  // Group itineraries by destination for display
+  const itinerariesByDestination = useMemo(() => {
+    const grouped: Record<string, ReferenceItinerary[]> = {};
+    filteredItineraries.forEach(itinerary => {
+      if (!grouped[itinerary.destinationId]) {
+        grouped[itinerary.destinationId] = [];
+      }
+      grouped[itinerary.destinationId].push(itinerary);
+    });
+    return grouped;
+  }, [filteredItineraries]);
 
   if (!isVisible) {
     return (
@@ -57,7 +105,7 @@ export const ReferencesPanel = ({
         className="fixed left-4 top-1/2 -translate-y-1/2 z-40 flex items-center gap-2 px-3 py-2 rounded-full bg-muted/80 backdrop-blur-sm border border-border shadow-lg hover:bg-muted transition-colors"
       >
         <ChevronRight className="w-4 h-4" />
-        <span className="text-xs font-medium">Referências</span>
+        <span className="text-xs font-medium">Partners</span>
       </button>
     );
   }
@@ -66,9 +114,12 @@ export const ReferencesPanel = ({
     <div className="flex flex-col h-full">
       {/* Panel Header */}
       <div className="flex items-center justify-between mb-3">
-        <h3 className="text-xs font-semibold text-foreground uppercase tracking-wide">
-          Referências
-        </h3>
+        <div className="flex items-center gap-2">
+          <Users className="w-4 h-4 text-primary" />
+          <h3 className="text-xs font-semibold text-foreground uppercase tracking-wide">
+            Partners on Trip
+          </h3>
+        </div>
         <button
           onClick={() => setIsVisible(false)}
           className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs text-muted-foreground hover:bg-muted transition-colors"
@@ -78,9 +129,9 @@ export const ReferencesPanel = ({
         </button>
       </div>
 
-      {/* Source Chips */}
+      {/* Partner/Source Chips */}
       <div className="flex flex-wrap gap-2 mb-4">
-        {sources.map((source) => {
+        {filteredSources.map((source) => {
           const isSelected = selectedSources.includes(source.id);
           const isLocked = source.isLocked;
           
@@ -111,6 +162,13 @@ export const ReferencesPanel = ({
           );
         })}
       </div>
+
+      {/* Partners count info */}
+      {partnersForTrip.length > 0 && (
+        <div className="text-[10px] text-muted-foreground mb-3">
+          {partnersForTrip.length} {partnersForTrip.length === 1 ? 'partner' : 'partners'} com roteiros para este destino
+        </div>
+      )}
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto space-y-4">
@@ -167,4 +225,6 @@ export const ReferencesPanel = ({
   );
 };
 
-export default ReferencesPanel;
+// Keep backward-compatible alias
+export const ReferencesPanel = PartnersOnTripPanel;
+export default PartnersOnTripPanel;

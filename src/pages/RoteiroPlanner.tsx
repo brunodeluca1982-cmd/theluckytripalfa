@@ -17,7 +17,7 @@ import {
 import { arrayMove, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import { ItineraryTabs } from "@/components/roteiro/ItineraryTabs";
 import { MultiDayTimeline } from "@/components/roteiro/MultiDayTimeline";
-import { ReferencesPanel } from "@/components/roteiro/ReferencesPanel";
+import { PartnersOnTripPanel } from "@/components/roteiro/ReferencesPanel";
 import { PlannerFAB } from "@/components/roteiro/PlannerFAB";
 import { ItineraryCard, ItineraryItem } from "@/components/roteiro/ItineraryCard";
 import { useRoteiroState } from "@/hooks/use-roteiro-state";
@@ -341,16 +341,17 @@ const RoteiroPlanner = () => {
               onDragEnd={handleDragEnd}
             >
               <div className="flex gap-4 p-4">
-                {/* Left Panel - References */}
+                {/* Left Panel - Partners on Trip */}
                 {showReferences && (
                   <div className="w-[280px] flex-shrink-0 hidden md:block">
-                    <ReferencesPanel
+                    <PartnersOnTripPanel
                       sources={sources}
                       selectedSources={selectedSources}
                       onSourceToggle={handleSourceToggle}
                       currentDay={currentDay}
                       curatedItems={curatedItinerary[currentDay] || []}
                       referenceItineraries={referenceItineraries}
+                      tripDestinationIds={[destinationId]}
                     />
                   </div>
                 )}
