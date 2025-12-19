@@ -89,7 +89,7 @@ export const DayColumn = ({
             </div>
           )
         ) : (
-          // EMPTY STATE
+          // EMPTY STATE — Calm, permissive, no pressure
           <div className="text-center">
             {isUserColumn ? (
               <>
@@ -97,12 +97,12 @@ export const DayColumn = ({
                   <Hand className="w-5 h-5 text-muted-foreground/50" />
                 </div>
                 <p className="text-xs text-muted-foreground leading-relaxed max-w-[120px] mx-auto">
-                  Arraste atividades da esquerda para montar seu dia
+                  Arraste atividades aqui quando quiser
                 </p>
               </>
             ) : (
               <p className="text-xs text-muted-foreground">
-                Sem sugestões
+                Explore outras opções
               </p>
             )}
           </div>

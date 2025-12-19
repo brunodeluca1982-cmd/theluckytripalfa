@@ -22,10 +22,11 @@ export const AIAssistantFAB = ({
 }: AIAssistantFABProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
+  // Actions are advisory only — never auto-edit, never override user
   const actions = [
     {
       id: 'suggest',
-      label: 'Sugerir atividades',
+      label: 'Me dá umas ideias',
       icon: Wand2,
       onClick: onSuggestActivities,
     },
@@ -37,7 +38,7 @@ export const AIAssistantFAB = ({
     },
     {
       id: 'rebalance',
-      label: 'Reequilibrar roteiro',
+      label: 'Sugerir ajustes',
       icon: RotateCcw,
       onClick: onRebalance,
     },
