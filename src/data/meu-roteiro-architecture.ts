@@ -10,7 +10,188 @@
  * No UI, pricing, or monetization logic.
  * 
  * ═══════════════════════════════════════════════════════════════════════════
+ * USER DRAFT STRUCTURAL LOCK
+ * ═══════════════════════════════════════════════════════════════════════════
+ * 
+ * CORE CONCEPT:
+ * "Meu Roteiro" starts as a DRAFT.
+ * It is a flexible workspace where the user organizes their trip ideas
+ * before final optimization.
+ * 
+ * GLOBAL RULES:
+ * - Do NOT define visual design, layout, spacing, colors, or typography
+ * - Do NOT generate or edit any Portuguese content
+ * - Do NOT define pricing or subscriptions
+ * - This is a structural and behavioral prompt only
+ * 
+ * ═══════════════════════════════════════════════════════════════════════════
  */
+
+// ═══════════════════════════════════════════════════════════════════════════
+// USER DRAFT STRUCTURAL LOCK — CORE DEFINITIONS
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * DRAFT VIEW (DEFAULT)
+ * 
+ * Structure:
+ * - The draft is organized by DAYS (Day 1, Day 2, Day 3…)
+ * - Each day contains a vertical list of items
+ * - Days are scrollable vertically
+ * - Items inside a day are reorderable via drag-and-drop
+ */
+export const DRAFT_VIEW_STRUCTURE = {
+  organizedBy: 'days',
+  dayLabeling: 'Day 1, Day 2, Day 3...',
+  itemLayout: 'vertical-list-per-day',
+  scrollDirection: 'vertical',
+  itemsReorderable: true,
+  reorderMethod: 'drag-and-drop',
+} as const;
+
+/**
+ * ITEM SOURCE TYPES
+ * 
+ * Items may come from:
+ * - Curated content (Bruno / Partners on Trip)
+ * - User-added places (Google Places only)
+ */
+export type DraftItemSource = 'curated' | 'user-added';
+
+/**
+ * DRAFT ITEM RETENTION
+ * 
+ * Each item must retain:
+ * - Name
+ * - Location (neighborhood or city)
+ * - Source (Curated or User-added)
+ * - Original destination
+ */
+export const DRAFT_ITEM_RETENTION = {
+  requiredFields: ['name', 'location', 'source', 'originalDestination'] as const,
+  locationGranularity: 'neighborhood-or-city',
+  sourceTypes: ['curated', 'user-added'] as DraftItemSource[],
+} as const;
+
+/**
+ * DRAG & DROP BEHAVIOR
+ * 
+ * Users can drag items:
+ * - Between days
+ * - Within the same day
+ * - Curated items into their own draft
+ * 
+ * Dragging does not duplicate logic or content — only reference.
+ */
+export const DRAFT_DRAG_DROP_BEHAVIOR = {
+  allowedOperations: {
+    dragBetweenDays: true,
+    dragWithinSameDay: true,
+    dragCuratedIntoDraft: true,
+  },
+  duplicationBehavior: 'reference-only',
+  noDuplicateLogicOrContent: true,
+} as const;
+
+/**
+ * NO TIME LOGIC (FOR NOW)
+ * 
+ * At this stage, the draft does NOT include:
+ * - Hours
+ * - Durations
+ * - Travel time
+ * - Costs
+ * 
+ * This is intentional.
+ * The draft is about thinking, not executing.
+ */
+export const DRAFT_NO_TIME_LOGIC = {
+  includesHours: false,
+  includesDurations: false,
+  includesTravelTime: false,
+  includesCosts: false,
+  reason: 'draft-is-about-thinking-not-executing',
+} as const;
+
+/**
+ * INTELLIGENCE (PASSIVE)
+ * 
+ * - The system may observe distances and patterns silently
+ * - No alerts, warnings, or corrections are shown yet
+ * - Intelligence layers will be added later
+ */
+export const DRAFT_PASSIVE_INTELLIGENCE = {
+  observesDistances: true,
+  observesPatterns: true,
+  showsAlerts: false,
+  showsWarnings: false,
+  showsCorrections: false,
+  intelligenceLayersAddedLater: true,
+} as const;
+
+/**
+ * NAVIGATION
+ * 
+ * - "Meu Roteiro" is always accessible from the destination context
+ * - Returning from the draft sends the user back to the last destination view
+ * - No forced login inside the draft stage
+ */
+export const DRAFT_NAVIGATION = {
+  accessibleFromDestinationContext: true,
+  returnBehavior: 'back-to-last-destination-view',
+  forcedLoginInsideDraft: false,
+} as const;
+
+/**
+ * SCALABILITY RULE
+ * 
+ * This draft structure must support future layers:
+ * - Time scheduling
+ * - Distance optimization
+ * - Cost estimation
+ * - AI suggestions
+ * - Map visualization
+ * 
+ * Without refactoring.
+ */
+export const DRAFT_SCALABILITY = {
+  futureLayers: [
+    'time-scheduling',
+    'distance-optimization',
+    'cost-estimation',
+    'ai-suggestions',
+    'map-visualization',
+  ] as const,
+  requiresRefactoring: false,
+} as const;
+
+/**
+ * USER DRAFT OUTCOME
+ * 
+ * After this lock:
+ * - Users can build a real itinerary draft
+ * - Curated content gains practical value
+ * - The journey feels complete even with one destination
+ */
+export const DRAFT_OUTCOME = {
+  userCanBuildRealDraft: true,
+  curatedContentGainsPracticalValue: true,
+  journeyFeelsCompleteWithOneDestination: true,
+} as const;
+
+/**
+ * COMPLETE USER DRAFT STRUCTURAL LOCK
+ */
+export const USER_DRAFT_STRUCTURAL_LOCK = {
+  viewStructure: DRAFT_VIEW_STRUCTURE,
+  itemRetention: DRAFT_ITEM_RETENTION,
+  dragDropBehavior: DRAFT_DRAG_DROP_BEHAVIOR,
+  noTimeLogic: DRAFT_NO_TIME_LOGIC,
+  passiveIntelligence: DRAFT_PASSIVE_INTELLIGENCE,
+  navigation: DRAFT_NAVIGATION,
+  scalability: DRAFT_SCALABILITY,
+  outcome: DRAFT_OUTCOME,
+} as const;
 
 /**
  * CORE DEFINITION
