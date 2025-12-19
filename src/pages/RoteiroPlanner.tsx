@@ -18,7 +18,6 @@ import { arrayMove, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import { ItineraryTabs } from "@/components/roteiro/ItineraryTabs";
 import { MultiDayTimeline } from "@/components/roteiro/MultiDayTimeline";
 import { PartnersOnTripPanel } from "@/components/roteiro/ReferencesPanel";
-import { PlannerFAB } from "@/components/roteiro/PlannerFAB";
 import { ItineraryCard, ItineraryItem } from "@/components/roteiro/ItineraryCard";
 import { useRoteiroState } from "@/hooks/use-roteiro-state";
 import { useTimelineData } from "@/hooks/use-timeline-data";
@@ -300,16 +299,16 @@ const RoteiroPlanner = () => {
     toast({ title: "Adicionado ✓", description: `${place.name} → Dia ${day}` });
   }, [addItem]);
 
-  const handleAddWithAI = useCallback((prompt: string) => {
-    toast({ title: "Buscando sugestões...", description: "A IA está pensando em ideias para você." });
+  const handleAddWithAI = useCallback((prompt: string, day: number) => {
+    toast({ title: "Buscando sugestões...", description: `A IA está pensando em ideias para o Dia ${day}.` });
   }, []);
 
-  const handleShowCuratedPicker = useCallback(() => {
+  const handleShowCuratedPicker = useCallback((day: number) => {
     if (!selectedSources.includes('lucky-trip')) {
       setSelectedSources(prev => [...prev, 'lucky-trip']);
     }
     setShowReferences(true);
-    toast({ title: "Referências ativadas", description: "Arraste itens do Lucky Trip para seu roteiro." });
+    toast({ title: "Referências ativadas", description: `Arraste itens do Lucky Trip para o Dia ${day}.` });
   }, [selectedSources]);
 
   return (
@@ -374,6 +373,10 @@ const RoteiroPlanner = () => {
                     days={timelineData}
                     onRemoveItem={(day, itemId) => removeItem(day, itemId)}
                     onActivityTap={(item, day) => setCurrentDay(day)}
+                    onAddManual={handleAddManual}
+                    onAddFromGoogle={handleAddFromGoogle}
+                    onAddWithAI={handleAddWithAI}
+                    onShowCuratedPicker={handleShowCuratedPicker}
                   />
                 </div>
               </div>
@@ -417,15 +420,6 @@ const RoteiroPlanner = () => {
           ),
         }}
       </ItineraryTabs>
-
-      {/* Planner FAB */}
-      <PlannerFAB
-        totalDays={totalDays}
-        onAddManual={handleAddManual}
-        onAddFromGoogle={handleAddFromGoogle}
-        onAddWithAI={handleAddWithAI}
-        onShowCuratedPicker={handleShowCuratedPicker}
-      />
     </div>
   );
 };

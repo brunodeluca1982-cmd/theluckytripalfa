@@ -5,6 +5,8 @@ import { SortableTimelineCard } from "./TimelineActivityCard";
 import { TravelBlock } from "./TravelBlock";
 import { ActivityDetailSheet } from "./ActivityDetailSheet";
 import { ItineraryItem } from "./ItineraryCard";
+import { AddActivityButton } from "./AddActivityButton";
+import { PlaceData } from "./GooglePlacesAutocomplete";
 import { Hand, AlertTriangle } from "lucide-react";
 
 /**
@@ -41,6 +43,10 @@ interface MultiDayTimelineProps {
   days: DayData[];
   onRemoveItem: (day: number, itemId: string) => void;
   onActivityTap?: (item: ItineraryItem, day: number) => void;
+  onAddManual?: (name: string, day: number) => void;
+  onAddFromGoogle?: (place: PlaceData, day: number) => void;
+  onAddWithAI?: (prompt: string, day: number) => void;
+  onShowCuratedPicker?: (day: number) => void;
 }
 
 // Single Day Column in the timeline
@@ -48,10 +54,18 @@ const DayTimelineColumn = ({
   dayData,
   onRemoveItem,
   onActivityTap,
+  onAddManual,
+  onAddFromGoogle,
+  onAddWithAI,
+  onShowCuratedPicker,
 }: {
   dayData: DayData;
   onRemoveItem: (itemId: string) => void;
   onActivityTap?: (item: ItineraryItem) => void;
+  onAddManual?: (name: string, day: number) => void;
+  onAddFromGoogle?: (place: PlaceData, day: number) => void;
+  onAddWithAI?: (prompt: string, day: number) => void;
+  onShowCuratedPicker?: (day: number) => void;
 }) => {
   const { setNodeRef, isOver } = useDroppable({
     id: `timeline-day-${dayData.dayNumber}`,
@@ -83,13 +97,24 @@ const DayTimelineColumn = ({
           </div>
         </div>
         
-        {/* Issue Badge */}
-        {dayData.hasIssues && (
-          <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-destructive/10 text-destructive text-[10px] font-medium">
-            <AlertTriangle className="w-3 h-3" />
-            {dayData.issueCount}
-          </div>
-        )}
+        <div className="flex items-center gap-2">
+          {/* Issue Badge */}
+          {dayData.hasIssues && (
+            <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-destructive/10 text-destructive text-[10px] font-medium">
+              <AlertTriangle className="w-3 h-3" />
+              {dayData.issueCount}
+            </div>
+          )}
+          
+          {/* Add Activity Button */}
+          <AddActivityButton
+            dayNumber={dayData.dayNumber}
+            onAddManual={onAddManual}
+            onAddFromGoogle={onAddFromGoogle}
+            onAddWithAI={onAddWithAI}
+            onShowCuratedPicker={onShowCuratedPicker}
+          />
+        </div>
       </div>
 
       {/* Timeline Content */}
@@ -161,6 +186,10 @@ export const MultiDayTimeline = ({
   days,
   onRemoveItem,
   onActivityTap,
+  onAddManual,
+  onAddFromGoogle,
+  onAddWithAI,
+  onShowCuratedPicker,
 }: MultiDayTimelineProps) => {
   const totalIssues = days.reduce((acc, day) => acc + day.issueCount, 0);
 
@@ -192,6 +221,10 @@ export const MultiDayTimeline = ({
               dayData={dayData}
               onRemoveItem={(itemId) => onRemoveItem(dayData.dayNumber, itemId)}
               onActivityTap={(item) => onActivityTap?.(item, dayData.dayNumber)}
+              onAddManual={onAddManual}
+              onAddFromGoogle={onAddFromGoogle}
+              onAddWithAI={onAddWithAI}
+              onShowCuratedPicker={onShowCuratedPicker}
             />
           ))}
         </div>
