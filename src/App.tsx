@@ -21,6 +21,8 @@ import HowToGetThere from "./pages/HowToGetThere";
 import WhatToDo from "./pages/WhatToDo";
 import WhatToDoDetail from "./pages/WhatToDoDetail";
 import MeuRoteiro from "./pages/MeuRoteiro";
+import TripPreferences from "./pages/TripPreferences";
+import Favoritos from "./pages/Favoritos";
 import RoteiroPlanner from "./pages/RoteiroPlanner";
 import CreateItinerary from "./pages/CreateItinerary";
 import RestaurantDetail from "./pages/RestaurantDetail";
@@ -103,6 +105,8 @@ const App = () => {
               
               {/* Meu Roteiro */}
               <Route path="/meu-roteiro" element={<MeuRoteiro />} />
+              <Route path="/meu-roteiro/preferencias" element={<TripPreferences />} />
+              <Route path="/favoritos" element={<Favoritos />} />
               <Route path="/criar-roteiro" element={<CreateItinerary />} />
               <Route path="/planejar/:destinationId" element={<RoteiroPlanner />} />
               
