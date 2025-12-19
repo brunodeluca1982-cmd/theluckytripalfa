@@ -252,7 +252,14 @@ const HotelDetail = () => {
   
   const hotel = hotelData[id || ""];
   const from = searchParams.get("from");
-  const backPath = from ? `/onde-ficar/${from}` : "/";
+  // Back navigation: list → onde-ficar-rio, map → city-view, neighborhood → neighborhood detail
+  const getBackPath = () => {
+    if (from === "list") return "/onde-ficar-rio";
+    if (from === "map") return "/city-view";
+    if (from) return `/onde-ficar/${from}`;
+    return "/city-view"; // Default to map view
+  };
+  const backPath = getBackPath();
 
   if (!hotel) {
     return (

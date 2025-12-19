@@ -4,11 +4,11 @@ import { ChevronLeft, ChevronDown } from "lucide-react";
 import { RIO_NEIGHBORHOODS } from "@/data/rio-neighborhoods";
 
 const placeholderHotels = [
-  { name: "Hotel Placeholder", price: "$$$$" },
-  { name: "Hotel Placeholder", price: "$$$" },
-  { name: "Hotel Placeholder", price: "$$$" },
-  { name: "Hotel Placeholder", price: "$$" },
-  { name: "Hotel Placeholder", price: "$$" },
+  { id: "hotel-fasano-rio", name: "Hotel Fasano Rio", price: "$$$$" },
+  { id: "hotel-emiliano", name: "Hotel Emiliano", price: "$$$$" },
+  { id: "copacabana-palace", name: "Copacabana Palace", price: "$$$$" },
+  { id: "hotel-marina-palace", name: "Marina Palace", price: "$$$" },
+  { id: "hotel-santa-teresa", name: "Santa Teresa Hotel", price: "$$$" },
 ];
 
 const OndeficarRio = () => {
@@ -24,11 +24,11 @@ const OndeficarRio = () => {
       <header className="sticky top-0 bg-background border-b border-border z-10">
         <div className="px-6 py-4">
           <Link
-            to="/"
+            to="/destino/rio-de-janeiro"
             className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4"
           >
             <ChevronLeft className="w-4 h-4" />
-            Início
+            Voltar
           </Link>
           <h1 className="text-3xl font-serif font-medium text-foreground">
             Onde Ficar
@@ -89,16 +89,17 @@ const OndeficarRio = () => {
                       </p>
                     </div>
 
-                    {/* Hotels List */}
+                    {/* Hotels List - Click to view detail */}
                     <div className="px-4 pb-4">
                       <h4 className="text-xs tracking-widest text-muted-foreground uppercase mb-3">
                         Hotéis
                       </h4>
                       <div className="space-y-2">
                         {placeholderHotels.map((hotel, index) => (
-                          <div
+                          <Link
                             key={index}
-                            className="flex items-center justify-between py-3 px-3 bg-background border border-border rounded-md"
+                            to={`/hotel/${hotel.id}?from=list`}
+                            className="flex items-center justify-between py-3 px-3 bg-background border border-border rounded-md hover:bg-accent/50 transition-colors"
                           >
                             <p className="text-sm font-medium text-foreground">
                               {hotel.name}
@@ -106,7 +107,7 @@ const OndeficarRio = () => {
                             <p className="text-sm text-muted-foreground">
                               {hotel.price}
                             </p>
-                          </div>
+                          </Link>
                         ))}
                       </div>
                     </div>
