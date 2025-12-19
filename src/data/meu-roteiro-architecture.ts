@@ -671,6 +671,147 @@ export const SCALABILITY_RULES = {
 } as const;
 
 // ═══════════════════════════════════════════════════════════════════════════
+// VISUAL ORGANIZATION
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * CORE CONCEPT
+ * 
+ * "Meu Roteiro" is presented as a READABLE, FLEXIBLE list,
+ * not as a schedule.
+ * 
+ * The goal is CLARITY, not execution.
+ */
+export const VISUAL_ORGANIZATION_CORE = {
+  presentationStyle: 'readable-flexible-list',
+  notASchedule: true,
+  goal: 'clarity',
+  notExecution: true,
+} as const;
+
+/**
+ * PRIMARY VIEW (DEFAULT)
+ * 
+ * Items inside "Meu Roteiro" must be displayed as:
+ * - A vertical list
+ * - Ordered manually or automatically
+ * - Easy to scan and understand
+ */
+export const PRIMARY_VIEW = {
+  format: 'vertical-list',
+  orderingMode: 'manual-or-automatic',
+  easyToScan: true,
+  easyToUnderstand: true,
+} as const;
+
+/**
+ * ITEM DISPLAY FIELDS
+ * 
+ * Each item must retain and display:
+ * - Name
+ * - Neighborhood
+ * - Source module (e.g. O Que Fazer, Onde Comer, Lucky List)
+ * - Premium indicator (if applicable)
+ */
+export const ITEM_DISPLAY_FIELDS = {
+  required: ['name', 'neighborhood', 'sourceModule'] as const,
+  conditional: ['premiumIndicator'] as const,
+  premiumIndicatorShowsWhen: 'item-is-from-lucky-list',
+} as const;
+
+/**
+ * GROUPING OPTIONS
+ */
+export type GroupingMode = 'flat' | 'by-neighborhood' | 'by-category';
+
+/**
+ * GROUPING LOGIC (OPTIONAL TOGGLE)
+ * 
+ * The user may switch between:
+ * - Flat list (default)
+ * - Grouped by neighborhood
+ * - Grouped by category (food, activity, nightlife)
+ * 
+ * No grouping is mandatory.
+ */
+export const VISUAL_GROUPING = {
+  defaultMode: 'flat' as GroupingMode,
+  availableModes: ['flat', 'by-neighborhood', 'by-category'] as GroupingMode[],
+  groupingMandatory: false,
+  userCanToggle: true,
+} as const;
+
+/**
+ * ORDERING RULES
+ * 
+ * - Items may be reordered freely by the user
+ * - No "correct" order is imposed
+ * - The system may suggest grouping (based on location intelligence),
+ *   but never force reordering
+ */
+export const ORDERING_RULES = {
+  userCanReorderFreely: true,
+  noCorrectOrderImposed: true,
+  systemMaySuggestGrouping: true,
+  systemNeverForcesReordering: true,
+} as const;
+
+/**
+ * NO TIME AXIS
+ * 
+ * At this stage:
+ * - No hours
+ * - No dates
+ * - No day separation
+ * - No "morning / afternoon / night"
+ * 
+ * This is INTENTIONAL.
+ */
+export const NO_TIME_AXIS = {
+  useHours: false,
+  useDates: false,
+  useDaySeparation: false,
+  useMorningAfternoonNight: false,
+  intentional: true,
+} as const;
+
+/**
+ * VISUAL ORGANIZATION NAVIGATION RULES
+ * 
+ * - "Meu Roteiro" must feel lightweight and reversible
+ * - Returning always sends the user back to the last destination view
+ * - No dead ends
+ */
+export const VISUAL_ORGANIZATION_NAVIGATION = {
+  feelsLightweight: true,
+  feelsReversible: true,
+  returnToLastDestinationView: true,
+  noDeadEnds: true,
+} as const;
+
+/**
+ * VISUAL ORGANIZATION SCALABILITY
+ * 
+ * This structure must support future layers:
+ * - Map view
+ * - Day-by-day timeline
+ * - Distance optimization
+ * - Export / share
+ * 
+ * Without refactor.
+ */
+export const VISUAL_ORGANIZATION_SCALABILITY = {
+  mustSupportFutureLayers: true,
+  futureLayersSupported: [
+    'map-view',
+    'day-by-day-timeline',
+    'distance-optimization',
+    'export-share',
+  ] as const,
+  requiresRefactorForFuture: false,
+} as const;
+
+// ═══════════════════════════════════════════════════════════════════════════
 // HELPER FUNCTIONS
 // ═══════════════════════════════════════════════════════════════════════════
 
