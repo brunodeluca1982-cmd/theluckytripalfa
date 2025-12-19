@@ -3,7 +3,13 @@ import { ChevronLeft } from "lucide-react";
 import HotelCard from "@/components/HotelCard";
 import { getNeighborhoodById } from "@/data/rio-neighborhoods";
 import RoteiroAccessLink from "@/components/RoteiroAccessLink";
-import { useItemSave } from "@/hooks/use-item-save";
+
+/**
+ * ONDE FICAR — NEIGHBORHOOD HOTEL LIST
+ * 
+ * SAVING BEHAVIOR: Save actions are NOT allowed on this page.
+ * Users must navigate to individual hotel detail pages to save.
+ */
 
 // Neighborhood descriptions for staying
 const neighborhoodDescriptions: Record<string, string> = {
@@ -230,7 +236,6 @@ const hotelsByNeighborhood: Record<string, {
 const WhereToStayDetail = () => {
   const { neighborhood } = useParams<{ neighborhood: string }>();
   const [searchParams] = useSearchParams();
-  const { saveItem } = useItemSave();
   
   const neighborhoodData = getNeighborhoodById(neighborhood || "");
   const name = neighborhoodData?.name || "Neighborhood";
@@ -239,10 +244,6 @@ const WhereToStayDetail = () => {
   
   const from = searchParams.get("from");
   const backPath = from === "map" ? "/city-view" : "/onde-ficar-rio";
-
-  const handleSaveHotel = (hotelId: string, hotelName: string) => {
-    saveItem(hotelId, 'hotel', hotelName, false);
-  };
 
   return (
     <div className="min-h-screen bg-background">
