@@ -27,6 +27,15 @@ import { toast } from "@/hooks/use-toast";
  * 
  * STRUCTURAL LOCK — Core planning interface
  * 
+ * MENTAL STATES:
+ * - RASCUNHO (default): Free playground, no validation, no "errors"
+ * - FINAL: Still editable, may receive advisory suggestions
+ * 
+ * PSYCHOLOGICAL RULES:
+ * - Never imply "wrong" or "incomplete"
+ * - Never auto-validate or block actions
+ * - System is a guide, not a judge
+ * 
  * TWO-COLUMN MODEL:
  * - LEFT: Curated source (read-only) — items dragged FROM here
  * - RIGHT: User roteiro (editable) — items dropped TO here
@@ -140,11 +149,11 @@ const RoteiroPlanner = () => {
       
       if (!item) return;
 
-      // Check if already added
+      // Already added — gentle reminder, no judgment
       if (hasItem(activeId)) {
         toast({
-          title: "Já adicionado",
-          description: `${item.name} já está no seu roteiro.`,
+          title: "Esse já está aqui",
+          description: `${item.name} já faz parte do seu rascunho.`,
         });
         return;
       }
@@ -209,11 +218,12 @@ const RoteiroPlanner = () => {
     }
   };
 
-  // AI Actions (assistive only)
+  // AI Actions — Assistive only, never auto-edit
+  // Language: "sugestão", never "erro"
   const handleAISuggest = useCallback(() => {
     toast({
-      title: "Analisando...",
-      description: "Buscando sugestões personalizadas.",
+      title: "Buscando ideias...",
+      description: "Vou sugerir algumas opções para você.",
     });
   }, []);
 
@@ -233,17 +243,17 @@ const RoteiroPlanner = () => {
     }
 
     toast({
-      title: filled ? "Dias preenchidos" : "Nenhum dia vazio",
+      title: filled ? "Sugestões adicionadas" : "Tudo certo",
       description: filled 
-        ? "A IA sugeriu atividades para os dias vazios." 
-        : "Todos os dias já têm atividades.",
+        ? "Coloquei algumas ideias nos dias vazios. Você pode mudar o que quiser." 
+        : "Seus dias já têm atividades. Continue no seu ritmo.",
     });
   }, [userItems, curatedItinerary, totalDays, setDayItems]);
 
   const handleRebalance = useCallback(() => {
     toast({
-      title: "Função em breve",
-      description: "Reequilíbrio automático será adicionado.",
+      title: "Em breve",
+      description: "Vou poder sugerir ajustes quando você quiser.",
     });
   }, []);
 

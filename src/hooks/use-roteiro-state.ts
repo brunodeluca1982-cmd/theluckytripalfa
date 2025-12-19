@@ -6,22 +6,39 @@ import { ItineraryItem } from "@/components/roteiro/ItineraryCard";
  * 
  * STRUCTURAL LOCK — Core state management for Meu Roteiro
  * 
- * This hook manages the user's personal itinerary with:
- * - Persistence to localStorage
- * - Day-based organization
- * - Item operations (add, remove, reorder, move)
+ * TWO MENTAL STATES:
+ * 
+ * 1. RASCUNHO (Draft) — DEFAULT
+ *    - Free, imperfect, reversible
+ *    - All actions allowed without validation
+ *    - No warnings, no "errors"
+ *    - A playground for exploration
+ * 
+ * 2. ROTEIRO FINAL (Finalized)
+ *    - Intentional and assumed
+ *    - Still fully editable
+ *    - May receive advisory suggestions (never blocking)
+ *    - User can return to Rascunho anytime
+ * 
+ * PSYCHOLOGICAL RULES:
+ * - Never imply something is "wrong" or "incomplete"
+ * - Never auto-finalize or auto-validate
+ * - Never punish or lock-in
+ * - The system is a guide, not a judge
  * 
  * ARCHITECTURE NOTES:
- * - User itinerary is fully editable
- * - Curated source remains unchanged
- * - State syncs automatically
- * - Supports future layers (map, time, cost, sharing)
+ * - Status persists with the roteiro
+ * - Transition is always user-initiated
+ * - No data loss on status change
  */
+
+export type RoteiroStatus = 'rascunho' | 'final';
 
 export interface RoteiroState {
   destinationId: string;
   totalDays: number;
   items: Record<number, ItineraryItem[]>;
+  status: RoteiroStatus;
   createdAt: string;
   updatedAt: string;
 }
@@ -34,13 +51,13 @@ const createEmptyRoteiro = (destinationId: string, totalDays: number): RoteiroSt
   items: Object.fromEntries(
     Array.from({ length: totalDays }, (_, i) => [i + 1, []])
   ),
+  status: 'rascunho', // Always starts as draft
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
 });
 
 export const useRoteiroState = (destinationId: string, totalDays: number = 3) => {
   const [roteiro, setRoteiro] = useState<RoteiroState>(() => {
-    // Load from localStorage on init
     const stored = localStorage.getItem(`${STORAGE_KEY}-${destinationId}`);
     if (stored) {
       try {
@@ -49,6 +66,8 @@ export const useRoteiroState = (destinationId: string, totalDays: number = 3) =>
         for (let i = 1; i <= totalDays; i++) {
           if (!parsed.items[i]) parsed.items[i] = [];
         }
+        // Ensure status exists (migration for old data)
+        if (!parsed.status) parsed.status = 'rascunho';
         return parsed;
       } catch {
         return createEmptyRoteiro(destinationId, totalDays);
@@ -63,15 +82,16 @@ export const useRoteiroState = (destinationId: string, totalDays: number = 3) =>
     localStorage.setItem(`${STORAGE_KEY}-${destinationId}`, JSON.stringify(updated));
   }, [roteiro, destinationId]);
 
-  // Add item to a specific day
+  // === ITEM OPERATIONS ===
+  // All operations work identically in both states (rascunho/final)
+  // No validation, no warnings, no blocking
+
   const addItem = useCallback((day: number, item: ItineraryItem, sourceItemId?: string) => {
     setRoteiro(prev => {
-      // Create unique ID for user's copy
       const newItem: ItineraryItem = {
         ...item,
         id: `user-${sourceItemId || item.id}-${Date.now()}`,
       };
-      
       return {
         ...prev,
         items: {
@@ -82,7 +102,6 @@ export const useRoteiroState = (destinationId: string, totalDays: number = 3) =>
     });
   }, []);
 
-  // Remove item from roteiro
   const removeItem = useCallback((day: number, itemId: string) => {
     setRoteiro(prev => ({
       ...prev,
@@ -93,29 +112,22 @@ export const useRoteiroState = (destinationId: string, totalDays: number = 3) =>
     }));
   }, []);
 
-  // Move item within same day (reorder)
   const reorderItems = useCallback((day: number, oldIndex: number, newIndex: number) => {
     setRoteiro(prev => {
       const items = [...prev.items[day]];
       const [removed] = items.splice(oldIndex, 1);
       items.splice(newIndex, 0, removed);
-      
       return {
         ...prev,
-        items: {
-          ...prev.items,
-          [day]: items,
-        },
+        items: { ...prev.items, [day]: items },
       };
     });
   }, []);
 
-  // Move item between days
   const moveItemBetweenDays = useCallback((fromDay: number, toDay: number, itemId: string) => {
     setRoteiro(prev => {
       const item = prev.items[fromDay].find(i => i.id === itemId);
       if (!item) return prev;
-      
       return {
         ...prev,
         items: {
@@ -127,49 +139,65 @@ export const useRoteiroState = (destinationId: string, totalDays: number = 3) =>
     });
   }, []);
 
-  // Set items for a day (used by AI fill)
   const setDayItems = useCallback((day: number, items: ItineraryItem[]) => {
     setRoteiro(prev => ({
       ...prev,
-      items: {
-        ...prev.items,
-        [day]: items,
-      },
+      items: { ...prev.items, [day]: items },
     }));
   }, []);
 
-  // Clear entire roteiro
   const clearRoteiro = useCallback(() => {
     setRoteiro(createEmptyRoteiro(destinationId, totalDays));
   }, [destinationId, totalDays]);
 
-  // Check if item already exists (by original source ID)
+  // === STATUS TRANSITIONS ===
+  // User-initiated only. Never auto-triggered.
+
+  const finalize = useCallback(() => {
+    setRoteiro(prev => ({ ...prev, status: 'final' }));
+  }, []);
+
+  const returnToRascunho = useCallback(() => {
+    setRoteiro(prev => ({ ...prev, status: 'rascunho' }));
+  }, []);
+
+  // === QUERIES ===
+
   const hasItem = useCallback((sourceId: string): boolean => {
     return Object.values(roteiro.items).some(
       dayItems => dayItems.some(item => item.id.includes(sourceId))
     );
   }, [roteiro.items]);
 
-  // Get total item count
   const totalItems = Object.values(roteiro.items).reduce(
     (sum, items) => sum + items.length, 0
   );
 
-  // Get items for a specific day
   const getItemsForDay = useCallback((day: number): ItineraryItem[] => {
     return roteiro.items[day] || [];
   }, [roteiro.items]);
 
+  const isRascunho = roteiro.status === 'rascunho';
+  const isFinal = roteiro.status === 'final';
+
   return {
     roteiro,
     items: roteiro.items,
+    status: roteiro.status,
+    isRascunho,
+    isFinal,
     totalItems,
+    // Item operations
     addItem,
     removeItem,
     reorderItems,
     moveItemBetweenDays,
     setDayItems,
     clearRoteiro,
+    // Status transitions
+    finalize,
+    returnToRascunho,
+    // Queries
     hasItem,
     getItemsForDay,
   };
