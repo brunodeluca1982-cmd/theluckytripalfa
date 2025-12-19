@@ -86,42 +86,61 @@ const DestinationHub = ({ destinationId, name, country, backgroundImage, actions
       </div>
 
       {/* ═══════════════════════════════════════════════════════════════
-          ZONE 2 — INTERACTIVE BUTTON ZONE
-          Positioned below editorial header, slightly below vertical center
-          Optimized for thumb reach
+          RADIAL BUTTON ZONE — FLOWER PATTERN (LOCKED)
+          Center: Lucky List (largest)
+          Surrounding: Chegar, Comer, Ficar, Fazer
           ═══════════════════════════════════════════════════════════════ */}
-      <div className="absolute left-0 right-0 z-20 flex flex-col items-center" style={{ top: 'calc(22vh + 28px)' }}>
-        
-        {/* Row 1: Chegar, Ficar, Comer (3 buttons) */}
-        <div className="flex justify-center gap-4 mb-4">
-          {primaryActions.slice(0, 3).map((action) => (
-            <CircularButton 
-              key={action.id} 
-              icon={action.icon}
-              label={action.shortLabel}
-              path={action.path}
-            />
-          ))}
-        </div>
-
-        {/* Row 2: Lucky List (special), Fazer (2 buttons) */}
-        <div className="flex justify-center gap-5">
+      <div className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none">
+        <div className="relative w-[280px] h-[280px] pointer-events-auto">
+          
+          {/* CENTER — Lucky List (Main Node, Largest) */}
           {primaryActions[3] && (
-            <CircularButton 
-              key={primaryActions[3].id} 
+            <RadialButton 
               icon={primaryActions[3].icon}
               label={primaryActions[3].shortLabel}
               path={primaryActions[3].path}
-              isSpecial={primaryActions[3].isSpecial}
-              isLarge
+              isCenter
+              position="center"
             />
           )}
+
+          {/* TOP LEFT — Chegar */}
+          {primaryActions[0] && (
+            <RadialButton 
+              icon={primaryActions[0].icon}
+              label={primaryActions[0].shortLabel}
+              path={primaryActions[0].path}
+              position="top-left"
+            />
+          )}
+
+          {/* TOP RIGHT — Comer */}
+          {primaryActions[2] && (
+            <RadialButton 
+              icon={primaryActions[2].icon}
+              label={primaryActions[2].shortLabel}
+              path={primaryActions[2].path}
+              position="top-right"
+            />
+          )}
+
+          {/* BOTTOM LEFT — Ficar */}
+          {primaryActions[1] && (
+            <RadialButton 
+              icon={primaryActions[1].icon}
+              label={primaryActions[1].shortLabel}
+              path={primaryActions[1].path}
+              position="bottom-left"
+            />
+          )}
+
+          {/* BOTTOM RIGHT — Fazer */}
           {primaryActions[4] && (
-            <CircularButton 
-              key={primaryActions[4].id} 
+            <RadialButton 
               icon={primaryActions[4].icon}
               label={primaryActions[4].shortLabel}
               path={primaryActions[4].path}
+              position="bottom-right"
             />
           )}
         </div>
@@ -133,35 +152,45 @@ const DestinationHub = ({ destinationId, name, country, backgroundImage, actions
 };
 
 /**
- * Primary Circular Button — 68-74px (5-8% smaller), glass effect
+ * Radial Button — Glass effect with absolute positioning for flower pattern
  */
-interface CircularButtonProps {
+interface RadialButtonProps {
   icon: LucideIcon;
   label: string;
   path: string;
-  isSpecial?: boolean;
-  isLarge?: boolean;
+  isCenter?: boolean;
+  position: 'center' | 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
 }
 
-const CircularButton = ({ icon: Icon, label, path, isSpecial, isLarge }: CircularButtonProps) => {
-  // Reduced sizes: standard 74px (was 80), large 86px (was 92)
-  const size = isLarge ? 'w-[86px] h-[86px]' : 'w-[74px] h-[74px]';
+const RadialButton = ({ icon: Icon, label, path, isCenter, position }: RadialButtonProps) => {
+  // Center button is largest (96px), surrounding buttons are 74px
+  const size = isCenter ? 'w-24 h-24' : 'w-[74px] h-[74px]';
+  
+  // Position offsets for flower pattern (equal distance from center)
+  const positionStyles: Record<string, string> = {
+    'center': 'top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2',
+    'top-left': 'top-0 left-0',
+    'top-right': 'top-0 right-0',
+    'bottom-left': 'bottom-0 left-0',
+    'bottom-right': 'bottom-0 right-0',
+  };
   
   return (
     <Link
       to={path}
       className={`
-        flex flex-col items-center justify-center flex-shrink-0
+        absolute flex flex-col items-center justify-center
         ${size} rounded-full
         backdrop-blur-md transition-all duration-200
-        ${isSpecial 
-          ? "bg-white/25 border-2 border-white/60 hover:bg-white/35 hover:scale-105 shadow-lg shadow-white/20" 
-          : "bg-white/15 border border-white/30 hover:bg-white/25 hover:scale-105"
+        ${positionStyles[position]}
+        ${isCenter 
+          ? "bg-white/25 border-2 border-white/60 hover:bg-white/35 hover:scale-105 shadow-lg shadow-black/20" 
+          : "bg-white/15 border border-white/30 hover:bg-white/25 hover:scale-105 shadow-md shadow-black/15"
         }
       `}
     >
-      <Icon className={`${isLarge ? 'w-6 h-6' : 'w-5 h-5'} text-white mb-1.5 ${isSpecial ? "drop-shadow-lg" : ""}`} />
-      <span className={`text-white ${isLarge ? 'text-[10px]' : 'text-[9px]'} font-medium tracking-wide text-center px-1 leading-tight`}>
+      <Icon className={`${isCenter ? 'w-7 h-7' : 'w-5 h-5'} text-white mb-1.5 ${isCenter ? "drop-shadow-lg" : ""}`} />
+      <span className={`text-white ${isCenter ? 'text-[11px]' : 'text-[9px]'} font-medium tracking-wide text-center px-1 leading-tight`}>
         {label}
       </span>
     </Link>
