@@ -541,15 +541,23 @@ const WhereToEatDetail = () => {
               </h2>
               
               <div>
-                {restaurantList.map((restaurant, index) => (
-                  <RestaurantCard
-                    key={index}
-                    id={`restaurant-${neighborhood}-${cuisineType}-${index}`}
-                    name={restaurant.name}
-                    description={restaurant.description}
-                    onSave={handleSaveRestaurant}
-                  />
-                ))}
+                {restaurantList.map((restaurant, index) => {
+                  const slug = restaurant.name
+                    .toLowerCase()
+                    .normalize("NFD")
+                    .replace(/[\u0300-\u036f]/g, "")
+                    .replace(/[^a-z0-9\s-]/g, "")
+                    .replace(/\s+/g, "-");
+                  return (
+                    <RestaurantCard
+                      key={index}
+                      name={restaurant.name}
+                      description={restaurant.description}
+                      slug={slug}
+                      neighborhood={neighborhood}
+                    />
+                  );
+                })}
               </div>
             </section>
           ))

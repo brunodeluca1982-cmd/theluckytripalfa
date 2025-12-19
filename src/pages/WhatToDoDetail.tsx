@@ -61,7 +61,11 @@ const WhatToDoDetail = () => {
           {activities.length > 0 ? (
             <div className="space-y-8">
               {activities.map((activity) => (
-                <article key={activity.id} className="border-b border-border pb-8 last:border-b-0">
+                <Link
+                  key={activity.id}
+                  to={`/atividade/${activity.id}?from=${neighborhood}`}
+                  className="block border-b border-border pb-8 last:border-b-0 hover:bg-muted/30 transition-colors -mx-2 px-2 rounded"
+                >
                   {/* Category */}
                   <p className="text-xs tracking-widest text-muted-foreground uppercase mb-2">
                     {activity.category}
@@ -81,53 +85,11 @@ const WhatToDoDetail = () => {
                     ))}
                   </div>
                   
-                  {/* Metadata */}
-                  <div className="space-y-1 text-sm text-muted-foreground">
-                    {activity.googleMaps && (
-                      <p>
-                        <a 
-                          href={activity.googleMaps} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="hover:text-foreground transition-colors underline"
-                        >
-                          Ver no Google Maps
-                        </a>
-                      </p>
-                    )}
-                    {activity.instagram && (
-                      <p>Instagram: {activity.instagram}</p>
-                    )}
-                    {activity.price && (
-                      <p>Preço: {activity.price}</p>
-                    )}
-                  </div>
-                  
-                  {/* Item-level Save Action */}
-                  <div className="mt-4 flex items-center gap-3">
-                    <Button
-                      onClick={() => handleSaveActivity(activity.id, activity.title)}
-                      variant="outline"
-                      size="sm"
-                      className="gap-1.5 text-xs"
-                    >
-                      <Plus className="w-3 h-3" />
-                      Salvar
-                    </Button>
-                    
-                    {/* External booking / partner link (reserved field) */}
-                    {activity.externalLink && (
-                      <a 
-                        href={activity.externalLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-block py-2 px-4 bg-primary text-primary-foreground rounded-lg text-sm hover:opacity-90 transition-opacity"
-                      >
-                        Reservar / Saber mais
-                      </a>
-                    )}
-                  </div>
-                </article>
+                  {/* View indicator */}
+                  <span className="text-xs text-muted-foreground/60">
+                    Ver detalhes
+                  </span>
+                </Link>
               ))}
             </div>
           ) : (
