@@ -19,12 +19,10 @@ interface DestinationConfig {
   name: string;
 }
 
-// Placeholder video - replace with actual destination videos
-const PLACEHOLDER_VIDEO = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4";
-
+// Official destination hero videos
 const destinationVideos: Record<string, DestinationConfig> = {
   "rio-de-janeiro": {
-    videoUrl: PLACEHOLDER_VIDEO, // TODO: Replace with Rio de Janeiro hero video
+    videoUrl: "/videos/rio-hero.mp4",
     hubPath: "/destino/rio-de-janeiro",
     name: "Rio de Janeiro",
   },
