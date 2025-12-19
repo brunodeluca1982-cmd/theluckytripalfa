@@ -2,33 +2,22 @@ import { Link } from "react-router-dom";
 import { useState, useRef } from "react";
 import { ChevronLeft, MapPin, Bed, Utensils, Compass, Sparkles, Car, Moon, Coffee, Wallet, FileText, Sun, Briefcase, Receipt, Link2, CheckSquare } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import { getPartnersForDestination } from "@/data/partners-data";
 
 /**
- * DESTINATION HUB — FINAL STRUCTURAL LOCK
+ * DESTINATION HUB — CENTERED ACTION LOCK (FINAL)
  * 
- * THREE VERTICAL ZONES (LOCKED):
+ * STRUCTURE:
+ * - Full-screen hero image (100vh)
+ * - Destination name + country centered near top
+ * - PRIMARY BUTTONS: Centered vertically, floating over hero (5 buttons in 3+2 grid)
+ * - HORIZONTAL SWIPE: Secondary modules on same screen
+ * - Pagination dots for secondary swipe
  * 
- * ZONE 1 — HERO IMAGE (60-65vh)
- *   • Full-width background image
- *   • Gradient overlay (top transparent → bottom rgba(0,0,0,0.30))
- *   • Centered destination name (serif) + country (small caps)
- *   • Partner avatar in lower-right corner (44-48px)
- *   • Back button
- * 
- * ZONE 2 — PRIMARY ACTIONS (FIXED)
- *   • 5 circular buttons in 3+2 grid
- *   • Row 1: Como Chegar, Onde Ficar, Onde Comer
- *   • Row 2: O Que Fazer, Lucky List (emphasized, larger)
- *   • 72-80px diameter, glass effect
- *   • MUST NOT overlap hero
- * 
- * ZONE 2B — SECONDARY MODULES (HORIZONTAL SWIPE)
- *   • Swipeable pages of secondary circular buttons
- *   • Same visual style as primary
- *   • Subtle page indicator + "Swipe to explore"
- * 
- * ZONE 3 — SYSTEM NAVIGATION (handled by MainLayout)
+ * HARD CONSTRAINTS:
+ * - Buttons stay centered vertically
+ * - No vertical scroll
+ * - No page transitions
+ * - No layout reinterpretation
  */
 
 interface DestinationAction {
@@ -76,9 +65,8 @@ const SECONDARY_PAGES: SecondaryModuleButton[][] = [
 ];
 
 const DestinationHub = ({ destinationId, name, country, backgroundImage, actions }: DestinationHubProps) => {
-  const partners = getPartnersForDestination(destinationId);
-  const primaryPartner = partners[0] || null;
   const [currentPage, setCurrentPage] = useState(0);
+  const [showSecondary, setShowSecondary] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // Primary actions (first 5)
@@ -94,117 +82,101 @@ const DestinationHub = ({ destinationId, name, country, backgroundImage, actions
   };
 
   return (
-    <div className="min-h-screen overflow-y-auto relative flex flex-col bg-black">
-      
+    <div className="fixed inset-0 overflow-hidden">
       {/* ═══════════════════════════════════════════════════════════════
-          ZONE 1 — HERO IMAGE (60-65vh)
+          FULL-SCREEN HERO BACKGROUND (100vh)
           ═══════════════════════════════════════════════════════════════ */}
-      <div className="relative h-[62vh] flex-shrink-0">
-        {/* Background Image */}
-        <div 
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: `url(${backgroundImage})` }}
-        />
-        {/* Gradient Overlay: top transparent → bottom rgba(0,0,0,0.30) */}
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/30" />
+      <div 
+        className="absolute inset-0 bg-cover bg-center bg-fixed"
+        style={{ backgroundImage: `url(${backgroundImage})` }}
+      />
+      {/* Dark gradient overlay */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/50" />
 
-        {/* Back Button - Top Left */}
-        <Link 
-          to="/destinos" 
-          className="absolute top-12 left-6 z-20 inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 text-white hover:bg-white/30 transition-colors"
-        >
-          <ChevronLeft className="w-5 h-5" />
-        </Link>
+      {/* ═══════════════════════════════════════════════════════════════
+          BACK BUTTON — Top Left
+          ═══════════════════════════════════════════════════════════════ */}
+      <Link 
+        to="/destinos" 
+        className="absolute top-12 left-6 z-30 inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 text-white hover:bg-white/30 transition-colors"
+      >
+        <ChevronLeft className="w-5 h-5" />
+      </Link>
 
-        {/* Centered Title Block */}
-        <div className="absolute inset-0 flex flex-col items-center justify-center z-10">
-          <h1 className="text-5xl font-serif font-medium text-white leading-tight text-center drop-shadow-lg">
-            {name}
-          </h1>
-          <p className="text-xs tracking-[0.3em] text-white/80 uppercase mt-3">
-            {country}
-          </p>
-        </div>
-
-        {/* Partner Avatar - Lower Right Corner */}
-        {primaryPartner && (
-          <Link
-            to={`/partner/${primaryPartner.id}/roteiro/${destinationId}`}
-            className="absolute bottom-6 right-6 z-20"
-          >
-            <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm border border-white/40 flex items-center justify-center hover:bg-white/30 transition-colors overflow-hidden">
-              {primaryPartner.imageUrl ? (
-                <img 
-                  src={primaryPartner.imageUrl}
-                  alt={primaryPartner.name}
-                  className="w-full h-full rounded-full object-cover"
-                />
-              ) : (
-                <span className="text-sm font-medium text-white">
-                  {primaryPartner.initials}
-                </span>
-              )}
-            </div>
-          </Link>
-        )}
+      {/* ═══════════════════════════════════════════════════════════════
+          DESTINATION TITLE — Near Top, Centered
+          ═══════════════════════════════════════════════════════════════ */}
+      <div className="absolute top-24 left-0 right-0 z-20 flex flex-col items-center">
+        <h1 className="text-5xl font-serif font-medium text-white leading-tight text-center drop-shadow-lg">
+          {name}
+        </h1>
+        <p className="text-xs tracking-[0.3em] text-white/80 uppercase mt-3">
+          {country}
+        </p>
       </div>
 
       {/* ═══════════════════════════════════════════════════════════════
-          ZONE 2 — PRIMARY ACTIONS (3+2 GRID)
+          PRIMARY + SECONDARY BUTTONS — CENTERED, FLOATING
           ═══════════════════════════════════════════════════════════════ */}
-      <div className="relative z-20 bg-black/80 backdrop-blur-md py-6 px-4">
-        {/* Row 1: 3 buttons */}
-        <div className="flex justify-center gap-4 mb-4">
-          {primaryActions.slice(0, 3).map((action) => (
-            <CircularButton 
-              key={action.id} 
-              icon={action.icon}
-              label={action.shortLabel}
-              path={action.path}
-            />
-          ))}
-        </div>
-        {/* Row 2: 2 buttons (O Que Fazer + Lucky List) */}
-        <div className="flex justify-center gap-6">
-          {primaryActions.slice(3, 4).map((action) => (
-            <CircularButton 
-              key={action.id} 
-              icon={action.icon}
-              label={action.shortLabel}
-              path={action.path}
-            />
-          ))}
-          {primaryActions.slice(4, 5).map((action) => (
-            <CircularButton 
-              key={action.id} 
-              icon={action.icon}
-              label={action.shortLabel}
-              path={action.path}
-              isSpecial={action.isSpecial}
-              isLarge
-            />
-          ))}
-        </div>
-      </div>
-
-      {/* ═══════════════════════════════════════════════════════════════
-          ZONE 2B — SECONDARY MODULES (HORIZONTAL SWIPE)
-          ═══════════════════════════════════════════════════════════════ */}
-      <div className="relative z-10 bg-black/60 backdrop-blur-sm pb-28">
-        {/* Swipeable Container */}
+      <div className="absolute inset-0 z-20 flex flex-col items-center justify-center pb-20">
+        
+        {/* Horizontal Swipe Container */}
         <div 
           ref={scrollRef}
           onScroll={handleScroll}
-          className="overflow-x-auto snap-x snap-mandatory scrollbar-hide"
+          className="w-full overflow-x-auto snap-x snap-mandatory scrollbar-hide"
         >
-          <div className="flex" style={{ width: `${SECONDARY_PAGES.length * 100}%` }}>
+          <div 
+            className="flex" 
+            style={{ width: `${(1 + SECONDARY_PAGES.length) * 100}%` }}
+          >
+            {/* PAGE 0: Primary Actions (5 buttons in 3+2 grid) */}
+            <div 
+              className="flex-shrink-0 snap-center flex flex-col items-center justify-center px-6"
+              style={{ width: `${100 / (1 + SECONDARY_PAGES.length)}%` }}
+            >
+              {/* Row 1: 3 buttons */}
+              <div className="flex justify-center gap-5 mb-5">
+                {primaryActions.slice(0, 3).map((action) => (
+                  <CircularButton 
+                    key={action.id} 
+                    icon={action.icon}
+                    label={action.shortLabel}
+                    path={action.path}
+                  />
+                ))}
+              </div>
+              {/* Row 2: 2 buttons (O Que Fazer + Lucky List centered) */}
+              <div className="flex justify-center gap-6">
+                {primaryActions.slice(3, 4).map((action) => (
+                  <CircularButton 
+                    key={action.id} 
+                    icon={action.icon}
+                    label={action.shortLabel}
+                    path={action.path}
+                  />
+                ))}
+                {primaryActions.slice(4, 5).map((action) => (
+                  <CircularButton 
+                    key={action.id} 
+                    icon={action.icon}
+                    label={action.shortLabel}
+                    path={action.path}
+                    isSpecial={action.isSpecial}
+                    isLarge
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* SECONDARY PAGES */}
             {SECONDARY_PAGES.map((page, pageIndex) => (
               <div 
                 key={pageIndex}
-                className="flex-shrink-0 snap-center py-6 px-4"
-                style={{ width: `${100 / SECONDARY_PAGES.length}%` }}
+                className="flex-shrink-0 snap-center flex items-center justify-center px-6"
+                style={{ width: `${100 / (1 + SECONDARY_PAGES.length)}%` }}
               >
-                <div className="flex justify-center gap-4 flex-wrap">
+                <div className="flex justify-center gap-4 flex-wrap max-w-xs">
                   {page.map((module) => (
                     <SecondaryButton
                       key={module.id}
@@ -219,19 +191,21 @@ const DestinationHub = ({ destinationId, name, country, backgroundImage, actions
           </div>
         </div>
 
-        {/* Page Indicator + Swipe Text */}
-        <div className="flex flex-col items-center gap-2 mt-2">
-          <div className="flex gap-1.5">
-            {SECONDARY_PAGES.map((_, index) => (
+        {/* Pagination Dots */}
+        <div className="flex flex-col items-center gap-3 mt-8">
+          <div className="flex gap-2">
+            {[0, ...SECONDARY_PAGES.map((_, i) => i + 1)].map((index) => (
               <div 
                 key={index}
-                className={`w-1.5 h-1.5 rounded-full transition-all duration-200 ${
-                  index === currentPage ? 'bg-white/80 w-3' : 'bg-white/30'
+                className={`rounded-full transition-all duration-300 ${
+                  index === currentPage 
+                    ? 'w-6 h-2 bg-white/90' 
+                    : 'w-2 h-2 bg-white/40'
                 }`}
               />
             ))}
           </div>
-          <p className="text-[10px] text-white/50 tracking-wider uppercase">
+          <p className="text-[10px] text-white/60 tracking-[0.2em] uppercase">
             Swipe to explore
           </p>
         </div>
@@ -254,7 +228,7 @@ interface CircularButtonProps {
 }
 
 const CircularButton = ({ icon: Icon, label, path, isSpecial, isLarge }: CircularButtonProps) => {
-  const size = isLarge ? 'w-[88px] h-[88px]' : 'w-[76px] h-[76px]';
+  const size = isLarge ? 'w-[92px] h-[92px]' : 'w-[80px] h-[80px]';
   
   return (
     <Link
@@ -264,7 +238,7 @@ const CircularButton = ({ icon: Icon, label, path, isSpecial, isLarge }: Circula
         ${size} rounded-full
         backdrop-blur-md transition-all duration-200
         ${isSpecial 
-          ? "bg-white/30 border-2 border-white/60 hover:bg-white/40 hover:scale-105 shadow-lg shadow-white/10" 
+          ? "bg-white/25 border-2 border-white/60 hover:bg-white/35 hover:scale-105 shadow-lg shadow-white/20" 
           : "bg-white/15 border border-white/30 hover:bg-white/25 hover:scale-105"
         }
       `}
@@ -290,7 +264,7 @@ const SecondaryButton = ({ icon: Icon, label, path }: SecondaryButtonProps) => {
   return (
     <Link
       to={path}
-      className="flex flex-col items-center justify-center flex-shrink-0 w-[68px] h-[68px] rounded-full bg-white/10 border border-white/20 backdrop-blur-sm hover:bg-white/20 hover:scale-105 transition-all duration-200"
+      className="flex flex-col items-center justify-center flex-shrink-0 w-[72px] h-[72px] rounded-full bg-white/15 border border-white/25 backdrop-blur-md hover:bg-white/25 hover:scale-105 transition-all duration-200"
     >
       <Icon className="w-5 h-5 text-white/90 mb-1" />
       <span className="text-white/80 text-[9px] font-medium tracking-wide text-center px-1 leading-tight">
