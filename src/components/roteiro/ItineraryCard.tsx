@@ -1,12 +1,23 @@
+import { useDraggable } from "@dnd-kit/core";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Clock, Sparkles, Star, Users } from "lucide-react";
+import { Clock, Sparkles, Star, Users, GripVertical, Trash2 } from "lucide-react";
 
 /**
  * ITINERARY CARD
  * 
- * Draggable card for roteiro planning.
- * Shows activity details with category, duration, and source.
+ * STRUCTURAL LOCK — Card component for roteiro items
+ * 
+ * Each card displays:
+ * - Square image (or placeholder)
+ * - Name
+ * - Category badge
+ * - Duration
+ * - Source indicator
+ * 
+ * Behavior:
+ * - In SOURCE column: draggable, read-only
+ * - In USER column: sortable, deletable
  */
 
 export interface ItineraryItem {
@@ -23,6 +34,8 @@ interface ItineraryCardProps {
   item: ItineraryItem;
   isDragging?: boolean;
   isOverlay?: boolean;
+  isUserColumn?: boolean;
+  onRemove?: () => void;
 }
 
 const categoryLabels: Record<ItineraryItem['category'], string> = {
@@ -33,10 +46,10 @@ const categoryLabels: Record<ItineraryItem['category'], string> = {
 };
 
 const categoryColors: Record<ItineraryItem['category'], string> = {
-  attraction: 'bg-blue-500/10 text-blue-600',
-  food: 'bg-orange-500/10 text-orange-600',
-  hotel: 'bg-purple-500/10 text-purple-600',
-  experience: 'bg-green-500/10 text-green-600',
+  attraction: 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
+  food: 'bg-orange-500/10 text-orange-600 dark:text-orange-400',
+  hotel: 'bg-purple-500/10 text-purple-600 dark:text-purple-400',
+  experience: 'bg-green-500/10 text-green-600 dark:text-green-400',
 };
 
 const sourceIcons: Record<ItineraryItem['source'], React.ReactNode> = {
@@ -50,30 +63,48 @@ const sourceLabels: Record<ItineraryItem['source'], string> = {
   'lucky-trip': 'Lucky Trip',
   'partner': 'Parceiro',
   'ai': 'IA',
-  'user': 'Você',
+  'user': '',
 };
 
-export const ItineraryCard = ({ item, isDragging, isOverlay }: ItineraryCardProps) => {
+export const ItineraryCard = ({ 
+  item, 
+  isDragging, 
+  isOverlay,
+  isUserColumn,
+  onRemove 
+}: ItineraryCardProps) => {
   return (
     <div
       className={`
         bg-card border border-border rounded-xl p-3 
-        transition-all duration-200
-        ${isDragging ? 'opacity-50 scale-95' : ''}
-        ${isOverlay ? 'shadow-xl rotate-2 scale-105' : 'shadow-sm hover:shadow-md'}
+        transition-all duration-200 group
+        ${isDragging ? 'opacity-40 scale-95' : ''}
+        ${isOverlay ? 'shadow-2xl rotate-3 scale-105 border-primary/50' : 'shadow-sm hover:shadow-md'}
       `}
     >
       <div className="flex gap-3">
+        {/* Drag Handle for user column */}
+        {isUserColumn && (
+          <div className="flex-shrink-0 flex items-center text-muted-foreground/50">
+            <GripVertical className="w-4 h-4" />
+          </div>
+        )}
+
         {/* Square Image */}
-        <div className="w-16 h-16 rounded-lg bg-muted flex-shrink-0 overflow-hidden">
+        <div className="w-14 h-14 rounded-lg bg-muted flex-shrink-0 overflow-hidden">
           {item.imageUrl ? (
             <img 
               src={item.imageUrl} 
               alt={item.name}
               className="w-full h-full object-cover"
+              loading="lazy"
             />
           ) : (
-            <div className="w-full h-full bg-gradient-to-br from-muted to-muted-foreground/20" />
+            <div className="w-full h-full bg-gradient-to-br from-muted to-muted-foreground/20 flex items-center justify-center">
+              <span className="text-muted-foreground/40 text-lg">
+                {item.name.charAt(0)}
+              </span>
+            </div>
           )}
         </div>
 
@@ -89,26 +120,65 @@ export const ItineraryCard = ({ item, isDragging, isOverlay }: ItineraryCardProp
           </span>
           
           {/* Meta Row */}
-          <div className="flex items-center gap-3 mt-2 text-[11px] text-muted-foreground">
+          <div className="flex items-center gap-2 mt-1.5 text-[10px] text-muted-foreground">
             <span className="flex items-center gap-1">
               <Clock className="w-3 h-3" />
               {item.duration}
             </span>
-            {item.source !== 'user' && (
-              <span className="flex items-center gap-1">
+            {item.source !== 'user' && sourceLabels[item.source] && (
+              <span className="flex items-center gap-1 text-primary/70">
                 {sourceIcons[item.source]}
                 {sourceLabels[item.source]}
               </span>
             )}
           </div>
         </div>
+
+        {/* Remove button for user column */}
+        {isUserColumn && onRemove && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onRemove();
+            }}
+            className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity p-1 text-muted-foreground hover:text-destructive"
+            aria-label="Remover"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
+        )}
       </div>
     </div>
   );
 };
 
-// Sortable wrapper for drag-and-drop
-export const SortableItineraryCard = ({ item }: { item: ItineraryItem }) => {
+// Draggable card for SOURCE column (read-only, drag to copy)
+export const DraggableItineraryCard = ({ item }: { item: ItineraryItem }) => {
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
+    id: item.id,
+    data: { item, type: 'source' },
+  });
+
+  return (
+    <div
+      ref={setNodeRef}
+      {...attributes}
+      {...listeners}
+      className="touch-manipulation cursor-grab active:cursor-grabbing"
+    >
+      <ItineraryCard item={item} isDragging={isDragging} isUserColumn={false} />
+    </div>
+  );
+};
+
+// Sortable card for USER column (editable, reorderable)
+export const SortableItineraryCard = ({ 
+  item,
+  onRemove 
+}: { 
+  item: ItineraryItem;
+  onRemove?: () => void;
+}) => {
   const {
     attributes,
     listeners,
@@ -116,7 +186,10 @@ export const SortableItineraryCard = ({ item }: { item: ItineraryItem }) => {
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: item.id });
+  } = useSortable({ 
+    id: item.id,
+    data: { item, type: 'user' },
+  });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -131,7 +204,12 @@ export const SortableItineraryCard = ({ item }: { item: ItineraryItem }) => {
       {...listeners}
       className="touch-manipulation cursor-grab active:cursor-grabbing"
     >
-      <ItineraryCard item={item} isDragging={isDragging} />
+      <ItineraryCard 
+        item={item} 
+        isDragging={isDragging} 
+        isUserColumn={true}
+        onRemove={onRemove}
+      />
     </div>
   );
 };

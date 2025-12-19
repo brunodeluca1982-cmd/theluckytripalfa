@@ -1,13 +1,21 @@
 import { useDroppable } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
-import { SortableItineraryCard, ItineraryItem } from "./ItineraryCard";
-import { Plus } from "lucide-react";
+import { DraggableItineraryCard, SortableItineraryCard, ItineraryItem } from "./ItineraryCard";
+import { Hand } from "lucide-react";
 
 /**
  * DAY COLUMN
  * 
- * A single day's activities within a roteiro column.
- * Supports drag-and-drop reordering and receiving items.
+ * STRUCTURAL LOCK — Container for a single day's activities
+ * 
+ * Two modes:
+ * - SOURCE (isUserColumn=false): Read-only, items are draggable copies
+ * - USER (isUserColumn=true): Editable, items are sortable and removable
+ * 
+ * EMPTY STATE:
+ * - Calm, inviting message
+ * - No pressure or urgency
+ * - Clear instruction to drag
  */
 
 interface DayColumnProps {
@@ -15,7 +23,7 @@ interface DayColumnProps {
   dayNumber: number;
   items: ItineraryItem[];
   isUserColumn?: boolean;
-  onAddItem?: () => void;
+  onRemoveItem?: (itemId: string) => void;
 }
 
 export const DayColumn = ({ 
@@ -23,52 +31,81 @@ export const DayColumn = ({
   dayNumber, 
   items, 
   isUserColumn = false,
-  onAddItem 
+  onRemoveItem,
 }: DayColumnProps) => {
-  const { setNodeRef, isOver } = useDroppable({ id: dayId });
+  const { setNodeRef, isOver } = useDroppable({ 
+    id: dayId,
+    data: { day: dayNumber, type: isUserColumn ? 'user' : 'source' },
+  });
 
   return (
     <div className="flex-shrink-0 w-full">
       {/* Day Header */}
-      <div className="flex items-center justify-between mb-4 px-1">
+      <div className="flex items-center justify-between mb-3 px-1">
         <h3 className="text-sm font-semibold text-foreground">
           Dia {dayNumber}
         </h3>
-        {isUserColumn && onAddItem && (
-          <button
-            onClick={onAddItem}
-            className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
-          >
-            <Plus className="w-3 h-3" />
-            Adicionar
-          </button>
+        {isUserColumn && items.length > 0 && (
+          <span className="text-[10px] text-muted-foreground">
+            {items.length} {items.length === 1 ? 'item' : 'itens'}
+          </span>
         )}
       </div>
 
-      {/* Drop Zone */}
+      {/* Drop Zone / Content Area */}
       <div
         ref={setNodeRef}
         className={`
-          min-h-[200px] rounded-xl p-2 transition-colors duration-200
-          ${isOver ? 'bg-primary/5 border-2 border-dashed border-primary/30' : 'bg-muted/30'}
-          ${items.length === 0 ? 'flex items-center justify-center' : ''}
+          min-h-[280px] rounded-xl transition-all duration-200
+          ${isUserColumn 
+            ? isOver 
+              ? 'bg-primary/10 border-2 border-dashed border-primary/40' 
+              : 'bg-muted/20 border-2 border-dashed border-transparent'
+            : 'bg-muted/30'
+          }
+          ${items.length === 0 ? 'flex items-center justify-center p-4' : 'p-2'}
         `}
       >
         {items.length > 0 ? (
-          <SortableContext items={items.map(i => i.id)} strategy={verticalListSortingStrategy}>
-            <div className="space-y-3">
+          isUserColumn ? (
+            // USER COLUMN: Sortable items
+            <SortableContext items={items.map(i => i.id)} strategy={verticalListSortingStrategy}>
+              <div className="space-y-2">
+                {items.map((item) => (
+                  <SortableItineraryCard 
+                    key={item.id} 
+                    item={item}
+                    onRemove={() => onRemoveItem?.(item.id)}
+                  />
+                ))}
+              </div>
+            </SortableContext>
+          ) : (
+            // SOURCE COLUMN: Draggable items (copies)
+            <div className="space-y-2">
               {items.map((item) => (
-                <SortableItineraryCard key={item.id} item={item} />
+                <DraggableItineraryCard key={item.id} item={item} />
               ))}
             </div>
-          </SortableContext>
+          )
         ) : (
-          <p className="text-xs text-muted-foreground text-center px-4">
-            {isUserColumn 
-              ? "Arraste atividades aqui ou toque em adicionar"
-              : "Nenhuma atividade para este dia"
-            }
-          </p>
+          // EMPTY STATE
+          <div className="text-center">
+            {isUserColumn ? (
+              <>
+                <div className="w-10 h-10 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-3">
+                  <Hand className="w-5 h-5 text-muted-foreground/50" />
+                </div>
+                <p className="text-xs text-muted-foreground leading-relaxed max-w-[120px] mx-auto">
+                  Arraste atividades da esquerda para montar seu dia
+                </p>
+              </>
+            ) : (
+              <p className="text-xs text-muted-foreground">
+                Sem sugestões
+              </p>
+            )}
+          </div>
         )}
       </div>
     </div>
