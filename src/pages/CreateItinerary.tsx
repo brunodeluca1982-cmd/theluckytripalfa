@@ -1,7 +1,7 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, ChevronRight, X, MapPin, Calendar, Clock, Users, Baby, Plus, Minus, ChevronLeft, Check } from "lucide-react";
+import { Search, ChevronRight, X, MapPin, Calendar, Clock, Users, Baby, Plus, Minus, ChevronLeft, Check, Plane } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Input } from "@/components/ui/input";
@@ -10,20 +10,21 @@ import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Switch } from "@/components/ui/switch";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { curatedDestinations, searchDestinations, Destination } from "@/data/destinations-database";
-import { useTripSetup, Child } from "@/hooks/use-trip-setup";
+import { curatedDestinations, searchDestinations, Destination, getDestination } from "@/data/destinations-database";
+import { useTripSetup, Child, SetupStep } from "@/hooks/use-trip-setup";
 import { toast } from "@/hooks/use-toast";
 
 /**
- * CREATE ITINERARY PRE-FLOW
+ * CREATE ITINERARY PRE-FLOW (MANDATORY)
  * 
- * Guided setup before the itinerary organization screen:
+ * Blocking setup before itinerary access:
  * Step 1: Destination search (internal database only)
- * Step 2: Trip details (dates, times, travelers)
- * Step 3: Navigate to planner
+ * Step 2: Travel dates & times
+ * Step 3: Travel party (adults, children)
+ * Step 4: Confirmation summary
+ * 
+ * User cannot access planner until setup is complete.
  */
-
-type Step = 'destination' | 'details' | 'complete';
 
 const CreateItinerary = () => {
   const navigate = useNavigate();
@@ -31,6 +32,9 @@ const CreateItinerary = () => {
     tripSetup,
     tripDays,
     isValid,
+    isDestinationValid,
+    isDatesValid,
+    isTravelersValid,
     setDestination,
     setDates,
     setTimes,
@@ -39,11 +43,27 @@ const CreateItinerary = () => {
     addChild,
     removeChild,
     updateChildAge,
+    setCurrentStep,
+    completeSetup,
   } = useTripSetup();
 
-  const [step, setStep] = useState<Step>('destination');
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedDestination, setSelectedDestination] = useState<Destination | null>(null);
+  const [selectedDestination, setSelectedDestination] = useState<Destination | null>(() => {
+    if (tripSetup.destinationId) {
+      return getDestination(tripSetup.destinationId) || null;
+    }
+    return null;
+  });
+
+  // Resume from last incomplete step
+  useEffect(() => {
+    if (tripSetup.setupComplete) {
+      // Already complete, go to planner
+      navigate(`/planejar/${tripSetup.destinationId}`, { replace: true });
+    }
+  }, [tripSetup.setupComplete, tripSetup.destinationId, navigate]);
+
+  const step = tripSetup.currentStep;
 
   // Search results
   const searchResults = useMemo(() => {
@@ -61,20 +81,33 @@ const CreateItinerary = () => {
     }
     setSelectedDestination(destination);
     setDestination(destination.id);
-    setStep('details');
-  }, [setDestination]);
+    setCurrentStep('dates');
+  }, [setDestination, setCurrentStep]);
 
   // Handle back navigation
   const handleBack = useCallback(() => {
-    if (step === 'details') {
-      setStep('destination');
+    if (step === 'dates') {
+      setCurrentStep('destination');
+    } else if (step === 'travelers') {
+      setCurrentStep('dates');
+    } else if (step === 'confirmation') {
+      setCurrentStep('travelers');
     } else {
       navigate(-1);
     }
-  }, [step, navigate]);
+  }, [step, navigate, setCurrentStep]);
 
-  // Handle form submission
-  const handleSubmit = useCallback(() => {
+  // Handle step navigation
+  const handleNextStep = useCallback(() => {
+    if (step === 'dates' && isDatesValid) {
+      setCurrentStep('travelers');
+    } else if (step === 'travelers' && isTravelersValid) {
+      setCurrentStep('confirmation');
+    }
+  }, [step, isDatesValid, isTravelersValid, setCurrentStep]);
+
+  // Handle final confirmation
+  const handleConfirm = useCallback(() => {
     if (!isValid) {
       toast({ 
         title: "Preencha todos os campos", 
@@ -83,9 +116,14 @@ const CreateItinerary = () => {
       return;
     }
 
-    // Navigate to planner with trip setup
+    completeSetup();
     navigate(`/planejar/${tripSetup.destinationId}`);
-  }, [isValid, navigate, tripSetup.destinationId]);
+  }, [isValid, completeSetup, navigate, tripSetup.destinationId]);
+
+  // Progress calculation
+  const stepOrder: SetupStep[] = ['destination', 'dates', 'travelers', 'confirmation'];
+  const currentStepIndex = stepOrder.indexOf(step);
+  const progress = ((currentStepIndex + 1) / 4) * 100;
 
   return (
     <div className="min-h-screen bg-background">
@@ -99,56 +137,40 @@ const CreateItinerary = () => {
             <ChevronLeft className="w-5 h-5" />
           </button>
           
-          <div className="flex-1 flex items-center gap-2">
+          <div className="flex-1">
+            {/* Progress bar */}
+            <div className="h-1 bg-muted rounded-full overflow-hidden">
+              <motion.div 
+                className="h-full bg-primary"
+                initial={{ width: 0 }}
+                animate={{ width: `${progress}%` }}
+                transition={{ duration: 0.3 }}
+              />
+            </div>
+            
             {/* Step indicators */}
-            <div className="flex items-center gap-2 text-xs font-medium">
-              <div className={cn(
-                "w-6 h-6 rounded-full flex items-center justify-center transition-colors",
-                step === 'destination' 
-                  ? "bg-primary text-primary-foreground" 
-                  : "bg-primary/20 text-primary"
-              )}>
-                {step !== 'destination' ? <Check className="w-3.5 h-3.5" /> : '1'}
-              </div>
-              <span className={cn(
-                "hidden sm:block",
-                step === 'destination' ? "text-foreground" : "text-muted-foreground"
-              )}>
-                Destino
-              </span>
-              
-              <ChevronRight className="w-4 h-4 text-muted-foreground/50" />
-              
-              <div className={cn(
-                "w-6 h-6 rounded-full flex items-center justify-center transition-colors",
-                step === 'details' 
-                  ? "bg-primary text-primary-foreground" 
-                  : "bg-muted text-muted-foreground"
-              )}>
-                2
-              </div>
-              <span className={cn(
-                "hidden sm:block",
-                step === 'details' ? "text-foreground" : "text-muted-foreground"
-              )}>
-                Detalhes
-              </span>
-              
-              <ChevronRight className="w-4 h-4 text-muted-foreground/50" />
-              
-              <div className="w-6 h-6 rounded-full bg-muted text-muted-foreground flex items-center justify-center">
-                3
-              </div>
-              <span className="hidden sm:block text-muted-foreground">
-                Montar
-              </span>
+            <div className="flex items-center justify-between mt-2 text-xs font-medium">
+              {stepOrder.map((s, i) => (
+                <div key={s} className="flex items-center gap-1">
+                  <div className={cn(
+                    "w-5 h-5 rounded-full flex items-center justify-center text-[10px] transition-colors",
+                    currentStepIndex > i 
+                      ? "bg-primary text-primary-foreground" 
+                      : currentStepIndex === i 
+                        ? "bg-primary text-primary-foreground" 
+                        : "bg-muted text-muted-foreground"
+                  )}>
+                    {currentStepIndex > i ? <Check className="w-3 h-3" /> : i + 1}
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
       </div>
 
       {/* Content */}
-      <div className="pt-16 pb-24">
+      <div className="pt-20 pb-24">
         <AnimatePresence mode="wait">
           {step === 'destination' && (
             <DestinationStep
@@ -160,21 +182,40 @@ const CreateItinerary = () => {
             />
           )}
           
-          {step === 'details' && selectedDestination && (
-            <DetailsStep
-              key="details"
+          {step === 'dates' && selectedDestination && (
+            <DatesStep
+              key="dates"
               destination={selectedDestination}
               tripSetup={tripSetup}
               tripDays={tripDays}
               onSetDates={setDates}
               onSetTimes={setTimes}
+              onNext={handleNextStep}
+              isValid={isDatesValid}
+            />
+          )}
+
+          {step === 'travelers' && selectedDestination && (
+            <TravelersStep
+              key="travelers"
+              tripSetup={tripSetup}
               onSetAdults={setAdultsCount}
               onToggleChildren={toggleHasChildren}
               onAddChild={addChild}
               onRemoveChild={removeChild}
               onUpdateChildAge={updateChildAge}
-              onSubmit={handleSubmit}
-              isValid={isValid}
+              onNext={handleNextStep}
+              isValid={isTravelersValid}
+            />
+          )}
+
+          {step === 'confirmation' && selectedDestination && (
+            <ConfirmationStep
+              key="confirmation"
+              destination={selectedDestination}
+              tripSetup={tripSetup}
+              tripDays={tripDays}
+              onConfirm={handleConfirm}
             />
           )}
         </AnimatePresence>
@@ -199,18 +240,16 @@ const DestinationStep = ({ searchQuery, setSearchQuery, searchResults, onSelect 
       exit={{ opacity: 0, x: -20 }}
       className="px-4"
     >
-      {/* Search header */}
       <div className="mb-8 text-center">
-        <h1 className="text-2xl font-bold text-foreground mb-2">Vai pra onde?</h1>
-        <p className="text-muted-foreground">Escolha seu destino para começar</p>
+        <h1 className="text-2xl font-bold text-foreground mb-2">Where are you going?</h1>
+        <p className="text-muted-foreground">Select your destination to continue</p>
       </div>
 
-      {/* Search bar */}
       <div className="relative mb-6">
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
         <Input
           type="text"
-          placeholder="Buscar destino..."
+          placeholder="Search destination..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="pl-12 pr-10 h-14 text-lg bg-muted/50 border-0 rounded-2xl focus-visible:ring-primary"
@@ -226,7 +265,6 @@ const DestinationStep = ({ searchQuery, setSearchQuery, searchResults, onSelect 
         )}
       </div>
 
-      {/* Results */}
       <div className="space-y-2">
         {searchResults.map((destination) => (
           <motion.button
@@ -263,7 +301,7 @@ const DestinationStep = ({ searchQuery, setSearchQuery, searchResults, onSelect 
               <ChevronRight className="w-5 h-5 text-muted-foreground" />
             ) : (
               <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded-full">
-                Em breve
+                Coming soon
               </span>
             )}
           </motion.button>
@@ -272,7 +310,7 @@ const DestinationStep = ({ searchQuery, setSearchQuery, searchResults, onSelect 
         {searchResults.length === 0 && searchQuery && (
           <div className="text-center py-12">
             <MapPin className="w-12 h-12 mx-auto mb-4 text-muted-foreground/30" />
-            <p className="text-muted-foreground">Nenhum destino encontrado</p>
+            <p className="text-muted-foreground">No destinations found</p>
           </div>
         )}
       </div>
@@ -280,36 +318,26 @@ const DestinationStep = ({ searchQuery, setSearchQuery, searchResults, onSelect 
   );
 };
 
-// ============= STEP 2: DETAILS =============
-interface DetailsStepProps {
+// ============= STEP 2: DATES & TIMES =============
+interface DatesStepProps {
   destination: Destination;
   tripSetup: ReturnType<typeof useTripSetup>['tripSetup'];
   tripDays: number;
   onSetDates: (start: Date | null, end: Date | null) => void;
   onSetTimes: (arrival: string, departure: string) => void;
-  onSetAdults: (count: number) => void;
-  onToggleChildren: (has: boolean) => void;
-  onAddChild: () => void;
-  onRemoveChild: (id: string) => void;
-  onUpdateChildAge: (id: string, age: number) => void;
-  onSubmit: () => void;
+  onNext: () => void;
   isValid: boolean;
 }
 
-const DetailsStep = ({ 
+const DatesStep = ({ 
   destination, 
   tripSetup, 
   tripDays,
   onSetDates, 
   onSetTimes, 
-  onSetAdults,
-  onToggleChildren,
-  onAddChild,
-  onRemoveChild,
-  onUpdateChildAge,
-  onSubmit, 
+  onNext, 
   isValid 
-}: DetailsStepProps) => {
+}: DatesStepProps) => {
   return (
     <motion.div
       initial={{ opacity: 0, x: 20 }}
@@ -317,14 +345,13 @@ const DetailsStep = ({
       exit={{ opacity: 0, x: -20 }}
       className="px-4"
     >
-      {/* Destination preview */}
       <div className="mb-8 text-center">
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary mb-4">
           <MapPin className="w-4 h-4" />
           <span className="font-medium">{destination.name}</span>
         </div>
-        <h1 className="text-2xl font-bold text-foreground mb-2">Detalhes da viagem</h1>
-        <p className="text-muted-foreground">Quando você vai e quem vai com você?</p>
+        <h1 className="text-2xl font-bold text-foreground mb-2">When are you traveling?</h1>
+        <p className="text-muted-foreground">Set your arrival and departure</p>
       </div>
 
       <div className="space-y-6 max-w-md mx-auto">
@@ -335,9 +362,9 @@ const DetailsStep = ({
               <Calendar className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <h3 className="font-semibold text-foreground">Datas da viagem</h3>
+              <h3 className="font-semibold text-foreground">Travel dates</h3>
               {tripDays > 0 && (
-                <p className="text-sm text-muted-foreground">{tripDays} {tripDays === 1 ? 'dia' : 'dias'}</p>
+                <p className="text-sm text-muted-foreground">{tripDays} {tripDays === 1 ? 'day' : 'days'}</p>
               )}
             </div>
           </div>
@@ -353,8 +380,8 @@ const DetailsStep = ({
                   )}
                 >
                   {tripSetup.tripStartDate 
-                    ? format(tripSetup.tripStartDate, "dd/MM/yy", { locale: ptBR })
-                    : "Ida"
+                    ? format(tripSetup.tripStartDate, "MMM dd", { locale: ptBR })
+                    : "Arrival"
                   }
                 </Button>
               </PopoverTrigger>
@@ -380,8 +407,8 @@ const DetailsStep = ({
                   )}
                 >
                   {tripSetup.tripEndDate 
-                    ? format(tripSetup.tripEndDate, "dd/MM/yy", { locale: ptBR })
-                    : "Volta"
+                    ? format(tripSetup.tripEndDate, "MMM dd", { locale: ptBR })
+                    : "Departure"
                   }
                 </Button>
               </PopoverTrigger>
@@ -406,14 +433,14 @@ const DetailsStep = ({
               <Clock className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <h3 className="font-semibold text-foreground">Horários</h3>
-              <p className="text-sm text-muted-foreground">Chegada e partida local</p>
+              <h3 className="font-semibold text-foreground">Local times</h3>
+              <p className="text-sm text-muted-foreground">When do you arrive/leave?</p>
             </div>
           </div>
           
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-xs text-muted-foreground mb-1 block">Chegada</label>
+              <label className="text-xs text-muted-foreground mb-1 block">Arrival time</label>
               <Input
                 type="time"
                 value={tripSetup.arrivalTime}
@@ -422,7 +449,7 @@ const DetailsStep = ({
               />
             </div>
             <div>
-              <label className="text-xs text-muted-foreground mb-1 block">Partida</label>
+              <label className="text-xs text-muted-foreground mb-1 block">Departure time</label>
               <Input
                 type="time"
                 value={tripSetup.departureTime}
@@ -433,21 +460,68 @@ const DetailsStep = ({
           </div>
         </div>
 
-        {/* Travelers */}
+        <Button
+          onClick={onNext}
+          disabled={!isValid}
+          className="w-full h-14 text-lg font-semibold rounded-2xl"
+        >
+          Continue
+          <ChevronRight className="w-5 h-5 ml-2" />
+        </Button>
+      </div>
+    </motion.div>
+  );
+};
+
+// ============= STEP 3: TRAVELERS =============
+interface TravelersStepProps {
+  tripSetup: ReturnType<typeof useTripSetup>['tripSetup'];
+  onSetAdults: (count: number) => void;
+  onToggleChildren: (has: boolean) => void;
+  onAddChild: () => void;
+  onRemoveChild: (id: string) => void;
+  onUpdateChildAge: (id: string, age: number) => void;
+  onNext: () => void;
+  isValid: boolean;
+}
+
+const TravelersStep = ({ 
+  tripSetup, 
+  onSetAdults,
+  onToggleChildren,
+  onAddChild,
+  onRemoveChild,
+  onUpdateChildAge,
+  onNext, 
+  isValid 
+}: TravelersStepProps) => {
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -20 }}
+      className="px-4"
+    >
+      <div className="mb-8 text-center">
+        <h1 className="text-2xl font-bold text-foreground mb-2">Who's traveling?</h1>
+        <p className="text-muted-foreground">Tell us about your travel party</p>
+      </div>
+
+      <div className="space-y-6 max-w-md mx-auto">
         <div className="bg-card rounded-2xl p-4 space-y-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
               <Users className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <h3 className="font-semibold text-foreground">Viajantes</h3>
-              <p className="text-sm text-muted-foreground">Quem vai nessa?</p>
+              <h3 className="font-semibold text-foreground">Travelers</h3>
+              <p className="text-sm text-muted-foreground">Adults and children</p>
             </div>
           </div>
 
           {/* Adults counter */}
           <div className="flex items-center justify-between py-2">
-            <span className="text-foreground">Adultos</span>
+            <span className="text-foreground">Adults</span>
             <div className="flex items-center gap-3">
               <Button
                 variant="outline"
@@ -474,7 +548,7 @@ const DetailsStep = ({
           <div className="flex items-center justify-between py-2 border-t border-border">
             <div className="flex items-center gap-3">
               <Baby className="w-5 h-5 text-muted-foreground" />
-              <span className="text-foreground">Tem crianças?</span>
+              <span className="text-foreground">Any children?</span>
             </div>
             <Switch
               checked={tripSetup.hasChildren}
@@ -508,20 +582,137 @@ const DetailsStep = ({
                   onClick={onAddChild}
                 >
                   <Plus className="w-4 h-4 mr-2" />
-                  Adicionar criança
+                  Add child
                 </Button>
               </motion.div>
             )}
           </AnimatePresence>
         </div>
 
-        {/* Submit button */}
         <Button
-          onClick={onSubmit}
+          onClick={onNext}
           disabled={!isValid}
           className="w-full h-14 text-lg font-semibold rounded-2xl"
         >
-          Montar roteiro
+          Continue
+          <ChevronRight className="w-5 h-5 ml-2" />
+        </Button>
+      </div>
+    </motion.div>
+  );
+};
+
+// ============= STEP 4: CONFIRMATION =============
+interface ConfirmationStepProps {
+  destination: Destination;
+  tripSetup: ReturnType<typeof useTripSetup>['tripSetup'];
+  tripDays: number;
+  onConfirm: () => void;
+}
+
+const ConfirmationStep = ({ destination, tripSetup, tripDays, onConfirm }: ConfirmationStepProps) => {
+  const totalTravelers = tripSetup.adultsCount + tripSetup.children.length;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -20 }}
+      className="px-4"
+    >
+      <div className="mb-8 text-center">
+        <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+          <Plane className="w-8 h-8 text-primary" />
+        </div>
+        <h1 className="text-2xl font-bold text-foreground mb-2">Ready to plan!</h1>
+        <p className="text-muted-foreground">Review your trip details</p>
+      </div>
+
+      <div className="space-y-4 max-w-md mx-auto">
+        {/* Destination */}
+        <div className="bg-card rounded-2xl p-4">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+              <MapPin className="w-6 h-6 text-primary" />
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Destination</p>
+              <p className="font-semibold text-foreground">{destination.name}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Dates */}
+        <div className="bg-card rounded-2xl p-4">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+              <Calendar className="w-6 h-6 text-primary" />
+            </div>
+            <div className="flex-1">
+              <p className="text-sm text-muted-foreground">Dates</p>
+              <p className="font-semibold text-foreground">
+                {tripSetup.tripStartDate && tripSetup.tripEndDate 
+                  ? `${format(tripSetup.tripStartDate, "MMM dd")} - ${format(tripSetup.tripEndDate, "MMM dd, yyyy")}`
+                  : 'Not set'
+                }
+              </p>
+            </div>
+            <div className="text-right">
+              <p className="text-lg font-bold text-primary">{tripDays}</p>
+              <p className="text-xs text-muted-foreground">{tripDays === 1 ? 'day' : 'days'}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Times */}
+        <div className="bg-card rounded-2xl p-4">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+              <Clock className="w-6 h-6 text-primary" />
+            </div>
+            <div className="flex-1">
+              <p className="text-sm text-muted-foreground">Local times</p>
+              <div className="flex gap-4">
+                <div>
+                  <span className="text-xs text-muted-foreground">Arrival: </span>
+                  <span className="font-semibold text-foreground">{tripSetup.arrivalTime || '--:--'}</span>
+                </div>
+                <div>
+                  <span className="text-xs text-muted-foreground">Departure: </span>
+                  <span className="font-semibold text-foreground">{tripSetup.departureTime || '--:--'}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Travelers */}
+        <div className="bg-card rounded-2xl p-4">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+              <Users className="w-6 h-6 text-primary" />
+            </div>
+            <div className="flex-1">
+              <p className="text-sm text-muted-foreground">Travelers</p>
+              <p className="font-semibold text-foreground">
+                {tripSetup.adultsCount} {tripSetup.adultsCount === 1 ? 'adult' : 'adults'}
+                {tripSetup.children.length > 0 && (
+                  <span>, {tripSetup.children.length} {tripSetup.children.length === 1 ? 'child' : 'children'}</span>
+                )}
+              </p>
+            </div>
+            <div className="text-right">
+              <p className="text-lg font-bold text-primary">{totalTravelers}</p>
+              <p className="text-xs text-muted-foreground">total</p>
+            </div>
+          </div>
+        </div>
+
+        <Button
+          onClick={onConfirm}
+          className="w-full h-14 text-lg font-semibold rounded-2xl mt-6"
+        >
+          Create my itinerary
           <ChevronRight className="w-5 h-5 ml-2" />
         </Button>
       </div>
@@ -546,7 +737,7 @@ const ChildRow = ({ child, index, onUpdateAge, onRemove }: ChildRowProps) => {
       className="flex items-center gap-3 py-2 pl-2"
     >
       <span className="text-sm text-muted-foreground flex-1">
-        Criança {index + 1}
+        Child {index + 1}
       </span>
       
       <div className="flex items-center gap-2">
@@ -560,7 +751,7 @@ const ChildRow = ({ child, index, onUpdateAge, onRemove }: ChildRowProps) => {
           <Minus className="w-3 h-3" />
         </Button>
         <span className="w-10 text-center text-sm">
-          {child.age} {child.age === 1 ? 'ano' : 'anos'}
+          {child.age} {child.age === 1 ? 'yr' : 'yrs'}
         </span>
         <Button
           variant="outline"

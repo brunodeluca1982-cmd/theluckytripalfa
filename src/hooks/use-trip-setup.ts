@@ -15,6 +15,8 @@ export interface Child {
   age: number;
 }
 
+export type SetupStep = 'destination' | 'dates' | 'travelers' | 'confirmation' | 'complete';
+
 export interface TripSetup {
   destinationId: string;
   tripStartDate: Date | null;
@@ -25,6 +27,8 @@ export interface TripSetup {
   hasChildren: boolean;
   children: Child[];
   createdAt: string;
+  currentStep: SetupStep;
+  setupComplete: boolean;
 }
 
 const STORAGE_KEY = 'trip-setup';
@@ -39,6 +43,8 @@ const createEmptyTripSetup = (): TripSetup => ({
   hasChildren: false,
   children: [],
   createdAt: new Date().toISOString(),
+  currentStep: 'destination',
+  setupComplete: false,
 });
 
 export const useTripSetup = () => {
@@ -115,25 +121,43 @@ export const useTripSetup = () => {
     localStorage.removeItem(STORAGE_KEY);
   }, []);
 
+  const setCurrentStep = useCallback((step: SetupStep) => {
+    updateSetup({ currentStep: step });
+  }, [updateSetup]);
+
+  const completeSetup = useCallback(() => {
+    updateSetup({ setupComplete: true, currentStep: 'complete' });
+  }, [updateSetup]);
+
   // Calculate trip duration
   const tripDays = tripSetup.tripStartDate && tripSetup.tripEndDate
     ? Math.ceil((tripSetup.tripEndDate.getTime() - tripSetup.tripStartDate.getTime()) / (1000 * 60 * 60 * 24)) + 1
     : 0;
 
-  // Validation
-  const isValid = 
-    tripSetup.destinationId !== '' &&
+  // Step validations
+  const isDestinationValid = tripSetup.destinationId !== '';
+  
+  const isDatesValid = 
     tripSetup.tripStartDate !== null &&
     tripSetup.tripEndDate !== null &&
     tripSetup.tripEndDate >= tripSetup.tripStartDate &&
     tripSetup.arrivalTime !== '' &&
-    tripSetup.departureTime !== '' &&
+    tripSetup.departureTime !== '';
+  
+  const isTravelersValid = 
+    tripSetup.adultsCount >= 1 &&
     (!tripSetup.hasChildren || tripSetup.children.length > 0);
+
+  // Full validation
+  const isValid = isDestinationValid && isDatesValid && isTravelersValid;
 
   return {
     tripSetup,
     tripDays,
     isValid,
+    isDestinationValid,
+    isDatesValid,
+    isTravelersValid,
     // Actions
     setDestination,
     setDates,
@@ -145,6 +169,8 @@ export const useTripSetup = () => {
     updateChildAge,
     clearSetup,
     updateSetup,
+    setCurrentStep,
+    completeSetup,
   };
 };
 
