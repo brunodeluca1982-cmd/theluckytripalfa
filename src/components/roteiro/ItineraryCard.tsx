@@ -28,6 +28,10 @@ export interface ItineraryItem {
   source: 'lucky-trip' | 'partner' | 'ai' | 'user';
   imageUrl?: string;
   description?: string;
+  // Curator attribution (required for AI-generated itineraries)
+  curatorId?: string;
+  curatorName?: string;
+  neighborhood?: string;
 }
 
 interface ItineraryCardProps {
@@ -125,13 +129,25 @@ export const ItineraryCard = ({
               <Clock className="w-3 h-3" />
               {item.duration}
             </span>
-            {item.source !== 'user' && sourceLabels[item.source] && (
+            {/* Curator Badge — Shows "By [Name]" if curator is set */}
+            {item.curatorName ? (
+              <span className="flex items-center gap-1 text-primary/80 font-medium">
+                <Users className="w-3 h-3" />
+                By {item.curatorName.split(' ')[0]}
+              </span>
+            ) : item.source !== 'user' && sourceLabels[item.source] && (
               <span className="flex items-center gap-1 text-primary/70">
                 {sourceIcons[item.source]}
                 {sourceLabels[item.source]}
               </span>
             )}
           </div>
+          {/* Neighborhood if available */}
+          {item.neighborhood && (
+            <p className="text-[9px] text-muted-foreground/70 mt-0.5 truncate">
+              {item.neighborhood}
+            </p>
+          )}
         </div>
 
         {/* Remove button for user column */}
