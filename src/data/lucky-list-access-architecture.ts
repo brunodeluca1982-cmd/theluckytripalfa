@@ -174,6 +174,26 @@ export const INTERACTION_RULES = {
 } as const;
 
 // ═══════════════════════════════════════════════════════════════════════════
+// CORE PREMIUM PRINCIPLE
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * CORE PRINCIPLE
+ * 
+ * Lucky List is:
+ * - A layer of intelligence
+ * - Not a separate product
+ * - Not a hard paywall
+ * - Not mandatory to enjoy the destination
+ */
+export const PREMIUM_CORE_PRINCIPLE = {
+  isLayerOfIntelligence: true,
+  isSeparateProduct: false,
+  isHardPaywall: false,
+  mandatoryToEnjoyDestination: false,
+} as const;
+
+// ═══════════════════════════════════════════════════════════════════════════
 // COGNITIVE POSITIONING
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -193,8 +213,34 @@ export const COGNITIVE_POSITIONING = {
   impliesDepthNotBreadth: true,
 } as const;
 
+/**
+ * COGNITIVE FEEL
+ * 
+ * Lucky List must FEEL like:
+ * - A secret layer
+ * - A quiet advantage
+ * - A refinement tool
+ * 
+ * NOT like:
+ * - A sales wall
+ * - A locked door
+ * - A punishment for free users
+ */
+export const COGNITIVE_FEEL = {
+  mustFeelLike: {
+    secretLayer: true,
+    quietAdvantage: true,
+    refinementTool: true,
+  },
+  mustNotFeelLike: {
+    salesWall: true,
+    lockedDoor: true,
+    punishmentForFreeUsers: true,
+  },
+} as const;
+
 // ═══════════════════════════════════════════════════════════════════════════
-// CONTENT STRUCTURE
+// CONTENT STRUCTURE & TEASER
 // ═══════════════════════════════════════════════════════════════════════════
 
 /**
@@ -203,13 +249,121 @@ export const COGNITIVE_POSITIONING = {
 export type ContentVisibility = 'visible' | 'locked' | 'teaser';
 
 /**
- * Teaser content rules
+ * TEASER CONTENT RULES (NON-SUBSCRIBERS)
+ * 
+ * - A limited number of Lucky List items
+ *   may be partially visible as "iscas"
+ * - Content teases depth, not answers everything
+ * - No full operational detail is revealed
  */
 export const TEASER_CONTENT_RULES = {
+  limitedItemsVisible: true,
+  visibleAsIscas: true,
+  teasesDepth: true,
+  answersEverything: false,
+  revealsFullOperationalDetail: false,
   showsEnoughToIntrique: true,
   showsEnoughToFrustrate: false,
   createsDesireForMore: true,
   revealsFullValue: false,
+} as const;
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SAVE BEHAVIOR
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * SAVE BEHAVIOR
+ * 
+ * - Non-subscribers may view Lucky List items
+ *   but cannot save them
+ * - Attempting to save triggers a premium access flow
+ *   (defined later)
+ * - No forced redirect or interruption
+ */
+export const SAVE_BEHAVIOR = {
+  nonSubscribersMayView: true,
+  nonSubscribersCannotSave: true,
+  saveAttemptTriggersPremiumFlow: true,
+  premiumFlowDefinedLater: true,
+  forcedRedirect: false,
+  forcedInterruption: false,
+} as const;
+
+// ═══════════════════════════════════════════════════════════════════════════
+// COMMUNICATION RULES
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * COMMUNICATION RULE
+ * 
+ * Lucky List must be framed as:
+ * "formas melhores de viver o lugar"
+ * NOT as "conteúdo bloqueado"
+ * 
+ * Language must emphasize:
+ * insight, timing, nuance, reading the city
+ * NOT exclusivity or urgency
+ */
+export const COMMUNICATION_RULES = {
+  framedAs: 'formas-melhores-de-viver-o-lugar',
+  notFramedAs: 'conteudo-bloqueado',
+  
+  languageEmphasizes: {
+    insight: true,
+    timing: true,
+    nuance: true,
+    readingTheCity: true,
+  },
+  
+  languageAvoidsEmphasizing: {
+    exclusivity: true,
+    urgency: true,
+    scarcity: true,
+    fomo: true,
+  },
+} as const;
+
+/**
+ * Value proposition keywords
+ */
+export const VALUE_KEYWORDS = {
+  positive: [
+    'insight',
+    'timing',
+    'nuance',
+    'reading',
+    'understanding',
+    'depth',
+    'refinement',
+  ] as const,
+  
+  negative: [
+    'exclusive',
+    'urgent',
+    'limited',
+    'blocked',
+    'locked',
+    'premium-only',
+  ] as const,
+} as const;
+
+// ═══════════════════════════════════════════════════════════════════════════
+// NAVIGATION RULES
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * NAVIGATION RULES
+ * 
+ * - Entering and exiting Lucky List
+ *   must always return the user
+ *   to the same destination context
+ * - Never eject to Home
+ */
+export const LUCKY_LIST_NAVIGATION = {
+  returnToSameDestinationContext: true,
+  neverEjectToHome: true,
+  preservesNavigationState: true,
 } as const;
 
 // ═══════════════════════════════════════════════════════════════════════════
