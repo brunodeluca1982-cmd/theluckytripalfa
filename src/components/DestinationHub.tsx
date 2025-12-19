@@ -6,38 +6,50 @@ import { useCallback, useEffect, useState } from "react";
 
 /**
  * ═══════════════════════════════════════════════════════════════════════════
- * DESTINATION HUB — FINAL STRUCTURAL LOCK (DO NOT MODIFY)
+ * DESTINATION HUB — STRUCTURAL & UX LOCK (VALIDATED / FROZEN)
  * ═══════════════════════════════════════════════════════════════════════════
  * 
- * CORE PRINCIPLE:
- * Game-like, swipe-based, calm and intuitive. No vertical scrolling.
+ * LOCKED FLOW (STEP 2 OF DESTINATION JOURNEY):
+ * 1. Video intro ends → Hub appears automatically
+ * 2. Hub displays EXACTLY 5 central transparent buttons
+ * 3. Horizontal swipe navigation only (no vertical scroll)
  * 
- * LOCKED ELEMENTS (DO NOT CHANGE):
- * - Same hero image across all swipes
- * - Same typography, opacity and blur treatment
- * - Same circular, semi-transparent buttons
- * - No lists, no cards, no grids
- * - No text blocks or explanations
- * - No additional CTAs
- * - No auto-reordering
- * - No resizing except where explicitly stated
+ * ═══════════════════════════════════════════════════════════════════════════
+ * PRIMARY HUB (SWIPE 1) — 5 BUTTONS EXACTLY:
+ * ═══════════════════════════════════════════════════════════════════════════
+ * 1. Como Chegar (top-left)
+ * 2. Onde Ficar (top-right)
+ * 3. Onde Comer (bottom-left)
+ * 4. O Que Fazer (bottom-right)
+ * 5. Lucky List (CENTER, smaller, emphasized)
  * 
- * 🔒 FINAL SWIPE STRUCTURE (3 SWIPES ONLY):
- * - Swipe 1: Primary Hub (Como chegar, Onde ficar, Onde comer, O que fazer + Lucky List center)
+ * ═══════════════════════════════════════════════════════════════════════════
+ * IMMUTABILITY RULES — DO NOT MODIFY:
+ * ═══════════════════════════════════════════════════════════════════════════
+ * - Buttons MUST remain centered on screen
+ * - Buttons MUST remain transparent (glass effect)
+ * - NO list-based layout allowed on this screen
+ * - NO additional modules allowed on primary hub
+ * - NO reordering of button positions
+ * - NO relabeling of button text
+ * - Same hero image across ALL swipes
+ * - Same typography, opacity, blur treatment
+ * - NO text blocks or explanations
+ * - NO additional CTAs
+ * - NO auto-reordering
+ * 
+ * ═══════════════════════════════════════════════════════════════════════════
+ * SECONDARY SWIPES (LOCKED):
+ * ═══════════════════════════════════════════════════════════════════════════
  * - Swipe 2: Mobility & Lifestyle (Mover, Vida noturna, Sabores locais, Dinheiro)
  * - Swipe 3: Planning & Closure (Documentos & Visto, Melhor época, O que levar, Links & Checklist)
  * 
- * CONSOLIDATION APPLIED:
- * - "Gastos da viagem" removed entirely
- * - "Links úteis" + "Checklist final" merged into "Links & Checklist"
- * - Context & Safety modules removed
- * - Experiences & Discovery modules removed
- * 
- * IMMUTABILITY RULES:
- * - No module may change swipe position
- * - No module may be duplicated
- * - No module may be renamed without explicit override
- * - System must never auto-reorder buttons
+ * ═══════════════════════════════════════════════════════════════════════════
+ * SCALABILITY:
+ * ═══════════════════════════════════════════════════════════════════════════
+ * - This structure applies IDENTICALLY to ALL destinations
+ * - Future destinations MUST follow this exact layout
+ * - No destination-specific variations allowed
  * ═══════════════════════════════════════════════════════════════════════════
  */
 

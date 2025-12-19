@@ -2,15 +2,31 @@ import { useEffect, useRef, useCallback } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 
 /**
- * DESTINATION VIDEO INTRO
+ * ═══════════════════════════════════════════════════════════════════════════
+ * DESTINATION VIDEO INTRO — STRUCTURAL & UX LOCK
+ * ═══════════════════════════════════════════════════════════════════════════
  * 
- * Hero video introduction for each destination.
- * Plays automatically, auto-advances to destination hub when complete.
- * User can skip anytime with "Pular" button.
+ * LOCKED FLOW (STEP 1 OF DESTINATION JOURNEY):
+ * 1. Destination click → Hero video plays (15–30s)
+ * 2. Video ends → Automatic transition to destination hub
+ * 3. User can skip anytime with "Pular" button
  * 
- * SCALABLE: Add video URLs to destinationVideos object for new destinations.
+ * IMMUTABILITY RULES:
+ * - Video must auto-play on entry
+ * - Video must auto-advance to hub on completion
+ * - Skip button must always be visible
+ * - Replace history entry (no back to video from hub)
  * 
- * TODO: Replace placeholder video with actual destination videos.
+ * DO NOT MODIFY:
+ * - Flow sequence (video → hub)
+ * - Skip button behavior
+ * - Auto-advance behavior
+ * - History replacement logic
+ * 
+ * SCALABLE:
+ * - Add video URLs to destinationVideos object for new destinations
+ * - Same flow applies to ALL destinations
+ * ═══════════════════════════════════════════════════════════════════════════
  */
 
 interface DestinationConfig {
