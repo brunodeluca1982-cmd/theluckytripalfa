@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ChevronLeft, MapPin, Bed, Utensils, Compass, Sparkles } from "lucide-react";
+import { ChevronLeft, ChevronRight, MapPin, Bed, Utensils, Compass, Sparkles } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 /**
@@ -93,6 +93,17 @@ const DestinationEntry = ({ name, country, backgroundImage, actions }: Destinati
             ))}
           </div>
         </main>
+        
+        {/* Swipe Hint - Access to Secondary Modules */}
+        <div className="px-6 pb-28">
+          <Link
+            to="/destino/rio-de-janeiro/explorar"
+            className="flex items-center justify-center gap-2 py-3 text-white/70 hover:text-white transition-colors"
+          >
+            <span className="text-sm">Explorar mais</span>
+            <ChevronRight className="w-4 h-4" />
+          </Link>
+        </div>
       </div>
     </div>
   );
