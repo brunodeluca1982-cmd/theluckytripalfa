@@ -1,24 +1,33 @@
 import { Link } from "react-router-dom";
-import { ChevronLeft, MapPin, Bed, Utensils, Compass, Sparkles, Car, Moon, Coffee, Wallet } from "lucide-react";
+import { ChevronLeft, MapPin, Bed, Utensils, Compass, Sparkles, Car, Moon, Coffee, Wallet, Palette, Shield, Cloud, Lightbulb, Star, Map, Route, Calendar } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import useEmblaCarousel from "embla-carousel-react";
 import { useCallback, useEffect, useState } from "react";
 
 /**
- * DESTINATION HUB — FINAL LOCK
+ * ═══════════════════════════════════════════════════════════════════════════
+ * DESTINATION HUB — STRUCTURAL LOCK (FINAL)
+ * ═══════════════════════════════════════════════════════════════════════════
+ * 
+ * CORE PRINCIPLE:
+ * Game-like, swipe-based, calm and intuitive. No vertical scrolling.
  * 
  * LOCKED ELEMENTS (DO NOT CHANGE):
- * - Button positions (diamond layout)
- * - Button sizes (78px outer, 70px center)
- * - Transparency/glass style
- * - Typography hierarchy
- * - Background image
+ * - Same hero image across all swipes
+ * - Same typography, opacity and blur treatment
+ * - Same circular, semi-transparent buttons
+ * - No lists, no cards, no grids
+ * - No text blocks or explanations
+ * - No additional CTAs
+ * - No auto-reordering
+ * - No resizing except where explicitly stated
  * 
- * NAVIGATION:
- * - Horizontal swipe reveals secondary button groups
- * - Max 5 buttons per page
- * - Same visual style across all pages
- * - No vertical scrolling
+ * SWIPE STRUCTURE:
+ * - Swipe 0: Primary Hub (Chegar, Ficar, Comer, Fazer + Lucky List center)
+ * - Swipe 1: Living the Destination (Mover, Noite, Sabores, Dinheiro)
+ * - Swipe 2: Context & Safety (Cultura, Segurança, Clima, Dicas Locais)
+ * - Swipe 3: Experiences & Discovery (Experiências, Fora do Óbvio, Bate-volta, Sazonal)
+ * ═══════════════════════════════════════════════════════════════════════════
  */
 
 interface DestinationAction {
@@ -38,12 +47,34 @@ interface DestinationHubProps {
   actions: DestinationAction[];
 }
 
-// Secondary modules (page 2+)
-const SECONDARY_MODULES = [
+// ═══════════════════════════════════════════════════════════════════════════
+// SWIPE 1 — Living the Destination
+// ═══════════════════════════════════════════════════════════════════════════
+const SWIPE_1_MODULES = [
   { id: 'mover', shortLabel: 'Mover', icon: Car, path: '/destino/rio-de-janeiro/mover' },
   { id: 'noite', shortLabel: 'Noite', icon: Moon, path: '/destino/rio-de-janeiro/noite' },
   { id: 'sabores', shortLabel: 'Sabores', icon: Coffee, path: '/destino/rio-de-janeiro/sabores' },
   { id: 'dinheiro', shortLabel: 'Dinheiro', icon: Wallet, path: '/destino/rio-de-janeiro/dinheiro' },
+];
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SWIPE 2 — Context & Safety
+// ═══════════════════════════════════════════════════════════════════════════
+const SWIPE_2_MODULES = [
+  { id: 'cultura', shortLabel: 'Cultura', icon: Palette, path: '/destino/rio-de-janeiro/cultura' },
+  { id: 'seguranca', shortLabel: 'Segurança', icon: Shield, path: '/destino/rio-de-janeiro/seguranca' },
+  { id: 'clima', shortLabel: 'Clima', icon: Cloud, path: '/destino/rio-de-janeiro/clima' },
+  { id: 'dicas-locais', shortLabel: 'Dicas Locais', icon: Lightbulb, path: '/destino/rio-de-janeiro/dicas-locais' },
+];
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SWIPE 3 — Experiences & Discovery
+// ═══════════════════════════════════════════════════════════════════════════
+const SWIPE_3_MODULES = [
+  { id: 'experiencias', shortLabel: 'Experiências', icon: Star, path: '/destino/rio-de-janeiro/experiencias' },
+  { id: 'fora-do-obvio', shortLabel: 'Fora do Óbvio', icon: Map, path: '/destino/rio-de-janeiro/fora-do-obvio' },
+  { id: 'bate-volta', shortLabel: 'Bate-volta', icon: Route, path: '/destino/rio-de-janeiro/bate-volta' },
+  { id: 'sazonal', shortLabel: 'Sazonal', icon: Calendar, path: '/destino/rio-de-janeiro/sazonal' },
 ];
 
 const DestinationHub = ({ destinationId, name, country, backgroundImage, actions }: DestinationHubProps) => {
@@ -51,16 +82,14 @@ const DestinationHub = ({ destinationId, name, country, backgroundImage, actions
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [scrollSnaps, setScrollSnaps] = useState<number[]>([]);
 
-  // Fixed order: Chegar, Ficar, Comer, Lucky List, Fazer
-  const reorderedActions = [
-    actions.find(a => a.id === 'chegar'),
-    actions.find(a => a.id === 'ficar'),
-    actions.find(a => a.id === 'comer'),
-    actions.find(a => a.id === 'lucky-list'),
-    actions.find(a => a.id === 'fazer'),
-  ].filter(Boolean) as DestinationAction[];
-
-  const primaryActions = reorderedActions.length === 5 ? reorderedActions : actions.slice(0, 5);
+  // Fixed order for Swipe 0: Chegar, Ficar, Comer, Lucky List (center), Fazer
+  const primaryActions = {
+    chegar: actions.find(a => a.id === 'chegar'),
+    ficar: actions.find(a => a.id === 'ficar'),
+    comer: actions.find(a => a.id === 'comer'),
+    luckyList: actions.find(a => a.id === 'lucky-list'),
+    fazer: actions.find(a => a.id === 'fazer'),
+  };
 
   const onSelect = useCallback(() => {
     if (!emblaApi) return;
@@ -77,7 +106,7 @@ const DestinationHub = ({ destinationId, name, country, backgroundImage, actions
   return (
     <div className="fixed inset-0 overflow-hidden">
       {/* ═══════════════════════════════════════════════════════════════
-          FULL-SCREEN HERO BACKGROUND (LOCKED)
+          FULL-SCREEN HERO BACKGROUND (LOCKED — SAME ACROSS ALL SWIPES)
           ═══════════════════════════════════════════════════════════════ */}
       <div 
         className="absolute inset-0 bg-cover bg-center bg-fixed"
@@ -108,105 +137,181 @@ const DestinationHub = ({ destinationId, name, country, backgroundImage, actions
       </div>
 
       {/* ═══════════════════════════════════════════════════════════════
-          HORIZONTAL SWIPE CAROUSEL
+          HORIZONTAL SWIPE CAROUSEL (4 PAGES)
           ═══════════════════════════════════════════════════════════════ */}
       <div className="absolute inset-0 z-20 overflow-hidden" ref={emblaRef}>
         <div className="flex h-full">
           
-          {/* PAGE 1 — PRIMARY ACTIONS (LOCKED DIAMOND LAYOUT) */}
+          {/* ═══════════════════════════════════════════════════════════
+              SWIPE 0 — PRIMARY HUB (ENTRY POINT)
+              Purpose: immediate decision, zero cognitive load
+              ═══════════════════════════════════════════════════════════ */}
           <div className="flex-none w-full h-full flex items-center justify-center" style={{ paddingTop: '8vh' }}>
             <div className="relative w-[300px] h-[300px]">
-              {/* CENTER — Lucky List */}
-              {primaryActions[3] && (
+              {/* CENTER — Lucky List (slightly smaller, curiosity trigger) */}
+              {primaryActions.luckyList && (
                 <RadialButton 
-                  icon={primaryActions[3].icon}
-                  label={primaryActions[3].shortLabel}
-                  path={primaryActions[3].path}
+                  icon={primaryActions.luckyList.icon}
+                  label={primaryActions.luckyList.shortLabel}
+                  path={primaryActions.luckyList.path}
                   isCenter
                   position="center"
                 />
               )}
               {/* TOP LEFT — Chegar */}
-              {primaryActions[0] && (
+              {primaryActions.chegar && (
                 <RadialButton 
-                  icon={primaryActions[0].icon}
-                  label={primaryActions[0].shortLabel}
-                  path={primaryActions[0].path}
+                  icon={primaryActions.chegar.icon}
+                  label={primaryActions.chegar.shortLabel}
+                  path={primaryActions.chegar.path}
                   position="top-left"
                 />
               )}
               {/* TOP RIGHT — Ficar */}
-              {primaryActions[1] && (
+              {primaryActions.ficar && (
                 <RadialButton 
-                  icon={primaryActions[1].icon}
-                  label={primaryActions[1].shortLabel}
-                  path={primaryActions[1].path}
+                  icon={primaryActions.ficar.icon}
+                  label={primaryActions.ficar.shortLabel}
+                  path={primaryActions.ficar.path}
                   position="top-right"
                 />
               )}
               {/* BOTTOM LEFT — Comer */}
-              {primaryActions[2] && (
+              {primaryActions.comer && (
                 <RadialButton 
-                  icon={primaryActions[2].icon}
-                  label={primaryActions[2].shortLabel}
-                  path={primaryActions[2].path}
+                  icon={primaryActions.comer.icon}
+                  label={primaryActions.comer.shortLabel}
+                  path={primaryActions.comer.path}
                   position="bottom-left"
                 />
               )}
               {/* BOTTOM RIGHT — Fazer */}
-              {primaryActions[4] && (
+              {primaryActions.fazer && (
                 <RadialButton 
-                  icon={primaryActions[4].icon}
-                  label={primaryActions[4].shortLabel}
-                  path={primaryActions[4].path}
+                  icon={primaryActions.fazer.icon}
+                  label={primaryActions.fazer.shortLabel}
+                  path={primaryActions.fazer.path}
                   position="bottom-right"
                 />
               )}
             </div>
           </div>
 
-          {/* PAGE 2 — SECONDARY MODULES (SAME STYLE) */}
+          {/* ═══════════════════════════════════════════════════════════
+              SWIPE 1 — LIVING THE DESTINATION
+              Purpose: day-to-day experience
+              ═══════════════════════════════════════════════════════════ */}
           <div className="flex-none w-full h-full flex items-center justify-center" style={{ paddingTop: '8vh' }}>
             <div className="relative w-[300px] h-[300px]">
-              {SECONDARY_MODULES[0] && (
-                <RadialButton 
-                  icon={SECONDARY_MODULES[0].icon}
-                  label={SECONDARY_MODULES[0].shortLabel}
-                  path={SECONDARY_MODULES[0].path}
-                  position="top-left"
-                />
-              )}
-              {SECONDARY_MODULES[1] && (
-                <RadialButton 
-                  icon={SECONDARY_MODULES[1].icon}
-                  label={SECONDARY_MODULES[1].shortLabel}
-                  path={SECONDARY_MODULES[1].path}
-                  position="top-right"
-                />
-              )}
-              {SECONDARY_MODULES[2] && (
-                <RadialButton 
-                  icon={SECONDARY_MODULES[2].icon}
-                  label={SECONDARY_MODULES[2].shortLabel}
-                  path={SECONDARY_MODULES[2].path}
-                  position="bottom-left"
-                />
-              )}
-              {SECONDARY_MODULES[3] && (
-                <RadialButton 
-                  icon={SECONDARY_MODULES[3].icon}
-                  label={SECONDARY_MODULES[3].shortLabel}
-                  path={SECONDARY_MODULES[3].path}
-                  position="bottom-right"
-                />
-              )}
+              {/* TOP LEFT — Mover */}
+              <RadialButton 
+                icon={SWIPE_1_MODULES[0].icon}
+                label={SWIPE_1_MODULES[0].shortLabel}
+                path={SWIPE_1_MODULES[0].path}
+                position="top-left"
+              />
+              {/* TOP RIGHT — Noite */}
+              <RadialButton 
+                icon={SWIPE_1_MODULES[1].icon}
+                label={SWIPE_1_MODULES[1].shortLabel}
+                path={SWIPE_1_MODULES[1].path}
+                position="top-right"
+              />
+              {/* BOTTOM LEFT — Sabores */}
+              <RadialButton 
+                icon={SWIPE_1_MODULES[2].icon}
+                label={SWIPE_1_MODULES[2].shortLabel}
+                path={SWIPE_1_MODULES[2].path}
+                position="bottom-left"
+              />
+              {/* BOTTOM RIGHT — Dinheiro */}
+              <RadialButton 
+                icon={SWIPE_1_MODULES[3].icon}
+                label={SWIPE_1_MODULES[3].shortLabel}
+                path={SWIPE_1_MODULES[3].path}
+                position="bottom-right"
+              />
+            </div>
+          </div>
+
+          {/* ═══════════════════════════════════════════════════════════
+              SWIPE 2 — CONTEXT & SAFETY
+              Purpose: reduce anxiety, increase confidence
+              ═══════════════════════════════════════════════════════════ */}
+          <div className="flex-none w-full h-full flex items-center justify-center" style={{ paddingTop: '8vh' }}>
+            <div className="relative w-[300px] h-[300px]">
+              {/* TOP LEFT — Cultura */}
+              <RadialButton 
+                icon={SWIPE_2_MODULES[0].icon}
+                label={SWIPE_2_MODULES[0].shortLabel}
+                path={SWIPE_2_MODULES[0].path}
+                position="top-left"
+              />
+              {/* TOP RIGHT — Segurança */}
+              <RadialButton 
+                icon={SWIPE_2_MODULES[1].icon}
+                label={SWIPE_2_MODULES[1].shortLabel}
+                path={SWIPE_2_MODULES[1].path}
+                position="top-right"
+              />
+              {/* BOTTOM LEFT — Clima */}
+              <RadialButton 
+                icon={SWIPE_2_MODULES[2].icon}
+                label={SWIPE_2_MODULES[2].shortLabel}
+                path={SWIPE_2_MODULES[2].path}
+                position="bottom-left"
+              />
+              {/* BOTTOM RIGHT — Dicas Locais */}
+              <RadialButton 
+                icon={SWIPE_2_MODULES[3].icon}
+                label={SWIPE_2_MODULES[3].shortLabel}
+                path={SWIPE_2_MODULES[3].path}
+                position="bottom-right"
+              />
+            </div>
+          </div>
+
+          {/* ═══════════════════════════════════════════════════════════
+              SWIPE 3 — EXPERIENCES & DISCOVERY
+              Purpose: desire, differentiation, inspiration
+              ═══════════════════════════════════════════════════════════ */}
+          <div className="flex-none w-full h-full flex items-center justify-center" style={{ paddingTop: '8vh' }}>
+            <div className="relative w-[300px] h-[300px]">
+              {/* TOP LEFT — Experiências */}
+              <RadialButton 
+                icon={SWIPE_3_MODULES[0].icon}
+                label={SWIPE_3_MODULES[0].shortLabel}
+                path={SWIPE_3_MODULES[0].path}
+                position="top-left"
+              />
+              {/* TOP RIGHT — Fora do Óbvio */}
+              <RadialButton 
+                icon={SWIPE_3_MODULES[1].icon}
+                label={SWIPE_3_MODULES[1].shortLabel}
+                path={SWIPE_3_MODULES[1].path}
+                position="top-right"
+              />
+              {/* BOTTOM LEFT — Bate-volta */}
+              <RadialButton 
+                icon={SWIPE_3_MODULES[2].icon}
+                label={SWIPE_3_MODULES[2].shortLabel}
+                path={SWIPE_3_MODULES[2].path}
+                position="bottom-left"
+              />
+              {/* BOTTOM RIGHT — Sazonal */}
+              <RadialButton 
+                icon={SWIPE_3_MODULES[3].icon}
+                label={SWIPE_3_MODULES[3].shortLabel}
+                path={SWIPE_3_MODULES[3].path}
+                position="bottom-right"
+              />
             </div>
           </div>
         </div>
       </div>
 
       {/* ═══════════════════════════════════════════════════════════════
-          PAGE INDICATORS
+          PAGE INDICATORS (SUBTLE)
           ═══════════════════════════════════════════════════════════════ */}
       <div className="absolute bottom-28 left-0 right-0 z-30 flex flex-col items-center gap-2">
         <div className="flex gap-2">
@@ -222,16 +327,15 @@ const DestinationHub = ({ destinationId, name, country, backgroundImage, actions
             />
           ))}
         </div>
-        <p className="text-[9px] text-white/50 tracking-wider uppercase">
-          {selectedIndex === 0 ? 'Swipe to explore' : 'Mais categorias'}
-        </p>
       </div>
     </div>
   );
 };
 
 /**
- * Radial Button — Glass effect (LOCKED STYLE)
+ * ═══════════════════════════════════════════════════════════════════════════
+ * RADIAL BUTTON — LOCKED GLASS STYLE
+ * ═══════════════════════════════════════════════════════════════════════════
  */
 interface RadialButtonProps {
   icon: LucideIcon;
