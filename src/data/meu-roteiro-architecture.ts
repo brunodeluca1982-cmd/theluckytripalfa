@@ -601,6 +601,261 @@ export const LOCATION_INTELLIGENCE_SCALABILITY = {
 } as const;
 
 // ═══════════════════════════════════════════════════════════════════════════
+// ENHANCED LOCATION INTELLIGENCE & COHERENCE LOGIC
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * LOCATION DATA SOURCE
+ * 
+ * Each item added to "Meu Roteiro" must be associated internally with:
+ * - Google Maps location data (latitude / longitude)
+ * - Neighborhood (when applicable)
+ * - Destination context
+ * 
+ * This data is used for ANALYSIS ONLY, not visualization.
+ */
+export const LOCATION_DATA_SOURCE = {
+  requiredData: {
+    googleMapsCoordinates: true,
+    latitude: true,
+    longitude: true,
+    neighborhood: true,
+    destinationContext: true,
+  },
+  usageMode: 'analysis-only',
+  notForVisualization: true,
+} as const;
+
+/**
+ * Zone types for cross-zone detection
+ */
+export type RioZone = 
+  | 'zona-sul'
+  | 'zona-norte'
+  | 'zona-oeste'
+  | 'barra'
+  | 'centro';
+
+/**
+ * Transport mode for cluster analysis
+ */
+export type TransportMode = 'walkable' | 'car-dependent' | 'mixed';
+
+/**
+ * INTELLIGENCE FUNCTION 1: DISTANCE AWARENESS
+ * 
+ * - Detect when saved items are geographically distant
+ * - Identify clusters that are walkable vs. car-dependent
+ * - Recognize cross-zone jumps (e.g. Zona Sul → Barra)
+ */
+export const DISTANCE_AWARENESS = {
+  enabled: true,
+  capabilities: {
+    detectGeographicallyDistantItems: true,
+    identifyWalkableClusters: true,
+    identifyCarDependentClusters: true,
+    recognizeCrossZoneJumps: true,
+  },
+  crossZoneExamples: [
+    ['zona-sul', 'barra'],
+    ['zona-sul', 'zona-norte'],
+    ['centro', 'barra'],
+  ] as Array<[RioZone, RioZone]>,
+} as const;
+
+/**
+ * Coherence issue types
+ */
+export type CoherenceIssueType = 
+  | 'too-many-distant-items'
+  | 'impractical-single-outing'
+  | 'different-time-of-day-required';
+
+/**
+ * INTELLIGENCE FUNCTION 2: LOGICAL COHERENCE
+ * 
+ * Detect potential friction such as:
+ * - Too many distant items grouped together
+ * - Impractical combinations for a single outing
+ * - Items that usually require different times of day
+ * 
+ * These are SUGGESTIONS ONLY, never errors.
+ */
+export const LOGICAL_COHERENCE = {
+  enabled: true,
+  detects: {
+    tooManyDistantItemsGrouped: true,
+    impracticalSingleOutingCombinations: true,
+    differentTimeOfDayRequired: true,
+  },
+  outputType: 'suggestions-only',
+  neverErrors: true,
+  neverBlocks: true,
+} as const;
+
+/**
+ * Contextual warning types
+ */
+export type ContextualWarningType = 
+  | 'places-far-apart'
+  | 'requires-car'
+  | 'works-better-split';
+
+/**
+ * INTELLIGENCE FUNCTION 3: CONTEXTUAL WARNINGS (SOFT)
+ * 
+ * The system may surface gentle insights such as:
+ * - "These places are far apart"
+ * - "This group may require a car"
+ * - "This works better if split"
+ * 
+ * No alert is mandatory.
+ * No blocking behavior is allowed.
+ */
+export const CONTEXTUAL_WARNINGS = {
+  enabled: true,
+  warningTypes: [
+    'places-far-apart',
+    'requires-car',
+    'works-better-split',
+  ] as ContextualWarningType[],
+  behavior: {
+    alertMandatory: false,
+    blockingAllowed: false,
+    toneIsGentle: true,
+    toneIsInsightful: true,
+  },
+} as const;
+
+/**
+ * USER CONTROL PRINCIPLE
+ * 
+ * - The user ALWAYS remains in control
+ * - The system NEVER says "wrong"
+ * - The system NEVER enforces changes
+ * - Intelligence is SUGGESTIVE, not corrective
+ */
+export const USER_CONTROL_PRINCIPLE = {
+  userAlwaysInControl: true,
+  systemNeverSaysWrong: true,
+  systemNeverEnforcesChanges: true,
+  intelligenceMode: 'suggestive',
+  notCorrective: true,
+} as const;
+
+/**
+ * INTEGRATION WITH MEU ROTEIRO
+ * 
+ * - Intelligence operates inside the roteiro context
+ * - Suggestions appear only when relevant
+ * - Dismissing a suggestion never penalizes the user
+ */
+export const INTELLIGENCE_INTEGRATION = {
+  operatesInsideRoteiroContext: true,
+  suggestionsAppearWhenRelevant: true,
+  dismissingSuggestionNeverPenalizes: true,
+} as const;
+
+/**
+ * ENHANCED SCALABILITY
+ * 
+ * - This intelligence applies identically to all destinations
+ * - Future layers (map view, timeline, optimization)
+ *   may build on this logic without refactoring
+ */
+export const ENHANCED_INTELLIGENCE_SCALABILITY = {
+  appliesToAllDestinations: true,
+  logicIdenticalAcrossDestinations: true,
+  futureLayersCanBuildOn: true,
+  noRefactoringRequired: true,
+  futureLayers: [
+    'map-view',
+    'timeline',
+    'optimization',
+  ] as const,
+} as const;
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ENHANCED INTELLIGENCE HELPER FUNCTIONS
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Determine transport mode for a cluster of items
+ */
+export const determineTransportMode = (
+  maxDistanceKm: number
+): TransportMode => {
+  if (maxDistanceKm <= 1) return 'walkable';
+  if (maxDistanceKm >= 5) return 'car-dependent';
+  return 'mixed';
+};
+
+/**
+ * Check if two zones are considered a cross-zone jump
+ */
+export const isCrossZoneJump = (
+  zone1: RioZone,
+  zone2: RioZone
+): boolean => {
+  if (zone1 === zone2) return false;
+  
+  const significantJumps: Array<[RioZone, RioZone]> = [
+    ['zona-sul', 'barra'],
+    ['zona-sul', 'zona-norte'],
+    ['centro', 'barra'],
+    ['zona-norte', 'barra'],
+  ];
+  
+  return significantJumps.some(
+    ([a, b]) => (zone1 === a && zone2 === b) || (zone1 === b && zone2 === a)
+  );
+};
+
+/**
+ * Generate contextual warning based on analysis
+ */
+export const generateContextualWarning = (
+  issueType: CoherenceIssueType
+): ContextualWarningType => {
+  switch (issueType) {
+    case 'too-many-distant-items':
+      return 'places-far-apart';
+    case 'impractical-single-outing':
+      return 'works-better-split';
+    case 'different-time-of-day-required':
+      return 'works-better-split';
+    default:
+      return 'places-far-apart';
+  }
+};
+
+/**
+ * Soft coherence analysis result
+ */
+export interface SoftCoherenceInsight {
+  type: ContextualWarningType;
+  affectedItemIds: string[];
+  suggestion: string;
+  isMandatory: false;
+  canBeDismissed: true;
+}
+
+/**
+ * Create a soft coherence insight (always dismissable)
+ */
+export const createSoftInsight = (
+  type: ContextualWarningType,
+  affectedItemIds: string[],
+  suggestionKey: string
+): SoftCoherenceInsight => ({
+  type,
+  affectedItemIds,
+  suggestion: suggestionKey,
+  isMandatory: false,
+  canBeDismissed: true,
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
 // PROGRESSIVE AUTHENTICATION (MEU ROTEIRO)
 // ═══════════════════════════════════════════════════════════════════════════
 
