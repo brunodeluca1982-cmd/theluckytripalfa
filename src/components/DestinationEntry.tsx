@@ -1,17 +1,22 @@
 import { Link } from "react-router-dom";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, MapPin, Bed, Utensils, Compass, Sparkles } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
 /**
- * DESTINATION ENTRY SCREEN — STRUCTURAL LOCK
+ * DESTINATION ENTRY SCREEN — STRUCTURAL + VISUAL LOCK
  * 
  * First screen user sees after selecting a destination.
+ * Uses full-screen background with circular icon buttons.
  * 
  * PRIMARY ACTIONS (FIXED, EXACTLY 5):
- * 1. Como Chegar
- * 2. Onde Ficar
- * 3. Onde Comer
- * 4. O Que Fazer
- * 5. Lucky List (highlighted special action)
+ * 1. Como Chegar (Chegar)
+ * 2. Onde Ficar (Ficar)
+ * 3. Onde Comer (Comer)
+ * 4. O Que Fazer (Fazer)
+ * 5. Lucky List (central emphasis)
+ * 
+ * VISUAL REFERENCE: Circular buttons in grid layout
+ * No list-based layouts. Button-centric interaction model.
  * 
  * RULES:
  * - Exists at destination level only
@@ -24,61 +29,100 @@ import { ChevronLeft } from "lucide-react";
 interface DestinationAction {
   id: string;
   label: string;
+  shortLabel: string;
   path: string;
+  icon: LucideIcon;
   isSpecial?: boolean;
 }
 
 interface DestinationEntryProps {
   name: string;
   country: string;
+  backgroundImage: string;
   actions: DestinationAction[];
 }
 
-const DestinationEntry = ({ name, country, actions }: DestinationEntryProps) => {
-  return (
-    <div className="min-h-screen flex flex-col bg-background pb-20">
-      {/* Header with back navigation */}
-      <header className="px-6 pt-12 pb-8">
-        <Link 
-          to="/destinos" 
-          className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4"
-        >
-          <ChevronLeft className="w-4 h-4" />
-          Destinos
-        </Link>
-        <p className="text-xs tracking-widest text-muted-foreground uppercase mb-2">
-          {country}
-        </p>
-        <h1 className="text-4xl font-serif font-medium text-foreground">
-          {name}
-        </h1>
-      </header>
+const DestinationEntry = ({ name, country, backgroundImage, actions }: DestinationEntryProps) => {
+  // Split actions: first 3 for top row, last 2 for bottom row (with Lucky List centered)
+  const topRow = actions.slice(0, 3);
+  const bottomRow = actions.slice(3, 5);
 
-      {/* Primary Actions - exactly 5 */}
-      <main className="flex-1 px-6">
-        <div className="space-y-3 max-w-md">
-          {actions.map((action) => (
-            <Link
-              key={action.id}
-              to={action.path}
-              className={
-                action.isSpecial
-                  ? "inline-flex items-center justify-between w-full py-3 px-5 bg-muted/50 border border-border/50 rounded-lg text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
-                  : "inline-flex items-center justify-between w-full py-4 px-6 bg-card border border-border rounded-lg text-foreground hover:bg-accent transition-colors"
-              }
-            >
-              <p className={action.isSpecial ? "text-base font-serif" : "text-lg font-serif font-medium"}>
-                {action.label}
-              </p>
-              <span className={action.isSpecial ? "text-xs opacity-60" : "text-muted-foreground"}>
-                {action.isSpecial ? "✦" : "→"}
-              </span>
-            </Link>
-          ))}
-        </div>
-      </main>
+  return (
+    <div className="min-h-screen relative overflow-hidden">
+      {/* Full-screen background image */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center"
+        style={{ backgroundImage: `url(${backgroundImage})` }}
+      />
+      
+      {/* Gradient overlay for readability */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/50" />
+      
+      {/* Content */}
+      <div className="relative z-10 min-h-screen flex flex-col pb-24">
+        {/* Header */}
+        <header className="px-6 pt-12 pb-8">
+          <Link 
+            to="/destinos" 
+            className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 text-white hover:bg-white/30 transition-colors mb-6"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </Link>
+          
+          <h1 className="text-5xl font-serif font-medium text-white leading-tight">
+            {name}
+          </h1>
+          <p className="text-sm tracking-[0.3em] text-white/80 uppercase mt-2">
+            {country}
+          </p>
+        </header>
+
+        {/* Action Buttons Grid */}
+        <main className="flex-1 flex flex-col items-center justify-center px-6 -mt-8">
+          {/* Top Row - 3 buttons */}
+          <div className="flex justify-center gap-4 mb-4">
+            {topRow.map((action) => (
+              <ActionButton key={action.id} action={action} />
+            ))}
+          </div>
+          
+          {/* Bottom Row - 2 buttons centered */}
+          <div className="flex justify-center gap-4">
+            {bottomRow.map((action) => (
+              <ActionButton key={action.id} action={action} />
+            ))}
+          </div>
+        </main>
+      </div>
     </div>
   );
 };
 
+const ActionButton = ({ action }: { action: DestinationAction }) => {
+  const Icon = action.icon;
+  
+  return (
+    <Link
+      to={action.path}
+      className={`
+        flex flex-col items-center justify-center
+        w-24 h-24 rounded-full
+        backdrop-blur-md transition-all duration-200
+        ${action.isSpecial 
+          ? "bg-white/30 border-2 border-white/50 hover:bg-white/40 hover:scale-105" 
+          : "bg-white/20 border border-white/30 hover:bg-white/30 hover:scale-105"
+        }
+      `}
+    >
+      <Icon className={`w-7 h-7 text-white mb-1.5 ${action.isSpecial ? "drop-shadow-lg" : ""}`} />
+      <span className="text-white text-sm font-medium tracking-wide">
+        {action.shortLabel}
+      </span>
+    </Link>
+  );
+};
+
 export default DestinationEntry;
+
+// Export icons for use in destination pages
+export { MapPin, Bed, Utensils, Compass, Sparkles };
