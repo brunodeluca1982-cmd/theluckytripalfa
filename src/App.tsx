@@ -29,6 +29,7 @@ import DivisaoGastos from "./pages/profile/DivisaoGastos";
 import DiarioViagem from "./pages/profile/DiarioViagem";
 import Assinatura from "./pages/profile/Assinatura";
 import Configuracoes from "./pages/profile/Configuracoes";
+import SuporteHumano from "./pages/profile/SuporteHumano";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -92,6 +93,7 @@ const App = () => {
               <Route path="/perfil/diario" element={<DiarioViagem />} />
               <Route path="/perfil/assinatura" element={<Assinatura />} />
               <Route path="/perfil/configuracoes" element={<Configuracoes />} />
+              <Route path="/perfil/suporte" element={<SuporteHumano />} />
 
               {/* Placeholder routes for bottom nav */}
               <Route path="/ia" element={<NotFound />} />
