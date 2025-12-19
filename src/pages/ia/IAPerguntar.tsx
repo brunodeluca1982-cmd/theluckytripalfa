@@ -3,19 +3,35 @@ import { ChevronLeft, MessageCircle, Send, ArrowRight } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { findKnowledgeMatch, topicToModuleMap, KnowledgeEntry } from "@/data/rio-knowledge-base";
+import { 
+  findKnowledgeMatch, 
+  topicToModuleMap, 
+  AI_FALLBACK_MESSAGE,
+  containsSafetyTopic 
+} from "@/data/rio-knowledge-base";
 
 /**
  * ═══════════════════════════════════════════════════════════════════════════
- * IA PERGUNTAR — CLOSED-SCOPE CHAT (NO HALLUCINATIONS)
+ * IA PERGUNTAR — CLOSED-SCOPE CHAT (STRICT FALLBACK)
  * ═══════════════════════════════════════════════════════════════════════════
  * 
- * RULES:
- * - AI responds ONLY from RIO_KB (local knowledge base)
- * - If no match found, offer navigation to relevant modules
- * - All UI in Portuguese (pt-BR)
- * - No external APIs, no hallucinations
- * - Ready for future RAG integration
+ * AI SCOPE LOCK:
+ * - Answers ONLY from RIO_KB curated database
+ * - NEVER invents, assumes, or guesses
+ * - NEVER uses external/web knowledge
+ * - Uses EXACT fallback message when cannot answer
+ * 
+ * FALLBACK (VERBATIM):
+ * "Ih! Essa aí eu não sei te responder… quer falar com o Bruno? 
+ *  Chama ele no WhatsApp! 21998102132"
+ * 
+ * SAFETY RULE:
+ * Medical, legal, financial questions → trigger fallback immediately
+ * 
+ * LANGUAGE:
+ * - All responses in Portuguese (pt-BR)
+ * - No emojis
+ * - Calm, adult, practical tone
  * ═══════════════════════════════════════════════════════════════════════════
  */
 
@@ -50,22 +66,20 @@ const IAPerguntar = () => {
   }, [messages]);
 
   const generateResponse = (query: string): { content: string; suggestions?: { path: string; label: string }[] } => {
+    // SAFETY CHECK — Medical, legal, financial topics trigger fallback
+    if (containsSafetyTopic(query)) {
+      return { content: AI_FALLBACK_MESSAGE };
+    }
+    
+    // STRICT MATCHING — Only answer if grounded in curated content
     const matches = findKnowledgeMatch(query);
     
     if (matches.length === 0) {
-      // No match found - offer navigation
-      return {
-        content: "Ainda não tenho isso no meu banco do Rio. Quer que eu te leve para uma dessas seções?",
-        suggestions: [
-          { path: '/como-chegar', label: 'Chegar' },
-          { path: '/onde-ficar-rio', label: 'Ficar' },
-          { path: '/eat-map-view', label: 'Comer' },
-          { path: '/o-que-fazer', label: 'Fazer' },
-        ],
-      };
+      // No confident match — use exact fallback message
+      return { content: AI_FALLBACK_MESSAGE };
     }
 
-    // Build response from matches
+    // Build response ONLY from curated matches (max 2 entries)
     const responseTexts = matches.slice(0, 2).map(entry => entry.text);
     const topics = [...new Set(matches.map(m => m.topic))];
     const suggestions = topics.slice(0, 2).map(topic => topicToModuleMap[topic]);
