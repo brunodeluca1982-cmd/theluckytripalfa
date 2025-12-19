@@ -60,16 +60,43 @@ export type RoteiroItemType =
   | 'experience';
 
 // ═══════════════════════════════════════════════════════════════════════════
-// GEOLOCATION DATA STRUCTURE (GOOGLE MAPS READY)
+// LOCATION & CONTEXT INTELLIGENCE — CORE PRINCIPLE
 // ═══════════════════════════════════════════════════════════════════════════
 
 /**
- * GEOLOCATION DATA
+ * CORE PRINCIPLE
  * 
- * Every item in "Meu Roteiro" must internally retain geolocation data
- * for future Google Maps integration and route coherence analysis.
+ * The product must UNDERSTAND location before it SHOWS location.
+ * Every saved or browsed item must carry invisible spatial meaning.
+ */
+export const LOCATION_INTELLIGENCE_PRINCIPLE = {
+  understandBeforeShow: true,
+  everyItemCarriesSpatialMeaning: true,
+  invisibleAtThisStage: true,
+} as const;
+
+// ═══════════════════════════════════════════════════════════════════════════
+// LOCATION ATTRIBUTES (INTERNAL)
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Environment type for items
+ */
+export type EnvironmentType = 'indoor' | 'outdoor' | 'mixed';
+
+/**
+ * GEOLOCATION DATA (ENHANCED)
  * 
- * These fields may remain INVISIBLE to the user at this stage.
+ * Every item in "Meu Roteiro" must internally retain:
+ * - City
+ * - Neighborhood
+ * - Latitude (future-ready)
+ * - Longitude (future-ready)
+ * - Category (food, activity, nightlife, etc.)
+ * - Indoor / Outdoor (when applicable)
+ * 
+ * These attributes are INTERNAL only.
+ * They are NOT user-facing at this stage.
  */
 export interface GeoLocation {
   latitude: number;
@@ -78,6 +105,200 @@ export interface GeoLocation {
   city: string;
   country: string;
 }
+
+/**
+ * Extended location attributes (internal)
+ */
+export interface LocationAttributes {
+  geo: GeoLocation;
+  category: RoteiroItemType;
+  environment: EnvironmentType;
+  effortLevel?: 'low' | 'medium' | 'high';
+  typicalDuration?: number; // in minutes
+}
+
+/**
+ * LOCATION ATTRIBUTES RULES
+ */
+export const LOCATION_ATTRIBUTES_RULES = {
+  requiredFields: ['city', 'neighborhood', 'latitude', 'longitude', 'category'] as const,
+  optionalFields: ['environment', 'effortLevel', 'typicalDuration'] as const,
+  isUserFacing: false,
+  isInternal: true,
+} as const;
+
+// ═══════════════════════════════════════════════════════════════════════════
+// DISTANCE AWARENESS (PASSIVE)
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * DISTANCE AWARENESS (PASSIVE)
+ * 
+ * The system must be CAPABLE of:
+ * - Calculating distance between items
+ * - Understanding neighborhood adjacency
+ * - Identifying extreme displacements
+ * - Detecting incompatible groupings
+ * 
+ * NO action is taken yet.
+ * NO warnings are shown yet.
+ */
+export const DISTANCE_AWARENESS = {
+  capabilities: {
+    calculateDistanceBetweenItems: true,
+    understandNeighborhoodAdjacency: true,
+    identifyExtremeDisplacements: true,
+    detectIncompatibleGroupings: true,
+  },
+  currentBehavior: {
+    actionsTaken: false,
+    warningsShown: false,
+    passiveOnly: true,
+  },
+} as const;
+
+/**
+ * Neighborhood adjacency map for Rio de Janeiro
+ */
+export const RIO_NEIGHBORHOOD_ADJACENCY: Record<string, string[]> = {
+  'ipanema': ['leblon', 'arpoador', 'copacabana', 'lagoa'],
+  'leblon': ['ipanema', 'gavea', 'jardim-botanico', 'lagoa'],
+  'copacabana': ['ipanema', 'leme', 'botafogo'],
+  'leme': ['copacabana'],
+  'arpoador': ['ipanema', 'copacabana'],
+  'botafogo': ['copacabana', 'flamengo', 'urca', 'humaita'],
+  'flamengo': ['botafogo', 'catete', 'laranjeiras', 'centro'],
+  'urca': ['botafogo'],
+  'lagoa': ['ipanema', 'leblon', 'jardim-botanico', 'gavea', 'humaita'],
+  'jardim-botanico': ['leblon', 'gavea', 'lagoa', 'humaita'],
+  'gavea': ['leblon', 'jardim-botanico', 'sao-conrado'],
+  'sao-conrado': ['gavea', 'barra'],
+  'barra': ['sao-conrado', 'recreio'],
+  'recreio': ['barra'],
+  'centro': ['flamengo', 'santa-teresa', 'lapa'],
+  'santa-teresa': ['centro', 'lapa'],
+  'lapa': ['centro', 'santa-teresa'],
+  'humaita': ['botafogo', 'lagoa', 'jardim-botanico'],
+  'catete': ['flamengo', 'laranjeiras'],
+  'laranjeiras': ['flamengo', 'catete'],
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
+// COHERENCE READINESS
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Future coherence condition types
+ */
+export type CoherenceCondition = 
+  | 'items-far-apart-same-day'
+  | 'excessive-zone-backtrack'
+  | 'outdoor-items-incompatible-weather'
+  | 'high-effort-consecutive';
+
+/**
+ * COHERENCE READINESS
+ * 
+ * Mark the following future conditions as DETECTABLE:
+ * - Items very far apart on the same day (future)
+ * - Excessive back-and-forth between zones
+ * - Outdoor items grouped in incompatible weather windows
+ * - High-effort items grouped consecutively
+ * 
+ * These signals remain DORMANT.
+ */
+export const COHERENCE_CONDITIONS: readonly CoherenceCondition[] = [
+  'items-far-apart-same-day',
+  'excessive-zone-backtrack',
+  'outdoor-items-incompatible-weather',
+  'high-effort-consecutive',
+] as const;
+
+export const COHERENCE_READINESS = {
+  detectableConditions: COHERENCE_CONDITIONS,
+  conditionStatus: 'dormant',
+  activeAtThisStage: false,
+} as const;
+
+// ═══════════════════════════════════════════════════════════════════════════
+// NO JUDGMENT RULE
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * NO JUDGMENT RULE
+ * 
+ * At this stage:
+ * - The system NEVER blocks actions
+ * - The system NEVER forces corrections
+ * - The system NEVER warns the user
+ * 
+ * It only UNDERSTANDS.
+ */
+export const NO_JUDGMENT_RULE = {
+  blocksActions: false,
+  forcesCorrections: false,
+  warnsUser: false,
+  onlyUnderstands: true,
+} as const;
+
+// ═══════════════════════════════════════════════════════════════════════════
+// INTEGRATION READINESS
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * External API compatibility types
+ */
+export type ExternalApiType = 
+  | 'google-maps'
+  | 'apple-maps'
+  | 'distance-api'
+  | 'weather-api'
+  | 'time-estimation-api';
+
+/**
+ * INTEGRATION READINESS
+ * 
+ * This intelligence must be compatible with:
+ * - Google Maps
+ * - Apple Maps
+ * - Distance APIs
+ * - Weather APIs
+ * - Time estimation APIs
+ * 
+ * Without structural refactor.
+ */
+export const INTEGRATION_READINESS = {
+  compatibleWith: [
+    'google-maps',
+    'apple-maps',
+    'distance-api',
+    'weather-api',
+    'time-estimation-api',
+  ] as ExternalApiType[],
+  requiresStructuralRefactor: false,
+} as const;
+
+// ═══════════════════════════════════════════════════════════════════════════
+// LOCATION INTELLIGENCE SCALABILITY
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * SCALABILITY RULE
+ * 
+ * This intelligence applies to:
+ * - All destinations
+ * - All items
+ * - All future planning layers
+ */
+export const LOCATION_SCALABILITY = {
+  appliesToAllDestinations: true,
+  appliesToAllItems: true,
+  appliesToAllFuturePlanningLayers: true,
+} as const;
+
+// ═══════════════════════════════════════════════════════════════════════════
+// GEOLOCATION DATA STRUCTURE (GOOGLE MAPS READY)
+// ═══════════════════════════════════════════════════════════════════════════
 
 /**
  * Individual item saved to roteiro (with geolocation)
@@ -94,6 +315,11 @@ export interface RoteiroItem {
   
   // Geolocation data (Google Maps ready)
   geo: GeoLocation;
+  
+  // Extended location attributes (internal)
+  environment?: EnvironmentType;
+  effortLevel?: 'low' | 'medium' | 'high';
+  typicalDuration?: number;
 }
 
 /**
@@ -642,13 +868,13 @@ export type RioZone =
 export type TransportMode = 'walkable' | 'car-dependent' | 'mixed';
 
 /**
- * INTELLIGENCE FUNCTION 1: DISTANCE AWARENESS
+ * INTELLIGENCE FUNCTION 1: ENHANCED DISTANCE AWARENESS
  * 
  * - Detect when saved items are geographically distant
  * - Identify clusters that are walkable vs. car-dependent
  * - Recognize cross-zone jumps (e.g. Zona Sul → Barra)
  */
-export const DISTANCE_AWARENESS = {
+export const ENHANCED_DISTANCE_AWARENESS = {
   enabled: true,
   capabilities: {
     detectGeographicallyDistantItems: true,
@@ -1650,4 +1876,131 @@ export const countItemsPerNeighborhood = (
     acc[key] = (acc[key] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
+// LOCATION & CONTEXT INTELLIGENCE HELPER FUNCTIONS
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Check if two neighborhoods are adjacent
+ */
+export const areNeighborhoodsAdjacent = (
+  neighborhood1: string,
+  neighborhood2: string
+): boolean => {
+  const adjacentTo = RIO_NEIGHBORHOOD_ADJACENCY[neighborhood1.toLowerCase()];
+  if (!adjacentTo) return false;
+  return adjacentTo.includes(neighborhood2.toLowerCase());
+};
+
+/**
+ * Calculate approximate distance between two coordinates (Haversine formula)
+ */
+export const calculateDistanceKm = (
+  lat1: number,
+  lon1: number,
+  lat2: number,
+  lon2: number
+): number => {
+  const R = 6371; // Earth's radius in km
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = 
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+};
+
+/**
+ * Calculate distance between two roteiro items
+ */
+export const calculateItemDistance = (
+  item1: RoteiroItem,
+  item2: RoteiroItem
+): number => {
+  return calculateDistanceKm(
+    item1.geo.latitude,
+    item1.geo.longitude,
+    item2.geo.latitude,
+    item2.geo.longitude
+  );
+};
+
+/**
+ * Detect if a coherence condition exists (dormant - returns but doesn't warn)
+ */
+export const detectCoherenceCondition = (
+  items: RoteiroItem[],
+  condition: CoherenceCondition
+): boolean => {
+  switch (condition) {
+    case 'items-far-apart-same-day':
+      // Check if any two items are more than 10km apart
+      for (let i = 0; i < items.length; i++) {
+        for (let j = i + 1; j < items.length; j++) {
+          if (calculateItemDistance(items[i], items[j]) > 10) {
+            return true;
+          }
+        }
+      }
+      return false;
+      
+    case 'excessive-zone-backtrack':
+      return detectNeighborhoodBacktrack(items).length > 1;
+      
+    case 'high-effort-consecutive':
+      for (let i = 0; i < items.length - 1; i++) {
+        if (items[i].effortLevel === 'high' && items[i + 1].effortLevel === 'high') {
+          return true;
+        }
+      }
+      return false;
+      
+    case 'outdoor-items-incompatible-weather':
+      // Placeholder - requires weather API integration
+      return false;
+      
+    default:
+      return false;
+  }
+};
+
+/**
+ * Get all coherence conditions for a roteiro (dormant analysis)
+ */
+export const analyzeRoteiroCoherence = (
+  items: RoteiroItem[]
+): Record<CoherenceCondition, boolean> => {
+  return {
+    'items-far-apart-same-day': detectCoherenceCondition(items, 'items-far-apart-same-day'),
+    'excessive-zone-backtrack': detectCoherenceCondition(items, 'excessive-zone-backtrack'),
+    'outdoor-items-incompatible-weather': detectCoherenceCondition(items, 'outdoor-items-incompatible-weather'),
+    'high-effort-consecutive': detectCoherenceCondition(items, 'high-effort-consecutive'),
+  };
+};
+
+/**
+ * Get total estimated duration for roteiro items
+ */
+export const getTotalEstimatedDuration = (items: RoteiroItem[]): number => {
+  return items.reduce((total, item) => total + (item.typicalDuration || 0), 0);
+};
+
+/**
+ * Group items by environment type
+ */
+export const groupByEnvironment = (
+  items: RoteiroItem[]
+): Record<EnvironmentType, RoteiroItem[]> => {
+  return items.reduce((acc, item) => {
+    const env = item.environment || 'mixed';
+    if (!acc[env]) {
+      acc[env] = [];
+    }
+    acc[env].push(item);
+    return acc;
+  }, {} as Record<EnvironmentType, RoteiroItem[]>);
 };
