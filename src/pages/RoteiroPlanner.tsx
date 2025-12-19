@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useMemo } from "react";
 import { Link, useParams } from "react-router-dom";
-import { ChevronLeft, User } from "lucide-react";
+import { ChevronLeft, User, Map, Info, Ticket, Utensils } from "lucide-react";
 import {
   DndContext,
   DragOverlay,
@@ -15,42 +15,39 @@ import {
   Modifier,
 } from "@dnd-kit/core";
 import { arrayMove, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
-import { DayColumn } from "@/components/roteiro/DayColumn";
-import { DaySwiper } from "@/components/roteiro/DaySwiper";
-import { ItineraryCard, ItineraryItem } from "@/components/roteiro/ItineraryCard";
+import { ItineraryTabs } from "@/components/roteiro/ItineraryTabs";
+import { MultiDayTimeline } from "@/components/roteiro/MultiDayTimeline";
 import { ReferencesPanel } from "@/components/roteiro/ReferencesPanel";
 import { PlannerFAB } from "@/components/roteiro/PlannerFAB";
+import { ItineraryCard, ItineraryItem } from "@/components/roteiro/ItineraryCard";
 import { useRoteiroState } from "@/hooks/use-roteiro-state";
+import { useTimelineData } from "@/hooks/use-timeline-data";
 import { getCuratedItinerary, getDestinationDays } from "@/data/curated-itineraries";
 import { getReferenceItinerariesForDestination, ReferenceItem } from "@/data/reference-itineraries";
 import { PlaceData } from "@/components/roteiro/GooglePlacesAutocomplete";
 import { toast } from "@/hooks/use-toast";
 
 /**
- * ROTEIRO PLANNER — GAMIFIED
+ * ROTEIRO PLANNER — GAMIFIED ITINERARY EXPERIENCE
  * 
  * Premium travel app with playful, calm, game-like interface.
- * Everything is optional. Nothing is forced.
- * The user explores, drags, tests and reverts freely.
- * 
- * FEATURES:
- * - Single "+" FAB with 4 actions
- * - Left panel with show/hide references
- * - Horizontal drag lock
- * - Smooth visual feedback
+ * Features:
+ * - Tab navigation (General | Itinerary | Details | Tickets | Food)
+ * - Multi-day horizontal timeline view
+ * - Drag & drop between days and reorder within
+ * - Travel time calculation and inconsistency detection
+ * - Collapsible reference panel
  */
 
 const destinationNames: Record<string, string> = {
   'rio-de-janeiro': 'Rio de Janeiro',
 };
 
-// Horizontal axis lock modifier for drag & drop
-const restrictToHorizontalAxis: Modifier = ({ transform }) => {
-  return {
-    ...transform,
-    y: 0, // Lock vertical movement
-  };
-};
+// Horizontal axis lock for moving items between days
+const restrictToHorizontalAxis: Modifier = ({ transform }) => ({
+  ...transform,
+  y: 0,
+});
 
 const RoteiroPlanner = () => {
   const { destinationId = 'rio-de-janeiro' } = useParams();
@@ -68,20 +65,19 @@ const RoteiroPlanner = () => {
     referenceItineraries.forEach(ref => {
       list.push({ id: ref.id, label: ref.author, author: ref.author });
     });
-    // Premium sources (locked for now)
     list.push({ id: 'lucky-tips', label: 'Lucky Tips', isPremium: true, isLocked: true });
     return list;
   }, [referenceItineraries]);
   
   const [selectedSources, setSelectedSources] = useState<string[]>(['lucky-trip']);
+  const [showReferences, setShowReferences] = useState(true);
   
   const handleSourceToggle = useCallback((sourceId: string) => {
-    setSelectedSources(prev => {
-      if (prev.includes(sourceId)) {
-        return prev.filter(id => id !== sourceId);
-      }
-      return [...prev, sourceId];
-    });
+    setSelectedSources(prev => 
+      prev.includes(sourceId) 
+        ? prev.filter(id => id !== sourceId)
+        : [...prev, sourceId]
+    );
   }, []);
   
   // Determine total days based on selected reference
@@ -89,6 +85,8 @@ const RoteiroPlanner = () => {
   const sourceTotalDays = selectedReference 
     ? Object.keys(selectedReference.days).length 
     : getDestinationDays(destinationId);
+  
+  const totalDays = Math.max(sourceTotalDays, 5);
   
   // User's roteiro state (with persistence)
   const { 
@@ -99,10 +97,16 @@ const RoteiroPlanner = () => {
     setDayItems,
     hasItem,
     totalItems,
-  } = useRoteiroState(destinationId, Math.max(sourceTotalDays, 8));
+  } = useRoteiroState(destinationId, totalDays);
   
   const [currentDay, setCurrentDay] = useState(1);
   const [activeItem, setActiveItem] = useState<ItineraryItem | null>(null);
+
+  // Transform items into timeline data with travel blocks
+  const timelineData = useTimelineData({
+    items: userItems,
+    totalDays,
+  });
 
   // Store destination context for back navigation
   useEffect(() => {
@@ -110,32 +114,23 @@ const RoteiroPlanner = () => {
   }, [destinationId]);
 
   const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: { distance: 8 },
-    }),
-    useSensor(TouchSensor, {
-      activationConstraint: { delay: 150, tolerance: 5 },
-    }),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 150, tolerance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
 
   // Find item in curated, reference, or user itinerary
   const findItem = useCallback((id: string): ItineraryItem | ReferenceItem | null => {
-    // Check curated
     for (const day of Object.keys(curatedItinerary)) {
       const item = curatedItinerary[Number(day)].find(i => i.id === id);
       if (item) return item;
     }
-    // Check reference itineraries
     if (selectedReference) {
       for (const day of Object.keys(selectedReference.days)) {
         const item = selectedReference.days[Number(day)].items.find(i => i.id === id);
         if (item) return item;
       }
     }
-    // Check user
     for (const day of Object.keys(userItems)) {
       const item = userItems[Number(day)]?.find(i => i.id === id);
       if (item) return item;
@@ -146,21 +141,15 @@ const RoteiroPlanner = () => {
   // Determine if an ID belongs to curated, reference, or user items
   const getItemSource = useCallback((id: string): 'curated' | 'reference' | 'user' | null => {
     for (const day of Object.keys(curatedItinerary)) {
-      if (curatedItinerary[Number(day)].some(i => i.id === id)) {
-        return 'curated';
-      }
+      if (curatedItinerary[Number(day)].some(i => i.id === id)) return 'curated';
     }
     if (selectedReference) {
       for (const day of Object.keys(selectedReference.days)) {
-        if (selectedReference.days[Number(day)].items.some(i => i.id === id)) {
-          return 'reference';
-        }
+        if (selectedReference.days[Number(day)].items.some(i => i.id === id)) return 'reference';
       }
     }
     for (const day of Object.keys(userItems)) {
-      if (userItems[Number(day)]?.some(i => i.id === id)) {
-        return 'user';
-      }
+      if (userItems[Number(day)]?.some(i => i.id === id)) return 'user';
     }
     return null;
   }, [curatedItinerary, selectedReference, userItems]);
@@ -169,11 +158,8 @@ const RoteiroPlanner = () => {
     const { active } = event;
     const data = active.data.current;
     
-    // Handle day block drag
-    if (data?.type === 'day-block') {
-      if (data.items?.length > 0) {
-        setActiveItem(data.items[0]);
-      }
+    if (data?.type === 'day-block' && data.items?.length > 0) {
+      setActiveItem(data.items[0]);
       return;
     }
     
@@ -184,77 +170,46 @@ const RoteiroPlanner = () => {
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     setActiveItem(null);
-
     if (!over) return;
 
     const activeId = active.id as string;
     const overId = over.id as string;
     const data = active.data.current;
     
-    // CASE 0: Dragging a full day block
-    if (data?.type === 'day-block' && overId.startsWith('user-day-')) {
-      const targetDay = parseInt(overId.replace('user-day-', ''));
+    // Handle day block drag
+    if (data?.type === 'day-block' && overId.startsWith('timeline-day-')) {
+      const targetDay = parseInt(overId.replace('timeline-day-', ''));
       const dayItems = data.items as ReferenceItem[];
       
-      if (dayItems && dayItems.length > 0) {
+      if (dayItems?.length > 0) {
         const newItems = dayItems.map(item => ({
           ...item,
           id: `user-${item.id}-${Date.now()}-${Math.random()}`,
         }));
         setDayItems(targetDay, [...(userItems[targetDay] || []), ...newItems]);
-        
-        toast({
-          title: "Dia inteiro adicionado",
-          description: `${dayItems.length} itens → Dia ${targetDay}`,
-        });
+        toast({ title: "Dia inteiro adicionado", description: `${dayItems.length} itens → Dia ${targetDay}` });
       }
       return;
     }
 
     const itemSource = getItemSource(activeId);
 
-    // CASE 1: Dragging from CURATED or REFERENCE to USER column (left → right)
-    if ((itemSource === 'curated' || itemSource === 'reference') && overId.startsWith('user-day-')) {
-      const targetDay = parseInt(overId.replace('user-day-', ''));
+    // Dragging from CURATED/REFERENCE to timeline
+    if ((itemSource === 'curated' || itemSource === 'reference') && overId.startsWith('timeline-day-')) {
+      const targetDay = parseInt(overId.replace('timeline-day-', ''));
       const item = findItem(activeId);
       
       if (!item) return;
-
       if (hasItem(activeId)) {
-        toast({
-          title: "Esse já está aqui",
-          description: `${item.name} já faz parte do seu roteiro.`,
-        });
+        toast({ title: "Esse já está aqui", description: `${item.name} já faz parte do seu roteiro.` });
         return;
       }
 
       addItem(targetDay, item as ItineraryItem, activeId);
-      
-      toast({
-        title: "Adicionado ✓",
-        description: `${item.name} → Dia ${targetDay}`,
-      });
+      toast({ title: "Adicionado ✓", description: `${item.name} → Dia ${targetDay}` });
     }
 
-    // CASE 2: Dragging from USER to outside (right → left = discard)
-    if (itemSource === 'user' && (overId.startsWith('curated-day-') || !overId.startsWith('user-day-'))) {
-      // Find which day the active item is in
-      for (const day of Object.keys(userItems)) {
-        const dayNum = Number(day);
-        if (userItems[dayNum]?.some(i => i.id === activeId)) {
-          removeItem(dayNum, activeId);
-          const item = userItems[dayNum].find(i => i.id === activeId);
-          toast({
-            title: "Removido",
-            description: item?.name || 'Item removido',
-          });
-          break;
-        }
-      }
-      return;
-    }
-
-    // CASE 3: Reordering within USER column (same day)
+    // Reordering within USER items
     if (itemSource === 'user') {
       let activeDay: number | null = null;
       for (const day of Object.keys(userItems)) {
@@ -263,9 +218,23 @@ const RoteiroPlanner = () => {
           break;
         }
       }
-
       if (activeDay === null) return;
 
+      // Move between days
+      if (overId.startsWith('timeline-day-')) {
+        const targetDay = parseInt(overId.replace('timeline-day-', ''));
+        if (targetDay !== activeDay) {
+          const item = userItems[activeDay].find(i => i.id === activeId);
+          if (item) {
+            setDayItems(activeDay, userItems[activeDay].filter(i => i.id !== activeId));
+            setDayItems(targetDay, [...(userItems[targetDay] || []), item]);
+            toast({ title: "Movido", description: `${item.name} → Dia ${targetDay}` });
+          }
+        }
+        return;
+      }
+
+      // Reorder within same day
       const overSource = getItemSource(overId);
       if (overSource === 'user') {
         let overDay: number | null = null;
@@ -286,17 +255,6 @@ const RoteiroPlanner = () => {
           }
         }
       }
-
-      if (overId.startsWith('user-day-')) {
-        const targetDay = parseInt(overId.replace('user-day-', ''));
-        if (targetDay !== activeDay) {
-          const item = userItems[activeDay].find(i => i.id === activeId);
-          if (item) {
-            setDayItems(activeDay, userItems[activeDay].filter(i => i.id !== activeId));
-            setDayItems(targetDay, [...(userItems[targetDay] || []), item]);
-          }
-        }
-      }
     }
   };
 
@@ -309,10 +267,7 @@ const RoteiroPlanner = () => {
       source: 'user',
     };
     addItem(day, item);
-    toast({
-      title: "Adicionado ✓",
-      description: `${name} → Dia ${day}`,
-    });
+    toast({ title: "Adicionado ✓", description: `${name} → Dia ${day}` });
   }, [addItem]);
 
   const handleAddFromGoogle = useCallback((place: PlaceData, day: number) => {
@@ -326,29 +281,19 @@ const RoteiroPlanner = () => {
       lng: place.lng,
     };
     addItem(day, item);
-    toast({
-      title: "Adicionado ✓",
-      description: `${place.name} → Dia ${day}`,
-    });
+    toast({ title: "Adicionado ✓", description: `${place.name} → Dia ${day}` });
   }, [addItem]);
 
   const handleAddWithAI = useCallback((prompt: string) => {
-    toast({
-      title: "Buscando sugestões...",
-      description: "A IA está pensando em ideias para você.",
-    });
-    // Future: Call AI to generate suggestions as draggable cards
+    toast({ title: "Buscando sugestões...", description: "A IA está pensando em ideias para você." });
   }, []);
 
   const handleShowCuratedPicker = useCallback(() => {
-    // Ensure Lucky Trip is selected in references
     if (!selectedSources.includes('lucky-trip')) {
       setSelectedSources(prev => [...prev, 'lucky-trip']);
     }
-    toast({
-      title: "Referências ativadas",
-      description: "Arraste itens do Lucky Trip para seu roteiro.",
-    });
+    setShowReferences(true);
+    toast({ title: "Referências ativadas", description: "Arraste itens do Lucky Trip para seu roteiro." });
   }, [selectedSources]);
 
   return (
@@ -361,86 +306,104 @@ const RoteiroPlanner = () => {
             className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             <ChevronLeft className="w-4 h-4" />
-            Voltar
+            {destinationName}
           </Link>
           
           {totalItems > 0 && (
             <span className="text-xs text-muted-foreground">
-              {totalItems} {totalItems === 1 ? 'item' : 'itens'} salvos
+              {totalItems} {totalItems === 1 ? 'item' : 'itens'}
             </span>
           )}
         </div>
-        
-        {/* Day Navigation */}
-        <div className="pb-3">
-          <DaySwiper 
-            totalDays={sourceTotalDays} 
-            currentDay={currentDay} 
-            onDayChange={setCurrentDay} 
-          />
-        </div>
       </header>
 
-      {/* Main Content - Dual Columns */}
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCenter}
-        onDragStart={handleDragStart}
-        onDragEnd={handleDragEnd}
-        modifiers={[restrictToHorizontalAxis]}
-      >
-        <main className="grid grid-cols-2 gap-3 p-4 min-h-[60vh]">
-          {/* LEFT COLUMN — References (Read-Only Idea Bank) */}
-          <div className="h-full">
-            <ReferencesPanel
-              sources={sources}
-              selectedSources={selectedSources}
-              onSourceToggle={handleSourceToggle}
-              currentDay={currentDay}
-              curatedItems={curatedItinerary[currentDay] || []}
-              referenceItineraries={referenceItineraries}
-            />
-          </div>
-
-          {/* RIGHT COLUMN — User Roteiro (Editable) */}
-          <div>
-            <div className="flex items-center gap-2 mb-3">
-              <div className="w-4 h-4 rounded-full bg-primary/20 flex items-center justify-center">
-                <User className="w-2.5 h-2.5 text-primary" />
-              </div>
-              <div>
-                <h2 className="text-xs font-semibold text-foreground uppercase tracking-wide">
-                  Meu Roteiro
-                </h2>
-                <p className="text-[10px] text-muted-foreground">
-                  Arraste para cá
-                </p>
-              </div>
+      {/* Tabs Navigation */}
+      <ItineraryTabs defaultValue="itinerary">
+        {{
+          general: (
+            <div className="p-6 text-center">
+              <Map className="w-12 h-12 mx-auto mb-4 text-muted-foreground/30" />
+              <h3 className="text-lg font-semibold text-foreground mb-2">Visão Geral</h3>
+              <p className="text-sm text-muted-foreground max-w-xs mx-auto">
+                Resumo da sua viagem para {destinationName}
+              </p>
             </div>
-            
-            <DayColumn
-              dayId={`user-day-${currentDay}`}
-              dayNumber={currentDay}
-              items={userItems[currentDay] || []}
-              isUserColumn={true}
-              onRemoveItem={(itemId) => removeItem(currentDay, itemId)}
-            />
-          </div>
-        </main>
+          ),
+          itinerary: (
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragStart={handleDragStart}
+              onDragEnd={handleDragEnd}
+            >
+              <div className="flex gap-4 p-4">
+                {/* Left Panel - References */}
+                {showReferences && (
+                  <div className="w-[280px] flex-shrink-0 hidden md:block">
+                    <ReferencesPanel
+                      sources={sources}
+                      selectedSources={selectedSources}
+                      onSourceToggle={handleSourceToggle}
+                      currentDay={currentDay}
+                      curatedItems={curatedItinerary[currentDay] || []}
+                      referenceItineraries={referenceItineraries}
+                    />
+                  </div>
+                )}
 
-        {/* Drag Overlay */}
-        <DragOverlay>
-          {activeItem && (
-            <div className="w-[160px] opacity-90 rotate-2 scale-105 shadow-xl">
-              <ItineraryCard item={activeItem} isOverlay />
+                {/* Main Timeline */}
+                <div className="flex-1 min-w-0">
+                  <MultiDayTimeline
+                    days={timelineData}
+                    onRemoveItem={(day, itemId) => removeItem(day, itemId)}
+                    onActivityTap={(item, day) => setCurrentDay(day)}
+                  />
+                </div>
+              </div>
+
+              {/* Drag Overlay */}
+              <DragOverlay>
+                {activeItem && (
+                  <div className="w-[200px] opacity-90 rotate-2 scale-105 shadow-xl">
+                    <ItineraryCard item={activeItem} isOverlay />
+                  </div>
+                )}
+              </DragOverlay>
+            </DndContext>
+          ),
+          details: (
+            <div className="p-6 text-center">
+              <Info className="w-12 h-12 mx-auto mb-4 text-muted-foreground/30" />
+              <h3 className="text-lg font-semibold text-foreground mb-2">Detalhes</h3>
+              <p className="text-sm text-muted-foreground max-w-xs mx-auto">
+                Informações de logística e planejamento
+              </p>
             </div>
-          )}
-        </DragOverlay>
-      </DndContext>
+          ),
+          tickets: (
+            <div className="p-6 text-center">
+              <Ticket className="w-12 h-12 mx-auto mb-4 text-muted-foreground/30" />
+              <h3 className="text-lg font-semibold text-foreground mb-2">Ingressos</h3>
+              <p className="text-sm text-muted-foreground max-w-xs mx-auto">
+                Reservas e ingressos para suas atividades
+              </p>
+            </div>
+          ),
+          food: (
+            <div className="p-6 text-center">
+              <Utensils className="w-12 h-12 mx-auto mb-4 text-muted-foreground/30" />
+              <h3 className="text-lg font-semibold text-foreground mb-2">Comida</h3>
+              <p className="text-sm text-muted-foreground max-w-xs mx-auto">
+                Reservas de restaurantes e experiências gastronômicas
+              </p>
+            </div>
+          ),
+        }}
+      </ItineraryTabs>
 
       {/* Planner FAB */}
       <PlannerFAB
-        totalDays={sourceTotalDays}
+        totalDays={totalDays}
         onAddManual={handleAddManual}
         onAddFromGoogle={handleAddFromGoogle}
         onAddWithAI={handleAddWithAI}
