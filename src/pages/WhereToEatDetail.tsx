@@ -3,6 +3,7 @@ import { ChevronLeft } from "lucide-react";
 import RestaurantCard from "@/components/RestaurantCard";
 import { getNeighborhoodById } from "@/data/rio-neighborhoods";
 import SaveToRoteiroButton from "@/components/SaveToRoteiroButton";
+import RoteiroAccessLink from "@/components/RoteiroAccessLink";
 
 // Neighborhood descriptions for the food scene
 const neighborhoodDescriptions: Record<string, string> = {
@@ -499,13 +500,16 @@ const WhereToEatDetail = () => {
           <ChevronLeft className="w-4 h-4" />
           Voltar
         </Link>
-        {hasRestaurants && (
-          <SaveToRoteiroButton
-            itemId={`eat-${neighborhood}`}
-            itemType="restaurant"
-            itemTitle={`Onde comer em ${name}`}
-          />
-        )}
+        <div className="flex items-center gap-4">
+          <RoteiroAccessLink />
+          {hasRestaurants && (
+            <SaveToRoteiroButton
+              itemId={`eat-${neighborhood}`}
+              itemType="restaurant"
+              itemTitle={`Onde comer em ${name}`}
+            />
+          )}
+        </div>
       </header>
 
       {/* Content */}
