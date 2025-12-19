@@ -30,7 +30,6 @@ import DiarioViagem from "./pages/profile/DiarioViagem";
 import Assinatura from "./pages/profile/Assinatura";
 import Configuracoes from "./pages/profile/Configuracoes";
 import SuporteHumano from "./pages/profile/SuporteHumano";
-import SecondaryModules from "./pages/SecondaryModules";
 import SecondaryModuleDetail from "./pages/SecondaryModuleDetail";
 import NotFound from "./pages/NotFound";
 
@@ -63,8 +62,7 @@ const App = () => {
               <Route path="/destino/:id/intro" element={<DestinationVideoIntro />} />
               <Route path="/destino/rio-de-janeiro" element={<DestinationRio />} />
               
-              {/* Secondary Modules - Horizontal Swipe Navigation */}
-              <Route path="/destino/:destinationId/explorar" element={<SecondaryModules />} />
+              {/* Secondary Modules - Detail Pages */}
               <Route path="/destino/:destinationId/modulo/:moduleId" element={<SecondaryModuleDetail />} />
               
               {/* Where to Stay */}
