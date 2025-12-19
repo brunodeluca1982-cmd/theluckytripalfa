@@ -2,25 +2,38 @@ import DestinationHub, { MapPin, Bed, Utensils, Compass, Sparkles } from "@/comp
 
 /**
  * ═══════════════════════════════════════════════════════════════════════════
- * RIO DE JANEIRO — DESTINATION HUB
+ * RIO DE JANEIRO — DESTINATION HUB (STRUCTURAL & UX LOCK)
  * ═══════════════════════════════════════════════════════════════════════════
  * 
- * 🔒 HUB STRUCTURE — FINAL LOCK (DO NOT MODIFY)
+ * LOCKED DESTINATION JOURNEY:
+ * 1. User clicks destination → Hero video plays (15-30s)
+ * 2. Video ends → Automatic transition to THIS hub
+ * 3. Hub displays EXACTLY 5 central transparent buttons
  * 
- * This hub contains exactly 5 circular buttons (IMMUTABLE):
- * 1. Chegar
- * 2. Ficar
- * 3. Comer
- * 4. Fazer
- * 5. Lucky List (center)
+ * ═══════════════════════════════════════════════════════════════════════════
+ * PRIMARY HUB — 5 BUTTONS (IMMUTABLE):
+ * ═══════════════════════════════════════════════════════════════════════════
+ * 1. Como Chegar (top-left)
+ * 2. Onde Ficar (top-right)
+ * 3. Onde Comer (bottom-left)
+ * 4. O Que Fazer (bottom-right)
+ * 5. Lucky List (CENTER, smaller, emphasized)
  * 
- * RULES:
- * - Labels are final and immutable
+ * ═══════════════════════════════════════════════════════════════════════════
+ * IMMUTABILITY RULES — DO NOT MODIFY:
+ * ═══════════════════════════════════════════════════════════════════════════
+ * - Labels are FINAL and IMMUTABLE
  * - No synonyms, translations, or optimizations
  * - No A/B variants
- * - Hub never changes based on user behavior
- * - Hub never adapts content
- * - Hub never collapses to fewer buttons
+ * - Hub NEVER changes based on user behavior
+ * - Hub NEVER adapts content
+ * - Hub NEVER collapses to fewer buttons
+ * - Buttons MUST remain centered on screen
+ * - Buttons MUST remain transparent (glass effect)
+ * - NO list-based layout allowed
+ * - NO additional modules allowed on this screen
+ * 
+ * This structure applies to ALL destinations.
  * ═══════════════════════════════════════════════════════════════════════════
  */
 
