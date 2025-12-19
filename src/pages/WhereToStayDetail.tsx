@@ -2,6 +2,7 @@ import { Link, useParams, useSearchParams } from "react-router-dom";
 import { ChevronLeft } from "lucide-react";
 import HotelCard from "@/components/HotelCard";
 import { getNeighborhoodById } from "@/data/rio-neighborhoods";
+import SaveToRoteiroButton from "@/components/SaveToRoteiroButton";
 
 // Neighborhood descriptions for staying
 const neighborhoodDescriptions: Record<string, string> = {
@@ -239,8 +240,8 @@ const WhereToStayDetail = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="px-6 py-4 border-b border-border">
+      {/* Header with Save Action */}
+      <header className="px-6 py-4 border-b border-border flex items-center justify-between">
         <Link
           to={backPath}
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -248,6 +249,13 @@ const WhereToStayDetail = () => {
           <ChevronLeft className="w-4 h-4" />
           Voltar
         </Link>
+        {hotels.length > 0 && (
+          <SaveToRoteiroButton
+            itemId={`stay-${neighborhood}`}
+            itemType="hotel"
+            itemTitle={`Onde ficar em ${name}`}
+          />
+        )}
       </header>
 
       {/* Content */}

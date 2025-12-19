@@ -2,6 +2,7 @@ import { Link, useParams } from "react-router-dom";
 import { ChevronLeft } from "lucide-react";
 import { getNeighborhoodById } from "@/data/rio-neighborhoods";
 import { activitiesByNeighborhood } from "@/data/what-to-do-data";
+import SaveToRoteiroButton from "@/components/SaveToRoteiroButton";
 
 /**
  * O QUE FAZER — ACTIVITY DETAIL
@@ -23,8 +24,8 @@ const WhatToDoDetail = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="px-6 py-4 border-b border-border">
+      {/* Header with Save Action */}
+      <header className="px-6 py-4 border-b border-border flex items-center justify-between">
         <Link
           to="/o-que-fazer"
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -32,6 +33,13 @@ const WhatToDoDetail = () => {
           <ChevronLeft className="w-4 h-4" />
           Voltar
         </Link>
+        {activities.length > 0 && (
+          <SaveToRoteiroButton
+            itemId={`whatodo-${neighborhood}`}
+            itemType="activity"
+            itemTitle={`O que fazer em ${name}`}
+          />
+        )}
       </header>
 
       {/* Content */}

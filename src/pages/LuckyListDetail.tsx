@@ -2,6 +2,7 @@ import { Link, useParams } from "react-router-dom";
 import { ChevronLeft } from "lucide-react";
 import { luckyListItems } from "@/data/lucky-list-data";
 import { shouldDisplayField, getReturnPath } from "@/data/subscriber-behavior";
+import SaveToRoteiroButton from "@/components/SaveToRoteiroButton";
 
 /**
  * LUCKY LIST — DETAIL TEMPLATE
@@ -49,8 +50,8 @@ const LuckyListDetail = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header - Back to original context */}
-      <header className="px-6 py-4 border-b border-border">
+      {/* Header with Save Action - Back to original context */}
+      <header className="px-6 py-4 border-b border-border flex items-center justify-between">
         <Link
           to={returnPath}
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -58,6 +59,11 @@ const LuckyListDetail = () => {
           <ChevronLeft className="w-4 h-4" />
           Voltar
         </Link>
+        <SaveToRoteiroButton
+          itemId={item.id}
+          itemType="lucky-list"
+          itemTitle={item.title}
+        />
       </header>
 
       {/* Content */}
