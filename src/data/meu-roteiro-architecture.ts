@@ -343,6 +343,125 @@ export const NAVIGATION_RULES = {
 } as const;
 
 // ═══════════════════════════════════════════════════════════════════════════
+// MVP EXPERIENCE LOCK
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * MEU ROTEIRO — MVP STRUCTURE
+ * 
+ * "Meu Roteiro" has a dedicated screen accessible from:
+ * - Destination context
+ * - Saved item actions
+ */
+export const MVP_SCREEN_ACCESS = {
+  dedicatedScreen: true,
+  accessibleFromDestinationContext: true,
+  accessibleFromSavedItemActions: true,
+} as const;
+
+/**
+ * CONTENT DISPLAY RULES (MVP)
+ * 
+ * Inside "Meu Roteiro", display items as a simple list with:
+ * - Item name
+ * - Item type (activity, restaurant, bar, experience)
+ * - Neighborhood
+ * - Origin module (O que fazer, Onde comer, Lucky List, etc.)
+ * - Premium indicator (if applicable)
+ */
+export const MVP_CONTENT_DISPLAY = {
+  displayFormat: 'simple-list',
+  visibleFields: [
+    'itemName',
+    'itemType',
+    'neighborhood',
+    'originModule',
+    'premiumIndicator',
+  ] as const,
+} as const;
+
+/**
+ * GROUPING LOGIC (MVP)
+ * 
+ * - Default grouping: by destination
+ * - Secondary grouping option: by item type
+ * - No date or time grouping at MVP stage
+ */
+export const MVP_GROUPING = {
+  defaultGrouping: 'by-destination',
+  secondaryGroupingOption: 'by-item-type',
+  dateGrouping: false,
+  timeGrouping: false,
+} as const;
+
+/**
+ * ACTIONS AVAILABLE (MVP)
+ * 
+ * Users may:
+ * - Remove items
+ * - Reorder items manually
+ * - Tap an item to return to its original content context
+ */
+export const MVP_ACTIONS = {
+  removeItems: true,
+  reorderItemsManually: true,
+  tapToReturnToOriginalContext: true,
+  
+  // Explicitly excluded from MVP
+  smartReordering: false,
+  autoOptimization: false,
+  suggestions: false,
+} as const;
+
+/**
+ * MAP PRESENCE (MVP-LIGHT)
+ * 
+ * - A map view may exist as an optional secondary view
+ * - Map shows pins for saved items
+ * - No route drawing
+ * - No distance calculation
+ * - No optimization logic
+ */
+export const MVP_MAP = {
+  mapViewExists: true,
+  mapViewIsOptional: true,
+  showPinsForSavedItems: true,
+  
+  // Explicitly excluded from MVP
+  routeDrawing: false,
+  distanceCalculation: false,
+  optimizationLogic: false,
+} as const;
+
+/**
+ * LOGIN INTERACTION (MVP)
+ * 
+ * - Logged-out users may build and view a draft roteiro
+ * - When attempting to save permanently or access premium items,
+ *   trigger authentication flow (defined later)
+ */
+export const MVP_LOGIN_INTERACTION = {
+  loggedOutCanBuildDraft: true,
+  loggedOutCanViewDraft: true,
+  permanentSaveTriggerAuth: true,
+  premiumItemTriggerAuth: true,
+  authFlowDefinedSeparately: true,
+} as const;
+
+/**
+ * MVP NAVIGATION RULES
+ * 
+ * - Entering "Meu Roteiro" preserves destination context
+ * - Exiting returns the user to the last viewed destination screen
+ * - Never redirect to Home unexpectedly
+ */
+export const MVP_NAVIGATION = {
+  preservesDestinationContext: true,
+  exitReturnsToLastDestinationScreen: true,
+  neverRedirectToHomeUnexpectedly: true,
+} as const;
+
+// ═══════════════════════════════════════════════════════════════════════════
 // SCALABILITY RULES
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -352,12 +471,14 @@ export const NAVIGATION_RULES = {
  * - This structure applies to ALL destinations
  * - Logic must remain IDENTICAL across destinations
  * - Future features may EXTEND but NOT BREAK this object
+ * - Advanced features may layer on top without breaking MVP logic
  */
 export const SCALABILITY_RULES = {
   appliesToAllDestinations: true,
   logicIdenticalAcrossDestinations: true,
   futureFeaturesMayExtend: true,
   futureFeaturesMustNotBreak: true,
+  advancedFeaturesLayerOnTop: true,
 } as const;
 
 // ═══════════════════════════════════════════════════════════════════════════
