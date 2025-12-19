@@ -196,15 +196,24 @@ const MeuRoteiro = () => {
                 O Meu Roteiro é onde sua viagem toma forma.
               </p>
               <p className="text-sm text-muted-foreground mb-8 max-w-sm mx-auto">
-                Salve restaurantes, hotéis e experiências enquanto explora — e veja seu roteiro perfeito se construir aos poucos.
+                Salve restaurantes, hotéis e experiências enquanto explora — ou planeje seu roteiro arrastando atividades.
               </p>
-              <Link 
-                to="/destinos"
-                className="inline-flex items-center gap-2 py-3 px-6 bg-primary text-primary-foreground rounded-full text-sm font-medium hover:opacity-90 transition-opacity"
-              >
-                <Sparkles className="w-4 h-4" />
-                Começar a explorar
-              </Link>
+              <div className="flex flex-col gap-3 items-center">
+                <Link 
+                  to="/destinos"
+                  className="inline-flex items-center gap-2 py-3 px-6 bg-primary text-primary-foreground rounded-full text-sm font-medium hover:opacity-90 transition-opacity"
+                >
+                  <Sparkles className="w-4 h-4" />
+                  Começar a explorar
+                </Link>
+                <Link 
+                  to="/planejar/rio-de-janeiro"
+                  className="inline-flex items-center gap-2 py-3 px-6 border border-border text-foreground rounded-full text-sm font-medium hover:bg-accent transition-colors"
+                >
+                  <Compass className="w-4 h-4" />
+                  Planejar roteiro
+                </Link>
+              </div>
             </div>
           )}
         </div>
