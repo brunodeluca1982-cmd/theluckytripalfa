@@ -1,10 +1,17 @@
 import { toast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
+import { useCallback } from "react";
+import { ToastAction } from "@/components/ui/toast";
 
 /**
  * ITEM SAVE HOOK
  * 
  * Handles saving individual items to Meu Roteiro.
  * Only atomic content items can be saved (restaurants, hotels, activities, bars).
+ * 
+ * NAVIGATION VISIBILITY:
+ * - After save: toast includes action to go to Meu Roteiro
+ * - User always knows where saved items live
  */
 
 interface SavedItem {
@@ -16,7 +23,13 @@ interface SavedItem {
 }
 
 export const useItemSave = () => {
-  const saveItem = (
+  const navigate = useNavigate();
+
+  const goToRoteiro = useCallback(() => {
+    navigate('/meu-roteiro');
+  }, [navigate]);
+
+  const saveItem = useCallback((
     itemId: string,
     itemType: SavedItem['type'],
     itemTitle: string,
@@ -33,6 +46,11 @@ export const useItemSave = () => {
       toast({
         title: "Já salvo",
         description: `${itemTitle} já está no seu roteiro.`,
+        action: (
+          <ToastAction altText="Ver roteiro" onClick={goToRoteiro}>
+            Ver roteiro
+          </ToastAction>
+        ),
       });
       return false;
     }
@@ -51,12 +69,17 @@ export const useItemSave = () => {
     toast({
       title: "Salvo no Meu Roteiro",
       description: isPremium 
-        ? `${itemTitle} foi salvo. Crie uma conta para manter seu roteiro.`
-        : `${itemTitle} foi adicionado ao seu roteiro.`,
+        ? `${itemTitle} foi salvo.`
+        : `${itemTitle} foi adicionado.`,
+      action: (
+        <ToastAction altText="Ver roteiro" onClick={goToRoteiro}>
+          Ver roteiro
+        </ToastAction>
+      ),
     });
     
     return true;
-  };
+  }, [goToRoteiro]);
 
-  return { saveItem };
+  return { saveItem, goToRoteiro };
 };
