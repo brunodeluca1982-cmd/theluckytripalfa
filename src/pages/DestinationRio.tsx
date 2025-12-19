@@ -1,15 +1,17 @@
-import DestinationEntry, { MapPin, Bed, Utensils, Compass, Sparkles } from "@/components/DestinationEntry";
+import DestinationHub, { MapPin, Bed, Utensils, Compass, Sparkles } from "@/components/DestinationHub";
 
 /**
- * RIO DE JANEIRO — DESTINATION ENTRY SCREEN
+ * RIO DE JANEIRO — DESTINATION HUB
  * 
- * Instance of the locked destination entry template.
- * Contains exactly 5 primary actions with circular icon buttons.
+ * Full-screen swipeable destination experience.
+ * 
+ * SCREEN MODEL:
+ * - Hub (Screen 0): 5 primary action buttons
+ * - Screen 1-3: Secondary modules via horizontal swipe
  * 
  * Visual: Full-screen background with grid of action buttons.
  */
 
-// TODO: Replace with actual high-quality Rio de Janeiro image
 const RIO_BACKGROUND = "https://images.unsplash.com/photo-1483729558449-99ef09a8c325?q=80&w=2070&auto=format&fit=crop";
 
 const rioActions = [
@@ -22,7 +24,8 @@ const rioActions = [
 
 const DestinationRio = () => {
   return (
-    <DestinationEntry
+    <DestinationHub
+      destinationId="rio-de-janeiro"
       name="Rio de Janeiro"
       country="Brasil"
       backgroundImage={RIO_BACKGROUND}
