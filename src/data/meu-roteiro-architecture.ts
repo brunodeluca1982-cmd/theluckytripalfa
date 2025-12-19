@@ -51,16 +51,49 @@ export type ExcludedFromRoteiro =
 export type RoteiroState = 'draft' | 'saved' | 'premium';
 
 /**
- * Individual item saved to roteiro
+ * Item type classification for grouping and analysis
+ */
+export type RoteiroItemType = 
+  | 'activity'
+  | 'restaurant'
+  | 'bar'
+  | 'experience';
+
+// ═══════════════════════════════════════════════════════════════════════════
+// GEOLOCATION DATA STRUCTURE (GOOGLE MAPS READY)
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * GEOLOCATION DATA
+ * 
+ * Every item in "Meu Roteiro" must internally retain geolocation data
+ * for future Google Maps integration and route coherence analysis.
+ * 
+ * These fields may remain INVISIBLE to the user at this stage.
+ */
+export interface GeoLocation {
+  latitude: number;
+  longitude: number;
+  neighborhood: string;
+  city: string;
+  country: string;
+}
+
+/**
+ * Individual item saved to roteiro (with geolocation)
  */
 export interface RoteiroItem {
   id: string;
   originalDestination: string;
   originalNeighborhood: string | null;
   sourceModule: RoteiroSourceModule;
+  itemType: RoteiroItemType;
   isPremium: boolean;
   addedAt: Date;
   order: number;
+  
+  // Geolocation data (Google Maps ready)
+  geo: GeoLocation;
 }
 
 /**
@@ -120,12 +153,78 @@ export const isAllowedSource = (module: string): module is RoteiroSourceModule =
  * - Its original neighborhood (when applicable)
  * - Its original source module
  * - Its premium status (if Lucky List)
+ * - Its geolocation data (latitude, longitude, neighborhood, city, country)
+ * - Its item type (activity, restaurant, bar, experience)
  */
 export const ITEM_RETENTION_RULES = {
   mustRetainOriginalDestination: true,
   mustRetainOriginalNeighborhood: true,
   mustRetainSourceModule: true,
   mustRetainPremiumStatus: true,
+  mustRetainGeolocation: true,
+  mustRetainItemType: true,
+} as const;
+
+// ═══════════════════════════════════════════════════════════════════════════
+// GOOGLE MAPS COMPATIBILITY
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * GOOGLE MAPS COMPATIBILITY RULES
+ * 
+ * - Item structure must be compatible with Google Maps APIs
+ * - Items must be identifiable as map points
+ * - No routing or distance calculation is triggered at this stage
+ */
+export const GOOGLE_MAPS_COMPATIBILITY = {
+  structureCompatible: true,
+  itemsIdentifiableAsMapPoints: true,
+  routingTriggeredAtThisStage: false,
+  distanceCalculationAtThisStage: false,
+  
+  // Required fields for map point identification
+  requiredGeoFields: ['latitude', 'longitude', 'neighborhood', 'city', 'country'] as const,
+} as const;
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ROUTE COHERENCE PREPARATION
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * COHERENCE PREPARATION RULES
+ * 
+ * The system must be CAPABLE (in the future) of detecting:
+ * - Excessive distance between items
+ * - Impractical sequences (time/location)
+ * 
+ * NO alerts, warnings, or corrections are shown in the MVP.
+ */
+export const COHERENCE_PREPARATION = {
+  futureCapabilities: {
+    detectExcessiveDistance: true,
+    detectImpracticalSequences: true,
+    detectTimeConflicts: true,
+  },
+  mvpBehavior: {
+    showAlerts: false,
+    showWarnings: false,
+    showCorrections: false,
+    blockUserFromSaving: false,
+  },
+} as const;
+
+/**
+ * USER EXPERIENCE RULES FOR COHERENCE
+ * 
+ * - User is NEVER blocked from saving items
+ * - "Incoherent" routes are ALLOWED
+ * - Intelligence is ADVISORY, never RESTRICTIVE
+ */
+export const COHERENCE_UX_RULES = {
+  userNeverBlocked: true,
+  incoherentRoutesAllowed: true,
+  intelligenceMode: 'advisory' as const,
+  restrictiveMode: false,
 } as const;
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -303,22 +402,26 @@ export const shouldTriggerPremiumFlow = (
 };
 
 /**
- * Create a new roteiro item with required retention fields
+ * Create a new roteiro item with required retention fields and geolocation
  */
 export const createRoteiroItem = (
   id: string,
   destination: string,
   neighborhood: string | null,
   sourceModule: RoteiroSourceModule,
-  order: number
+  itemType: RoteiroItemType,
+  order: number,
+  geo: GeoLocation
 ): RoteiroItem => ({
   id,
   originalDestination: destination,
   originalNeighborhood: neighborhood,
   sourceModule,
+  itemType,
   isPremium: sourceModule === 'lucky-list',
   addedAt: new Date(),
   order,
+  geo,
 });
 
 /**
@@ -336,3 +439,78 @@ export const createEmptyRoteiro = (
   createdAt: new Date(),
   updatedAt: new Date(),
 });
+
+// ═══════════════════════════════════════════════════════════════════════════
+// GEOLOCATION HELPER FUNCTIONS
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Validate that a GeoLocation object has all required fields
+ */
+export const isValidGeoLocation = (geo: Partial<GeoLocation>): geo is GeoLocation => {
+  return (
+    typeof geo.latitude === 'number' &&
+    typeof geo.longitude === 'number' &&
+    typeof geo.neighborhood === 'string' &&
+    typeof geo.city === 'string' &&
+    typeof geo.country === 'string'
+  );
+};
+
+/**
+ * Check if item is map-ready (has valid geolocation)
+ */
+export const isMapReady = (item: RoteiroItem): boolean => {
+  return isValidGeoLocation(item.geo);
+};
+
+/**
+ * Extract map points from roteiro items
+ * Returns array of lat/lng pairs compatible with Google Maps
+ */
+export const extractMapPoints = (items: RoteiroItem[]): Array<{
+  id: string;
+  lat: number;
+  lng: number;
+  itemType: RoteiroItemType;
+}> => {
+  return items
+    .filter(isMapReady)
+    .map(item => ({
+      id: item.id,
+      lat: item.geo.latitude,
+      lng: item.geo.longitude,
+      itemType: item.itemType,
+    }));
+};
+
+/**
+ * Group roteiro items by neighborhood for map clustering
+ */
+export const groupByNeighborhood = (
+  items: RoteiroItem[]
+): Record<string, RoteiroItem[]> => {
+  return items.reduce((acc, item) => {
+    const key = item.geo.neighborhood;
+    if (!acc[key]) {
+      acc[key] = [];
+    }
+    acc[key].push(item);
+    return acc;
+  }, {} as Record<string, RoteiroItem[]>);
+};
+
+/**
+ * Group roteiro items by type for filtering
+ */
+export const groupByItemType = (
+  items: RoteiroItem[]
+): Record<RoteiroItemType, RoteiroItem[]> => {
+  return items.reduce((acc, item) => {
+    if (!acc[item.itemType]) {
+      acc[item.itemType] = [];
+    }
+    acc[item.itemType].push(item);
+    return acc;
+  }, {} as Record<RoteiroItemType, RoteiroItem[]>);
+};
