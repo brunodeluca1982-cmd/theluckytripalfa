@@ -15,6 +15,9 @@ import HowToGetThere from "./pages/HowToGetThere";
 import WhatToDo from "./pages/WhatToDo";
 import WhatToDoDetail from "./pages/WhatToDoDetail";
 import MeuRoteiro from "./pages/MeuRoteiro";
+import RestaurantDetail from "./pages/RestaurantDetail";
+import HotelDetail from "./pages/HotelDetail";
+import ActivityDetail from "./pages/ActivityDetail";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -33,14 +36,17 @@ const App = () => (
           <Route path="/city-view" element={<CityView />} />
           <Route path="/onde-ficar-rio" element={<OndeficarRio />} />
           <Route path="/onde-ficar/:neighborhood" element={<WhereToStayDetail />} />
+          <Route path="/hotel/:id" element={<HotelDetail />} />
           
           {/* Where to Eat */}
           <Route path="/eat-map-view" element={<EatMapView />} />
           <Route path="/onde-comer/:neighborhood" element={<WhereToEatDetail />} />
+          <Route path="/restaurante/:id" element={<RestaurantDetail />} />
           
           {/* What to Do */}
           <Route path="/o-que-fazer" element={<WhatToDo />} />
           <Route path="/o-que-fazer/:neighborhood" element={<WhatToDoDetail />} />
+          <Route path="/atividade/:id" element={<ActivityDetail />} />
           
           {/* Lucky List */}
           <Route path="/lucky-list" element={<LuckyList />} />

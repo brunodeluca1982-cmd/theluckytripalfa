@@ -290,19 +290,24 @@ const WhereToStayDetail = () => {
           
           {hotels.length > 0 ? (
             <div>
-              {hotels.map((hotel, index) => (
-                <HotelCard
-                  key={index}
-                  id={`hotel-${neighborhood}-${index}`}
-                  name={hotel.name}
-                  price={hotel.price}
-                  description={hotel.description}
-                  address={hotel.address}
-                  instagram={hotel.instagram}
-                  externalLink={hotel.externalLink}
-                  onSave={handleSaveHotel}
-                />
-              ))}
+              {hotels.map((hotel, index) => {
+                const slug = hotel.name
+                  .toLowerCase()
+                  .normalize("NFD")
+                  .replace(/[\u0300-\u036f]/g, "")
+                  .replace(/[^a-z0-9\s-]/g, "")
+                  .replace(/\s+/g, "-");
+                return (
+                  <HotelCard
+                    key={index}
+                    name={hotel.name}
+                    price={hotel.price}
+                    description={hotel.description}
+                    slug={slug}
+                    neighborhood={neighborhood}
+                  />
+                );
+              })}
             </div>
           ) : (
             <p className="text-sm text-muted-foreground">
