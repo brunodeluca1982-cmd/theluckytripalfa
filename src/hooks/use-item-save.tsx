@@ -1,6 +1,6 @@
 import { toast } from "@/hooks/use-toast";
-import { useNavigate } from "react-router-dom";
-import { useCallback } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useCallback, useEffect } from "react";
 import { ToastAction } from "@/components/ui/toast";
 
 /**
@@ -12,6 +12,9 @@ import { ToastAction } from "@/components/ui/toast";
  * NAVIGATION VISIBILITY:
  * - After save: toast includes action to go to Meu Roteiro
  * - User always knows where saved items live
+ * 
+ * DESTINATION CONTEXT:
+ * - Stores last destination path for return navigation
  */
 
 interface SavedItem {
@@ -24,6 +27,16 @@ interface SavedItem {
 
 export const useItemSave = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Store destination context for return navigation
+  useEffect(() => {
+    const path = location.pathname;
+    // Store if we're in a destination context
+    if (path.includes('/destino/') || path.includes('/onde-') || path.includes('/o-que-fazer') || path.includes('/lucky-list')) {
+      localStorage.setItem('last-destination-context', path);
+    }
+  }, [location.pathname]);
 
   const goToRoteiro = useCallback(() => {
     navigate('/meu-roteiro');
@@ -44,8 +57,8 @@ export const useItemSave = () => {
     
     if (alreadySaved) {
       toast({
-        title: "Já salvo",
-        description: `${itemTitle} já está no seu roteiro.`,
+        title: "Já está no seu roteiro",
+        description: `${itemTitle} já foi salvo.`,
         action: (
           <ToastAction altText="Ver roteiro" onClick={goToRoteiro}>
             Ver roteiro
@@ -69,11 +82,14 @@ export const useItemSave = () => {
     // Dispatch event for bottom navigation to update badge
     window.dispatchEvent(new CustomEvent('roteiro-updated'));
     
+    // Success feedback with item count
+    const itemCount = draftRoteiro.length;
+    
     toast({
-      title: "Salvo no Meu Roteiro",
+      title: "Adicionado ao roteiro ✓",
       description: isPremium 
-        ? `${itemTitle} foi salvo.`
-        : `${itemTitle} foi adicionado.`,
+        ? `${itemTitle} — ${itemCount} ${itemCount === 1 ? 'item' : 'itens'} no total`
+        : `${itemTitle} — ${itemCount} ${itemCount === 1 ? 'item' : 'itens'} salvos`,
       action: (
         <ToastAction altText="Ver roteiro" onClick={goToRoteiro}>
           Ver roteiro

@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
-import { ChevronLeft, Trash2, MapPin, Utensils, Bed, Star, Calendar } from "lucide-react";
+import { ChevronLeft, Trash2, MapPin, Utensils, Bed, Star, Compass, Sparkles, Moon, Coffee } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import { useEffect, useState } from "react";
@@ -10,7 +10,8 @@ import { useEffect, useState } from "react";
  * User journey completion:
  * - Displays all saved items from draft roteiro
  * - Allows removal of items
- * - Returns to last exploration context
+ * - Returns to last destination context
+ * - Feels like progress, not storage
  */
 
 interface SavedItem {
@@ -29,6 +30,10 @@ const getItemIcon = (type: SavedItem['type']) => {
       return <Bed className="w-4 h-4" />;
     case 'lucky-list':
       return <Star className="w-4 h-4" />;
+    case 'nightlife':
+      return <Moon className="w-4 h-4" />;
+    case 'local-flavor':
+      return <Coffee className="w-4 h-4" />;
     case 'activity':
     default:
       return <MapPin className="w-4 h-4" />;
@@ -57,13 +62,18 @@ const getItemTypeLabel = (type: SavedItem['type']) => {
 const MeuRoteiro = () => {
   const navigate = useNavigate();
   const [savedItems, setSavedItems] = useState<SavedItem[]>([]);
+  const [lastDestination, setLastDestination] = useState<string | null>(null);
   
   useEffect(() => {
     const items = JSON.parse(localStorage.getItem('draft-roteiro') || '[]');
     setSavedItems(items);
+    
+    // Get last visited destination for back navigation
+    const lastDest = localStorage.getItem('last-destination-context');
+    setLastDestination(lastDest);
   }, []);
 
-  const handleRemoveItem = (itemId: string, itemType: string) => {
+  const handleRemoveItem = (itemId: string, itemType: string, itemTitle: string) => {
     const updatedItems = savedItems.filter(
       item => !(item.id === itemId && item.type === itemType)
     );
@@ -74,18 +84,30 @@ const MeuRoteiro = () => {
     window.dispatchEvent(new CustomEvent('roteiro-updated'));
     
     toast({
-      title: "Removido",
-      description: "Item removido do seu roteiro.",
+      title: "Removido do roteiro",
+      description: `${itemTitle} foi removido.`,
     });
   };
 
   const handleGoBack = () => {
-    // Check if there's navigation history, otherwise go to home
-    if (window.history.length > 2) {
+    // Return to last destination context if available
+    if (lastDestination) {
+      navigate(lastDestination);
+    } else if (window.history.length > 2) {
       navigate(-1);
     } else {
       navigate('/');
     }
+  };
+
+  // Calculate progress indication
+  const getProgressMessage = () => {
+    const count = savedItems.length;
+    if (count === 0) return null;
+    if (count === 1) return "Seu roteiro está começando a tomar forma.";
+    if (count <= 3) return "Ótimo começo! Continue explorando.";
+    if (count <= 6) return "Sua viagem está ficando incrível.";
+    return "Roteiro completo! Você está pronto para viajar.";
   };
 
   return (
@@ -109,40 +131,39 @@ const MeuRoteiro = () => {
             Meu Roteiro
           </h1>
           {savedItems.length > 0 && (
-            <p className="text-sm text-muted-foreground mt-2">
-              {savedItems.length} {savedItems.length === 1 ? 'item salvo' : 'itens salvos'}
-            </p>
+            <>
+              <p className="text-sm text-muted-foreground mt-2">
+                {savedItems.length} {savedItems.length === 1 ? 'item salvo' : 'itens salvos'}
+              </p>
+              {/* Progress message */}
+              <p className="text-sm text-primary mt-1 font-medium">
+                {getProgressMessage()}
+              </p>
+            </>
           )}
         </div>
-
-        {/* Draft Notice */}
-        {savedItems.length > 0 && (
-          <div className="mx-6 mb-6 p-4 bg-muted/50 rounded-lg border border-border">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Calendar className="w-4 h-4" />
-              <span>Rascunho — crie uma conta para salvar permanentemente</span>
-            </div>
-          </div>
-        )}
 
         {/* Saved Items List */}
         <div className="px-6">
           {savedItems.length > 0 ? (
-            <div className="space-y-4">
+            <div className="space-y-3">
               {savedItems.map((item, index) => (
                 <article 
                   key={`${item.type}-${item.id}-${index}`}
-                  className="flex items-start justify-between p-4 border border-border rounded-lg bg-card"
+                  className="flex items-start justify-between p-4 border border-border rounded-lg bg-card animate-fade-in"
+                  style={{ animationDelay: `${index * 50}ms` }}
                 >
                   <div className="flex items-start gap-3 flex-1 min-w-0">
-                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-muted flex items-center justify-center">
+                    <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
+                      item.isPremium ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
+                    }`}>
                       {getItemIcon(item.type)}
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">
                         {getItemTypeLabel(item.type)}
                         {item.isPremium && (
-                          <span className="ml-2 text-primary">★ Premium</span>
+                          <span className="ml-2 text-primary">★</span>
                         )}
                       </p>
                       <h3 className="text-base font-medium text-foreground truncate">
@@ -153,8 +174,8 @@ const MeuRoteiro = () => {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="flex-shrink-0 text-muted-foreground hover:text-destructive"
-                    onClick={() => handleRemoveItem(item.id, item.type)}
+                    className="flex-shrink-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                    onClick={() => handleRemoveItem(item.id, item.type, item.title)}
                     aria-label="Remover item"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -163,25 +184,26 @@ const MeuRoteiro = () => {
               ))}
             </div>
           ) : (
-            /* EMPTY STATE - Explains what Meu Roteiro is */
-            <div className="text-center py-12">
-              <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
-                <MapPin className="w-8 h-8 text-muted-foreground" />
+            /* EMPTY STATE - Explains what Meu Roteiro is, invites exploration */
+            <div className="text-center py-16 animate-fade-in">
+              <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
+                <Compass className="w-10 h-10 text-primary" />
               </div>
-              <h2 className="text-xl font-serif font-medium text-foreground mb-2">
-                Seu roteiro está vazio
+              <h2 className="text-2xl font-serif font-medium text-foreground mb-3">
+                Sua viagem começa aqui
               </h2>
-              <p className="text-sm text-muted-foreground mb-2 max-w-xs mx-auto">
-                Aqui ficam os lugares que você salvar durante sua exploração.
+              <p className="text-base text-muted-foreground mb-2 max-w-sm mx-auto leading-relaxed">
+                O Meu Roteiro é onde sua viagem toma forma.
               </p>
-              <p className="text-sm text-muted-foreground mb-6 max-w-xs mx-auto">
-                Funciona como um bolso — salve restaurantes, hotéis e atividades para montar seu roteiro perfeito.
+              <p className="text-sm text-muted-foreground mb-8 max-w-sm mx-auto">
+                Salve restaurantes, hotéis e experiências enquanto explora — e veja seu roteiro perfeito se construir aos poucos.
               </p>
               <Link 
                 to="/destinos"
-                className="inline-block py-2 px-4 bg-primary text-primary-foreground rounded-lg text-sm hover:opacity-90 transition-opacity"
+                className="inline-flex items-center gap-2 py-3 px-6 bg-primary text-primary-foreground rounded-full text-sm font-medium hover:opacity-90 transition-opacity"
               >
-                Explorar destinos
+                <Sparkles className="w-4 h-4" />
+                Começar a explorar
               </Link>
             </div>
           )}

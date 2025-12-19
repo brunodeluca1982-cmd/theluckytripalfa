@@ -1,6 +1,7 @@
-import { Plus } from "lucide-react";
+import { Plus, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { toast } from "@/hooks/use-toast";
+import { useItemSave } from "@/hooks/use-item-save";
+import { useState, useEffect } from "react";
 
 /**
  * SAVE TO ROTEIRO BUTTON
@@ -8,9 +9,9 @@ import { toast } from "@/hooks/use-toast";
  * Structural interaction element for all item detail pages.
  * 
  * Behavior:
- * - If not logged in: Save to Draft state
- * - If Lucky List + not premium: Trigger premium access flow (defined later)
- * - Always visible without scrolling (placed in header area)
+ * - Shows visual feedback when saved
+ * - Uses centralized save logic from useItemSave hook
+ * - Animates on save action
  */
 
 interface SaveToRoteiroButtonProps {
@@ -26,69 +27,58 @@ const SaveToRoteiroButton = ({
   itemTitle,
   className = "" 
 }: SaveToRoteiroButtonProps) => {
-  
-  const handleSave = () => {
-    // Check if item is Lucky List (premium-gated)
-    const isPremiumItem = itemType === 'lucky-list';
-    
-    // For now: Save to draft state (localStorage simulation)
-    // Future: Check auth state and trigger appropriate flow
+  const { saveItem } = useItemSave();
+  const [isSaved, setIsSaved] = useState(false);
+  const [isAnimating, setIsAnimating] = useState(false);
+
+  // Check if already saved on mount
+  useEffect(() => {
     const draftRoteiro = JSON.parse(localStorage.getItem('draft-roteiro') || '[]');
-    
-    // Check if already saved
     const alreadySaved = draftRoteiro.some(
       (item: { id: string; type: string }) => item.id === itemId && item.type === itemType
     );
-    
-    if (alreadySaved) {
-      toast({
-        title: "Já salvo",
-        description: `${itemTitle} já está no seu roteiro.`,
-      });
+    setIsSaved(alreadySaved);
+  }, [itemId, itemType]);
+
+  const handleSave = () => {
+    if (isSaved) {
+      // Already saved, just show toast via hook
+      saveItem(itemId, itemType, itemTitle, itemType === 'lucky-list');
       return;
     }
+
+    // Trigger animation
+    setIsAnimating(true);
     
-    // If premium item and not premium user (future: check premium state)
-    // For now, save to draft and show toast
-    if (isPremiumItem) {
-      // Future: Trigger premium access flow
-      // For now, allow draft save with premium indicator
-      draftRoteiro.push({
-        id: itemId,
-        type: itemType,
-        title: itemTitle,
-        savedAt: new Date().toISOString(),
-        isPremium: true,
-      });
-    } else {
-      draftRoteiro.push({
-        id: itemId,
-        type: itemType,
-        title: itemTitle,
-        savedAt: new Date().toISOString(),
-        isPremium: false,
-      });
+    const isPremiumItem = itemType === 'lucky-list';
+    const success = saveItem(itemId, itemType, itemTitle, isPremiumItem);
+    
+    if (success) {
+      setIsSaved(true);
     }
-    
-    localStorage.setItem('draft-roteiro', JSON.stringify(draftRoteiro));
-    
-    toast({
-      title: "Salvo no Meu Roteiro",
-      description: isPremiumItem 
-        ? `${itemTitle} foi salvo. Crie uma conta para manter seu roteiro.`
-        : `${itemTitle} foi adicionado ao seu roteiro.`,
-    });
+
+    // Reset animation after delay
+    setTimeout(() => setIsAnimating(false), 600);
   };
 
   return (
     <Button
       onClick={handleSave}
-      variant="default"
+      variant={isSaved ? "secondary" : "default"}
       size="sm"
-      className={`gap-2 ${className}`}
+      className={`gap-2 transition-all duration-300 ${isAnimating ? "scale-105" : ""} ${className}`}
     >
-      <Plus className="w-4 h-4" />
-      Salvar no Meu Roteiro
+      {isSaved ? (
+        <>
+          <Check className={`w-4 h-4 ${isAnimating ? "animate-scale-in" : ""}`} />
+          Salvo
+        </>
+      ) : (
+        <>
+          <Plus className="w-4 h-4" />
+          Salvar no Meu Roteiro
+        </>
+      )}
     </Button>
   );
 };
