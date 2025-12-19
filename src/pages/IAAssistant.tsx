@@ -6,24 +6,42 @@ import { ChevronLeft, MessageCircle, CalendarPlus, Sparkles } from "lucide-react
  * TRAVEL ASSISTANT — IA SCREEN (PT-BR)
  * ═══════════════════════════════════════════════════════════════════════════
  * 
- * This is NOT a generic chatbot.
- * This is a curated, contextual, human-guided travel assistant.
+ * ██████████████████████████████████████████████████████████████████████████
+ * ██  BEHAVIORAL LOCK — AI ASSISTANT — DO NOT MODIFY                      ██
+ * ██████████████████████████████████████████████████████████████████████████
+ * 
+ * LANGUAGE LOCK:
+ * - ALL AI prompts and replies MUST be in Portuguese (pt-BR)
+ * - No English responses ever
+ * 
+ * CONTENT LOCK:
+ * - AI may ONLY use curated internal content
+ * - No external knowledge or hallucination
+ * - Never invents places, tips, or information
+ * 
+ * FALLBACK LOCK (VERBATIM — DO NOT MODIFY):
+ * When AI cannot answer, it MUST reply EXACTLY:
+ * "Ih! Essa aí eu não sei te responder… quer falar com o Bruno? 
+ * Chama ele no WhatsApp! 21998102132"
+ * 
+ * FEATURE LOCK:
+ * - No creativity modes allowed
+ * - No system logic exposure
+ * - No AI personality customization
  * 
  * PURPOSE:
  * - Reduce anxiety
  * - Organize decisions
  * - Transform content into action (itinerary)
  * 
- * AI RULES:
- * - Only uses curated content (Bruno, Partners, Lucky List, Guides)
- * - Never invents places, tips or information
- * - Calm, confident, human, experienced tone
- * 
  * VISUAL STYLE:
  * - Clean, premium, neutral
  * - No emojis, no playful elements
  * - Feels like a premium travel concierge
- * ═══════════════════════════════════════════════════════════════════════════
+ * 
+ * ██████████████████████████████████████████████████████████████████████████
+ * ██  END BEHAVIORAL LOCK                                                 ██
+ * ██████████████████████████████████████████████████████████████████████████
  */
 
 const IAAssistant = () => {
