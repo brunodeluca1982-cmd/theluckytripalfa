@@ -3,7 +3,13 @@ import { ChevronLeft } from "lucide-react";
 import RestaurantCard from "@/components/RestaurantCard";
 import { getNeighborhoodById } from "@/data/rio-neighborhoods";
 import RoteiroAccessLink from "@/components/RoteiroAccessLink";
-import { useItemSave } from "@/hooks/use-item-save";
+
+/**
+ * ONDE COMER — NEIGHBORHOOD RESTAURANT LIST
+ * 
+ * SAVING BEHAVIOR: Save actions are NOT allowed on this page.
+ * Users must navigate to individual restaurant detail pages to save.
+ */
 
 // Neighborhood descriptions for the food scene
 const neighborhoodDescriptions: Record<string, string> = {
@@ -478,7 +484,6 @@ const restaurantsByNeighborhood: Record<string, Record<string, { name: string; d
 const WhereToEatDetail = () => {
   const { neighborhood } = useParams<{ neighborhood: string }>();
   const [searchParams] = useSearchParams();
-  const { saveItem } = useItemSave();
   
   const neighborhoodData = getNeighborhoodById(neighborhood || "");
   const name = neighborhoodData?.name || "Neighborhood";
@@ -489,10 +494,6 @@ const WhereToEatDetail = () => {
   const backPath = from === "map" ? "/eat-map-view" : "/eat-map-view";
 
   const hasRestaurants = Object.keys(restaurants).length > 0;
-
-  const handleSaveRestaurant = (restaurantId: string, restaurantName: string) => {
-    saveItem(restaurantId, 'restaurant', restaurantName, false);
-  };
 
   return (
     <div className="min-h-screen bg-background">

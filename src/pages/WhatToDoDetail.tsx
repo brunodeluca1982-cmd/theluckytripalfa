@@ -1,32 +1,25 @@
 import { Link, useParams } from "react-router-dom";
-import { ChevronLeft, Plus } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import { getNeighborhoodById } from "@/data/rio-neighborhoods";
 import { activitiesByNeighborhood } from "@/data/what-to-do-data";
 import RoteiroAccessLink from "@/components/RoteiroAccessLink";
-import { Button } from "@/components/ui/button";
-import { useItemSave } from "@/hooks/use-item-save";
 
 /**
- * O QUE FAZER — ACTIVITY DETAIL
+ * O QUE FAZER — NEIGHBORHOOD ACTIVITY LIST
  * 
- * PUBLIC LAYER - Consistent template for all activities
+ * PUBLIC LAYER - Lists activities for a neighborhood
  * 
- * SAVING SCOPE: Only individual activities can be saved (item level).
- * Page-level saving is NOT allowed.
+ * SAVING BEHAVIOR: Save actions are NOT allowed on this page.
+ * Users must navigate to individual activity detail pages to save.
  */
 
 const WhatToDoDetail = () => {
   const { neighborhood } = useParams<{ neighborhood: string }>();
-  const { saveItem } = useItemSave();
   
   const neighborhoodData = getNeighborhoodById(neighborhood || "");
   const name = neighborhoodData?.name || "Bairro";
   const data = activitiesByNeighborhood[neighborhood || ""];
   const activities = data?.activities || [];
-
-  const handleSaveActivity = (activityId: string, activityTitle: string) => {
-    saveItem(activityId, 'activity', activityTitle, false);
-  };
 
   return (
     <div className="min-h-screen bg-background">
