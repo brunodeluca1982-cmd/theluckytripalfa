@@ -22,7 +22,7 @@ const destinations: Destination[] = [
     name: "Rio de Janeiro",
     country: "Brasil",
     available: true,
-    path: "/destino/rio-de-janeiro",
+    path: "/destino/rio-de-janeiro/intro",
   },
   {
     id: "sao-paulo",
