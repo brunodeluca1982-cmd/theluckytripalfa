@@ -1,295 +1,491 @@
-import { Link, useNavigate } from "react-router-dom";
-import { ChevronLeft, Trash2, MapPin, Utensils, Bed, Star, Compass, Sparkles, Moon, Coffee, Navigation } from "lucide-react";
+import { useState, useMemo, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import { 
+  ChevronLeft, Heart, Search, X, MapPin, Calendar, Clock, 
+  Users, Baby, Plus, Minus, ChevronRight 
+} from "lucide-react";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+import { curatedDestinations, searchDestinations, Destination } from "@/data/destinations-database";
+import { useTripDraft } from "@/hooks/use-trip-draft";
 import { toast } from "@/hooks/use-toast";
-import { useEffect, useState } from "react";
-import { AddPlaceSheet } from "@/components/roteiro/AddPlaceSheet";
-import { PlaceData } from "@/components/roteiro/GooglePlacesAutocomplete";
-import { useRoteiroState } from "@/hooks/use-roteiro-state";
 
 /**
- * ═══════════════════════════════════════════════════════════════════════════
- * MEU ROTEIRO — BEHAVIORAL LOCK (VALIDATED / FROZEN)
- * ═══════════════════════════════════════════════════════════════════════════
+ * MONTE SEU ROTEIRO — Entry Screen (Step 1)
  * 
- * LOCKED BEHAVIORS — DO NOT MODIFY:
- * ═══════════════════════════════════════════════════════════════════════════
- * 1. Saving an item saves a SINGLE CARD, not a full page
- * 2. Items CAN be saved WITHOUT login (draft state in localStorage)
- * 3. Saved items are accessible via the top-right icon (always visible)
- * 4. Login only UPGRADES persistence, NEVER blocks usage
- * 5. NO forced login at entry — feature is always accessible
+ * Route: /meu-roteiro
  * 
- * ═══════════════════════════════════════════════════════════════════════════
- * FORBIDDEN FEATURES — DO NOT INTRODUCE:
- * ═══════════════════════════════════════════════════════════════════════════
- * - NO scheduling functionality
- * - NO maps integration
- * - NO timelines or calendar views
- * - NO login gates or auth walls
- * - NO data sync requirements
- * 
- * ═══════════════════════════════════════════════════════════════════════════
- * PERSISTENCE MODEL:
- * ═══════════════════════════════════════════════════════════════════════════
- * - Draft state: localStorage (always available)
- * - Logged in: upgrades to cloud sync (optional, non-blocking)
- * - Transition is seamless, never loses data
- * 
- * USER JOURNEY:
- * - Displays all saved items from draft roteiro
- * - Allows removal of items
- * - Returns to last destination context
- * - Feels like progress, not storage
- * ═══════════════════════════════════════════════════════════════════════════
+ * Netflix-style destination carousel + search + trip parameters.
+ * CTA navigates to preferences (Step 2).
  */
-
-interface SavedItem {
-  id: string;
-  type: 'activity' | 'restaurant' | 'hotel' | 'lucky-list' | 'nightlife' | 'local-flavor' | 'custom';
-  title: string;
-  savedAt: string;
-  isPremium: boolean;
-}
-
-const getItemIcon = (type: SavedItem['type']) => {
-  switch (type) {
-    case 'restaurant':
-      return <Utensils className="w-4 h-4" />;
-    case 'hotel':
-      return <Bed className="w-4 h-4" />;
-    case 'lucky-list':
-      return <Star className="w-4 h-4" />;
-    case 'nightlife':
-      return <Moon className="w-4 h-4" />;
-    case 'local-flavor':
-      return <Coffee className="w-4 h-4" />;
-    case 'custom':
-      return <Navigation className="w-4 h-4" />;
-    case 'activity':
-    default:
-      return <MapPin className="w-4 h-4" />;
-  }
-};
-
-const getItemTypeLabel = (type: SavedItem['type']) => {
-  switch (type) {
-    case 'restaurant':
-      return 'Onde Comer';
-    case 'hotel':
-      return 'Onde Ficar';
-    case 'lucky-list':
-      return 'Lucky List';
-    case 'activity':
-      return 'O Que Fazer';
-    case 'nightlife':
-      return 'Vida Noturna';
-    case 'local-flavor':
-      return 'Sabores Locais';
-    case 'custom':
-      return 'Local Adicionado';
-    default:
-      return 'Item';
-  }
-};
-
-const TOTAL_DAYS = 3; // Default trip length
 
 const MeuRoteiro = () => {
   const navigate = useNavigate();
-  const [savedItems, setSavedItems] = useState<SavedItem[]>([]);
-  const [lastDestination, setLastDestination] = useState<string | null>(null);
-  const { addItem } = useRoteiroState('rio-de-janeiro', TOTAL_DAYS);
-  
-  useEffect(() => {
-    const items = JSON.parse(localStorage.getItem('draft-roteiro') || '[]');
-    setSavedItems(items);
-    
-    // Get last visited destination for back navigation
-    const lastDest = localStorage.getItem('last-destination-context');
-    setLastDestination(lastDest);
-  }, []);
+  const carouselRef = useRef<HTMLDivElement>(null);
+  const { 
+    draft, 
+    isStep1Valid,
+    setDestination, 
+    setArrival, 
+    setDeparture, 
+    setAdults, 
+    setChildren, 
+    setChildAge 
+  } = useTripDraft();
 
-  const handleAddPlace = (day: number, place: PlaceData) => {
-    // Add to roteiro state (structured itinerary)
-    addItem(day, {
-      id: place.placeId,
-      title: place.name,
-      time: '',
-      category: 'custom',
-      location: place.neighborhood || place.city || '',
-      placeId: place.placeId,
-      lat: place.lat,
-      lng: place.lng,
-    });
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
 
-    // Also add to saved items list for display
-    const newItem: SavedItem = {
-      id: place.placeId,
-      type: 'custom',
-      title: place.name,
-      savedAt: new Date().toISOString(),
-      isPremium: false,
-    };
-    
-    const updatedItems = [...savedItems, newItem];
-    setSavedItems(updatedItems);
-    localStorage.setItem('draft-roteiro', JSON.stringify(updatedItems));
-    
-    // Dispatch event for bottom navigation to update badge
-    window.dispatchEvent(new CustomEvent('roteiro-updated'));
-  };
+  // Search results
+  const searchResults = useMemo(() => {
+    if (!searchQuery.trim()) return [];
+    return searchDestinations(searchQuery);
+  }, [searchQuery]);
 
-  const handleRemoveItem = (itemId: string, itemType: string, itemTitle: string) => {
-    const updatedItems = savedItems.filter(
-      item => !(item.id === itemId && item.type === itemType)
+  // Handle destination selection from carousel or search
+  const handleSelectDestination = (destination: Destination) => {
+    if (!destination.available) {
+      toast({ 
+        title: "Em breve!", 
+        description: `${destination.name} estará disponível em breve.` 
+      });
+      return;
+    }
+    setDestination(
+      destination.id, 
+      destination.name, 
+      destination.id, 
+      destination.imageUrl || ''
     );
-    setSavedItems(updatedItems);
-    localStorage.setItem('draft-roteiro', JSON.stringify(updatedItems));
-    
-    // Dispatch event for bottom navigation to update badge
-    window.dispatchEvent(new CustomEvent('roteiro-updated'));
-    
-    toast({
-      title: "Removido do roteiro",
-      description: `${itemTitle} foi removido.`,
-    });
+    setSearchQuery('');
+    setIsSearchFocused(false);
   };
 
-  const handleGoBack = () => {
-    // Return to last destination context if available
-    if (lastDestination) {
-      navigate(lastDestination);
-    } else if (window.history.length > 2) {
+  const handleContinue = () => {
+    if (!isStep1Valid) {
+      toast({ 
+        title: "Complete os campos", 
+        description: "Selecione destino e datas para continuar." 
+      });
+      return;
+    }
+    navigate('/meu-roteiro/preferencias');
+  };
+
+  const handleBack = () => {
+    if (window.history.length > 2) {
       navigate(-1);
     } else {
       navigate('/');
     }
   };
 
-  // Calculate progress indication
-  const getProgressMessage = () => {
-    const count = savedItems.length;
-    if (count === 0) return null;
-    if (count === 1) return "Seu roteiro está começando a tomar forma.";
-    if (count <= 3) return "Ótimo começo! Continue explorando.";
-    if (count <= 6) return "Sua viagem está ficando incrível.";
-    return "Roteiro completo! Você está pronto para viajar.";
-  };
+  // Selected destination object
+  const selectedDestination = useMemo(() => {
+    return curatedDestinations.find(d => d.id === draft.destinationId) || null;
+  }, [draft.destinationId]);
 
   return (
-    <div className="min-h-screen bg-background pb-20">
+    <div className="min-h-screen bg-background pb-32">
       {/* Header */}
-      <header className="px-6 py-4 border-b border-border">
-        <button
-          onClick={handleGoBack}
-          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <ChevronLeft className="w-4 h-4" />
-          Voltar
-        </button>
+      <header className="sticky top-0 z-50 px-4 py-4 bg-background/95 backdrop-blur-sm border-b border-border">
+        <div className="flex items-center justify-between">
+          <button
+            onClick={handleBack}
+            className="p-2 -m-2 text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+          
+          <h1 className="text-lg font-semibold text-foreground">Monte seu roteiro</h1>
+          
+          <button
+            onClick={() => navigate('/favoritos')}
+            className="p-2 -m-2 text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <Heart className="w-5 h-5" />
+          </button>
+        </div>
       </header>
 
       {/* Content */}
-      <main className="pb-12">
-        {/* Title */}
-        <div className="px-6 pt-8 pb-6">
-          <h1 className="text-4xl font-serif font-semibold text-foreground leading-tight">
-            Meu Roteiro
-          </h1>
-          {savedItems.length > 0 && (
-            <>
-              <p className="text-sm text-muted-foreground mt-2">
-                {savedItems.length} {savedItems.length === 1 ? 'item salvo' : 'itens salvos'}
-              </p>
-              {/* Progress message */}
-              <p className="text-sm text-primary mt-1 font-medium">
-                {getProgressMessage()}
-              </p>
-            </>
-          )}
-        </div>
-
-        {/* Saved Items List */}
-        <div className="px-6">
-          {savedItems.length > 0 ? (
-            <div className="space-y-3">
-              {savedItems.map((item, index) => (
-                <article 
-                  key={`${item.type}-${item.id}-${index}`}
-                  className="flex items-start justify-between p-4 border border-border rounded-lg bg-card animate-fade-in"
-                  style={{ animationDelay: `${index * 50}ms` }}
+      <main className="px-4 py-6 space-y-6">
+        {/* Netflix-style destination carousel */}
+        <section>
+          <h2 className="text-lg font-semibold text-foreground mb-4">
+            Escolha seu destino
+          </h2>
+          
+          <div 
+            ref={carouselRef}
+            className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide"
+            style={{ scrollSnapType: 'x mandatory' }}
+          >
+            {curatedDestinations.map((destination, index) => {
+              const isSelected = draft.destinationId === destination.id;
+              
+              return (
+                <motion.button
+                  key={destination.id}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: index * 0.05 }}
+                  onClick={() => handleSelectDestination(destination)}
+                  className={cn(
+                    "relative flex-shrink-0 w-40 aspect-[3/4] rounded-2xl overflow-hidden transition-all",
+                    isSelected 
+                      ? "ring-2 ring-primary ring-offset-2 ring-offset-background scale-[1.02]" 
+                      : "ring-0",
+                    !destination.available && "opacity-60"
+                  )}
+                  style={{ scrollSnapAlign: 'start' }}
                 >
-                  <div className="flex items-start gap-3 flex-1 min-w-0">
-                    <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
-                      item.isPremium ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
-                    }`}>
-                      {getItemIcon(item.type)}
+                  {destination.imageUrl ? (
+                    <img
+                      src={destination.imageUrl}
+                      alt={destination.name}
+                      className="absolute inset-0 w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="absolute inset-0 bg-muted flex items-center justify-center">
+                      <MapPin className="w-8 h-8 text-muted-foreground" />
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">
-                        {getItemTypeLabel(item.type)}
-                        {item.isPremium && (
-                          <span className="ml-2 text-primary">★</span>
-                        )}
-                      </p>
-                      <h3 className="text-base font-medium text-foreground truncate">
-                        {item.title}
-                      </h3>
-                    </div>
+                  )}
+                  
+                  {/* Gradient overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                  
+                  {/* Content */}
+                  <div className="absolute bottom-0 left-0 right-0 p-3">
+                    <h3 className="text-white font-semibold text-sm truncate">
+                      {destination.name}
+                    </h3>
+                    <p className="text-white/70 text-xs truncate">
+                      {destination.country}
+                    </p>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="flex-shrink-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-                    onClick={() => handleRemoveItem(item.id, item.type, item.title)}
-                    aria-label="Remover item"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </article>
+
+                  {/* Coming soon badge */}
+                  {!destination.available && (
+                    <div className="absolute top-2 left-2 px-2 py-1 bg-black/60 rounded-full">
+                      <span className="text-[10px] text-white font-medium">Em breve</span>
+                    </div>
+                  )}
+
+                  {/* Selected indicator */}
+                  {isSelected && (
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      className="absolute top-2 right-2 w-6 h-6 rounded-full bg-primary flex items-center justify-center"
+                    >
+                      <svg 
+                        className="w-4 h-4 text-primary-foreground" 
+                        fill="none" 
+                        viewBox="0 0 24 24" 
+                        stroke="currentColor"
+                      >
+                        <path 
+                          strokeLinecap="round" 
+                          strokeLinejoin="round" 
+                          strokeWidth={3} 
+                          d="M5 13l4 4L19 7" 
+                        />
+                      </svg>
+                    </motion.div>
+                  )}
+                </motion.button>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* Search bar */}
+        <section className="relative">
+          <div className="relative">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder="Vai pra onde?"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onFocus={() => setIsSearchFocused(true)}
+              onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
+              className="pl-12 pr-10 h-14 text-base bg-muted/50 border-0 rounded-2xl focus-visible:ring-primary"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="absolute right-4 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+
+          {/* Search results dropdown */}
+          {isSearchFocused && searchResults.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="absolute top-full left-0 right-0 mt-2 bg-card rounded-2xl shadow-lg border border-border z-50 max-h-64 overflow-y-auto"
+            >
+              {searchResults.map((destination) => (
+                <button
+                  key={destination.id}
+                  onClick={() => handleSelectDestination(destination)}
+                  className={cn(
+                    "w-full flex items-center gap-3 p-3 hover:bg-accent transition-colors first:rounded-t-2xl last:rounded-b-2xl",
+                    !destination.available && "opacity-60"
+                  )}
+                >
+                  {destination.imageUrl ? (
+                    <img 
+                      src={destination.imageUrl} 
+                      alt={destination.name}
+                      className="w-12 h-12 rounded-xl object-cover"
+                    />
+                  ) : (
+                    <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center">
+                      <MapPin className="w-5 h-5 text-muted-foreground" />
+                    </div>
+                  )}
+                  <div className="flex-1 text-left">
+                    <p className="font-medium text-foreground">{destination.name}</p>
+                    <p className="text-sm text-muted-foreground">{destination.country}</p>
+                  </div>
+                  {!destination.available && (
+                    <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded-full">
+                      Em breve
+                    </span>
+                  )}
+                </button>
               ))}
-            </div>
-          ) : (
-            /* EMPTY STATE - Explains what Meu Roteiro is, invites exploration */
-            <div className="text-center py-16 animate-fade-in">
-              <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
-                <Compass className="w-10 h-10 text-primary" />
-              </div>
-              <h2 className="text-2xl font-serif font-medium text-foreground mb-3">
-                Sua viagem começa aqui
-              </h2>
-              <p className="text-base text-muted-foreground mb-2 max-w-sm mx-auto leading-relaxed">
-                O Meu Roteiro é onde sua viagem toma forma.
-              </p>
-              <p className="text-sm text-muted-foreground mb-8 max-w-sm mx-auto">
-                Salve restaurantes, hotéis e experiências enquanto explora — ou planeje seu roteiro arrastando atividades.
-              </p>
-              <div className="flex flex-col gap-3 items-center">
-                <Link 
-                  to="/destinos"
-                  className="inline-flex items-center gap-2 py-3 px-6 bg-primary text-primary-foreground rounded-full text-sm font-medium hover:opacity-90 transition-opacity"
-                >
-                  <Sparkles className="w-4 h-4" />
-                  Começar a explorar
-                </Link>
-                <Link 
-                  to="/planejar/rio-de-janeiro"
-                  className="inline-flex items-center gap-2 py-3 px-6 border border-border text-foreground rounded-full text-sm font-medium hover:bg-accent transition-colors"
-                >
-                  <Compass className="w-4 h-4" />
-                  Planejar roteiro
-                </Link>
-              </div>
-            </div>
+            </motion.div>
           )}
-        </div>
+        </section>
+
+        {/* Selected destination indicator */}
+        {selectedDestination && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex items-center gap-3 p-3 bg-primary/10 rounded-xl"
+          >
+            <MapPin className="w-5 h-5 text-primary" />
+            <span className="font-medium text-foreground">
+              {selectedDestination.name}, {selectedDestination.country}
+            </span>
+          </motion.div>
+        )}
+
+        {/* Trip dates */}
+        <section className="space-y-4">
+          <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
+            <Calendar className="w-5 h-5 text-primary" />
+            Data e horário
+          </h2>
+
+          {/* Arrival */}
+          <div className="bg-card rounded-2xl p-4 space-y-3">
+            <p className="text-sm font-medium text-muted-foreground">Chegada</p>
+            <div className="grid grid-cols-2 gap-3">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "h-12 justify-start text-left font-normal rounded-xl",
+                      !draft.arrivalAt && "text-muted-foreground"
+                    )}
+                  >
+                    {draft.arrivalAt 
+                      ? format(draft.arrivalAt, "dd MMM yyyy", { locale: ptBR })
+                      : "Data"
+                    }
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <CalendarComponent
+                    mode="single"
+                    selected={draft.arrivalAt || undefined}
+                    onSelect={(date) => setArrival(date || null, draft.arrivalTime)}
+                    disabled={(date) => date < new Date()}
+                    initialFocus
+                    className="pointer-events-auto"
+                  />
+                </PopoverContent>
+              </Popover>
+              
+              <Input
+                type="time"
+                value={draft.arrivalTime}
+                onChange={(e) => setArrival(draft.arrivalAt, e.target.value)}
+                className="h-12 rounded-xl"
+                placeholder="Horário"
+              />
+            </div>
+          </div>
+
+          {/* Departure */}
+          <div className="bg-card rounded-2xl p-4 space-y-3">
+            <p className="text-sm font-medium text-muted-foreground">Partida</p>
+            <div className="grid grid-cols-2 gap-3">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "h-12 justify-start text-left font-normal rounded-xl",
+                      !draft.departureAt && "text-muted-foreground"
+                    )}
+                  >
+                    {draft.departureAt 
+                      ? format(draft.departureAt, "dd MMM yyyy", { locale: ptBR })
+                      : "Data"
+                    }
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <CalendarComponent
+                    mode="single"
+                    selected={draft.departureAt || undefined}
+                    onSelect={(date) => setDeparture(date || null, draft.departureTime)}
+                    disabled={(date) => date < (draft.arrivalAt || new Date())}
+                    initialFocus
+                    className="pointer-events-auto"
+                  />
+                </PopoverContent>
+              </Popover>
+              
+              <Input
+                type="time"
+                value={draft.departureTime}
+                onChange={(e) => setDeparture(draft.departureAt, e.target.value)}
+                className="h-12 rounded-xl"
+                placeholder="Horário"
+              />
+            </div>
+          </div>
+        </section>
+
+        {/* Travelers */}
+        <section className="space-y-4">
+          <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
+            <Users className="w-5 h-5 text-primary" />
+            Viajantes
+          </h2>
+
+          <div className="bg-card rounded-2xl p-4 space-y-4">
+            {/* Adults counter */}
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-medium text-foreground">Adultos</p>
+                <p className="text-sm text-muted-foreground">13+ anos</p>
+              </div>
+              <div className="flex items-center gap-3">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-10 w-10 rounded-full"
+                  onClick={() => setAdults(draft.adults - 1)}
+                  disabled={draft.adults <= 1}
+                >
+                  <Minus className="w-4 h-4" />
+                </Button>
+                <span className="w-8 text-center font-semibold text-lg">
+                  {draft.adults}
+                </span>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-10 w-10 rounded-full"
+                  onClick={() => setAdults(draft.adults + 1)}
+                >
+                  <Plus className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+
+            {/* Children counter */}
+            <div className="flex items-center justify-between pt-4 border-t border-border">
+              <div>
+                <p className="font-medium text-foreground">Crianças</p>
+                <p className="text-sm text-muted-foreground">0-12 anos</p>
+              </div>
+              <div className="flex items-center gap-3">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-10 w-10 rounded-full"
+                  onClick={() => setChildren(draft.children - 1)}
+                  disabled={draft.children <= 0}
+                >
+                  <Minus className="w-4 h-4" />
+                </Button>
+                <span className="w-8 text-center font-semibold text-lg">
+                  {draft.children}
+                </span>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-10 w-10 rounded-full"
+                  onClick={() => setChildren(draft.children + 1)}
+                >
+                  <Plus className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+
+            {/* Children ages */}
+            {draft.children > 0 && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                className="pt-4 border-t border-border space-y-3"
+              >
+                <p className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                  <Baby className="w-4 h-4" />
+                  Idades das crianças
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {draft.childrenAges.map((age, index) => (
+                    <div key={index} className="flex items-center gap-2">
+                      <Input
+                        type="number"
+                        min={0}
+                        max={12}
+                        value={age}
+                        onChange={(e) => setChildAge(index, parseInt(e.target.value) || 0)}
+                        className="w-16 h-10 rounded-xl text-center"
+                      />
+                      <span className="text-sm text-muted-foreground">anos</span>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </div>
+        </section>
       </main>
-      {/* FAB for adding places */}
-      <AddPlaceSheet 
-        totalDays={TOTAL_DAYS} 
-        onAddPlace={handleAddPlace} 
-      />
+
+      {/* Fixed CTA */}
+      <div className="fixed bottom-16 left-0 right-0 p-4 bg-background/95 backdrop-blur-sm border-t border-border">
+        <Button
+          onClick={handleContinue}
+          disabled={!isStep1Valid}
+          className="w-full h-14 text-lg font-semibold rounded-2xl"
+        >
+          Continuar
+          <ChevronRight className="w-5 h-5 ml-2" />
+        </Button>
+      </div>
     </div>
   );
 };
