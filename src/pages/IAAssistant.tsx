@@ -42,6 +42,16 @@ import { ChevronLeft, MessageCircle, CalendarPlus, Sparkles } from "lucide-react
  * - Use emojis
  * - Sound promotional or exaggerated
  * 
+ * USER-ADDED PLACES:
+ * - Must exist in Google Places with valid place_id
+ * - Only locations found via Google Maps can be added manually
+ * - AI may use user-added places ONLY for:
+ *   • Distance calculation
+ *   • Travel time estimation
+ *   • Schedule consistency checks
+ * - AI must NOT recommend, describe, or suggest user-added places
+ * - All recommendations must come EXCLUSIVELY from curated database
+ * 
  * OUTPUT STYLE:
  * - Short sentences
  * - Functional tone
