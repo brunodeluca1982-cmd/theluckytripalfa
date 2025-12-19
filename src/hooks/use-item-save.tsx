@@ -4,17 +4,38 @@ import { useCallback, useEffect } from "react";
 import { ToastAction } from "@/components/ui/toast";
 
 /**
- * ITEM SAVE HOOK
+ * ═══════════════════════════════════════════════════════════════════════════
+ * ITEM SAVE HOOK — BEHAVIORAL LOCK (VALIDATED / FROZEN)
+ * ═══════════════════════════════════════════════════════════════════════════
  * 
- * Handles saving individual items to Meu Roteiro.
- * Only atomic content items can be saved (restaurants, hotels, activities, bars).
+ * LOCKED BEHAVIORS — DO NOT MODIFY:
+ * ═══════════════════════════════════════════════════════════════════════════
+ * 1. Saves SINGLE ATOMIC ITEMS (cards), never full pages
+ * 2. Works WITHOUT login — localStorage draft state
+ * 3. NO authentication check before save
+ * 4. NO forced redirects to login
+ * 5. Toast feedback always includes "Ver roteiro" action
  * 
- * NAVIGATION VISIBILITY:
+ * ═══════════════════════════════════════════════════════════════════════════
+ * ALLOWED ITEM TYPES (ATOMIC CONTENT ONLY):
+ * ═══════════════════════════════════════════════════════════════════════════
+ * - activity (O Que Fazer)
+ * - restaurant (Onde Comer)
+ * - hotel (Onde Ficar)
+ * - lucky-list (Lucky List items)
+ * - nightlife (Vida Noturna)
+ * - local-flavor (Sabores Locais)
+ * 
+ * ═══════════════════════════════════════════════════════════════════════════
+ * PERSISTENCE:
+ * ═══════════════════════════════════════════════════════════════════════════
+ * - Always saves to localStorage first (instant, offline-capable)
+ * - Login upgrades persistence but NEVER blocks the save action
+ * 
+ * NAVIGATION:
  * - After save: toast includes action to go to Meu Roteiro
- * - User always knows where saved items live
- * 
- * DESTINATION CONTEXT:
  * - Stores last destination path for return navigation
+ * ═══════════════════════════════════════════════════════════════════════════
  */
 
 interface SavedItem {

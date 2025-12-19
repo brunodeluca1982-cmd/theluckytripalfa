@@ -2,17 +2,37 @@ import { useState, useEffect, useCallback } from "react";
 import { ItineraryItem } from "@/components/roteiro/ItineraryCard";
 
 /**
- * ROTEIRO STATE HOOK
+ * ═══════════════════════════════════════════════════════════════════════════
+ * ROTEIRO STATE HOOK — BEHAVIORAL LOCK (VALIDATED / FROZEN)
+ * ═══════════════════════════════════════════════════════════════════════════
  * 
- * STRUCTURAL LOCK — Core state management for Meu Roteiro
+ * LOCKED BEHAVIORS — DO NOT MODIFY:
+ * ═══════════════════════════════════════════════════════════════════════════
+ * 1. Items CAN be saved WITHOUT login (localStorage draft state)
+ * 2. Login only UPGRADES persistence, NEVER blocks usage
+ * 3. NO forced login at entry
+ * 4. NO authentication checks before state operations
+ * 5. All operations work in draft (rascunho) mode by default
  * 
+ * ═══════════════════════════════════════════════════════════════════════════
+ * FORBIDDEN FEATURES — DO NOT INTRODUCE:
+ * ═══════════════════════════════════════════════════════════════════════════
+ * - NO scheduling functionality
+ * - NO maps integration  
+ * - NO timelines or calendar views
+ * - NO login gates or auth walls
+ * - NO mandatory cloud sync
+ * 
+ * ═══════════════════════════════════════════════════════════════════════════
  * TWO MENTAL STATES:
+ * ═══════════════════════════════════════════════════════════════════════════
  * 
  * 1. RASCUNHO (Draft) — DEFAULT
  *    - Free, imperfect, reversible
  *    - All actions allowed without validation
  *    - No warnings, no "errors"
  *    - A playground for exploration
+ *    - Works WITHOUT login
  * 
  * 2. ROTEIRO FINAL (Finalized)
  *    - Intentional and assumed
@@ -25,11 +45,7 @@ import { ItineraryItem } from "@/components/roteiro/ItineraryCard";
  * - Never auto-finalize or auto-validate
  * - Never punish or lock-in
  * - The system is a guide, not a judge
- * 
- * ARCHITECTURE NOTES:
- * - Status persists with the roteiro
- * - Transition is always user-initiated
- * - No data loss on status change
+ * ═══════════════════════════════════════════════════════════════════════════
  */
 
 export type RoteiroStatus = 'rascunho' | 'final';

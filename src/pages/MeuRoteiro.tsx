@@ -5,13 +5,40 @@ import { toast } from "@/hooks/use-toast";
 import { useEffect, useState } from "react";
 
 /**
- * MEU ROTEIRO — SAVED ITEMS PAGE
+ * ═══════════════════════════════════════════════════════════════════════════
+ * MEU ROTEIRO — BEHAVIORAL LOCK (VALIDATED / FROZEN)
+ * ═══════════════════════════════════════════════════════════════════════════
  * 
- * User journey completion:
+ * LOCKED BEHAVIORS — DO NOT MODIFY:
+ * ═══════════════════════════════════════════════════════════════════════════
+ * 1. Saving an item saves a SINGLE CARD, not a full page
+ * 2. Items CAN be saved WITHOUT login (draft state in localStorage)
+ * 3. Saved items are accessible via the top-right icon (always visible)
+ * 4. Login only UPGRADES persistence, NEVER blocks usage
+ * 5. NO forced login at entry — feature is always accessible
+ * 
+ * ═══════════════════════════════════════════════════════════════════════════
+ * FORBIDDEN FEATURES — DO NOT INTRODUCE:
+ * ═══════════════════════════════════════════════════════════════════════════
+ * - NO scheduling functionality
+ * - NO maps integration
+ * - NO timelines or calendar views
+ * - NO login gates or auth walls
+ * - NO data sync requirements
+ * 
+ * ═══════════════════════════════════════════════════════════════════════════
+ * PERSISTENCE MODEL:
+ * ═══════════════════════════════════════════════════════════════════════════
+ * - Draft state: localStorage (always available)
+ * - Logged in: upgrades to cloud sync (optional, non-blocking)
+ * - Transition is seamless, never loses data
+ * 
+ * USER JOURNEY:
  * - Displays all saved items from draft roteiro
  * - Allows removal of items
  * - Returns to last destination context
  * - Feels like progress, not storage
+ * ═══════════════════════════════════════════════════════════════════════════
  */
 
 interface SavedItem {
