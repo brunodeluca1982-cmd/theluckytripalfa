@@ -1,6 +1,6 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import { Link, useParams } from "react-router-dom";
-import { ChevronLeft, BookOpen, User } from "lucide-react";
+import { ChevronLeft, User } from "lucide-react";
 import {
   DndContext,
   DragOverlay,
@@ -17,9 +17,13 @@ import { arrayMove, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import { DayColumn } from "@/components/roteiro/DayColumn";
 import { DaySwiper } from "@/components/roteiro/DaySwiper";
 import { ItineraryCard, ItineraryItem } from "@/components/roteiro/ItineraryCard";
+import { ReferenceItemCard } from "@/components/roteiro/ReferenceItemCard";
+import { ReferenceDayColumn } from "@/components/roteiro/ReferenceDayColumn";
+import { SourceSelector } from "@/components/roteiro/SourceSelector";
 import { AIAssistantFAB } from "@/components/roteiro/AIAssistantFAB";
 import { useRoteiroState } from "@/hooks/use-roteiro-state";
 import { getCuratedItinerary, getDestinationDays } from "@/data/curated-itineraries";
+import { getReferenceItinerariesForDestination, ReferenceItem } from "@/data/reference-itineraries";
 import { toast } from "@/hooks/use-toast";
 
 /**
@@ -27,31 +31,19 @@ import { toast } from "@/hooks/use-toast";
  * 
  * STRUCTURAL LOCK — Core planning interface
  * 
+ * SOURCES:
+ * - Lucky Trip (default curated content)
+ * - Reference Itineraries (e.g., Bruno De Luca)
+ * - Future: Partner on Trip, AI suggestions
+ * 
  * MENTAL STATES:
- * - RASCUNHO (default): Free playground, no validation, no "errors"
- * - FINAL: Still editable, may receive advisory suggestions
+ * - RASCUNHO (default): Free playground, no validation
+ * - FINAL: Still editable, advisory suggestions only
  * 
  * PSYCHOLOGICAL RULES:
  * - Never imply "wrong" or "incomplete"
- * - Never auto-validate or block actions
+ * - Sources inspire, never impose
  * - System is a guide, not a judge
- * 
- * TWO-COLUMN MODEL:
- * - LEFT: Curated source (read-only) — items dragged FROM here
- * - RIGHT: User roteiro (editable) — items dropped TO here
- * 
- * PRIMARY INTERACTION:
- * - Drag & drop is the main gesture
- * - No secondary flows replace this
- * 
- * DAY STRUCTURE:
- * - Days displayed horizontally
- * - Swipe left/right to change days
- * - Days are containers, not timelines
- * 
- * STATE PERSISTENCE:
- * - User roteiro auto-saves to localStorage
- * - State preserved across sessions
  */
 
 const destinationNames: Record<string, string> = {
@@ -62,9 +54,28 @@ const RoteiroPlanner = () => {
   const { destinationId = 'rio-de-janeiro' } = useParams();
   const destinationName = destinationNames[destinationId] || destinationId;
   
-  // Get curated content for this destination
+  // Get curated content and reference itineraries
   const curatedItinerary = getCuratedItinerary(destinationId);
-  const totalDays = getDestinationDays(destinationId);
+  const referenceItineraries = getReferenceItinerariesForDestination(destinationId);
+  
+  // Build sources list
+  const sources = useMemo(() => {
+    const list: Array<{ id: string; label: string; author?: string; isDefault?: boolean }> = [
+      { id: 'lucky-trip', label: 'Lucky Trip', isDefault: true },
+    ];
+    referenceItineraries.forEach(ref => {
+      list.push({ id: ref.id, label: ref.title, author: ref.author });
+    });
+    return list;
+  }, [referenceItineraries]);
+  
+  const [currentSourceId, setCurrentSourceId] = useState('lucky-trip');
+  const currentReference = referenceItineraries.find(r => r.id === currentSourceId);
+  
+  // Determine total days based on source
+  const sourceTotalDays = currentReference 
+    ? Object.keys(currentReference.days).length 
+    : getDestinationDays(destinationId);
   
   // User's roteiro state (with persistence)
   const { 
@@ -75,7 +86,7 @@ const RoteiroPlanner = () => {
     setDayItems,
     hasItem,
     totalItems,
-  } = useRoteiroState(destinationId, totalDays);
+  } = useRoteiroState(destinationId, Math.max(sourceTotalDays, 8));
   
   const [currentDay, setCurrentDay] = useState(1);
   const [activeItem, setActiveItem] = useState<ItineraryItem | null>(null);
@@ -97,12 +108,19 @@ const RoteiroPlanner = () => {
     })
   );
 
-  // Find item in curated or user itinerary
-  const findItem = useCallback((id: string): ItineraryItem | null => {
+  // Find item in curated, reference, or user itinerary
+  const findItem = useCallback((id: string): ItineraryItem | ReferenceItem | null => {
     // Check curated
     for (const day of Object.keys(curatedItinerary)) {
       const item = curatedItinerary[Number(day)].find(i => i.id === id);
       if (item) return item;
+    }
+    // Check reference itineraries
+    if (currentReference) {
+      for (const day of Object.keys(currentReference.days)) {
+        const item = currentReference.days[Number(day)].items.find(i => i.id === id);
+        if (item) return item;
+      }
     }
     // Check user
     for (const day of Object.keys(userItems)) {
@@ -110,13 +128,20 @@ const RoteiroPlanner = () => {
       if (item) return item;
     }
     return null;
-  }, [curatedItinerary, userItems]);
+  }, [curatedItinerary, currentReference, userItems]);
 
-  // Determine if an ID belongs to curated or user items
-  const getItemSource = useCallback((id: string): 'curated' | 'user' | null => {
+  // Determine if an ID belongs to curated, reference, or user items
+  const getItemSource = useCallback((id: string): 'curated' | 'reference' | 'user' | null => {
     for (const day of Object.keys(curatedItinerary)) {
       if (curatedItinerary[Number(day)].some(i => i.id === id)) {
         return 'curated';
+      }
+    }
+    if (currentReference) {
+      for (const day of Object.keys(currentReference.days)) {
+        if (currentReference.days[Number(day)].items.some(i => i.id === id)) {
+          return 'reference';
+        }
       }
     }
     for (const day of Object.keys(userItems)) {
@@ -125,10 +150,22 @@ const RoteiroPlanner = () => {
       }
     }
     return null;
-  }, [curatedItinerary, userItems]);
+  }, [curatedItinerary, currentReference, userItems]);
 
   const handleDragStart = (event: DragStartEvent) => {
-    const item = findItem(event.active.id as string);
+    const { active } = event;
+    const data = active.data.current;
+    
+    // Handle day block drag
+    if (data?.type === 'day-block') {
+      // Set first item as active for overlay preview
+      if (data.items?.length > 0) {
+        setActiveItem(data.items[0]);
+      }
+      return;
+    }
+    
+    const item = findItem(active.id as string);
     setActiveItem(item);
   };
 
@@ -140,10 +177,32 @@ const RoteiroPlanner = () => {
 
     const activeId = active.id as string;
     const overId = over.id as string;
+    const data = active.data.current;
+    
+    // CASE 0: Dragging a full day block
+    if (data?.type === 'day-block' && overId.startsWith('user-day-')) {
+      const targetDay = parseInt(overId.replace('user-day-', ''));
+      const dayItems = data.items as ReferenceItem[];
+      
+      if (dayItems && dayItems.length > 0) {
+        const newItems = dayItems.map(item => ({
+          ...item,
+          id: `user-${item.id}-${Date.now()}-${Math.random()}`,
+        }));
+        setDayItems(targetDay, [...(userItems[targetDay] || []), ...newItems]);
+        
+        toast({
+          title: "Dia inteiro adicionado",
+          description: `${dayItems.length} itens → Dia ${targetDay}`,
+        });
+      }
+      return;
+    }
+
     const itemSource = getItemSource(activeId);
 
-    // CASE 1: Dragging from CURATED to USER column
-    if (itemSource === 'curated' && overId.startsWith('user-day-')) {
+    // CASE 1: Dragging from CURATED or REFERENCE to USER column
+    if ((itemSource === 'curated' || itemSource === 'reference') && overId.startsWith('user-day-')) {
       const targetDay = parseInt(overId.replace('user-day-', ''));
       const item = findItem(activeId);
       
@@ -159,7 +218,7 @@ const RoteiroPlanner = () => {
       }
 
       // Add copy to user roteiro
-      addItem(targetDay, item, activeId);
+      addItem(targetDay, item as ItineraryItem, activeId);
       
       toast({
         title: "Adicionado",
@@ -230,7 +289,7 @@ const RoteiroPlanner = () => {
   const handleAutoFill = useCallback(() => {
     let filled = false;
     
-    for (let day = 1; day <= totalDays; day++) {
+    for (let day = 1; day <= sourceTotalDays; day++) {
       if ((userItems[day]?.length || 0) === 0 && curatedItinerary[day]) {
         const itemsToAdd = curatedItinerary[day].map(item => ({
           ...item,
@@ -248,7 +307,7 @@ const RoteiroPlanner = () => {
         ? "Coloquei algumas ideias nos dias vazios. Você pode mudar o que quiser." 
         : "Seus dias já têm atividades. Continue no seu ritmo.",
     });
-  }, [userItems, curatedItinerary, totalDays, setDayItems]);
+  }, [userItems, curatedItinerary, sourceTotalDays, setDayItems]);
 
   const handleRebalance = useCallback(() => {
     toast({
@@ -280,7 +339,7 @@ const RoteiroPlanner = () => {
         {/* Day Navigation */}
         <div className="pb-3">
           <DaySwiper 
-            totalDays={totalDays} 
+            totalDays={sourceTotalDays} 
             currentDay={currentDay} 
             onDayChange={setCurrentDay} 
           />
@@ -297,24 +356,33 @@ const RoteiroPlanner = () => {
         <main className="grid grid-cols-2 gap-3 p-4">
           {/* LEFT COLUMN — Source (Read-Only) */}
           <div>
-            <div className="flex items-center gap-2 mb-3">
-              <BookOpen className="w-4 h-4 text-primary" />
-              <div>
-                <h2 className="text-xs font-semibold text-foreground uppercase tracking-wide">
-                  Lucky Trip
-                </h2>
-                <p className="text-[10px] text-muted-foreground">
-                  {destinationName}
-                </p>
-              </div>
+            {/* Source Selector */}
+            <div className="mb-3">
+              <SourceSelector
+                currentSourceId={currentSourceId}
+                sources={sources}
+                onSourceChange={setCurrentSourceId}
+              />
             </div>
             
-            <DayColumn
-              dayId={`curated-day-${currentDay}`}
-              dayNumber={currentDay}
-              items={curatedItinerary[currentDay] || []}
-              isUserColumn={false}
-            />
+            {/* Source Content */}
+            {currentReference ? (
+              // Reference Itinerary
+              currentReference.days[currentDay] && (
+                <ReferenceDayColumn 
+                  day={currentReference.days[currentDay]} 
+                  referenceId={currentReference.id}
+                />
+              )
+            ) : (
+              // Default Lucky Trip curated content
+              <DayColumn
+                dayId={`curated-day-${currentDay}`}
+                dayNumber={currentDay}
+                items={curatedItinerary[currentDay] || []}
+                isUserColumn={false}
+              />
+            )}
           </div>
 
           {/* RIGHT COLUMN — User Roteiro (Editable) */}
