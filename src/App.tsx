@@ -9,6 +9,7 @@ import MainLayout from "@/components/MainLayout";
 import Index from "./pages/Index";
 import Destinos from "./pages/Destinos";
 import DestinationRio from "./pages/DestinationRio";
+import DestinationVideoIntro from "./pages/DestinationVideoIntro";
 import OndeficarRio from "./pages/OndeficarRio";
 import CityView from "./pages/CityView";
 import EatMapView from "./pages/EatMapView";
@@ -51,6 +52,7 @@ const App = () => {
               
               {/* Destinos */}
               <Route path="/destinos" element={<Destinos />} />
+              <Route path="/destino/:id/intro" element={<DestinationVideoIntro />} />
               <Route path="/destino/rio-de-janeiro" element={<DestinationRio />} />
               
               {/* Where to Stay */}
