@@ -351,6 +351,157 @@ export const AUTH_SCALABILITY = {
 } as const;
 
 // ═══════════════════════════════════════════════════════════════════════════
+// AUTHENTICATION MOMENTS
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * CORE PRINCIPLE
+ * 
+ * Exploration comes first.
+ * Commitment comes later.
+ * 
+ * No user should be forced to log in
+ * before understanding the value of the product.
+ */
+export const AUTH_MOMENTS_CORE_PRINCIPLE = {
+  explorationFirst: true,
+  commitmentLater: true,
+  noForcedLoginBeforeValue: true,
+} as const;
+
+/**
+ * Authentication moment types (allowed)
+ */
+export type AllowedAuthMoment = 
+  | 'persistence-intent'
+  | 'returning-intent'
+  | 'organization-intent'
+  | 'cross-session-value';
+
+/**
+ * WHEN LOGIN IS ALLOWED TO BE SUGGESTED
+ * 
+ * 1) PERSISTENCE INTENT - User attempts to save/keep progress
+ * 2) RETURNING INTENT - User returns with existing draft
+ * 3) ORGANIZATION INTENT - User organizes/groups saved items
+ * 4) CROSS-SESSION VALUE - User would lose value without persistence
+ */
+export const ALLOWED_AUTH_MOMENTS: readonly AllowedAuthMoment[] = [
+  'persistence-intent',
+  'returning-intent',
+  'organization-intent',
+  'cross-session-value',
+] as const;
+
+export const LOGIN_ALLOWED_WHEN = {
+  persistenceIntent: {
+    trigger: 'attempt-save-beyond-session',
+    allowed: true,
+  },
+  returningIntent: {
+    trigger: 'return-with-existing-draft',
+    allowed: true,
+  },
+  organizationIntent: {
+    trigger: 'organize-group-revisit-items',
+    allowed: true,
+  },
+  crossSessionValue: {
+    trigger: 'would-lose-value-without-persistence',
+    allowed: true,
+  },
+} as const;
+
+/**
+ * Disallowed authentication moment types
+ */
+export type DisallowedAuthMoment = 
+  | 'app-launch'
+  | 'destination-entry'
+  | 'browse-content'
+  | 'read-editorial'
+  | 'view-lucky-list-preview'
+  | 'start-draft-roteiro';
+
+/**
+ * WHEN LOGIN MUST NOT BE REQUESTED
+ */
+export const DISALLOWED_AUTH_MOMENTS: readonly DisallowedAuthMoment[] = [
+  'app-launch',
+  'destination-entry',
+  'browse-content',
+  'read-editorial',
+  'view-lucky-list-preview',
+  'start-draft-roteiro',
+] as const;
+
+export const LOGIN_MUST_NOT_BE_REQUESTED = {
+  onAppLaunch: true,
+  onDestinationEntry: true,
+  toBrowseContent: true,
+  toReadEditorialBlocks: true,
+  toViewLuckyListPreviews: true,
+  toStartDraftRoteiro: true,
+} as const;
+
+/**
+ * LOGIN COMMUNICATION RULE
+ * 
+ * Login is framed as:
+ * - "save your discoveries"
+ * - "keep your roteiro"
+ * - "continue where you left off"
+ * 
+ * Never framed as:
+ * - obligation
+ * - security warning
+ * - access barrier
+ */
+export const LOGIN_COMMUNICATION = {
+  framedAs: {
+    saveDiscoveries: true,
+    keepRoteiro: true,
+    continueWhereLeftOff: true,
+  },
+  neverFramedAs: {
+    obligation: true,
+    securityWarning: true,
+    accessBarrier: true,
+  },
+} as const;
+
+/**
+ * LOGIN FAILURE RULE
+ * 
+ * If the user refuses or skips login:
+ * - The experience continues
+ * - No content is blocked
+ * - No repeated pressure occurs
+ */
+export const LOGIN_FAILURE_RULES = {
+  experienceContinues: true,
+  noContentBlocked: true,
+  noRepeatedPressure: true,
+  gracefulDegradation: true,
+} as const;
+
+/**
+ * SEPARATION RULE
+ * 
+ * Login and Premium are DISTINCT concepts:
+ * - Login = persistence
+ * - Premium = depth
+ * 
+ * They must NEVER be cognitively merged.
+ */
+export const LOGIN_PREMIUM_SEPARATION = {
+  loginMeans: 'persistence',
+  premiumMeans: 'depth',
+  neverCognitivelyMerged: true,
+  distinctConcepts: true,
+} as const;
+
+// ═══════════════════════════════════════════════════════════════════════════
 // DATA PERSISTENCE STATES
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -544,3 +695,75 @@ export const dataPeristsAcrossSessions = (state: AuthState): boolean => {
 export const shouldWarnAboutDataLoss = (state: AuthState): boolean => {
   return PERSISTENCE_BY_AUTH_STATE[state].dataMayBeLost === true;
 };
+
+// ═══════════════════════════════════════════════════════════════════════════
+// AUTHENTICATION MOMENTS HELPER FUNCTIONS
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Check if a moment is allowed for authentication suggestion
+ */
+export const isAllowedAuthMoment = (moment: string): moment is AllowedAuthMoment => {
+  return ALLOWED_AUTH_MOMENTS.includes(moment as AllowedAuthMoment);
+};
+
+/**
+ * Check if a moment is disallowed for authentication
+ */
+export const isDisallowedAuthMoment = (moment: string): moment is DisallowedAuthMoment => {
+  return DISALLOWED_AUTH_MOMENTS.includes(moment as DisallowedAuthMoment);
+};
+
+/**
+ * Determine if login should be suggested based on moment
+ */
+export const shouldSuggestLoginForMoment = (
+  moment: AllowedAuthMoment | DisallowedAuthMoment,
+  isLoggedIn: boolean
+): boolean => {
+  if (isLoggedIn) return false;
+  if (isDisallowedAuthMoment(moment)) return false;
+  return isAllowedAuthMoment(moment);
+};
+
+/**
+ * Get the framing for login suggestion
+ */
+export const getLoginFraming = (moment: AllowedAuthMoment): string => {
+  switch (moment) {
+    case 'persistence-intent':
+      return 'save-your-discoveries';
+    case 'returning-intent':
+      return 'continue-where-you-left-off';
+    case 'organization-intent':
+      return 'keep-your-roteiro';
+    case 'cross-session-value':
+      return 'save-your-discoveries';
+    default:
+      return 'save-your-discoveries';
+  }
+};
+
+/**
+ * Check if login can be suggested in current context
+ */
+export const canSuggestLoginInContext = (
+  context: string,
+  isLoggedIn: boolean
+): boolean => {
+  if (isLoggedIn) return false;
+  return !DISALLOWED_AUTH_MOMENTS.includes(context as DisallowedAuthMoment);
+};
+
+/**
+ * Handle login skip/failure gracefully
+ */
+export const handleLoginSkip = (): {
+  experienceContinues: boolean;
+  contentBlocked: boolean;
+  shouldRetry: boolean;
+} => ({
+  experienceContinues: LOGIN_FAILURE_RULES.experienceContinues,
+  contentBlocked: !LOGIN_FAILURE_RULES.noContentBlocked,
+  shouldRetry: !LOGIN_FAILURE_RULES.noRepeatedPressure,
+});
