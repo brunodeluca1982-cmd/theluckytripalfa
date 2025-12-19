@@ -3,6 +3,7 @@ import { ChevronLeft } from "lucide-react";
 import HotelCard from "@/components/HotelCard";
 import { getNeighborhoodById } from "@/data/rio-neighborhoods";
 import SaveToRoteiroButton from "@/components/SaveToRoteiroButton";
+import RoteiroAccessLink from "@/components/RoteiroAccessLink";
 
 // Neighborhood descriptions for staying
 const neighborhoodDescriptions: Record<string, string> = {
@@ -249,13 +250,16 @@ const WhereToStayDetail = () => {
           <ChevronLeft className="w-4 h-4" />
           Voltar
         </Link>
-        {hotels.length > 0 && (
-          <SaveToRoteiroButton
-            itemId={`stay-${neighborhood}`}
-            itemType="hotel"
-            itemTitle={`Onde ficar em ${name}`}
-          />
-        )}
+        <div className="flex items-center gap-4">
+          <RoteiroAccessLink />
+          {hotels.length > 0 && (
+            <SaveToRoteiroButton
+              itemId={`stay-${neighborhood}`}
+              itemType="hotel"
+              itemTitle={`Onde ficar em ${name}`}
+            />
+          )}
+        </div>
       </header>
 
       {/* Content */}

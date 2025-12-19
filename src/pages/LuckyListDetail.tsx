@@ -3,6 +3,7 @@ import { ChevronLeft } from "lucide-react";
 import { luckyListItems } from "@/data/lucky-list-data";
 import { shouldDisplayField, getReturnPath } from "@/data/subscriber-behavior";
 import SaveToRoteiroButton from "@/components/SaveToRoteiroButton";
+import RoteiroAccessLink from "@/components/RoteiroAccessLink";
 
 /**
  * LUCKY LIST — DETAIL TEMPLATE
@@ -59,11 +60,14 @@ const LuckyListDetail = () => {
           <ChevronLeft className="w-4 h-4" />
           Voltar
         </Link>
-        <SaveToRoteiroButton
-          itemId={item.id}
-          itemType="lucky-list"
-          itemTitle={item.title}
-        />
+        <div className="flex items-center gap-4">
+          <RoteiroAccessLink />
+          <SaveToRoteiroButton
+            itemId={item.id}
+            itemType="lucky-list"
+            itemTitle={item.title}
+          />
+        </div>
       </header>
 
       {/* Content */}

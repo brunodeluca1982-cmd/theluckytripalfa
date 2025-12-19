@@ -14,6 +14,7 @@ import LuckyListDetail from "./pages/LuckyListDetail";
 import HowToGetThere from "./pages/HowToGetThere";
 import WhatToDo from "./pages/WhatToDo";
 import WhatToDoDetail from "./pages/WhatToDoDetail";
+import MeuRoteiro from "./pages/MeuRoteiro";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -47,6 +48,9 @@ const App = () => (
           
           {/* How to Get There */}
           <Route path="/como-chegar" element={<HowToGetThere />} />
+          
+          {/* Meu Roteiro */}
+          <Route path="/meu-roteiro" element={<MeuRoteiro />} />
           
           {/* Fallback */}
           <Route path="*" element={<NotFound />} />

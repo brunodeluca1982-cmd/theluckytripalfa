@@ -3,6 +3,7 @@ import { ChevronLeft } from "lucide-react";
 import { getNeighborhoodById } from "@/data/rio-neighborhoods";
 import { activitiesByNeighborhood } from "@/data/what-to-do-data";
 import SaveToRoteiroButton from "@/components/SaveToRoteiroButton";
+import RoteiroAccessLink from "@/components/RoteiroAccessLink";
 
 /**
  * O QUE FAZER — ACTIVITY DETAIL
@@ -33,13 +34,16 @@ const WhatToDoDetail = () => {
           <ChevronLeft className="w-4 h-4" />
           Voltar
         </Link>
-        {activities.length > 0 && (
-          <SaveToRoteiroButton
-            itemId={`whatodo-${neighborhood}`}
-            itemType="activity"
-            itemTitle={`O que fazer em ${name}`}
-          />
-        )}
+        <div className="flex items-center gap-4">
+          <RoteiroAccessLink />
+          {activities.length > 0 && (
+            <SaveToRoteiroButton
+              itemId={`whatodo-${neighborhood}`}
+              itemType="activity"
+              itemTitle={`O que fazer em ${name}`}
+            />
+          )}
+        </div>
       </header>
 
       {/* Content */}
