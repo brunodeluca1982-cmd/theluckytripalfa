@@ -71,14 +71,13 @@ const DestinationHub = ({ destinationId, name, country, backgroundImage, actions
       </Link>
 
       {/* ═══════════════════════════════════════════════════════════════
-          ZONE 1 — EDITORIAL HEADER (top 20-25% of screen)
-          Destination title + country, fully unobstructed
+          EDITORIAL TITLE — Centered, Premium Typography
           ═══════════════════════════════════════════════════════════════ */}
-      <div className="absolute top-0 left-0 right-0 z-20 h-[22vh] flex flex-col items-center justify-end pb-4">
-        <h1 className="text-5xl font-serif font-medium text-white leading-tight text-center drop-shadow-lg">
+      <div className="absolute top-[18vh] left-0 right-0 z-10 flex flex-col items-center">
+        <h1 className="text-[3.25rem] font-serif font-medium text-white leading-none text-center drop-shadow-lg tracking-tight">
           {name}
         </h1>
-        <p className="text-xs tracking-[0.3em] text-white/80 uppercase mt-3">
+        <p className="text-[10px] tracking-[0.35em] text-white/70 uppercase mt-2.5">
           {country}
         </p>
       </div>
