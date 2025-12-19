@@ -601,6 +601,158 @@ export const LOCATION_INTELLIGENCE_SCALABILITY = {
 } as const;
 
 // ═══════════════════════════════════════════════════════════════════════════
+// PROGRESSIVE AUTHENTICATION (MEU ROTEIRO)
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * AUTHENTICATION PHILOSOPHY
+ * 
+ * The product must follow a: "Value first, login later" model.
+ * 
+ * Users must be allowed to explore, save, and experiment
+ * before being asked to authenticate.
+ */
+export const AUTH_PHILOSOPHY = {
+  model: 'value-first-login-later',
+  allowExploreBeforeAuth: true,
+  allowSaveBeforeAuth: true,
+  allowExperimentBeforeAuth: true,
+} as const;
+
+/**
+ * Roteiro-specific auth trigger types
+ */
+export type RoteiroAuthTrigger = 
+  | 'persist-data-across-sessions'
+  | 'access-premium-locked-action'
+  | 'access-roteiro-beyond-session';
+
+/**
+ * LOGIN TRIGGERS (ALLOWED)
+ * 
+ * Authentication may be requested ONLY when:
+ * 
+ * 1) The user attempts to persist data across sessions
+ *    (saving draft items permanently)
+ * 
+ * 2) The user attempts to access a premium-locked action
+ *    (e.g. saving Lucky List items)
+ * 
+ * 3) The user explicitly chooses to access "Meu Roteiro"
+ *    beyond the current session
+ */
+export const ALLOWED_ROTEIRO_AUTH_TRIGGERS: readonly RoteiroAuthTrigger[] = [
+  'persist-data-across-sessions',
+  'access-premium-locked-action',
+  'access-roteiro-beyond-session',
+] as const;
+
+export const AUTH_TRIGGERS_ALLOWED = {
+  persistDataAcrossSessions: true,
+  accessPremiumLockedAction: true,
+  accessRoteiroBeyondSession: true,
+} as const;
+
+/**
+ * LOGIN TRIGGERS (NOT ALLOWED)
+ * 
+ * - Login must NOT be required at app entry
+ * - Login must NOT be required to browse content
+ * - Login must NOT be required to add free items to a draft roteiro
+ * - Login must NOT interrupt reading or navigation flows
+ */
+export const AUTH_TRIGGERS_NOT_ALLOWED = {
+  requiredAtAppEntry: false,
+  requiredToBrowseContent: false,
+  requiredToAddFreeItemsToDraft: false,
+  interruptsReadingFlows: false,
+  interruptsNavigationFlows: false,
+} as const;
+
+/**
+ * DRAFT MIGRATION RULE
+ * 
+ * - When a user logs in,
+ *   all existing draft items must migrate automatically
+ *   to the saved roteiro
+ * - No confirmation or re-selection is required
+ */
+export const DRAFT_MIGRATION_RULES = {
+  migratesAutomaticallyOnLogin: true,
+  confirmationRequired: false,
+  reselectionRequired: false,
+  preservesItemOrder: true,
+  preservesItemData: true,
+} as const;
+
+/**
+ * FAIL-SAFE RULE
+ * 
+ * - If the user declines login,
+ *   they must be returned to their previous context
+ *   without losing navigation state
+ */
+export const AUTH_FAILSAFE_RULES = {
+  returnToPreviousContextOnDecline: true,
+  preservesNavigationState: true,
+  noDataLossOnDecline: true,
+  draftRemainsIntact: true,
+} as const;
+
+/**
+ * PROGRESSIVE AUTH SCALABILITY
+ * 
+ * - This authentication logic applies to all destinations
+ * - Future features must respect this progressive model
+ */
+export const PROGRESSIVE_AUTH_SCALABILITY = {
+  appliesToAllDestinations: true,
+  futureFeaturesMustRespect: true,
+  modelIsConsistent: true,
+} as const;
+
+// ═══════════════════════════════════════════════════════════════════════════
+// PROGRESSIVE AUTH HELPER FUNCTIONS
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Check if an action requires authentication
+ */
+export const requiresAuthForAction = (
+  action: RoteiroAuthTrigger,
+  isLoggedIn: boolean
+): boolean => {
+  if (isLoggedIn) return false;
+  return ALLOWED_ROTEIRO_AUTH_TRIGGERS.includes(action);
+};
+
+/**
+ * Check if login should be triggered for a save action
+ */
+export const shouldTriggerLoginForSave = (
+  isPermanentSave: boolean,
+  isLuckyListItem: boolean,
+  isLoggedIn: boolean
+): boolean => {
+  if (isLoggedIn) return false;
+  if (isPermanentSave) return true;
+  if (isLuckyListItem) return true;
+  return false;
+};
+
+/**
+ * Get the auth trigger type for a given action
+ */
+export const getAuthTriggerType = (
+  isPermanentSave: boolean,
+  isLuckyListItem: boolean
+): RoteiroAuthTrigger | null => {
+  if (isLuckyListItem) return 'access-premium-locked-action';
+  if (isPermanentSave) return 'persist-data-across-sessions';
+  return null;
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
 // ROTEIRO STATES
 // ═══════════════════════════════════════════════════════════════════════════
 
