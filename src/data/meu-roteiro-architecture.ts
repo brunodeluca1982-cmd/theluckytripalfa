@@ -516,6 +516,390 @@ export interface DaySummary {
   warnings: ConsistencyWarningType[];
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// MAP VIEW + GOOGLE MAPS EXPORT — STRUCTURAL LOCK
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ * MAP VIEW + GOOGLE MAPS EXPORT LAYER
+ * ═══════════════════════════════════════════════════════════════════════════
+ * 
+ * GOAL:
+ * Allow the user to visualize each day on a map
+ * and export the planned day (or full trip) to Google Maps,
+ * using place_id as the canonical location key.
+ * 
+ * GLOBAL RULES:
+ * - Do NOT define UI, layout, spacing, colors, typography, or animations
+ * - Do NOT generate or edit any Portuguese content
+ * - Do NOT define pricing or subscription logic
+ * - This defines behavior and logic only
+ * 
+ * ═══════════════════════════════════════════════════════════════════════════
+ */
+
+/**
+ * DATA REQUIREMENT (CANONICAL LOCATION)
+ * 
+ * Every item that appears in "Meu Roteiro" must have:
+ * - place_id (Google Places)
+ * - lat/lng (resolved from place_id)
+ * - destination_id
+ * - day_index
+ * 
+ * If an item does not have a place_id:
+ * - It cannot be mapped or exported
+ * - The system must request the user to search/select a Google place match
+ */
+export const MAP_DATA_REQUIREMENTS = {
+  requiredFields: ['place_id', 'lat', 'lng', 'destination_id', 'day_index'] as const,
+  placeIdSource: 'google-places',
+  coordinatesResolvedFrom: 'place_id',
+  missingPlaceIdBehavior: {
+    canBeMapped: false,
+    canBeExported: false,
+    mustRequestUserMatch: true,
+  },
+} as const;
+
+/**
+ * Mappable item with canonical location
+ */
+export interface MappableItem {
+  id: string;
+  name: string;
+  placeId: string; // Required for mapping
+  lat: number;
+  lng: number;
+  destinationId: string;
+  dayIndex: number;
+  orderInDay: number;
+  source: DraftItemSource;
+}
+
+/**
+ * MAP VIEW (IN-APP)
+ * 
+ * Provide a "Map View" mode for "Meu Roteiro".
+ * Map View must support:
+ * 1) Day filter (view Day 1, Day 2, etc.)
+ * 2) All-days view (optional)
+ * 3) Pins for each item in the selected day
+ * 4) Ordered path visualization (A → B → C) based on item order
+ * 
+ * The map is a visualization only:
+ * - No booking
+ * - No new recommendations
+ * - No content rewrite
+ */
+export const MAP_VIEW_CAPABILITIES = {
+  modes: ['single-day', 'all-days'] as const,
+  features: {
+    dayFilter: true,
+    allDaysView: true,
+    pinsPerItem: true,
+    orderedPathVisualization: true,
+  },
+  restrictions: {
+    noBooking: true,
+    noNewRecommendations: true,
+    noContentRewrite: true,
+  },
+  visualizationOnly: true,
+} as const;
+
+/**
+ * Map view mode type
+ */
+export type MapViewMode = 'single-day' | 'all-days';
+
+/**
+ * ROUTE LOGIC (PER DAY)
+ * 
+ * - If the day has 2+ items, compute an ordered route using:
+ *   - item order in the day as the route order
+ * - Show travel segments using the same travel mode logic
+ *   (walk/car/transit inference)
+ */
+export const MAP_ROUTE_LOGIC = {
+  minimumItemsForRoute: 2,
+  routeOrderDerivedFrom: 'item-order-in-day',
+  travelModeInference: true,
+  usesSharedTravelModeLogic: true,
+} as const;
+
+/**
+ * Route segment for map visualization
+ */
+export interface RouteSegment {
+  fromItem: MappableItem;
+  toItem: MappableItem;
+  distanceKm: number;
+  estimatedTravelMinutes: number;
+  travelMode: TravelMode;
+  polyline?: string; // Encoded polyline for rendering
+}
+
+/**
+ * Day route data for map
+ */
+export interface DayRouteData {
+  dayIndex: number;
+  items: MappableItem[];
+  segments: RouteSegment[];
+  totalDistanceKm: number;
+  totalTravelMinutes: number;
+}
+
+/**
+ * Export action types
+ */
+export type ExportAction = 'export-day' | 'export-full-trip';
+
+/**
+ * EXPORT TO GOOGLE MAPS (CORE)
+ * 
+ * Add export actions (logic only):
+ * 1) Export Day to Google Maps
+ * 2) Export Full Trip to Google Maps (multi-day as separate lists)
+ */
+export const GOOGLE_MAPS_EXPORT_ACTIONS = {
+  availableActions: ['export-day', 'export-full-trip'] as ExportAction[],
+  exportDayBehavior: 'single-day-as-route',
+  exportFullTripBehavior: 'multi-day-as-separate-lists',
+} as const;
+
+/**
+ * Export format types
+ */
+export type ExportFormat = 'saved-list' | 'shareable-link' | 'directions-link';
+
+/**
+ * EXPORT FORMAT (PREFERRED)
+ * 
+ * Generate a Google Maps "Saved list" or "shareable map link"
+ * using place_ids in order.
+ * 
+ * If direct list creation is not available:
+ * - Generate a Google Maps Directions link for each day
+ * - Use origin + waypoints + destination derived from ordered place_ids
+ * - Keep within Google Maps waypoint limits by splitting into multiple links
+ */
+export const GOOGLE_MAPS_EXPORT_FORMAT = {
+  preferredFormats: ['saved-list', 'shareable-link'] as ExportFormat[],
+  fallbackFormat: 'directions-link',
+  directionsLinkStructure: {
+    origin: 'first-item-place_id',
+    waypoints: 'middle-items-place_ids',
+    destination: 'last-item-place_id',
+  },
+  waypointLimits: {
+    maxWaypointsPerLink: 10, // Google Maps limit
+    splitBehavior: 'multiple-links',
+  },
+  usesPlaceIdAsKey: true,
+} as const;
+
+/**
+ * Export link data
+ */
+export interface ExportLinkData {
+  dayIndex: number;
+  format: ExportFormat;
+  url: string;
+  itemCount: number;
+  requiresSplit: boolean;
+  splitLinks?: string[]; // If exceeds waypoint limit
+}
+
+/**
+ * Full trip export data
+ */
+export interface FullTripExportData {
+  destinationId: string;
+  totalDays: number;
+  dayExports: ExportLinkData[];
+}
+
+/**
+ * USER-ADDED PLACES COMPLIANCE
+ * 
+ * - User-added places are allowed in map/export ONLY if they have a valid place_id
+ * - They may appear as pins and waypoints
+ * - The system must not recommend or describe them
+ */
+export const MAP_USER_ADDED_PLACES_RULES = {
+  allowedInMap: true,
+  allowedInExport: true,
+  requiresValidPlaceId: true,
+  mayAppearAsPins: true,
+  mayAppearAsWaypoints: true,
+  systemMustNotRecommend: true,
+  systemMustNotDescribe: true,
+} as const;
+
+/**
+ * CURATION RULE
+ * 
+ * - Export includes both curated and user-added items
+ * - Recommendations still come only from the curated database
+ */
+export const MAP_CURATION_RULES = {
+  exportIncludesCurated: true,
+  exportIncludesUserAdded: true,
+  recommendationsOnlyFromCurated: true,
+} as const;
+
+/**
+ * NAVIGATION RULES
+ * 
+ * - Map View lives inside "Meu Roteiro"
+ * - Returning from Map View returns to "Meu Roteiro" (same day context)
+ * - No redirect to Home
+ */
+export const MAP_NAVIGATION_RULES = {
+  livesInsideMeuRoteiro: true,
+  returnBehavior: 'back-to-meu-roteiro-same-day-context',
+  noRedirectToHome: true,
+} as const;
+
+/**
+ * SCALABILITY
+ * 
+ * This structure must allow future extensions:
+ * - Offline map pack
+ * - Public share page per trip/day
+ * - Booking layer per item
+ */
+export const MAP_SCALABILITY = {
+  futureExtensions: [
+    'offline-map-pack',
+    'public-share-page-per-trip',
+    'public-share-page-per-day',
+    'booking-layer-per-item',
+  ] as const,
+  requiresRefactoring: false,
+} as const;
+
+/**
+ * MAP OUTCOME
+ * 
+ * After this lock:
+ * - The user can see the plan spatially
+ * - The user can execute the trip using Google Maps
+ * - The app matches practical utility while keeping curated advantage
+ */
+export const MAP_OUTCOME = {
+  userCanSeePlanSpatially: true,
+  userCanExecuteTripWithGoogleMaps: true,
+  matchesPracticalUtility: true,
+  keepsCuratedAdvantage: true,
+} as const;
+
+/**
+ * COMPLETE MAP VIEW + GOOGLE MAPS EXPORT LOCK
+ */
+export const MAP_EXPORT_LOCK = {
+  dataRequirements: MAP_DATA_REQUIREMENTS,
+  viewCapabilities: MAP_VIEW_CAPABILITIES,
+  routeLogic: MAP_ROUTE_LOGIC,
+  exportActions: GOOGLE_MAPS_EXPORT_ACTIONS,
+  exportFormat: GOOGLE_MAPS_EXPORT_FORMAT,
+  userAddedPlacesRules: MAP_USER_ADDED_PLACES_RULES,
+  curationRules: MAP_CURATION_RULES,
+  navigation: MAP_NAVIGATION_RULES,
+  scalability: MAP_SCALABILITY,
+  outcome: MAP_OUTCOME,
+} as const;
+
+// ═══════════════════════════════════════════════════════════════════════════
+// HELPER FUNCTIONS FOR MAP & EXPORT
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Check if an item is mappable (has required place_id)
+ */
+export const isItemMappable = (item: { placeId?: string }): boolean => {
+  return !!item.placeId && item.placeId.length > 0;
+};
+
+/**
+ * Generate Google Maps directions URL from ordered place_ids
+ */
+export const generateDirectionsUrl = (
+  placeIds: string[],
+  travelMode: TravelMode = 'car'
+): string => {
+  if (placeIds.length < 2) return '';
+  
+  const origin = `place_id:${placeIds[0]}`;
+  const destination = `place_id:${placeIds[placeIds.length - 1]}`;
+  const waypoints = placeIds.slice(1, -1).map(id => `place_id:${id}`).join('|');
+  
+  const modeMap: Record<TravelMode, string> = {
+    walk: 'walking',
+    car: 'driving',
+    transit: 'transit',
+    bike: 'bicycling',
+    unknown: 'driving',
+  };
+  
+  let url = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}&travelmode=${modeMap[travelMode]}`;
+  
+  if (waypoints) {
+    url += `&waypoints=${encodeURIComponent(waypoints)}`;
+  }
+  
+  return url;
+};
+
+/**
+ * Split items into chunks respecting waypoint limits
+ */
+export const splitItemsForExport = (
+  items: MappableItem[],
+  maxWaypoints: number = 10
+): MappableItem[][] => {
+  if (items.length <= maxWaypoints + 1) {
+    return [items];
+  }
+  
+  const chunks: MappableItem[][] = [];
+  let remaining = [...items];
+  
+  while (remaining.length > 0) {
+    // Take up to maxWaypoints + 1 (origin + waypoints, next chunk starts with last as origin)
+    const chunk = remaining.slice(0, maxWaypoints + 1);
+    chunks.push(chunk);
+    
+    // Next chunk starts with the last item of this chunk
+    if (remaining.length > maxWaypoints + 1) {
+      remaining = remaining.slice(maxWaypoints);
+    } else {
+      break;
+    }
+  }
+  
+  return chunks;
+};
+
+/**
+ * Check if all items in a day are mappable
+ */
+export const isDayFullyMappable = (items: { placeId?: string }[]): boolean => {
+  return items.every(isItemMappable);
+};
+
+/**
+ * Get unmappable items in a day
+ */
+export const getUnmappableItems = <T extends { placeId?: string; id: string }>(
+  items: T[]
+): T[] => {
+  return items.filter(item => !isItemMappable(item));
+};
+
 /**
  * CORE DEFINITION
  * 
