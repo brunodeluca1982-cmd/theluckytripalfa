@@ -1,12 +1,12 @@
 import { Link } from "react-router-dom";
-import { ChevronLeft, MapPin, Bed, Utensils, Compass, Sparkles, Car, Moon, Coffee, Wallet, Palette, Shield, Cloud, Lightbulb, Star, Map, Route, Calendar } from "lucide-react";
+import { ChevronLeft, MapPin, Bed, Utensils, Compass, Sparkles, Car, Moon, Coffee, Wallet, Shield, Calendar, Lightbulb, Map } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import useEmblaCarousel from "embla-carousel-react";
 import { useCallback, useEffect, useState } from "react";
 
 /**
  * ═══════════════════════════════════════════════════════════════════════════
- * DESTINATION HUB — STRUCTURAL LOCK (FINAL)
+ * DESTINATION HUB — FINAL STRUCTURAL LOCK (DO NOT MODIFY)
  * ═══════════════════════════════════════════════════════════════════════════
  * 
  * CORE PRINCIPLE:
@@ -22,11 +22,22 @@ import { useCallback, useEffect, useState } from "react";
  * - No auto-reordering
  * - No resizing except where explicitly stated
  * 
- * SWIPE STRUCTURE:
- * - Swipe 0: Primary Hub (Chegar, Ficar, Comer, Fazer + Lucky List center)
- * - Swipe 1: Living the Destination (Mover, Noite, Sabores, Dinheiro)
- * - Swipe 2: Context & Safety (Cultura, Segurança, Clima, Dicas Locais)
- * - Swipe 3: Experiences & Discovery (Experiências, Fora do Óbvio, Bate-volta, Sazonal)
+ * 🔒 FINAL SWIPE STRUCTURE (3 SWIPES ONLY):
+ * - Swipe 1: Primary Hub (Como chegar, Onde ficar, Onde comer, O que fazer + Lucky List center)
+ * - Swipe 2: Mobility & Lifestyle (Mover, Vida noturna, Sabores locais, Dinheiro)
+ * - Swipe 3: Planning & Closure (Documentos & Visto, Melhor época, O que levar, Links & Checklist)
+ * 
+ * CONSOLIDATION APPLIED:
+ * - "Gastos da viagem" removed entirely
+ * - "Links úteis" + "Checklist final" merged into "Links & Checklist"
+ * - Context & Safety modules removed
+ * - Experiences & Discovery modules removed
+ * 
+ * IMMUTABILITY RULES:
+ * - No module may change swipe position
+ * - No module may be duplicated
+ * - No module may be renamed without explicit override
+ * - System must never auto-reorder buttons
  * ═══════════════════════════════════════════════════════════════════════════
  */
 
@@ -48,33 +59,23 @@ interface DestinationHubProps {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// SWIPE 1 — Living the Destination
+// SWIPE 2 — MOBILITY & LIFESTYLE (LOCKED)
 // ═══════════════════════════════════════════════════════════════════════════
-const SWIPE_1_MODULES = [
+const SWIPE_2_MODULES = [
   { id: 'mover', shortLabel: 'Mover', icon: Car, path: '/destino/rio-de-janeiro/mover' },
-  { id: 'noite', shortLabel: 'Noite', icon: Moon, path: '/destino/rio-de-janeiro/noite' },
-  { id: 'sabores', shortLabel: 'Sabores', icon: Coffee, path: '/destino/rio-de-janeiro/sabores' },
+  { id: 'vida-noturna', shortLabel: 'Vida noturna', icon: Moon, path: '/destino/rio-de-janeiro/vida-noturna' },
+  { id: 'sabores-locais', shortLabel: 'Sabores locais', icon: Coffee, path: '/destino/rio-de-janeiro/sabores-locais' },
   { id: 'dinheiro', shortLabel: 'Dinheiro', icon: Wallet, path: '/destino/rio-de-janeiro/dinheiro' },
 ];
 
 // ═══════════════════════════════════════════════════════════════════════════
-// SWIPE 2 — Context & Safety
-// ═══════════════════════════════════════════════════════════════════════════
-const SWIPE_2_MODULES = [
-  { id: 'cultura', shortLabel: 'Cultura', icon: Palette, path: '/destino/rio-de-janeiro/cultura' },
-  { id: 'seguranca', shortLabel: 'Segurança', icon: Shield, path: '/destino/rio-de-janeiro/seguranca' },
-  { id: 'clima', shortLabel: 'Clima', icon: Cloud, path: '/destino/rio-de-janeiro/clima' },
-  { id: 'dicas-locais', shortLabel: 'Dicas Locais', icon: Lightbulb, path: '/destino/rio-de-janeiro/dicas-locais' },
-];
-
-// ═══════════════════════════════════════════════════════════════════════════
-// SWIPE 3 — Experiences & Discovery
+// SWIPE 3 — PLANNING & CLOSURE (LOCKED)
 // ═══════════════════════════════════════════════════════════════════════════
 const SWIPE_3_MODULES = [
-  { id: 'experiencias', shortLabel: 'Experiências', icon: Star, path: '/destino/rio-de-janeiro/experiencias' },
-  { id: 'fora-do-obvio', shortLabel: 'Fora do Óbvio', icon: Map, path: '/destino/rio-de-janeiro/fora-do-obvio' },
-  { id: 'bate-volta', shortLabel: 'Bate-volta', icon: Route, path: '/destino/rio-de-janeiro/bate-volta' },
-  { id: 'sazonal', shortLabel: 'Sazonal', icon: Calendar, path: '/destino/rio-de-janeiro/sazonal' },
+  { id: 'documentos-visto', shortLabel: 'Documentos & Visto', icon: Shield, path: '/destino/rio-de-janeiro/documentos-visto' },
+  { id: 'melhor-epoca', shortLabel: 'Melhor época', icon: Calendar, path: '/destino/rio-de-janeiro/melhor-epoca' },
+  { id: 'o-que-levar', shortLabel: 'O que levar', icon: Lightbulb, path: '/destino/rio-de-janeiro/o-que-levar' },
+  { id: 'links-checklist', shortLabel: 'Links & Checklist', icon: Map, path: '/destino/rio-de-janeiro/links-checklist' },
 ];
 
 const DestinationHub = ({ destinationId, name, country, backgroundImage, actions }: DestinationHubProps) => {
@@ -198,70 +199,33 @@ const DestinationHub = ({ destinationId, name, country, backgroundImage, actions
           </div>
 
           {/* ═══════════════════════════════════════════════════════════
-              SWIPE 1 — LIVING THE DESTINATION
-              Purpose: day-to-day experience
+              SWIPE 2 — MOBILITY & LIFESTYLE (LOCKED)
+              Purpose: day-to-day movement and local experience
               ═══════════════════════════════════════════════════════════ */}
           <div className="flex-none w-full h-full flex items-center justify-center" style={{ paddingTop: '8vh' }}>
             <div className="relative w-[300px] h-[300px]">
               {/* TOP LEFT — Mover */}
-              <RadialButton 
-                icon={SWIPE_1_MODULES[0].icon}
-                label={SWIPE_1_MODULES[0].shortLabel}
-                path={SWIPE_1_MODULES[0].path}
-                position="top-left"
-              />
-              {/* TOP RIGHT — Noite */}
-              <RadialButton 
-                icon={SWIPE_1_MODULES[1].icon}
-                label={SWIPE_1_MODULES[1].shortLabel}
-                path={SWIPE_1_MODULES[1].path}
-                position="top-right"
-              />
-              {/* BOTTOM LEFT — Sabores */}
-              <RadialButton 
-                icon={SWIPE_1_MODULES[2].icon}
-                label={SWIPE_1_MODULES[2].shortLabel}
-                path={SWIPE_1_MODULES[2].path}
-                position="bottom-left"
-              />
-              {/* BOTTOM RIGHT — Dinheiro */}
-              <RadialButton 
-                icon={SWIPE_1_MODULES[3].icon}
-                label={SWIPE_1_MODULES[3].shortLabel}
-                path={SWIPE_1_MODULES[3].path}
-                position="bottom-right"
-              />
-            </div>
-          </div>
-
-          {/* ═══════════════════════════════════════════════════════════
-              SWIPE 2 — CONTEXT & SAFETY
-              Purpose: reduce anxiety, increase confidence
-              ═══════════════════════════════════════════════════════════ */}
-          <div className="flex-none w-full h-full flex items-center justify-center" style={{ paddingTop: '8vh' }}>
-            <div className="relative w-[300px] h-[300px]">
-              {/* TOP LEFT — Cultura */}
               <RadialButton 
                 icon={SWIPE_2_MODULES[0].icon}
                 label={SWIPE_2_MODULES[0].shortLabel}
                 path={SWIPE_2_MODULES[0].path}
                 position="top-left"
               />
-              {/* TOP RIGHT — Segurança */}
+              {/* TOP RIGHT — Vida noturna */}
               <RadialButton 
                 icon={SWIPE_2_MODULES[1].icon}
                 label={SWIPE_2_MODULES[1].shortLabel}
                 path={SWIPE_2_MODULES[1].path}
                 position="top-right"
               />
-              {/* BOTTOM LEFT — Clima */}
+              {/* BOTTOM LEFT — Sabores locais */}
               <RadialButton 
                 icon={SWIPE_2_MODULES[2].icon}
                 label={SWIPE_2_MODULES[2].shortLabel}
                 path={SWIPE_2_MODULES[2].path}
                 position="bottom-left"
               />
-              {/* BOTTOM RIGHT — Dicas Locais */}
+              {/* BOTTOM RIGHT — Dinheiro */}
               <RadialButton 
                 icon={SWIPE_2_MODULES[3].icon}
                 label={SWIPE_2_MODULES[3].shortLabel}
@@ -272,33 +236,33 @@ const DestinationHub = ({ destinationId, name, country, backgroundImage, actions
           </div>
 
           {/* ═══════════════════════════════════════════════════════════
-              SWIPE 3 — EXPERIENCES & DISCOVERY
-              Purpose: desire, differentiation, inspiration
+              SWIPE 3 — PLANNING & CLOSURE (LOCKED)
+              Purpose: preparation, final checks, and travel readiness
               ═══════════════════════════════════════════════════════════ */}
           <div className="flex-none w-full h-full flex items-center justify-center" style={{ paddingTop: '8vh' }}>
             <div className="relative w-[300px] h-[300px]">
-              {/* TOP LEFT — Experiências */}
+              {/* TOP LEFT — Documentos & Visto */}
               <RadialButton 
                 icon={SWIPE_3_MODULES[0].icon}
                 label={SWIPE_3_MODULES[0].shortLabel}
                 path={SWIPE_3_MODULES[0].path}
                 position="top-left"
               />
-              {/* TOP RIGHT — Fora do Óbvio */}
+              {/* TOP RIGHT — Melhor época */}
               <RadialButton 
                 icon={SWIPE_3_MODULES[1].icon}
                 label={SWIPE_3_MODULES[1].shortLabel}
                 path={SWIPE_3_MODULES[1].path}
                 position="top-right"
               />
-              {/* BOTTOM LEFT — Bate-volta */}
+              {/* BOTTOM LEFT — O que levar */}
               <RadialButton 
                 icon={SWIPE_3_MODULES[2].icon}
                 label={SWIPE_3_MODULES[2].shortLabel}
                 path={SWIPE_3_MODULES[2].path}
                 position="bottom-left"
               />
-              {/* BOTTOM RIGHT — Sazonal */}
+              {/* BOTTOM RIGHT — Links & Checklist */}
               <RadialButton 
                 icon={SWIPE_3_MODULES[3].icon}
                 label={SWIPE_3_MODULES[3].shortLabel}
