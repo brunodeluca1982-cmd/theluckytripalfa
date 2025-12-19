@@ -193,6 +193,329 @@ export const USER_DRAFT_STRUCTURAL_LOCK = {
   outcome: DRAFT_OUTCOME,
 } as const;
 
+// ═══════════════════════════════════════════════════════════════════════════
+// TIME, DISTANCE & CONSISTENCY INTELLIGENCE — STRUCTURAL LOCK
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ * EXECUTION INTELLIGENCE LAYER
+ * ═══════════════════════════════════════════════════════════════════════════
+ * 
+ * GOAL:
+ * Layer execution intelligence on top of the existing draft,
+ * while preserving user freedom and curated differentiation.
+ * 
+ * PREREQUISITE:
+ * This step builds on the existing DRAFT structure
+ * with days and draggable items already defined.
+ * 
+ * GLOBAL RULES:
+ * - Do NOT define UI, layout, spacing, colors, typography, or animations
+ * - Do NOT generate or edit any Portuguese content
+ * - Do NOT define pricing or subscription logic
+ * - This defines behavior and logic only
+ * 
+ * ═══════════════════════════════════════════════════════════════════════════
+ */
+
+/**
+ * 1) TIME ASSIGNMENT (OPTIONAL, USER-LED)
+ * 
+ * - Users may assign a start time to any item
+ * - Time is optional, not mandatory
+ * - If no time is assigned, the item remains flexible
+ */
+export const TIME_ASSIGNMENT_RULES = {
+  isOptional: true,
+  isUserLed: true,
+  isMandatory: false,
+  defaultState: 'flexible',
+  allowsStartTime: true,
+  allowsEndTime: false, // derived from duration
+} as const;
+
+/**
+ * Duration source priority
+ */
+export type DurationSource = 'curated' | 'google-places' | 'user-defined' | 'default';
+
+/**
+ * 2) DURATION ESTIMATION
+ * 
+ * - Each item may have an estimated duration
+ * - Duration may come from:
+ *   - Curated database (preferred)
+ *   - Google Places data (fallback)
+ * - Duration is an estimate, not a promise
+ */
+export const DURATION_ESTIMATION_RULES = {
+  isEstimate: true,
+  isNotAPromise: true,
+  sources: ['curated', 'google-places', 'user-defined', 'default'] as DurationSource[],
+  sourcePriority: {
+    first: 'curated',
+    fallback: 'google-places',
+    userOverride: 'user-defined',
+    lastResort: 'default',
+  },
+  defaultDurationMinutes: 60,
+} as const;
+
+/**
+ * Travel mode types
+ */
+export type TravelMode = 'walk' | 'car' | 'transit' | 'bike' | 'unknown';
+
+/**
+ * 3) DISTANCE & TRAVEL TIME
+ * 
+ * - The system calculates distance and travel time between consecutive items
+ * - Travel mode may be inferred (walk / car / transit)
+ * - Distances are displayed contextually, per transition
+ */
+export const DISTANCE_TRAVEL_TIME_RULES = {
+  calculatesDistance: true,
+  calculatesTravelTime: true,
+  scopeIsConsecutiveItems: true,
+  travelModes: ['walk', 'car', 'transit', 'bike'] as TravelMode[],
+  travelModeInference: true,
+  displayContext: 'per-transition',
+  requiresGeoData: true,
+} as const;
+
+/**
+ * Consistency warning types
+ */
+export type ConsistencyWarningType = 
+  | 'overlapping-times'
+  | 'unrealistic-travel-gap'
+  | 'excessive-distance'
+  | 'outside-logical-hours';
+
+/**
+ * 4) CONSISTENCY CHECKS (INTELLIGENT WARNINGS)
+ * 
+ * The system may detect and flag:
+ * - Overlapping times
+ * - Unrealistic travel gaps
+ * - Excessive distances between consecutive items
+ * - Items placed outside logical hours
+ * 
+ * Rules:
+ * - Warnings are advisory, not blocking
+ * - The user may ignore all warnings
+ * - No automatic correction is applied
+ */
+export const CONSISTENCY_CHECK_RULES = {
+  detectableIssues: [
+    'overlapping-times',
+    'unrealistic-travel-gap',
+    'excessive-distance',
+    'outside-logical-hours',
+  ] as ConsistencyWarningType[],
+  warningBehavior: {
+    isAdvisory: true,
+    isBlocking: false,
+    userCanIgnore: true,
+    automaticCorrection: false,
+  },
+  thresholds: {
+    excessiveDistanceKm: 15,
+    unrealisticTravelGapMinutes: 15,
+    logicalHoursStart: 6, // 6 AM
+    logicalHoursEnd: 24, // midnight
+  },
+} as const;
+
+/**
+ * Day feasibility levels
+ */
+export type DayFeasibilityLevel = 'light' | 'balanced' | 'heavy';
+
+/**
+ * 5) DAILY SUMMARY
+ * 
+ * For each day, the system may calculate:
+ * - Total planned duration
+ * - Total estimated travel time
+ * - General feasibility indicator (light / balanced / heavy)
+ * 
+ * No scoring, no judgment.
+ */
+export const DAILY_SUMMARY_RULES = {
+  calculatesTotalPlannedDuration: true,
+  calculatesTotalTravelTime: true,
+  providesFeasibilityIndicator: true,
+  feasibilityLevels: ['light', 'balanced', 'heavy'] as DayFeasibilityLevel[],
+  noScoring: true,
+  noJudgment: true,
+  thresholds: {
+    lightMaxHours: 4,
+    balancedMaxHours: 8,
+    heavyMinHours: 8,
+  },
+} as const;
+
+/**
+ * 6) USER-ADDED PLACES RULE
+ * 
+ * - User-added places must exist in Google Places and have a valid place_id
+ * - These places may be used ONLY for:
+ *   - Distance calculation
+ *   - Travel time estimation
+ *   - Schedule consistency checks
+ * - The system must NOT recommend, describe, or suggest user-added places
+ * - All recommendations must come exclusively from the curated database
+ */
+export const USER_ADDED_PLACES_INTELLIGENCE_RULES = {
+  requiresGooglePlaces: true,
+  requiresValidPlaceId: true,
+  allowedUseCases: [
+    'distance-calculation',
+    'travel-time-estimation',
+    'schedule-consistency-checks',
+  ] as const,
+  forbiddenActions: {
+    recommend: true,
+    describe: true,
+    suggest: true,
+  },
+  recommendationsSource: 'curated-database-only',
+} as const;
+
+/**
+ * 7) CURATION PRIORITY
+ * 
+ * - Curated items always retain priority in suggestions
+ * - The system may suggest replacing a user-added item
+ *   with a curated alternative, but never automatically
+ */
+export const CURATION_PRIORITY_RULES = {
+  curatedHasPriorityInSuggestions: true,
+  mayOfferCuratedAlternatives: true,
+  automaticReplacement: false,
+  userMustConfirmReplacement: true,
+} as const;
+
+/**
+ * NAVIGATION RULES
+ * 
+ * - All intelligence appears within the context of "Meu Roteiro"
+ * - No redirection to Home or external screens
+ * - The user always stays inside their planning flow
+ */
+export const INTELLIGENCE_NAVIGATION_RULES = {
+  contextIsWithinMeuRoteiro: true,
+  noRedirectionToHome: true,
+  noRedirectionToExternalScreens: true,
+  userStaysInPlanningFlow: true,
+} as const;
+
+/**
+ * SCALABILITY RULE
+ * 
+ * This layer must support future extensions:
+ * - Cost estimation
+ * - Booking integrations
+ * - Map export
+ * - Public itinerary pages
+ * 
+ * Without refactoring.
+ */
+export const INTELLIGENCE_SCALABILITY = {
+  futureExtensions: [
+    'cost-estimation',
+    'booking-integrations',
+    'map-export',
+    'public-itinerary-pages',
+  ] as const,
+  requiresRefactoring: false,
+} as const;
+
+/**
+ * INTELLIGENCE OUTCOME
+ * 
+ * After this lock:
+ * - "Meu Roteiro" becomes executable, not just inspirational
+ * - The app matches and exceeds core planning power
+ * - Curated content gains measurable, practical value
+ * - The product feels complete even with a single destination
+ */
+export const INTELLIGENCE_OUTCOME = {
+  roteiroBecomesExecutable: true,
+  matchesPlanningPower: true,
+  curatedContentGainsMeasurableValue: true,
+  productFeelsCompleteWithOneDestination: true,
+} as const;
+
+/**
+ * COMPLETE TIME, DISTANCE & CONSISTENCY INTELLIGENCE LOCK
+ */
+export const EXECUTION_INTELLIGENCE_LOCK = {
+  timeAssignment: TIME_ASSIGNMENT_RULES,
+  durationEstimation: DURATION_ESTIMATION_RULES,
+  distanceTravelTime: DISTANCE_TRAVEL_TIME_RULES,
+  consistencyChecks: CONSISTENCY_CHECK_RULES,
+  dailySummary: DAILY_SUMMARY_RULES,
+  userAddedPlaces: USER_ADDED_PLACES_INTELLIGENCE_RULES,
+  curationPriority: CURATION_PRIORITY_RULES,
+  navigation: INTELLIGENCE_NAVIGATION_RULES,
+  scalability: INTELLIGENCE_SCALABILITY,
+  outcome: INTELLIGENCE_OUTCOME,
+} as const;
+
+// ═══════════════════════════════════════════════════════════════════════════
+// HELPER TYPES FOR INTELLIGENCE LAYER
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Item with time intelligence data
+ */
+export interface IntelligentRoteiroItem {
+  id: string;
+  name: string;
+  source: DraftItemSource;
+  
+  // Time intelligence (optional)
+  startTime?: string; // HH:mm format
+  estimatedDurationMinutes?: number;
+  durationSource?: DurationSource;
+  
+  // Location intelligence
+  placeId?: string; // Google Places ID
+  coordinates?: { lat: number; lng: number };
+  neighborhood?: string;
+  
+  // Derived data
+  calculatedEndTime?: string;
+}
+
+/**
+ * Transition between two items
+ */
+export interface ItemTransition {
+  fromItemId: string;
+  toItemId: string;
+  distanceKm: number;
+  estimatedTravelMinutes: number;
+  inferredTravelMode: TravelMode;
+  hasWarning: boolean;
+  warningType?: ConsistencyWarningType;
+}
+
+/**
+ * Daily summary data
+ */
+export interface DaySummary {
+  dayNumber: number;
+  itemCount: number;
+  totalPlannedMinutes: number;
+  totalTravelMinutes: number;
+  feasibilityLevel: DayFeasibilityLevel;
+  warnings: ConsistencyWarningType[];
+}
+
 /**
  * CORE DEFINITION
  * 
