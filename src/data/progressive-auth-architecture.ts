@@ -220,6 +220,116 @@ export const AUTH_NAVIGATION_RULES = {
 } as const;
 
 // ═══════════════════════════════════════════════════════════════════════════
+// CORE LOGIN PRINCIPLE
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * CORE PRINCIPLE
+ * 
+ * Login must be:
+ * - Contextual
+ * - Optional at first
+ * - Value-driven
+ * - Never mandatory at entry
+ */
+export const LOGIN_CORE_PRINCIPLE = {
+  isContextual: true,
+  isOptionalAtFirst: true,
+  isValueDriven: true,
+  mandatoryAtEntry: false,
+} as const;
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ENHANCED LOGIN TRIGGERS
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Login trigger context types
+ */
+export type LoginTriggerContext = 
+  | 'save-permanently'
+  | 'save-lucky-list-item'
+  | 'session-end-risk'
+  | 'cross-device-access';
+
+/**
+ * LOGIN TRIGGERS (CONTEXTUAL ONLY)
+ * 
+ * Login may be SUGGESTED when:
+ * - User attempts to save permanently
+ * - User attempts to save a Lucky List item
+ * - User risks losing a draft (session end)
+ * - User wants cross-device access
+ */
+export const CONTEXTUAL_LOGIN_TRIGGERS: readonly LoginTriggerContext[] = [
+  'save-permanently',
+  'save-lucky-list-item',
+  'session-end-risk',
+  'cross-device-access',
+] as const;
+
+export const LOGIN_SUGGESTED_WHEN = {
+  attemptsSavePermanently: true,
+  attemptsSaveLuckyListItem: true,
+  risksLosingDraft: true,
+  wantsCrossDeviceAccess: true,
+} as const;
+
+/**
+ * LOGIN MUST NOT BE TRIGGERED
+ * 
+ * - On first app open
+ * - On destination entry
+ * - On casual browsing
+ */
+export const LOGIN_MUST_NOT_TRIGGER = {
+  onFirstAppOpen: true,
+  onDestinationEntry: true,
+  onCasualBrowsing: true,
+} as const;
+
+// ═══════════════════════════════════════════════════════════════════════════
+// DATA MIGRATION
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * DATA MIGRATION RULE
+ * 
+ * - Upon login, any existing draft data
+ *   must migrate automatically to the authenticated state
+ * - No data loss is allowed
+ */
+export const DATA_MIGRATION_RULES = {
+  migratesAutomaticallyOnLogin: true,
+  noDataLossAllowed: true,
+  draftToAuthenticatedMigration: true,
+  preservesAllItemData: true,
+  preservesItemOrder: true,
+  preservesItemMetadata: true,
+} as const;
+
+// ═══════════════════════════════════════════════════════════════════════════
+// FAIL-SAFE RULES
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * FAIL-SAFE RULE
+ * 
+ * - If login is skipped or fails,
+ *   the user must return to the exact previous context
+ * - No reset, no forced restart
+ */
+export const LOGIN_FAILSAFE_RULES = {
+  onSkipOrFail: {
+    returnToExactPreviousContext: true,
+    noReset: true,
+    noForcedRestart: true,
+    preservesDraftData: true,
+    preservesNavigationState: true,
+  },
+} as const;
+
+// ═══════════════════════════════════════════════════════════════════════════
 // SCALABILITY RULES
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -228,11 +338,53 @@ export const AUTH_NAVIGATION_RULES = {
  * 
  * - This authentication logic applies to ALL destinations
  * - Future features (payments, Google Maps, AI) must respect these states
+ * - Future authentication methods (Google, Apple, email)
+ *   may be added without refactoring
  */
 export const AUTH_SCALABILITY = {
   appliesToAllDestinations: true,
+  appliesToAllFeatures: true,
   futureFeaturesMustRespectStates: true,
   affectedFeatures: ['payments', 'google-maps', 'ai', 'sync'] as const,
+  futureAuthMethodsNoRefactor: true,
+  supportedFutureMethods: ['google', 'apple', 'email', 'phone'] as const,
+} as const;
+
+// ═══════════════════════════════════════════════════════════════════════════
+// DATA PERSISTENCE STATES
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Persistence state types
+ */
+export type PersistenceState = 'local' | 'cloud' | 'synced';
+
+/**
+ * Data persistence by auth state
+ */
+export const PERSISTENCE_BY_AUTH_STATE = {
+  anonymous: {
+    storage: 'local' as PersistenceState,
+    persistsAcrossSessions: false,
+    persistsAcrossDevices: false,
+    dataMayBeLost: true,
+    userInformed: true,
+  },
+  'logged-in': {
+    storage: 'cloud' as PersistenceState,
+    persistsAcrossSessions: true,
+    persistsAcrossDevices: true,
+    dataMayBeLost: false,
+    automaticSync: true,
+  },
+  subscriber: {
+    storage: 'synced' as PersistenceState,
+    persistsAcrossSessions: true,
+    persistsAcrossDevices: true,
+    dataMayBeLost: false,
+    automaticSync: true,
+    premiumDataIncluded: true,
+  },
 } as const;
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -324,4 +476,71 @@ export const getUpgradePath = (
     return null;
   }
   return getRequiredAuthState(targetAction);
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ENHANCED LOGIN HELPER FUNCTIONS
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Check if login should be suggested for a given context
+ */
+export const shouldSuggestLogin = (
+  context: LoginTriggerContext,
+  isLoggedIn: boolean
+): boolean => {
+  if (isLoggedIn) return false;
+  return CONTEXTUAL_LOGIN_TRIGGERS.includes(context);
+};
+
+/**
+ * Check if current context should NOT trigger login
+ */
+export const shouldNotTriggerLogin = (
+  context: 'first-app-open' | 'destination-entry' | 'casual-browsing'
+): boolean => {
+  const blockedContexts = {
+    'first-app-open': LOGIN_MUST_NOT_TRIGGER.onFirstAppOpen,
+    'destination-entry': LOGIN_MUST_NOT_TRIGGER.onDestinationEntry,
+    'casual-browsing': LOGIN_MUST_NOT_TRIGGER.onCasualBrowsing,
+  };
+  return blockedContexts[context] === true;
+};
+
+/**
+ * Get persistence configuration for auth state
+ */
+export const getPersistenceConfig = (state: AuthState) => {
+  return PERSISTENCE_BY_AUTH_STATE[state];
+};
+
+/**
+ * Check if data migration is needed after login
+ */
+export const needsDataMigration = (
+  hadDraftData: boolean,
+  justLoggedIn: boolean
+): boolean => {
+  return hadDraftData && justLoggedIn && DATA_MIGRATION_RULES.migratesAutomaticallyOnLogin;
+};
+
+/**
+ * Get fail-safe behavior for login skip/fail
+ */
+export const getFailSafeBehavior = () => {
+  return LOGIN_FAILSAFE_RULES.onSkipOrFail;
+};
+
+/**
+ * Check if user data persists across sessions
+ */
+export const dataPeristsAcrossSessions = (state: AuthState): boolean => {
+  return PERSISTENCE_BY_AUTH_STATE[state].persistsAcrossSessions;
+};
+
+/**
+ * Check if user should be warned about data loss
+ */
+export const shouldWarnAboutDataLoss = (state: AuthState): boolean => {
+  return PERSISTENCE_BY_AUTH_STATE[state].dataMayBeLost === true;
 };
