@@ -3,21 +3,19 @@ import { ChevronLeft, MapPin, Bed, Utensils, Compass, Sparkles } from "lucide-re
 import type { LucideIcon } from "lucide-react";
 
 /**
- * DESTINATION HUB — EDITORIAL + INTERACTION LOCK (FINAL)
+ * DESTINATION HUB — DIAMOND LAYOUT LOCK (FINAL)
  * 
- * STRUCTURE:
- * 1. EDITORIAL HEADER ZONE (top 20-25%): Title + country, unobstructed
- * 2. INTERACTIVE BUTTON ZONE (center-lower): 5 buttons in 3+2 grid
+ * BUTTON POSITIONS (LOCKED):
+ * - TOP LEFT: Chegar
+ * - TOP RIGHT: Ficar  
+ * - BOTTOM LEFT: Comer
+ * - BOTTOM RIGHT: Fazer
+ * - CENTER: Lucky List (smaller, subtle, curiosity trigger)
  * 
- * BUTTON ORDER (LOCKED):
- * Row 1: Chegar, Ficar, Comer
- * Row 2: Lucky List, Fazer
- * 
- * HARD CONSTRAINTS:
- * - No overlap between zones
- * - No secondary modules on this screen
- * - No horizontal swipe
- * - No auto-repositioning
+ * CONSTRAINTS:
+ * - All outer buttons SAME SIZE (78px)
+ * - Lucky List 10% SMALLER (70px)
+ * - No overlap with title/country
  */
 
 interface DestinationAction {
@@ -86,14 +84,14 @@ const DestinationHub = ({ destinationId, name, country, backgroundImage, actions
       </div>
 
       {/* ═══════════════════════════════════════════════════════════════
-          RADIAL BUTTON ZONE — FLOWER PATTERN (LOCKED)
-          Center: Lucky List (largest)
-          Surrounding: Chegar, Comer, Ficar, Fazer
+          DIAMOND BUTTON LAYOUT (LOCKED)
+          Center: Lucky List (smaller, subtle)
+          Diamond: Chegar, Ficar, Comer, Fazer (same size)
           ═══════════════════════════════════════════════════════════════ */}
-      <div className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none">
-        <div className="relative w-[280px] h-[280px] pointer-events-auto">
+      <div className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none" style={{ paddingTop: '8vh' }}>
+        <div className="relative w-[300px] h-[300px] pointer-events-auto">
           
-          {/* CENTER — Lucky List (Main Node, Largest) */}
+          {/* CENTER — Lucky List (Smaller, Subtle, Curiosity Trigger) */}
           {primaryActions[3] && (
             <RadialButton 
               icon={primaryActions[3].icon}
@@ -114,22 +112,22 @@ const DestinationHub = ({ destinationId, name, country, backgroundImage, actions
             />
           )}
 
-          {/* TOP RIGHT — Comer */}
-          {primaryActions[2] && (
-            <RadialButton 
-              icon={primaryActions[2].icon}
-              label={primaryActions[2].shortLabel}
-              path={primaryActions[2].path}
-              position="top-right"
-            />
-          )}
-
-          {/* BOTTOM LEFT — Ficar */}
+          {/* TOP RIGHT — Ficar */}
           {primaryActions[1] && (
             <RadialButton 
               icon={primaryActions[1].icon}
               label={primaryActions[1].shortLabel}
               path={primaryActions[1].path}
+              position="top-right"
+            />
+          )}
+
+          {/* BOTTOM LEFT — Comer */}
+          {primaryActions[2] && (
+            <RadialButton 
+              icon={primaryActions[2].icon}
+              label={primaryActions[2].shortLabel}
+              path={primaryActions[2].path}
               position="bottom-left"
             />
           )}
@@ -163,16 +161,16 @@ interface RadialButtonProps {
 }
 
 const RadialButton = ({ icon: Icon, label, path, isCenter, position }: RadialButtonProps) => {
-  // Center button is largest (96px), surrounding buttons are 74px
-  const size = isCenter ? 'w-24 h-24' : 'w-[74px] h-[74px]';
+  // Outer buttons: 78px (same size), Center: 70px (10% smaller, subtle)
+  const size = isCenter ? 'w-[70px] h-[70px]' : 'w-[78px] h-[78px]';
   
-  // Position offsets for flower pattern (equal distance from center)
+  // Diamond position offsets with generous spacing
   const positionStyles: Record<string, string> = {
     'center': 'top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2',
-    'top-left': 'top-0 left-0',
-    'top-right': 'top-0 right-0',
-    'bottom-left': 'bottom-0 left-0',
-    'bottom-right': 'bottom-0 right-0',
+    'top-left': 'top-[15px] left-[15px]',
+    'top-right': 'top-[15px] right-[15px]',
+    'bottom-left': 'bottom-[15px] left-[15px]',
+    'bottom-right': 'bottom-[15px] right-[15px]',
   };
   
   return (
@@ -184,13 +182,13 @@ const RadialButton = ({ icon: Icon, label, path, isCenter, position }: RadialBut
         backdrop-blur-md transition-all duration-200
         ${positionStyles[position]}
         ${isCenter 
-          ? "bg-white/25 border-2 border-white/60 hover:bg-white/35 hover:scale-105 shadow-lg shadow-black/20" 
-          : "bg-white/15 border border-white/30 hover:bg-white/25 hover:scale-105 shadow-md shadow-black/15"
+          ? "bg-white/15 border border-white/40 hover:bg-white/25 hover:scale-105 shadow-md shadow-black/15" 
+          : "bg-white/20 border border-white/40 hover:bg-white/30 hover:scale-105 shadow-md shadow-black/15"
         }
       `}
     >
-      <Icon className={`${isCenter ? 'w-7 h-7' : 'w-5 h-5'} text-white mb-1.5 ${isCenter ? "drop-shadow-lg" : ""}`} />
-      <span className={`text-white ${isCenter ? 'text-[11px]' : 'text-[9px]'} font-medium tracking-wide text-center px-1 leading-tight`}>
+      <Icon className={`${isCenter ? 'w-5 h-5' : 'w-5 h-5'} text-white mb-1 drop-shadow-sm`} />
+      <span className={`text-white text-[9px] font-medium tracking-wide text-center px-1 leading-tight`}>
         {label}
       </span>
     </Link>
