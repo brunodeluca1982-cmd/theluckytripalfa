@@ -472,7 +472,7 @@ const RestaurantDetail = () => {
   
   const restaurant = restaurantData[id || ""];
   const from = searchParams.get("from");
-  const backPath = from ? `/onde-comer/${from}` : "/";
+  const backPath = from ? `/onde-comer/${from}` : "/eat-map-view";
 
   if (!restaurant) {
     return (

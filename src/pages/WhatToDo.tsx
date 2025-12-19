@@ -65,9 +65,10 @@ const WhatToDo = () => {
           </h2>
           <div className="space-y-4">
             {cityLevelActivities.map((activity) => (
-              <div
+              <Link
                 key={activity.id}
-                className="p-4 bg-card border border-border rounded-lg"
+                to={`/atividade/${activity.id}?from=city`}
+                className="block p-4 bg-card border border-border rounded-lg hover:bg-accent/50 transition-colors"
               >
                 <h3 className="text-lg font-serif font-medium text-foreground mb-1">
                   {activity.title}
@@ -75,7 +76,7 @@ const WhatToDo = () => {
                 <p className="text-sm text-muted-foreground">
                   {activity.description}
                 </p>
-              </div>
+              </Link>
             ))}
           </div>
         </section>
