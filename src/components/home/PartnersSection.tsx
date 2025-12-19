@@ -2,16 +2,36 @@ import { Link } from "react-router-dom";
 import { getAllPartners } from "@/data/partners-data";
 
 /**
- * PARTNERS ON TRIP — HOME SECTION
+ * ═══════════════════════════════════════════════════════════════════════════
+ * 🔒 PARTNERS ON TRIP — STRUCTURAL LOCK (HOME SCREEN ONLY)
+ * ═══════════════════════════════════════════════════════════════════════════
  * 
- * SECONDARY PLACEMENT
+ * SCOPE
+ * This is the ONLY location where Partners on Trip appear in the app.
  * 
- * Horizontal row of circular profile avatars representing travel curators.
- * Tapping an avatar opens that partner's list of curated destinations.
+ * PLACEMENT RULES
+ * - Partners MUST appear exclusively on the Home screen
+ * - Do NOT display partners inside destinations, guides, itineraries, or AI
+ * - Do NOT reference partners elsewhere in the app
  * 
- * RULES:
- * - From Home, tapping a Partner opens their profile (list of destinations)
- * - Selecting a destination then opens the partner's roteiro
+ * DISPLAY FORMAT
+ * - Horizontal list of circular avatars
+ * - Each avatar uses the real photo of the person
+ * - Person's name appears below the avatar
+ * - No additional text, description, or call to action
+ * 
+ * FUNCTION
+ * - Discovery and authority layer only
+ * - Partners act as trusted references, not navigation shortcuts
+ * 
+ * COST OPTIMIZATION
+ * - Do not generate new content
+ * - Do not duplicate partner data across screens
+ * - Reuse the same partner entity from partners-data.ts
+ * 
+ * LOCK
+ * This behavior is final until explicitly changed.
+ * ═══════════════════════════════════════════════════════════════════════════
  */
 
 const PartnersSection = () => {
