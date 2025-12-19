@@ -22,16 +22,23 @@ import { Clock, Sparkles, Star, Users, GripVertical, Trash2 } from "lucide-react
 
 export interface ItineraryItem {
   id: string;
-  name: string;
-  category: 'attraction' | 'food' | 'hotel' | 'experience';
-  duration: string;
-  source: 'lucky-trip' | 'partner' | 'ai' | 'user';
+  name?: string;
+  title?: string; // Alternative to name for compatibility
+  category: 'attraction' | 'food' | 'hotel' | 'experience' | 'custom';
+  duration?: string;
+  time?: string; // Alternative to duration
+  source?: 'lucky-trip' | 'partner' | 'ai' | 'user';
   imageUrl?: string;
   description?: string;
+  location?: string;
   // Curator attribution (required for AI-generated itineraries)
   curatorId?: string;
   curatorName?: string;
   neighborhood?: string;
+  // Google Places data for custom items
+  placeId?: string;
+  lat?: number;
+  lng?: number;
 }
 
 interface ItineraryCardProps {
@@ -47,6 +54,7 @@ const categoryLabels: Record<ItineraryItem['category'], string> = {
   food: 'Gastronomia',
   hotel: 'Hospedagem',
   experience: 'Experiência',
+  custom: 'Local Adicionado',
 };
 
 const categoryColors: Record<ItineraryItem['category'], string> = {
@@ -54,6 +62,7 @@ const categoryColors: Record<ItineraryItem['category'], string> = {
   food: 'bg-orange-500/10 text-orange-600 dark:text-orange-400',
   hotel: 'bg-purple-500/10 text-purple-600 dark:text-purple-400',
   experience: 'bg-green-500/10 text-green-600 dark:text-green-400',
+  custom: 'bg-slate-500/10 text-slate-600 dark:text-slate-400',
 };
 
 const sourceIcons: Record<ItineraryItem['source'], React.ReactNode> = {
@@ -106,7 +115,7 @@ export const ItineraryCard = ({
           ) : (
             <div className="w-full h-full bg-gradient-to-br from-muted to-muted-foreground/20 flex items-center justify-center">
               <span className="text-muted-foreground/40 text-lg">
-                {item.name.charAt(0)}
+                {(item.name || item.title || '?').charAt(0)}
               </span>
             </div>
           )}
@@ -115,7 +124,7 @@ export const ItineraryCard = ({
         {/* Content */}
         <div className="flex-1 min-w-0">
           <h4 className="text-sm font-medium text-foreground truncate mb-1">
-            {item.name}
+            {item.name || item.title}
           </h4>
           
           {/* Category Badge */}
@@ -125,27 +134,29 @@ export const ItineraryCard = ({
           
           {/* Meta Row */}
           <div className="flex items-center gap-2 mt-1.5 text-[10px] text-muted-foreground">
-            <span className="flex items-center gap-1">
-              <Clock className="w-3 h-3" />
-              {item.duration}
-            </span>
+            {(item.duration || item.time) && (
+              <span className="flex items-center gap-1">
+                <Clock className="w-3 h-3" />
+                {item.duration || item.time}
+              </span>
+            )}
             {/* Curator Badge — Shows "By [Name]" if curator is set */}
             {item.curatorName ? (
               <span className="flex items-center gap-1 text-primary/80 font-medium">
                 <Users className="w-3 h-3" />
                 By {item.curatorName.split(' ')[0]}
               </span>
-            ) : item.source !== 'user' && sourceLabels[item.source] && (
+            ) : item.source && item.source !== 'user' && sourceLabels[item.source] && (
               <span className="flex items-center gap-1 text-primary/70">
                 {sourceIcons[item.source]}
                 {sourceLabels[item.source]}
               </span>
             )}
           </div>
-          {/* Neighborhood if available */}
-          {item.neighborhood && (
+          {/* Location/Neighborhood if available */}
+          {(item.neighborhood || item.location) && (
             <p className="text-[9px] text-muted-foreground/70 mt-0.5 truncate">
-              {item.neighborhood}
+              {item.neighborhood || item.location}
             </p>
           )}
         </div>

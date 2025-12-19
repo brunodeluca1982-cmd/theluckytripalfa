@@ -1,8 +1,11 @@
 import { Link, useNavigate } from "react-router-dom";
-import { ChevronLeft, Trash2, MapPin, Utensils, Bed, Star, Compass, Sparkles, Moon, Coffee } from "lucide-react";
+import { ChevronLeft, Trash2, MapPin, Utensils, Bed, Star, Compass, Sparkles, Moon, Coffee, Navigation } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import { useEffect, useState } from "react";
+import { AddPlaceSheet } from "@/components/roteiro/AddPlaceSheet";
+import { PlaceData } from "@/components/roteiro/GooglePlacesAutocomplete";
+import { useRoteiroState } from "@/hooks/use-roteiro-state";
 
 /**
  * ═══════════════════════════════════════════════════════════════════════════
@@ -43,7 +46,7 @@ import { useEffect, useState } from "react";
 
 interface SavedItem {
   id: string;
-  type: 'activity' | 'restaurant' | 'hotel' | 'lucky-list' | 'nightlife' | 'local-flavor';
+  type: 'activity' | 'restaurant' | 'hotel' | 'lucky-list' | 'nightlife' | 'local-flavor' | 'custom';
   title: string;
   savedAt: string;
   isPremium: boolean;
@@ -61,6 +64,8 @@ const getItemIcon = (type: SavedItem['type']) => {
       return <Moon className="w-4 h-4" />;
     case 'local-flavor':
       return <Coffee className="w-4 h-4" />;
+    case 'custom':
+      return <Navigation className="w-4 h-4" />;
     case 'activity':
     default:
       return <MapPin className="w-4 h-4" />;
@@ -81,15 +86,20 @@ const getItemTypeLabel = (type: SavedItem['type']) => {
       return 'Vida Noturna';
     case 'local-flavor':
       return 'Sabores Locais';
+    case 'custom':
+      return 'Local Adicionado';
     default:
       return 'Item';
   }
 };
 
+const TOTAL_DAYS = 3; // Default trip length
+
 const MeuRoteiro = () => {
   const navigate = useNavigate();
   const [savedItems, setSavedItems] = useState<SavedItem[]>([]);
   const [lastDestination, setLastDestination] = useState<string | null>(null);
+  const { addItem } = useRoteiroState('rio-de-janeiro', TOTAL_DAYS);
   
   useEffect(() => {
     const items = JSON.parse(localStorage.getItem('draft-roteiro') || '[]');
@@ -99,6 +109,36 @@ const MeuRoteiro = () => {
     const lastDest = localStorage.getItem('last-destination-context');
     setLastDestination(lastDest);
   }, []);
+
+  const handleAddPlace = (day: number, place: PlaceData) => {
+    // Add to roteiro state (structured itinerary)
+    addItem(day, {
+      id: place.placeId,
+      title: place.name,
+      time: '',
+      category: 'custom',
+      location: place.neighborhood || place.city || '',
+      placeId: place.placeId,
+      lat: place.lat,
+      lng: place.lng,
+    });
+
+    // Also add to saved items list for display
+    const newItem: SavedItem = {
+      id: place.placeId,
+      type: 'custom',
+      title: place.name,
+      savedAt: new Date().toISOString(),
+      isPremium: false,
+    };
+    
+    const updatedItems = [...savedItems, newItem];
+    setSavedItems(updatedItems);
+    localStorage.setItem('draft-roteiro', JSON.stringify(updatedItems));
+    
+    // Dispatch event for bottom navigation to update badge
+    window.dispatchEvent(new CustomEvent('roteiro-updated'));
+  };
 
   const handleRemoveItem = (itemId: string, itemType: string, itemTitle: string) => {
     const updatedItems = savedItems.filter(
@@ -245,6 +285,11 @@ const MeuRoteiro = () => {
           )}
         </div>
       </main>
+      {/* FAB for adding places */}
+      <AddPlaceSheet 
+        totalDays={TOTAL_DAYS} 
+        onAddPlace={handleAddPlace} 
+      />
     </div>
   );
 };
