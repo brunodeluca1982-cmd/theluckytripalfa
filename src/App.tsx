@@ -34,6 +34,10 @@ import SuporteHumano from "./pages/profile/SuporteHumano";
 import SecondaryModuleDetail from "./pages/SecondaryModuleDetail";
 import PartnerProfile from "./pages/PartnerProfile";
 import PartnerRoteiro from "./pages/PartnerRoteiro";
+import IAAssistant from "./pages/IAAssistant";
+import IAChatPlaceholder from "./pages/ia/IAChatPlaceholder";
+import IARoteirosInteligentes from "./pages/ia/IARoteirosInteligentes";
+import IARevisarRoteiro from "./pages/ia/IARevisarRoteiro";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -107,8 +111,11 @@ const App = () => {
               <Route path="/partner/:id" element={<PartnerProfile />} />
               <Route path="/partner/:partnerId/roteiro/:destinationId" element={<PartnerRoteiro />} />
 
-              {/* Placeholder routes for bottom nav */}
-              <Route path="/ia" element={<NotFound />} />
+              {/* IA Assistant */}
+              <Route path="/ia" element={<IAAssistant />} />
+              <Route path="/ia/chat" element={<IAChatPlaceholder />} />
+              <Route path="/ia/roteiros-inteligentes" element={<IARoteirosInteligentes />} />
+              <Route path="/ia/revisar-roteiro" element={<IARevisarRoteiro />} />
 
               {/* Fallback */}
               <Route path="*" element={<NotFound />} />
