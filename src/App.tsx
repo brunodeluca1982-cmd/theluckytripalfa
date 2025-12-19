@@ -40,6 +40,9 @@ import IACreateItinerary from "./pages/ia/IACreateItinerary";
 import IAImproveItinerary from "./pages/ia/IAImproveItinerary";
 import IARoteirosInteligentes from "./pages/ia/IARoteirosInteligentes";
 import IARevisarRoteiro from "./pages/ia/IARevisarRoteiro";
+import IAPerguntar from "./pages/ia/IAPerguntar";
+import IACriarRoteiro from "./pages/ia/IACriarRoteiro";
+import IAMelhorarRoteiro from "./pages/ia/IAMelhorarRoteiro";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -120,6 +123,10 @@ const App = () => {
               <Route path="/ia/improve-itinerary" element={<IAImproveItinerary />} />
               <Route path="/ia/roteiros-inteligentes" element={<IARoteirosInteligentes />} />
               <Route path="/ia/revisar-roteiro" element={<IARevisarRoteiro />} />
+              {/* New PT-BR IA routes */}
+              <Route path="/ia/perguntar" element={<IAPerguntar />} />
+              <Route path="/ia/criar-roteiro" element={<IACriarRoteiro />} />
+              <Route path="/ia/melhorar-roteiro" element={<IAMelhorarRoteiro />} />
 
               {/* Fallback */}
               <Route path="*" element={<NotFound />} />

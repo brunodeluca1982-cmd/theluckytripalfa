@@ -3,7 +3,7 @@ import { ChevronLeft, MessageCircle, CalendarPlus, Sparkles } from "lucide-react
 
 /**
  * ═══════════════════════════════════════════════════════════════════════════
- * TRAVEL ASSISTANT — IA SCREEN (FINAL / LOCKED)
+ * TRAVEL ASSISTANT — IA SCREEN (PT-BR)
  * ═══════════════════════════════════════════════════════════════════════════
  * 
  * This is NOT a generic chatbot.
@@ -31,9 +31,7 @@ const IAAssistant = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      {/* ═══════════════════════════════════════════════════════════════
-          HEADER
-          ═══════════════════════════════════════════════════════════════ */}
+      {/* Header */}
       <header className="px-6 pt-12 pb-6">
         <Link 
           to="/" 
@@ -43,100 +41,81 @@ const IAAssistant = () => {
         </Link>
       </header>
 
-      {/* ═══════════════════════════════════════════════════════════════
-          TITLE SECTION
-          ═══════════════════════════════════════════════════════════════ */}
+      {/* Title Section */}
       <div className="px-6 pt-4 pb-8 text-center">
         <h1 className="text-3xl font-serif font-medium text-foreground tracking-tight">
-          Travel Assistant
+          Assistente de Viagem
         </h1>
         <p className="text-xs tracking-[0.2em] text-muted-foreground uppercase mt-3">
           Powered by human experience
         </p>
       </div>
 
-      {/* ═══════════════════════════════════════════════════════════════
-          MAIN CONTENT
-          ═══════════════════════════════════════════════════════════════ */}
+      {/* Main Content */}
       <div className="flex-1 flex flex-col items-center justify-center px-6 pb-32">
         
         {/* Main Question */}
         <p className="text-lg text-foreground/80 font-light mb-10 text-center">
-          What do you want to do now?
+          O que você quer fazer agora?
         </p>
 
-        {/* Action Buttons */}
+        {/* Action Cards */}
         <div className="w-full max-w-sm space-y-4">
           
-          {/* BUTTON 1 — ASK A QUESTION */}
-          <ActionButton
-            icon={MessageCircle}
-            label="Ask about this destination"
-            onClick={() => navigate("/ia/chat")}
-          />
+          {/* CARD 1 — PERGUNTAR */}
+          <button
+            onClick={() => navigate("/ia/perguntar")}
+            className="w-full p-5 rounded-2xl bg-card border border-border hover:bg-accent hover:border-border transition-all duration-200 shadow-sm"
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                <MessageCircle className="w-5 h-5 text-primary" />
+              </div>
+              <span className="text-base font-medium text-foreground text-left">
+                Perguntar sobre este destino
+              </span>
+            </div>
+          </button>
 
-          {/* BUTTON 2 — CREATE ITINERARY */}
-          <ActionButton
-            icon={CalendarPlus}
-            label="Create my itinerary"
-            onClick={() => navigate("/ia/create-itinerary")}
-          />
+          {/* CARD 2 — CRIAR ROTEIRO */}
+          <button
+            onClick={() => navigate("/ia/criar-roteiro")}
+            className="w-full p-5 rounded-2xl bg-card border border-border hover:bg-accent hover:border-border transition-all duration-200 shadow-sm"
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                <CalendarPlus className="w-5 h-5 text-primary" />
+              </div>
+              <span className="text-base font-medium text-foreground text-left">
+                Criar meu roteiro
+              </span>
+            </div>
+          </button>
 
-          {/* BUTTON 3 — IMPROVE ITINERARY */}
-          <ActionButton
-            icon={Sparkles}
-            label="Improve my itinerary"
-            onClick={() => navigate("/ia/improve-itinerary")}
-            subtle
-          />
+          {/* CARD 3 — MELHORAR ROTEIRO */}
+          <button
+            onClick={() => navigate("/ia/melhorar-roteiro")}
+            className="w-full p-5 rounded-2xl bg-muted/30 border border-border/50 hover:bg-muted/50 hover:border-border transition-all duration-200 shadow-sm"
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
+                <Sparkles className="w-5 h-5 text-muted-foreground" />
+              </div>
+              <span className="text-base font-medium text-foreground text-left">
+                Melhorar meu roteiro
+              </span>
+            </div>
+          </button>
         </div>
       </div>
 
-      {/* ═══════════════════════════════════════════════════════════════
-          FOOTER NOTE
-          ═══════════════════════════════════════════════════════════════ */}
+      {/* Footer Note */}
       <div className="px-6 pb-8 text-center">
         <p className="text-xs text-muted-foreground/60 leading-relaxed max-w-xs mx-auto">
-          Answers are based exclusively on curated content from our editorial team and trusted partners.
+          Respostas baseadas exclusivamente em conteúdo curado pela nossa equipe editorial e parceiros.
         </p>
       </div>
     </div>
-  );
-};
-
-/**
- * Premium Action Button Component
- */
-interface ActionButtonProps {
-  icon: React.ElementType;
-  label: string;
-  onClick: () => void;
-  subtle?: boolean;
-}
-
-const ActionButton = ({ icon: Icon, label, onClick, subtle }: ActionButtonProps) => {
-  return (
-    <button
-      onClick={onClick}
-      className={`
-        w-full flex items-center gap-4 p-5 rounded-2xl
-        border transition-all duration-200
-        ${subtle 
-          ? "bg-muted/30 border-border/50 hover:bg-muted/50 hover:border-border" 
-          : "bg-card border-border hover:bg-accent hover:border-border"
-        }
-      `}
-    >
-      <div className={`
-        w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0
-        ${subtle ? "bg-muted" : "bg-primary/10"}
-      `}>
-        <Icon className={`w-5 h-5 ${subtle ? "text-muted-foreground" : "text-primary"}`} />
-      </div>
-      <span className="text-base font-medium text-foreground text-left">
-        {label}
-      </span>
-    </button>
   );
 };
 
