@@ -2,8 +2,8 @@ import { Link, useParams, useSearchParams } from "react-router-dom";
 import { ChevronLeft } from "lucide-react";
 import HotelCard from "@/components/HotelCard";
 import { getNeighborhoodById } from "@/data/rio-neighborhoods";
-import SaveToRoteiroButton from "@/components/SaveToRoteiroButton";
 import RoteiroAccessLink from "@/components/RoteiroAccessLink";
+import { useItemSave } from "@/hooks/use-item-save";
 
 // Neighborhood descriptions for staying
 const neighborhoodDescriptions: Record<string, string> = {
@@ -230,6 +230,7 @@ const hotelsByNeighborhood: Record<string, {
 const WhereToStayDetail = () => {
   const { neighborhood } = useParams<{ neighborhood: string }>();
   const [searchParams] = useSearchParams();
+  const { saveItem } = useItemSave();
   
   const neighborhoodData = getNeighborhoodById(neighborhood || "");
   const name = neighborhoodData?.name || "Neighborhood";
@@ -239,9 +240,13 @@ const WhereToStayDetail = () => {
   const from = searchParams.get("from");
   const backPath = from === "map" ? "/city-view" : "/onde-ficar-rio";
 
+  const handleSaveHotel = (hotelId: string, hotelName: string) => {
+    saveItem(hotelId, 'hotel', hotelName, false);
+  };
+
   return (
     <div className="min-h-screen bg-background">
-      {/* Header with Save Action */}
+      {/* Header - No page-level save button */}
       <header className="px-6 py-4 border-b border-border flex items-center justify-between">
         <Link
           to={backPath}
@@ -250,16 +255,7 @@ const WhereToStayDetail = () => {
           <ChevronLeft className="w-4 h-4" />
           Voltar
         </Link>
-        <div className="flex items-center gap-4">
-          <RoteiroAccessLink />
-          {hotels.length > 0 && (
-            <SaveToRoteiroButton
-              itemId={`stay-${neighborhood}`}
-              itemType="hotel"
-              itemTitle={`Onde ficar em ${name}`}
-            />
-          )}
-        </div>
+        <RoteiroAccessLink />
       </header>
 
       {/* Content */}
@@ -297,12 +293,14 @@ const WhereToStayDetail = () => {
               {hotels.map((hotel, index) => (
                 <HotelCard
                   key={index}
+                  id={`hotel-${neighborhood}-${index}`}
                   name={hotel.name}
                   price={hotel.price}
                   description={hotel.description}
                   address={hotel.address}
                   instagram={hotel.instagram}
                   externalLink={hotel.externalLink}
+                  onSave={handleSaveHotel}
                 />
               ))}
             </div>

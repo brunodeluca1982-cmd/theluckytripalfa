@@ -1,3 +1,6 @@
+import { Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
+
 interface HotelCardProps {
   name: string;
   price: string;
@@ -5,9 +8,26 @@ interface HotelCardProps {
   address?: string;
   instagram?: string;
   externalLink?: string;
+  id?: string;
+  onSave?: (id: string, name: string) => void;
 }
 
-const HotelCard = ({ name, price, description, address, instagram, externalLink }: HotelCardProps) => {
+const HotelCard = ({ 
+  name, 
+  price, 
+  description, 
+  address, 
+  instagram, 
+  externalLink,
+  id,
+  onSave 
+}: HotelCardProps) => {
+  const handleSave = () => {
+    if (onSave && id) {
+      onSave(id, name);
+    }
+  };
+
   return (
     <div className="py-6 border-b border-border last:border-b-0">
       {/* Media Placeholder */}
@@ -52,21 +72,34 @@ const HotelCard = ({ name, price, description, address, instagram, externalLink 
         )}
       </div>
       
-      {/* CTA */}
-      {externalLink ? (
-        <a 
-          href={externalLink} 
-          target="_blank" 
-          rel="noopener noreferrer"
-          className="text-xs text-foreground underline"
-        >
-          View availability
-        </a>
-      ) : (
-        <span className="text-xs text-muted-foreground/60 cursor-default select-none">
-          View availability
-        </span>
-      )}
+      {/* Actions */}
+      <div className="flex items-center gap-3">
+        {id && onSave && (
+          <Button
+            onClick={handleSave}
+            variant="outline"
+            size="sm"
+            className="gap-1.5 text-xs"
+          >
+            <Plus className="w-3 h-3" />
+            Salvar
+          </Button>
+        )}
+        {externalLink ? (
+          <a 
+            href={externalLink} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-xs text-foreground underline"
+          >
+            View availability
+          </a>
+        ) : (
+          <span className="text-xs text-muted-foreground/60 cursor-default select-none">
+            View availability
+          </span>
+        )}
+      </div>
     </div>
   );
 };

@@ -1,31 +1,36 @@
 import { Link, useParams } from "react-router-dom";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, Plus } from "lucide-react";
 import { getNeighborhoodById } from "@/data/rio-neighborhoods";
 import { activitiesByNeighborhood } from "@/data/what-to-do-data";
-import SaveToRoteiroButton from "@/components/SaveToRoteiroButton";
 import RoteiroAccessLink from "@/components/RoteiroAccessLink";
+import { Button } from "@/components/ui/button";
+import { useItemSave } from "@/hooks/use-item-save";
 
 /**
  * O QUE FAZER — ACTIVITY DETAIL
  * 
  * PUBLIC LAYER - Consistent template for all activities
  * 
- * Reserved fields (always present, even if empty):
- * - External booking / partner link
- * - Media area
+ * SAVING SCOPE: Only individual activities can be saved (item level).
+ * Page-level saving is NOT allowed.
  */
 
 const WhatToDoDetail = () => {
   const { neighborhood } = useParams<{ neighborhood: string }>();
+  const { saveItem } = useItemSave();
   
   const neighborhoodData = getNeighborhoodById(neighborhood || "");
   const name = neighborhoodData?.name || "Bairro";
   const data = activitiesByNeighborhood[neighborhood || ""];
   const activities = data?.activities || [];
 
+  const handleSaveActivity = (activityId: string, activityTitle: string) => {
+    saveItem(activityId, 'activity', activityTitle, false);
+  };
+
   return (
     <div className="min-h-screen bg-background">
-      {/* Header with Save Action */}
+      {/* Header - No page-level save button */}
       <header className="px-6 py-4 border-b border-border flex items-center justify-between">
         <Link
           to="/o-que-fazer"
@@ -34,16 +39,7 @@ const WhatToDoDetail = () => {
           <ChevronLeft className="w-4 h-4" />
           Voltar
         </Link>
-        <div className="flex items-center gap-4">
-          <RoteiroAccessLink />
-          {activities.length > 0 && (
-            <SaveToRoteiroButton
-              itemId={`whatodo-${neighborhood}`}
-              itemType="activity"
-              itemTitle={`O que fazer em ${name}`}
-            />
-          )}
-        </div>
+        <RoteiroAccessLink />
       </header>
 
       {/* Content */}
@@ -107,9 +103,20 @@ const WhatToDoDetail = () => {
                     )}
                   </div>
                   
-                  {/* External booking / partner link (reserved field) */}
-                  {activity.externalLink && (
-                    <div className="mt-4">
+                  {/* Item-level Save Action */}
+                  <div className="mt-4 flex items-center gap-3">
+                    <Button
+                      onClick={() => handleSaveActivity(activity.id, activity.title)}
+                      variant="outline"
+                      size="sm"
+                      className="gap-1.5 text-xs"
+                    >
+                      <Plus className="w-3 h-3" />
+                      Salvar
+                    </Button>
+                    
+                    {/* External booking / partner link (reserved field) */}
+                    {activity.externalLink && (
                       <a 
                         href={activity.externalLink}
                         target="_blank"
@@ -118,8 +125,8 @@ const WhatToDoDetail = () => {
                       >
                         Reservar / Saber mais
                       </a>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </article>
               ))}
             </div>
