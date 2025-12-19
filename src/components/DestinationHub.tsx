@@ -6,16 +6,20 @@ import { useCallback, useEffect, useState } from "react";
 
 /**
  * ═══════════════════════════════════════════════════════════════════════════
- * DESTINATION HUB — STRUCTURAL & UX LOCK (VALIDATED / FROZEN)
+ * DESTINATION HUB — STRUCTURAL, UX & NAVIGATION LOCK (VALIDATED / FROZEN)
  * ═══════════════════════════════════════════════════════════════════════════
  * 
- * LOCKED FLOW (STEP 2 OF DESTINATION JOURNEY):
- * 1. Video intro ends → Hub appears automatically
- * 2. Hub displays EXACTLY 5 central transparent buttons
- * 3. Horizontal swipe navigation only (no vertical scroll)
+ * ═══════════════════════════════════════════════════════════════════════════
+ * NAVIGATION LOCK — LATERAL SWIPE ONLY
+ * ═══════════════════════════════════════════════════════════════════════════
+ * - ONLY lateral swipe navigation allowed
+ * - NO vertical scrolling
+ * - NO "explore more" buttons
+ * - NO new pages may be introduced
+ * - All swipes MUST preserve identical layout and background
  * 
  * ═══════════════════════════════════════════════════════════════════════════
- * PRIMARY HUB (SWIPE 1) — 5 BUTTONS EXACTLY:
+ * SWIPE 1 — PRIMARY (LOCKED)
  * ═══════════════════════════════════════════════════════════════════════════
  * 1. Como Chegar (top-left)
  * 2. Onde Ficar (top-right)
@@ -24,25 +28,36 @@ import { useCallback, useEffect, useState } from "react";
  * 5. Lucky List (CENTER, smaller, emphasized)
  * 
  * ═══════════════════════════════════════════════════════════════════════════
+ * SWIPE 2 — SECONDARY (LOCKED)
+ * ═══════════════════════════════════════════════════════════════════════════
+ * 1. Mover (Como se locomover)
+ * 2. Vida Noturna
+ * 3. Sabores Locais
+ * 4. Dinheiro
+ * 
+ * ═══════════════════════════════════════════════════════════════════════════
+ * SWIPE 3 — SUPPORT (LOCKED)
+ * ═══════════════════════════════════════════════════════════════════════════
+ * 1. Documentos & Visto
+ * 2. Melhor Época
+ * 3. O Que Levar
+ * 4. Links Úteis + Checklist Final (merged as "Links & Checklist")
+ * 
+ * ═══════════════════════════════════════════════════════════════════════════
  * IMMUTABILITY RULES — DO NOT MODIFY:
  * ═══════════════════════════════════════════════════════════════════════════
  * - Buttons MUST remain centered on screen
  * - Buttons MUST remain transparent (glass effect)
- * - NO list-based layout allowed on this screen
- * - NO additional modules allowed on primary hub
+ * - NO list-based layout allowed
+ * - NO additional modules allowed
  * - NO reordering of button positions
  * - NO relabeling of button text
  * - Same hero image across ALL swipes
  * - Same typography, opacity, blur treatment
  * - NO text blocks or explanations
- * - NO additional CTAs
+ * - NO additional CTAs or "explore more"
  * - NO auto-reordering
- * 
- * ═══════════════════════════════════════════════════════════════════════════
- * SECONDARY SWIPES (LOCKED):
- * ═══════════════════════════════════════════════════════════════════════════
- * - Swipe 2: Mobility & Lifestyle (Mover, Vida noturna, Sabores locais, Dinheiro)
- * - Swipe 3: Planning & Closure (Documentos & Visto, Melhor época, O que levar, Links & Checklist)
+ * - NO new swipes may be added
  * 
  * ═══════════════════════════════════════════════════════════════════════════
  * SCALABILITY:
