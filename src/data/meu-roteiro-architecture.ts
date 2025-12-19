@@ -228,6 +228,195 @@ export const COHERENCE_UX_RULES = {
 } as const;
 
 // ═══════════════════════════════════════════════════════════════════════════
+// LOCATION INTELLIGENCE
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * CORE PRINCIPLE
+ * 
+ * "Meu Roteiro" is LOCATION-AWARE, but NOT route-optimized at MVP level.
+ * Each saved item is treated as a POINT IN SPACE, not yet as a timed event.
+ */
+
+/**
+ * Item categories for coherence analysis
+ */
+export type ItemCategory = 
+  | 'food'
+  | 'activity'
+  | 'nightlife'
+  | 'experience'
+  | 'attraction';
+
+/**
+ * Time-of-day context for soft coherence checks
+ */
+export type TimeOfDayContext = 
+  | 'breakfast'
+  | 'lunch'
+  | 'afternoon'
+  | 'dinner'
+  | 'nightlife'
+  | 'any';
+
+/**
+ * LOCATION DATA MODEL (ABSTRACT)
+ * 
+ * Each item in "Meu Roteiro" must internally store:
+ * - Destination (city)
+ * - Neighborhood (when applicable)
+ * - Approximate geographic reference (place-level)
+ * - Category (food, activity, nightlife, etc.)
+ * 
+ * No exact coordinates are required at this stage.
+ */
+export interface LocationDataModel {
+  destination: string;
+  neighborhood: string | null;
+  approximateReference: string;
+  category: ItemCategory;
+  timeOfDayContext?: TimeOfDayContext;
+}
+
+export const LOCATION_DATA_REQUIREMENTS = {
+  requiredFields: ['destination', 'neighborhood', 'approximateReference', 'category'] as const,
+  exactCoordinatesRequired: false,
+  exactCoordinatesOptional: true,
+} as const;
+
+/**
+ * COHERENCE CHECK TYPES
+ */
+export type CoherenceCheckType = 
+  | 'distance-warning'
+  | 'sequence-incompatibility'
+  | 'neighborhood-backtrack';
+
+/**
+ * Coherence check result
+ */
+export interface CoherenceCheckResult {
+  type: CoherenceCheckType;
+  severity: 'info' | 'suggestion';
+  itemIds: string[];
+  message: string;
+  userCanIgnore: true;
+}
+
+/**
+ * COHERENCE CHECKS (SOFT LOGIC)
+ * 
+ * The system may detect and flag:
+ * - Items located very far apart within the same roteiro
+ * - Items that are commonly incompatible in sequence
+ *   (e.g. breakfast-only place saved after nightlife)
+ * - Excessive back-and-forth between distant neighborhoods
+ * 
+ * These checks must be:
+ * - Suggestive, not blocking
+ * - Informational, not prescriptive
+ * - Expressed as guidance, not error
+ */
+export const SOFT_COHERENCE_CHECKS = {
+  distanceCheck: {
+    enabled: true,
+    detects: 'items-very-far-apart',
+    behavior: 'suggestive',
+    blocking: false,
+  },
+  sequenceCheck: {
+    enabled: true,
+    detects: 'commonly-incompatible-sequences',
+    examples: ['breakfast-after-nightlife', 'morning-activity-after-late-dinner'],
+    behavior: 'informational',
+    blocking: false,
+  },
+  neighborhoodBacktrackCheck: {
+    enabled: true,
+    detects: 'excessive-back-and-forth',
+    behavior: 'guidance',
+    blocking: false,
+  },
+} as const;
+
+/**
+ * INCOMPATIBLE SEQUENCE DEFINITIONS
+ * 
+ * Pairs of time-of-day contexts that are commonly incompatible in sequence
+ */
+export const INCOMPATIBLE_SEQUENCES: Array<[TimeOfDayContext, TimeOfDayContext]> = [
+  ['nightlife', 'breakfast'],
+  ['dinner', 'breakfast'],
+  ['breakfast', 'nightlife'],
+];
+
+/**
+ * USER FEEDBACK RULE
+ * 
+ * When a potential incoherence is detected:
+ * - The user may ignore it freely
+ * - No action is forced
+ * - The app maintains a supportive, advisory tone
+ */
+export const USER_FEEDBACK_RULES = {
+  userMayIgnoreFreely: true,
+  noActionForced: true,
+  toneIsSupportive: true,
+  toneIsAdvisory: true,
+  toneIsNotPrescriptive: true,
+} as const;
+
+/**
+ * NO TIME ASSUMPTIONS
+ * 
+ * At this stage:
+ * - No dates
+ * - No hours
+ * - No day-by-day structure
+ * - No travel duration calculation
+ * 
+ * These will be layered later.
+ */
+export const TIME_ASSUMPTIONS_MVP = {
+  useDates: false,
+  useHours: false,
+  useDayByDayStructure: false,
+  useTravelDurationCalculation: false,
+  willBeLayeredLater: true,
+} as const;
+
+/**
+ * NAVIGATION RULES FOR LOCATION INTELLIGENCE
+ * 
+ * - Location intelligence must NOT interrupt browsing
+ * - Feedback may appear inside "Meu Roteiro" context ONLY
+ * - No modal interruptions at MVP stage
+ */
+export const LOCATION_INTELLIGENCE_NAVIGATION = {
+  interruptsBrowsing: false,
+  feedbackOnlyInRoteiroContext: true,
+  modalInterruptionsAtMVP: false,
+} as const;
+
+/**
+ * SCALABILITY FOR LOCATION INTELLIGENCE
+ * 
+ * - This logic applies to all destinations
+ * - Future Google Maps integration will ENHANCE this layer, not replace it
+ * - This structure must support future features
+ */
+export const LOCATION_INTELLIGENCE_SCALABILITY = {
+  appliesToAllDestinations: true,
+  googleMapsWillEnhance: true,
+  googleMapsWillNotReplace: true,
+  futureFeatureSupport: {
+    distanceCalculation: true,
+    routeGrouping: true,
+    timeBasedLogic: true,
+  },
+} as const;
+
+// ═══════════════════════════════════════════════════════════════════════════
 // ROTEIRO STATES
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -634,4 +823,99 @@ export const groupByItemType = (
     acc[item.itemType].push(item);
     return acc;
   }, {} as Record<RoteiroItemType, RoteiroItem[]>);
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
+// LOCATION INTELLIGENCE HELPER FUNCTIONS
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Check if two items are in different neighborhoods
+ */
+export const areInDifferentNeighborhoods = (
+  item1: RoteiroItem,
+  item2: RoteiroItem
+): boolean => {
+  return item1.geo.neighborhood !== item2.geo.neighborhood;
+};
+
+/**
+ * Detect neighborhood backtracking in item sequence
+ * Returns pairs of indices where backtracking occurs
+ */
+export const detectNeighborhoodBacktrack = (
+  items: RoteiroItem[]
+): Array<[number, number]> => {
+  const backtracks: Array<[number, number]> = [];
+  const visitedNeighborhoods: string[] = [];
+  
+  items.forEach((item, index) => {
+    const neighborhood = item.geo.neighborhood;
+    const lastVisitIndex = visitedNeighborhoods.lastIndexOf(neighborhood);
+    
+    if (lastVisitIndex !== -1 && lastVisitIndex < visitedNeighborhoods.length - 1) {
+      backtracks.push([lastVisitIndex, index]);
+    }
+    
+    visitedNeighborhoods.push(neighborhood);
+  });
+  
+  return backtracks;
+};
+
+/**
+ * Check if two time-of-day contexts are incompatible in sequence
+ */
+export const areIncompatibleInSequence = (
+  first: TimeOfDayContext,
+  second: TimeOfDayContext
+): boolean => {
+  return INCOMPATIBLE_SEQUENCES.some(
+    ([a, b]) => a === first && b === second
+  );
+};
+
+/**
+ * Run soft coherence checks on roteiro items
+ * Returns array of check results (all ignorable)
+ */
+export const runSoftCoherenceChecks = (
+  items: RoteiroItem[]
+): CoherenceCheckResult[] => {
+  const results: CoherenceCheckResult[] = [];
+  
+  // Check for neighborhood backtracking
+  const backtracks = detectNeighborhoodBacktrack(items);
+  backtracks.forEach(([fromIndex, toIndex]) => {
+    results.push({
+      type: 'neighborhood-backtrack',
+      severity: 'suggestion',
+      itemIds: [items[fromIndex].id, items[toIndex].id],
+      message: 'roteiro-backtrack-suggestion',
+      userCanIgnore: true,
+    });
+  });
+  
+  return results;
+};
+
+/**
+ * Get unique neighborhoods in roteiro
+ */
+export const getUniqueNeighborhoods = (items: RoteiroItem[]): string[] => {
+  const neighborhoods = new Set(items.map(item => item.geo.neighborhood));
+  return Array.from(neighborhoods);
+};
+
+/**
+ * Count items per neighborhood
+ */
+export const countItemsPerNeighborhood = (
+  items: RoteiroItem[]
+): Record<string, number> => {
+  return items.reduce((acc, item) => {
+    const key = item.geo.neighborhood;
+    acc[key] = (acc[key] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
 };
