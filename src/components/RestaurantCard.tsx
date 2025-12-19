@@ -1,9 +1,20 @@
+import { Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
+
 interface RestaurantCardProps {
   name: string;
   description?: string;
+  id?: string;
+  onSave?: (id: string, name: string) => void;
 }
 
-const RestaurantCard = ({ name, description }: RestaurantCardProps) => {
+const RestaurantCard = ({ name, description, id, onSave }: RestaurantCardProps) => {
+  const handleSave = () => {
+    if (onSave && id) {
+      onSave(id, name);
+    }
+  };
+
   return (
     <div className="py-6 border-b border-border last:border-b-0">
       {/* Media Placeholder */}
@@ -21,10 +32,23 @@ const RestaurantCard = ({ name, description }: RestaurantCardProps) => {
         </p>
       )}
       
-      {/* Inactive CTA Placeholder */}
-      <span className="text-xs text-muted-foreground/60 cursor-default select-none">
-        View restaurant
-      </span>
+      {/* Actions */}
+      <div className="flex items-center gap-3">
+        {id && onSave && (
+          <Button
+            onClick={handleSave}
+            variant="outline"
+            size="sm"
+            className="gap-1.5 text-xs"
+          >
+            <Plus className="w-3 h-3" />
+            Salvar
+          </Button>
+        )}
+        <span className="text-xs text-muted-foreground/60 cursor-default select-none">
+          View restaurant
+        </span>
+      </div>
     </div>
   );
 };
