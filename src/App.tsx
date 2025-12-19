@@ -36,6 +36,8 @@ import PartnerProfile from "./pages/PartnerProfile";
 import PartnerRoteiro from "./pages/PartnerRoteiro";
 import IAAssistant from "./pages/IAAssistant";
 import IAChatPlaceholder from "./pages/ia/IAChatPlaceholder";
+import IACreateItinerary from "./pages/ia/IACreateItinerary";
+import IAImproveItinerary from "./pages/ia/IAImproveItinerary";
 import IARoteirosInteligentes from "./pages/ia/IARoteirosInteligentes";
 import IARevisarRoteiro from "./pages/ia/IARevisarRoteiro";
 import NotFound from "./pages/NotFound";
@@ -114,6 +116,8 @@ const App = () => {
               {/* IA Assistant */}
               <Route path="/ia" element={<IAAssistant />} />
               <Route path="/ia/chat" element={<IAChatPlaceholder />} />
+              <Route path="/ia/create-itinerary" element={<IACreateItinerary />} />
+              <Route path="/ia/improve-itinerary" element={<IAImproveItinerary />} />
               <Route path="/ia/roteiros-inteligentes" element={<IARoteirosInteligentes />} />
               <Route path="/ia/revisar-roteiro" element={<IARevisarRoteiro />} />
 
