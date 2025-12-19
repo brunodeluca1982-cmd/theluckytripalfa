@@ -66,6 +66,9 @@ export const useItemSave = () => {
     
     localStorage.setItem('draft-roteiro', JSON.stringify(draftRoteiro));
     
+    // Dispatch event for bottom navigation to update badge
+    window.dispatchEvent(new CustomEvent('roteiro-updated'));
+    
     toast({
       title: "Salvo no Meu Roteiro",
       description: isPremium 

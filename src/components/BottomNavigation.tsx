@@ -1,5 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { Home, Map, BookmarkCheck, Sparkles, User } from "lucide-react";
+import { useEffect, useState } from "react";
 
 /**
  * GLOBAL BOTTOM NAVIGATION
@@ -9,9 +10,13 @@ import { Home, Map, BookmarkCheck, Sparkles, User } from "lucide-react";
  * FIXED ITEMS (exactly 5):
  * 1. Home - Main discovery hub
  * 2. Destinos - Destinations portal
- * 3. Meu Roteiro - Personal saved items
+ * 3. Meu Roteiro - Personal saved items (shows count badge when active)
  * 4. IA - AI assistance
  * 5. Perfil - User profile
+ * 
+ * HOME AWARENESS:
+ * - Meu Roteiro shows a badge when items are saved
+ * - Empty state vs active state is reflected visually
  */
 
 interface NavItem {
@@ -31,6 +36,32 @@ const navItems: NavItem[] = [
 
 const BottomNavigation = () => {
   const location = useLocation();
+  const [savedItemsCount, setSavedItemsCount] = useState(0);
+
+  // Listen for saved items changes
+  useEffect(() => {
+    const updateCount = () => {
+      const items = JSON.parse(localStorage.getItem('draft-roteiro') || '[]');
+      setSavedItemsCount(items.length);
+    };
+
+    updateCount();
+
+    // Listen for storage changes and custom events
+    window.addEventListener('storage', updateCount);
+    window.addEventListener('roteiro-updated', updateCount);
+
+    return () => {
+      window.removeEventListener('storage', updateCount);
+      window.removeEventListener('roteiro-updated', updateCount);
+    };
+  }, []);
+
+  // Also update on route change (in case item was saved)
+  useEffect(() => {
+    const items = JSON.parse(localStorage.getItem('draft-roteiro') || '[]');
+    setSavedItemsCount(items.length);
+  }, [location.pathname]);
 
   const isActive = (path: string) => {
     if (path === "/") {
@@ -45,18 +76,28 @@ const BottomNavigation = () => {
         {navItems.map((item) => {
           const Icon = item.icon;
           const active = isActive(item.path);
+          const isRoteiro = item.id === "roteiro";
+          const hasItems = isRoteiro && savedItemsCount > 0;
           
           return (
             <Link
               key={item.id}
               to={item.path}
-              className={`flex flex-col items-center justify-center flex-1 h-full transition-colors ${
+              className={`relative flex flex-col items-center justify-center flex-1 h-full transition-colors ${
                 active 
                   ? "text-foreground" 
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              <Icon className={`h-5 w-5 ${active ? "stroke-[2.5]" : ""}`} />
+              <div className="relative">
+                <Icon className={`h-5 w-5 ${active ? "stroke-[2.5]" : ""}`} />
+                {/* Badge indicator for saved items */}
+                {hasItems && (
+                  <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 bg-primary text-primary-foreground text-[10px] font-medium rounded-full flex items-center justify-center">
+                    {savedItemsCount > 9 ? "9+" : savedItemsCount}
+                  </span>
+                )}
+              </div>
               <span className="text-[10px] mt-1 font-medium">{item.label}</span>
             </Link>
           );

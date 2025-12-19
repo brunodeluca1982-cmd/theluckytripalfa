@@ -70,6 +70,9 @@ const MeuRoteiro = () => {
     setSavedItems(updatedItems);
     localStorage.setItem('draft-roteiro', JSON.stringify(updatedItems));
     
+    // Dispatch event for bottom navigation to update badge
+    window.dispatchEvent(new CustomEvent('roteiro-updated'));
+    
     toast({
       title: "Removido",
       description: "Item removido do seu roteiro.",
@@ -86,7 +89,7 @@ const MeuRoteiro = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-20">
       {/* Header */}
       <header className="px-6 py-4 border-b border-border">
         <button
@@ -105,9 +108,11 @@ const MeuRoteiro = () => {
           <h1 className="text-4xl font-serif font-semibold text-foreground leading-tight">
             Meu Roteiro
           </h1>
-          <p className="text-sm text-muted-foreground mt-2">
-            Rio de Janeiro
-          </p>
+          {savedItems.length > 0 && (
+            <p className="text-sm text-muted-foreground mt-2">
+              {savedItems.length} {savedItems.length === 1 ? 'item salvo' : 'itens salvos'}
+            </p>
+          )}
         </div>
 
         {/* Draft Notice */}
@@ -158,6 +163,7 @@ const MeuRoteiro = () => {
               ))}
             </div>
           ) : (
+            /* EMPTY STATE - Explains what Meu Roteiro is */
             <div className="text-center py-12">
               <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
                 <MapPin className="w-8 h-8 text-muted-foreground" />
@@ -165,26 +171,22 @@ const MeuRoteiro = () => {
               <h2 className="text-xl font-serif font-medium text-foreground mb-2">
                 Seu roteiro está vazio
               </h2>
+              <p className="text-sm text-muted-foreground mb-2 max-w-xs mx-auto">
+                Aqui ficam os lugares que você salvar durante sua exploração.
+              </p>
               <p className="text-sm text-muted-foreground mb-6 max-w-xs mx-auto">
-                Explore o destino e salve os lugares que mais interessam você.
+                Funciona como um bolso — salve restaurantes, hotéis e atividades para montar seu roteiro perfeito.
               </p>
               <Link 
-                to="/"
+                to="/destinos"
                 className="inline-block py-2 px-4 bg-primary text-primary-foreground rounded-lg text-sm hover:opacity-90 transition-opacity"
               >
-                Explorar Rio de Janeiro
+                Explorar destinos
               </Link>
             </div>
           )}
         </div>
       </main>
-
-      {/* Footer */}
-      <footer className="px-6 py-8 border-t border-border">
-        <p className="text-xs text-muted-foreground">
-          The Lucky Trip — Rio de Janeiro
-        </p>
-      </footer>
     </div>
   );
 };
