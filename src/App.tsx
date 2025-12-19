@@ -32,6 +32,8 @@ import Assinatura from "./pages/profile/Assinatura";
 import Configuracoes from "./pages/profile/Configuracoes";
 import SuporteHumano from "./pages/profile/SuporteHumano";
 import SecondaryModuleDetail from "./pages/SecondaryModuleDetail";
+import PartnerProfile from "./pages/PartnerProfile";
+import PartnerRoteiro from "./pages/PartnerRoteiro";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -101,9 +103,12 @@ const App = () => {
               <Route path="/perfil/configuracoes" element={<Configuracoes />} />
               <Route path="/perfil/suporte" element={<SuporteHumano />} />
 
+              {/* Partners on Trip */}
+              <Route path="/partner/:id" element={<PartnerProfile />} />
+              <Route path="/partner/:partnerId/roteiro/:destinationId" element={<PartnerRoteiro />} />
+
               {/* Placeholder routes for bottom nav */}
               <Route path="/ia" element={<NotFound />} />
-              <Route path="/partner/:id" element={<NotFound />} />
 
               {/* Fallback */}
               <Route path="*" element={<NotFound />} />

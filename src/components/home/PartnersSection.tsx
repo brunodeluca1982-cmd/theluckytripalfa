@@ -1,28 +1,22 @@
 import { Link } from "react-router-dom";
+import { getAllPartners } from "@/data/partners-data";
 
 /**
- * PARTNERS ON TRIP
+ * PARTNERS ON TRIP — HOME SECTION
+ * 
+ * SECONDARY PLACEMENT
  * 
  * Horizontal row of circular profile avatars representing travel curators.
- * Tapping an avatar opens that partner's destinations or content.
+ * Tapping an avatar opens that partner's list of curated destinations.
+ * 
+ * RULES:
+ * - From Home, tapping a Partner opens their profile (list of destinations)
+ * - Selecting a destination then opens the partner's roteiro
  */
 
-interface Partner {
-  id: string;
-  name: string;
-  initials: string;
-}
-
-// Structural placeholder data - content to be provided externally
-const partners: Partner[] = [
-  { id: "bruno-de-luca", name: "Bruno De Luca", initials: "BD" },
-  { id: "carolina-dieckmann", name: "Carolina Dieckmann", initials: "CD" },
-  { id: "celina-locks", name: "Celina Locks", initials: "CL" },
-  { id: "di-ferrero", name: "Di Ferrero", initials: "DF" },
-  { id: "isabeli-fontana", name: "Isabeli Fontana", initials: "IF" },
-];
-
 const PartnersSection = () => {
+  const partners = getAllPartners();
+
   return (
     <section className="py-6">
       <p className="text-xs tracking-widest text-muted-foreground uppercase mb-4 px-6">
@@ -37,9 +31,17 @@ const PartnersSection = () => {
             className="flex flex-col items-center gap-2 flex-shrink-0"
           >
             <div className="w-16 h-16 rounded-full bg-muted border border-border flex items-center justify-center hover:border-foreground transition-colors">
-              <span className="text-sm font-medium text-muted-foreground">
-                {partner.initials}
-              </span>
+              {partner.imageUrl ? (
+                <img 
+                  src={partner.imageUrl}
+                  alt={partner.name}
+                  className="w-full h-full rounded-full object-cover"
+                />
+              ) : (
+                <span className="text-sm font-medium text-muted-foreground">
+                  {partner.initials}
+                </span>
+              )}
             </div>
             <span className="text-xs text-muted-foreground text-center max-w-[64px] truncate">
               {partner.name.split(" ")[0]}

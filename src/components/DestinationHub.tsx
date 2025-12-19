@@ -4,7 +4,7 @@ import useEmblaCarousel from "embla-carousel-react";
 import { ChevronLeft, MapPin, Bed, Utensils, Compass, Sparkles, Bus, Moon, Pizza, Wallet, FileText, Sun, Briefcase, Calculator, Link2, CheckSquare } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { SCREEN_GROUPS, type SecondaryModule } from "@/data/secondary-modules-data";
-
+import PartnersOnTripBlock from "@/components/destination/PartnersOnTripBlock";
 /**
  * DESTINATION HUB — STRUCTURAL + NAVIGATION LOCK
  * 
@@ -115,6 +115,9 @@ const DestinationHub = ({ destinationId, name, country, backgroundImage, actions
           {country}
         </p>
       </header>
+
+      {/* PARTNERS ON TRIP — Primary Placement */}
+      <PartnersOnTripBlock destinationId={destinationId} />
 
       {/* Page Indicator Dots */}
       <div className="relative z-20 flex justify-center gap-2 py-4">
