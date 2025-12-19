@@ -1,10 +1,19 @@
 import { Link, useNavigate } from "react-router-dom";
-import { ChevronLeft, ArrowRight, Check, MapPin, Clock, Wallet, Heart, Shield, Plus, Trash2, ChevronRight, RotateCcw } from "lucide-react";
-import { useState, useEffect } from "react";
+import { ChevronLeft, ArrowRight, Check, MapPin, Clock, Wallet, Heart, Shield, Plus, Trash2, ChevronRight, RotateCcw, AlertTriangle, Route } from "lucide-react";
+import { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
+import { 
+  analyzeRoute, 
+  generateSuggestions, 
+  RouteAnalysis, 
+  RouteSuggestion,
+  RouteIssue,
+  ItemWithCoords 
+} from "@/lib/route-intelligence";
+import { ItineraryItem } from "@/components/roteiro/ItineraryCard";
 
 /**
  * ═══════════════════════════════════════════════════════════════════════════
@@ -79,8 +88,13 @@ const IAMelhorarRoteiro = () => {
   
   // Changes state
   const [changes, setChanges] = useState<Change[]>([]);
+  
+  // Route Intelligence state
+  const [roteiroItems, setRoteiroItems] = useState<Record<number, ItemWithCoords[]>>({});
+  const [routeAnalysis, setRouteAnalysis] = useState<RouteAnalysis | null>(null);
+  const [routeSuggestions, setRouteSuggestions] = useState<RouteSuggestion[]>([]);
 
-  // Check if itinerary exists
+  // Check if itinerary exists and load it
   useEffect(() => {
     const draft = localStorage.getItem('itinerary_draft') || localStorage.getItem('user-roteiro-rio-de-janeiro');
     if (draft) {
@@ -88,6 +102,9 @@ const IAMelhorarRoteiro = () => {
       try {
         const parsed = JSON.parse(draft);
         if (parsed.totalDays) setDays(parsed.totalDays);
+        if (parsed.items) {
+          setRoteiroItems(parsed.items);
+        }
       } catch (e) {
         // ignore
       }
@@ -124,76 +141,99 @@ const IAMelhorarRoteiro = () => {
   };
 
   const generateChanges = () => {
-    // MVP rule-based improvement engine
+    // Run Route Intelligence analysis
+    const analysis = analyzeRoute(roteiroItems, days);
+    setRouteAnalysis(analysis);
+    
+    // Generate suggestions based on real analysis
+    const suggestions = generateSuggestions(analysis);
+    setRouteSuggestions(suggestions);
+    
+    // Convert real issues and suggestions to Change format
     const generatedChanges: Change[] = [];
     
-    if (selectedIntents.includes('logistics')) {
-      generatedChanges.push({
-        id: 'change-1',
-        type: 'moved',
-        description: 'Moved "Pão de Açúcar" to late afternoon for sunset views',
-        accepted: null,
-      });
-      generatedChanges.push({
-        id: 'change-2',
-        type: 'moved',
-        description: 'Grouped Ipanema and Leblon activities on the same day',
-        accepted: null,
-      });
-    }
-    
-    if (selectedIntents.includes('pace')) {
-      if (energyLevel === 'low') {
+    // Add changes based on detected issues
+    for (const issue of analysis.issues) {
+      if (issue.type === 'overloaded_day' && selectedIntents.includes('pace')) {
         generatedChanges.push({
-          id: 'change-3',
+          id: `issue-${issue.dayNumber}-overload`,
           type: 'removed',
-          description: 'Removed one activity from Day 2 to allow rest time',
+          description: issue.description,
           accepted: null,
         });
       }
-      generatedChanges.push({
-        id: 'change-4',
-        type: 'inserted',
-        description: 'Added free time block on Day 3 afternoon',
-        accepted: null,
-      });
+      
+      if (issue.type === 'far_apart_items' && selectedIntents.includes('logistics')) {
+        generatedChanges.push({
+          id: `issue-${issue.dayNumber}-distance-${issue.itemIds?.join('-') || ''}`,
+          type: 'moved',
+          description: issue.description,
+          accepted: null,
+        });
+      }
+      
+      if (issue.type === 'high_dispersion' && selectedIntents.includes('logistics')) {
+        generatedChanges.push({
+          id: `issue-${issue.dayNumber}-dispersion`,
+          type: 'moved',
+          description: issue.description,
+          accepted: null,
+        });
+      }
     }
     
-    if (selectedIntents.includes('budget')) {
-      generatedChanges.push({
-        id: 'change-5',
-        type: 'replaced',
-        description: 'Replaced upscale restaurant with local favorite (similar quality, better price)',
-        accepted: null,
-      });
+    // Add changes based on suggestions
+    for (const suggestion of suggestions) {
+      const matchesIntent = 
+        (suggestion.type === 'rebalance' && selectedIntents.includes('pace')) ||
+        (suggestion.type === 'group_nearby' && selectedIntents.includes('logistics')) ||
+        (suggestion.type === 'split_day' && selectedIntents.includes('pace')) ||
+        (suggestion.type === 'combine_days' && selectedIntents.includes('pace'));
+      
+      if (matchesIntent) {
+        generatedChanges.push({
+          id: `suggestion-${suggestion.type}-${suggestion.affectedDays.join('-')}`,
+          type: suggestion.type === 'split_day' ? 'removed' : 
+                suggestion.type === 'combine_days' ? 'moved' :
+                suggestion.type === 'group_nearby' ? 'moved' : 'moved',
+          description: suggestion.description,
+          accepted: null,
+        });
+      }
     }
     
-    if (selectedIntents.includes('preferences')) {
-      generatedChanges.push({
-        id: 'change-6',
-        type: 'inserted',
-        description: 'Added beach time at Arpoador based on your preferences',
-        accepted: null,
-      });
+    // Add energy-based suggestions
+    if (selectedIntents.includes('pace') && energyLevel === 'low') {
+      const denseDays = analysis.dayAnalyses.filter(d => d.densityLevel === 'dense');
+      for (const day of denseDays) {
+        if (!generatedChanges.some(c => c.id.includes(`${day.dayNumber}-overload`))) {
+          generatedChanges.push({
+            id: `energy-${day.dayNumber}`,
+            type: 'inserted',
+            description: `Sugestão: adicionar tempo livre no Dia ${day.dayNumber} para descanso`,
+            accepted: null,
+          });
+        }
+      }
     }
     
-    if (selectedIntents.includes('safety')) {
-      generatedChanges.push({
-        id: 'change-7',
-        type: 'moved',
-        description: 'Moved Lapa visit to earlier evening for safety',
-        accepted: null,
-      });
-    }
-    
-    // Default improvements
-    if (generatedChanges.length < 3) {
-      generatedChanges.push({
-        id: 'change-default-1',
-        type: 'moved',
-        description: 'Optimized route order to minimize travel time',
-        accepted: null,
-      });
+    // If no specific issues found, provide general feedback
+    if (generatedChanges.length === 0) {
+      if (analysis.totalItems === 0) {
+        generatedChanges.push({
+          id: 'empty-itinerary',
+          type: 'inserted',
+          description: 'Seu roteiro está vazio. Adicione atividades para receber sugestões.',
+          accepted: null,
+        });
+      } else if (analysis.overallBalance === 'balanced' && analysis.issues.length === 0) {
+        generatedChanges.push({
+          id: 'already-optimized',
+          type: 'moved',
+          description: 'Seu roteiro já está bem equilibrado! Nenhuma mudança necessária.',
+          accepted: true, // Auto-accept positive feedback
+        });
+      }
     }
     
     setChanges(generatedChanges);
@@ -505,14 +545,88 @@ const IAMelhorarRoteiro = () => {
           <div className="space-y-6">
             <div className="text-center mb-6">
               <p className="text-lg text-foreground/80 font-light">
-                Here's what I'll improve
+                Análise do seu roteiro
               </p>
               <p className="text-sm text-muted-foreground mt-1">
-                {changes.length} changes planned
+                {changes.length} {changes.length === 1 ? 'sugestão encontrada' : 'sugestões encontradas'}
               </p>
             </div>
 
+            {/* Route Analysis Summary */}
+            {routeAnalysis && (
+              <div className="p-4 rounded-xl bg-card border border-border space-y-3">
+                <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+                  <Route className="w-4 h-4 text-primary" />
+                  Resumo da análise
+                </div>
+                
+                <div className="grid grid-cols-2 gap-3 text-sm">
+                  <div className="p-3 rounded-lg bg-muted/50">
+                    <p className="text-muted-foreground text-xs">Total de itens</p>
+                    <p className="font-medium text-foreground">{routeAnalysis.totalItems}</p>
+                  </div>
+                  <div className="p-3 rounded-lg bg-muted/50">
+                    <p className="text-muted-foreground text-xs">Dias com atividades</p>
+                    <p className="font-medium text-foreground">{routeAnalysis.daysWithItems} de {routeAnalysis.totalDays}</p>
+                  </div>
+                </div>
+                
+                {/* Balance indicator */}
+                <div className="flex items-center gap-2 text-sm">
+                  <span className="text-muted-foreground">Balanceamento:</span>
+                  <span className={`font-medium ${
+                    routeAnalysis.overallBalance === 'balanced' ? 'text-green-500' :
+                    routeAnalysis.overallBalance === 'uneven' ? 'text-amber-500' : 'text-orange-500'
+                  }`}>
+                    {routeAnalysis.overallBalance === 'balanced' ? 'Equilibrado' :
+                     routeAnalysis.overallBalance === 'uneven' ? 'Desigual' :
+                     routeAnalysis.overallBalance === 'front_heavy' ? 'Mais cheio no início' :
+                     'Mais cheio no final'}
+                  </span>
+                </div>
+                
+                {/* Day breakdown */}
+                <div className="space-y-2 pt-2 border-t border-border/50">
+                  {routeAnalysis.dayAnalyses.filter(d => d.itemCount > 0).map(day => (
+                    <div key={day.dayNumber} className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">Dia {day.dayNumber}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-foreground">{day.itemCount} itens</span>
+                        {day.densityLevel === 'dense' && (
+                          <span className="text-xs px-2 py-0.5 rounded-full bg-orange-500/10 text-orange-500">
+                            intenso
+                          </span>
+                        )}
+                        {day.dispersionLevel === 'scattered' && (
+                          <span className="text-xs px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-500">
+                            disperso
+                          </span>
+                        )}
+                        {day.totalDistanceKm > 0 && (
+                          <span className="text-xs text-muted-foreground">
+                            ~{day.totalDistanceKm}km
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                
+                {/* Issues count */}
+                {routeAnalysis.issues.length > 0 && (
+                  <div className="flex items-center gap-2 text-sm text-amber-500 pt-2">
+                    <AlertTriangle className="w-4 h-4" />
+                    <span>{routeAnalysis.issues.length} {routeAnalysis.issues.length === 1 ? 'ponto de atenção' : 'pontos de atenção'}</span>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Changes list */}
             <div className="space-y-3">
+              <p className="text-xs tracking-widest text-muted-foreground uppercase">
+                Sugestões de melhoria
+              </p>
               {changes.map((change, idx) => (
                 <div key={change.id} className="flex items-start gap-3 p-4 rounded-xl bg-muted/50 border border-border/50">
                   <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -526,7 +640,9 @@ const IAMelhorarRoteiro = () => {
                       ${change.type === 'inserted' ? 'text-green-500' : ''}
                       ${change.type === 'removed' ? 'text-red-500' : ''}
                     `}>
-                      {change.type}
+                      {change.type === 'moved' ? 'reorganizar' :
+                       change.type === 'replaced' ? 'substituir' :
+                       change.type === 'inserted' ? 'adicionar' : 'remover'}
                     </span>
                     <p className="text-sm text-foreground mt-1">{change.description}</p>
                   </div>
