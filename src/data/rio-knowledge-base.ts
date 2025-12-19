@@ -3,22 +3,51 @@
  * RIO DE JANEIRO KNOWLEDGE BASE — CURATED CONTENT ONLY
  * ═══════════════════════════════════════════════════════════════════════════
  * 
- * STRUCTURAL LOCK — This is the ONLY source of truth for the IA chat.
+ * STRUCTURAL LOCK — AI SCOPE + FALLBACK RULES
  * 
- * RULES:
- * - No external API calls
- * - No AI hallucinations
- * - All content must be verified and curated
- * - Ready for future RAG integration
+ * HARD LIMITS:
+ * - AI answers ONLY from this curated database
+ * - AI NEVER invents, assumes, or guesses information
+ * - AI NEVER uses external/web knowledge
+ * - AI NEVER fills gaps with partial guesses
  * 
- * TOPICS:
- * - chegar: How to get there
- * - ficar: Where to stay
- * - comer: Where to eat
- * - fazer: What to do
- * - seguranca: Safety tips
+ * FALLBACK (VERBATIM, FIXED):
+ * When AI cannot answer with confidence:
+ * "Ih! Essa aí eu não sei te responder… quer falar com o Bruno? Chama ele no WhatsApp! 21998102132"
+ * 
+ * SAFETY RULE:
+ * Medical, legal, financial, or high-stakes questions → trigger fallback
+ * 
+ * LANGUAGE:
+ * - All responses in Portuguese (pt-BR)
+ * - No emojis
+ * - Calm, adult, practical tone
+ * 
+ * TONE RULES:
+ * - Premium, reliable, curated feel
+ * - Never apologetic or verbose
+ * - Confident when grounded, honest when not
  * ═══════════════════════════════════════════════════════════════════════════
  */
+
+/**
+ * FIXED FALLBACK MESSAGE — DO NOT MODIFY
+ * This exact message must be used when AI cannot answer.
+ */
+export const AI_FALLBACK_MESSAGE = "Ih! Essa aí eu não sei te responder… quer falar com o Bruno? Chama ele no WhatsApp! 21998102132";
+
+/**
+ * Safety/sensitive topics that trigger fallback
+ */
+export const SAFETY_KEYWORDS = [
+  'médico', 'medico', 'hospital', 'emergência', 'emergencia', 'doença', 'doenca',
+  'remédio', 'remedio', 'medicamento', 'vacina', 'saúde', 'saude',
+  'advogado', 'lei', 'legal', 'processo', 'justiça', 'justica', 'crime',
+  'investimento', 'investir', 'banco', 'empréstimo', 'emprestimo', 'financiamento',
+  'seguro de vida', 'seguro saúde', 'seguro saude',
+  'droga', 'drogas', 'ilegal', 'polícia', 'policia',
+  'aborto', 'arma', 'violência', 'violencia',
+];
 
 export type KnowledgeTopic = 'chegar' | 'ficar' | 'comer' | 'fazer' | 'seguranca';
 
@@ -127,20 +156,34 @@ export const RIO_KB: KnowledgeEntry[] = [
 ];
 
 /**
+ * Check if query contains safety/sensitive topics
+ * These topics ALWAYS trigger fallback
+ */
+export const containsSafetyTopic = (query: string): boolean => {
+  const normalizedQuery = query.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  return SAFETY_KEYWORDS.some(keyword => 
+    normalizedQuery.includes(keyword.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''))
+  );
+};
+
+/**
  * Find matching knowledge entries for a user query
+ * Returns empty array if no confident match found
+ * STRICT MATCHING — no partial guesses
  */
 export const findKnowledgeMatch = (query: string): KnowledgeEntry[] => {
   const normalizedQuery = query.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
   
-  return RIO_KB.filter(entry => {
-    const matchesKeyword = entry.keywords.some(keyword => 
-      normalizedQuery.includes(keyword.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''))
-    );
-    const matchesTitle = entry.title.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-      .split(' ').some(word => normalizedQuery.includes(word));
-    
-    return matchesKeyword || matchesTitle;
+  // Require at least one strong keyword match
+  const matches = RIO_KB.filter(entry => {
+    const matchesKeyword = entry.keywords.some(keyword => {
+      const normalizedKeyword = keyword.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      return normalizedQuery.includes(normalizedKeyword);
+    });
+    return matchesKeyword;
   });
+  
+  return matches;
 };
 
 /**
