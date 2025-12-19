@@ -24,6 +24,11 @@ import MeuRoteiro from "./pages/MeuRoteiro";
 import RestaurantDetail from "./pages/RestaurantDetail";
 import HotelDetail from "./pages/HotelDetail";
 import ActivityDetail from "./pages/ActivityDetail";
+import Profile from "./pages/Profile";
+import DivisaoGastos from "./pages/profile/DivisaoGastos";
+import DiarioViagem from "./pages/profile/DiarioViagem";
+import Assinatura from "./pages/profile/Assinatura";
+import Configuracoes from "./pages/profile/Configuracoes";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -81,11 +86,17 @@ const App = () => {
               {/* Meu Roteiro */}
               <Route path="/meu-roteiro" element={<MeuRoteiro />} />
               
+              {/* Profile */}
+              <Route path="/perfil" element={<Profile />} />
+              <Route path="/perfil/divisao-gastos" element={<DivisaoGastos />} />
+              <Route path="/perfil/diario" element={<DiarioViagem />} />
+              <Route path="/perfil/assinatura" element={<Assinatura />} />
+              <Route path="/perfil/configuracoes" element={<Configuracoes />} />
+
               {/* Placeholder routes for bottom nav */}
               <Route path="/ia" element={<NotFound />} />
-              <Route path="/perfil" element={<NotFound />} />
               <Route path="/partner/:id" element={<NotFound />} />
-              
+
               {/* Fallback */}
               <Route path="*" element={<NotFound />} />
             </Routes>
