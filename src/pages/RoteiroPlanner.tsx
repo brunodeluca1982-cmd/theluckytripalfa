@@ -1,6 +1,6 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
-import { ChevronLeft, Columns } from "lucide-react";
+import { ChevronLeft, BookOpen, User } from "lucide-react";
 import {
   DndContext,
   DragOverlay,
@@ -12,150 +12,136 @@ import {
   useSensors,
   DragStartEvent,
   DragEndEvent,
-  DragOverEvent,
 } from "@dnd-kit/core";
 import { arrayMove, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import { DayColumn } from "@/components/roteiro/DayColumn";
 import { DaySwiper } from "@/components/roteiro/DaySwiper";
 import { ItineraryCard, ItineraryItem } from "@/components/roteiro/ItineraryCard";
 import { AIAssistantFAB } from "@/components/roteiro/AIAssistantFAB";
+import { useRoteiroState } from "@/hooks/use-roteiro-state";
+import { getCuratedItinerary, getDestinationDays } from "@/data/curated-itineraries";
 import { toast } from "@/hooks/use-toast";
 
 /**
  * ROTEIRO PLANNER
  * 
- * Dual-column itinerary planning interface.
- * Left: Curated Lucky Trip itinerary (read-only source)
- * Right: User's personal itinerary (editable)
+ * STRUCTURAL LOCK — Core planning interface
  * 
- * Features:
- * - Drag cards from source to user column
- * - Reorder within days
- * - Swipe between days
- * - AI assistant for suggestions
+ * TWO-COLUMN MODEL:
+ * - LEFT: Curated source (read-only) — items dragged FROM here
+ * - RIGHT: User roteiro (editable) — items dropped TO here
+ * 
+ * PRIMARY INTERACTION:
+ * - Drag & drop is the main gesture
+ * - No secondary flows replace this
+ * 
+ * DAY STRUCTURE:
+ * - Days displayed horizontally
+ * - Swipe left/right to change days
+ * - Days are containers, not timelines
+ * 
+ * STATE PERSISTENCE:
+ * - User roteiro auto-saves to localStorage
+ * - State preserved across sessions
  */
 
-// Sample curated itinerary data
-const sampleCuratedItinerary: Record<number, ItineraryItem[]> = {
-  1: [
-    { id: 'c1', name: 'Cristo Redentor', category: 'attraction', duration: '3h', source: 'lucky-trip', imageUrl: 'https://images.unsplash.com/photo-1483729558449-99ef09a8c325?w=200' },
-    { id: 'c2', name: 'Confeitaria Colombo', category: 'food', duration: '1h30', source: 'lucky-trip', imageUrl: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=200' },
-    { id: 'c3', name: 'Pão de Açúcar', category: 'attraction', duration: '2h', source: 'lucky-trip', imageUrl: 'https://images.unsplash.com/photo-1516306580123-e6e52b1b7b5f?w=200' },
-  ],
-  2: [
-    { id: 'c4', name: 'Praia de Ipanema', category: 'experience', duration: '4h', source: 'lucky-trip', imageUrl: 'https://images.unsplash.com/photo-1518639192441-8fce0a366e2e?w=200' },
-    { id: 'c5', name: 'Feira de Ipanema', category: 'experience', duration: '2h', source: 'partner' },
-    { id: 'c6', name: 'Restaurante Zuka', category: 'food', duration: '2h', source: 'lucky-trip' },
-  ],
-  3: [
-    { id: 'c7', name: 'Jardim Botânico', category: 'attraction', duration: '3h', source: 'lucky-trip', imageUrl: 'https://images.unsplash.com/photo-1585208798174-6cedd86e019a?w=200' },
-    { id: 'c8', name: 'Lagoa Rodrigo de Freitas', category: 'experience', duration: '2h', source: 'ai' },
-    { id: 'c9', name: 'Copacabana Palace', category: 'hotel', duration: 'Noite', source: 'partner' },
-  ],
+const destinationNames: Record<string, string> = {
+  'rio-de-janeiro': 'Rio de Janeiro',
 };
 
 const RoteiroPlanner = () => {
   const { destinationId = 'rio-de-janeiro' } = useParams();
-  const destinationName = destinationId === 'rio-de-janeiro' ? 'Rio de Janeiro' : destinationId;
+  const destinationName = destinationNames[destinationId] || destinationId;
+  
+  // Get curated content for this destination
+  const curatedItinerary = getCuratedItinerary(destinationId);
+  const totalDays = getDestinationDays(destinationId);
+  
+  // User's roteiro state (with persistence)
+  const { 
+    items: userItems, 
+    addItem, 
+    removeItem, 
+    reorderItems,
+    setDayItems,
+    hasItem,
+    totalItems,
+  } = useRoteiroState(destinationId, totalDays);
   
   const [currentDay, setCurrentDay] = useState(1);
-  const [totalDays] = useState(3);
-  const [activeId, setActiveId] = useState<string | null>(null);
   const [activeItem, setActiveItem] = useState<ItineraryItem | null>(null);
-  
-  // User's itinerary state
-  const [userItinerary, setUserItinerary] = useState<Record<number, ItineraryItem[]>>({
-    1: [],
-    2: [],
-    3: [],
-  });
 
-  // Curated itinerary (read-only)
-  const [curatedItinerary] = useState<Record<number, ItineraryItem[]>>(sampleCuratedItinerary);
+  // Store destination context for back navigation
+  useEffect(() => {
+    localStorage.setItem('last-destination-context', `/destino/${destinationId}`);
+  }, [destinationId]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 8,
-      },
+      activationConstraint: { distance: 8 },
     }),
     useSensor(TouchSensor, {
-      activationConstraint: {
-        delay: 200,
-        tolerance: 5,
-      },
+      activationConstraint: { delay: 150, tolerance: 5 },
     }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })
   );
 
-  const findContainer = (id: string): { container: 'curated' | 'user'; day: number } | null => {
+  // Find item in curated or user itinerary
+  const findItem = useCallback((id: string): ItineraryItem | null => {
     // Check curated
-    for (const day of Object.keys(curatedItinerary)) {
-      if (curatedItinerary[Number(day)].some(item => item.id === id)) {
-        return { container: 'curated', day: Number(day) };
-      }
-    }
-    // Check user
-    for (const day of Object.keys(userItinerary)) {
-      if (userItinerary[Number(day)].some(item => item.id === id)) {
-        return { container: 'user', day: Number(day) };
-      }
-    }
-    return null;
-  };
-
-  const findItem = (id: string): ItineraryItem | null => {
     for (const day of Object.keys(curatedItinerary)) {
       const item = curatedItinerary[Number(day)].find(i => i.id === id);
       if (item) return item;
     }
-    for (const day of Object.keys(userItinerary)) {
-      const item = userItinerary[Number(day)].find(i => i.id === id);
+    // Check user
+    for (const day of Object.keys(userItems)) {
+      const item = userItems[Number(day)]?.find(i => i.id === id);
       if (item) return item;
     }
     return null;
-  };
+  }, [curatedItinerary, userItems]);
+
+  // Determine if an ID belongs to curated or user items
+  const getItemSource = useCallback((id: string): 'curated' | 'user' | null => {
+    for (const day of Object.keys(curatedItinerary)) {
+      if (curatedItinerary[Number(day)].some(i => i.id === id)) {
+        return 'curated';
+      }
+    }
+    for (const day of Object.keys(userItems)) {
+      if (userItems[Number(day)]?.some(i => i.id === id)) {
+        return 'user';
+      }
+    }
+    return null;
+  }, [curatedItinerary, userItems]);
 
   const handleDragStart = (event: DragStartEvent) => {
-    const { active } = event;
-    setActiveId(active.id as string);
-    setActiveItem(findItem(active.id as string));
-  };
-
-  const handleDragOver = (event: DragOverEvent) => {
-    // Handle drag over logic for visual feedback
+    const item = findItem(event.active.id as string);
+    setActiveItem(item);
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
-    
-    setActiveId(null);
     setActiveItem(null);
 
     if (!over) return;
 
-    const activeContainer = findContainer(active.id as string);
+    const activeId = active.id as string;
     const overId = over.id as string;
-    
-    // Determine target day from droppable ID (e.g., "user-day-1")
-    const isUserDayDrop = overId.startsWith('user-day-');
-    const targetDay = isUserDayDrop ? parseInt(overId.replace('user-day-', '')) : currentDay;
+    const itemSource = getItemSource(activeId);
 
-    if (!activeContainer) return;
-
-    // If dragging from curated to user column
-    if (activeContainer.container === 'curated' && isUserDayDrop) {
-      const item = findItem(active.id as string);
+    // CASE 1: Dragging from CURATED to USER column
+    if (itemSource === 'curated' && overId.startsWith('user-day-')) {
+      const targetDay = parseInt(overId.replace('user-day-', ''));
+      const item = findItem(activeId);
+      
       if (!item) return;
 
-      // Check if already in user itinerary
-      const alreadyAdded = Object.values(userItinerary).some(
-        dayItems => dayItems.some(i => i.id === item.id)
-      );
-
-      if (alreadyAdded) {
+      // Check if already added
+      if (hasItem(activeId)) {
         toast({
           title: "Já adicionado",
           description: `${item.name} já está no seu roteiro.`,
@@ -163,94 +149,101 @@ const RoteiroPlanner = () => {
         return;
       }
 
-      // Add to user itinerary with new ID to allow multiple instances
-      const newItem = { ...item, id: `user-${item.id}-${Date.now()}`, source: 'user' as const };
-      setUserItinerary(prev => ({
-        ...prev,
-        [targetDay]: [...prev[targetDay], newItem],
-      }));
-
+      // Add copy to user roteiro
+      addItem(targetDay, item, activeId);
+      
       toast({
-        title: "Adicionado ao roteiro",
-        description: `${item.name} foi adicionado ao Dia ${targetDay}.`,
+        title: "Adicionado",
+        description: `${item.name} → Dia ${targetDay}`,
       });
     }
 
-    // If reordering within user column
-    if (activeContainer.container === 'user') {
-      const overContainer = findContainer(over.id as string);
-      
-      if (overContainer?.container === 'user') {
-        const oldDay = activeContainer.day;
-        const newDay = overContainer.day;
-        
-        if (oldDay === newDay) {
-          // Reorder within same day
-          const oldIndex = userItinerary[oldDay].findIndex(i => i.id === active.id);
-          const newIndex = userItinerary[newDay].findIndex(i => i.id === over.id);
-          
-          if (oldIndex !== newIndex) {
-            setUserItinerary(prev => ({
-              ...prev,
-              [oldDay]: arrayMove(prev[oldDay], oldIndex, newIndex),
-            }));
+    // CASE 2: Reordering within USER column (same day)
+    if (itemSource === 'user') {
+      // Find which day the active item is in
+      let activeDay: number | null = null;
+      for (const day of Object.keys(userItems)) {
+        if (userItems[Number(day)]?.some(i => i.id === activeId)) {
+          activeDay = Number(day);
+          break;
+        }
+      }
+
+      if (activeDay === null) return;
+
+      // If dropping on another item in the same day
+      const overSource = getItemSource(overId);
+      if (overSource === 'user') {
+        let overDay: number | null = null;
+        for (const day of Object.keys(userItems)) {
+          if (userItems[Number(day)]?.some(i => i.id === overId)) {
+            overDay = Number(day);
+            break;
           }
-        } else {
+        }
+
+        if (overDay === activeDay) {
+          // Same day reorder
+          const oldIndex = userItems[activeDay].findIndex(i => i.id === activeId);
+          const newIndex = userItems[activeDay].findIndex(i => i.id === overId);
+          
+          if (oldIndex !== -1 && newIndex !== -1 && oldIndex !== newIndex) {
+            const newItems = arrayMove(userItems[activeDay], oldIndex, newIndex);
+            setDayItems(activeDay, newItems);
+          }
+        }
+      }
+
+      // If dropping on a user day zone
+      if (overId.startsWith('user-day-')) {
+        const targetDay = parseInt(overId.replace('user-day-', ''));
+        if (targetDay !== activeDay) {
           // Move between days
-          const item = userItinerary[oldDay].find(i => i.id === active.id);
+          const item = userItems[activeDay].find(i => i.id === activeId);
           if (item) {
-            setUserItinerary(prev => ({
-              ...prev,
-              [oldDay]: prev[oldDay].filter(i => i.id !== active.id),
-              [newDay]: [...prev[newDay], item],
-            }));
+            setDayItems(activeDay, userItems[activeDay].filter(i => i.id !== activeId));
+            setDayItems(targetDay, [...(userItems[targetDay] || []), item]);
           }
         }
       }
     }
   };
 
+  // AI Actions (assistive only)
   const handleAISuggest = useCallback(() => {
     toast({
-      title: "Sugestões da IA",
-      description: "Analisando seu roteiro para sugestões personalizadas...",
+      title: "Analisando...",
+      description: "Buscando sugestões personalizadas.",
     });
   }, []);
 
   const handleAutoFill = useCallback(() => {
-    // Auto-fill empty days with curated content
-    const newUserItinerary = { ...userItinerary };
     let filled = false;
-
+    
     for (let day = 1; day <= totalDays; day++) {
-      if (newUserItinerary[day].length === 0 && curatedItinerary[day]) {
-        newUserItinerary[day] = curatedItinerary[day].map(item => ({
+      if ((userItems[day]?.length || 0) === 0 && curatedItinerary[day]) {
+        const itemsToAdd = curatedItinerary[day].map(item => ({
           ...item,
-          id: `user-${item.id}-${Date.now()}`,
+          id: `user-${item.id}-${Date.now()}-${Math.random()}`,
           source: 'ai' as const,
         }));
+        setDayItems(day, itemsToAdd);
         filled = true;
       }
     }
 
-    if (filled) {
-      setUserItinerary(newUserItinerary);
-      toast({
-        title: "Dias preenchidos",
-        description: "A IA preencheu os dias vazios com sugestões.",
-      });
-    } else {
-      toast({
-        title: "Nenhum dia vazio",
-        description: "Todos os dias já possuem atividades.",
-      });
-    }
-  }, [userItinerary, curatedItinerary, totalDays]);
+    toast({
+      title: filled ? "Dias preenchidos" : "Nenhum dia vazio",
+      description: filled 
+        ? "A IA sugeriu atividades para os dias vazios." 
+        : "Todos os dias já têm atividades.",
+    });
+  }, [userItems, curatedItinerary, totalDays, setDayItems]);
 
   const handleRebalance = useCallback(() => {
     toast({
-      title: "Reequilibrando",
-      description: "Redistribuindo atividades para melhor experiência...",
+      title: "Função em breve",
+      description: "Reequilíbrio automático será adicionado.",
     });
   }, []);
 
@@ -258,7 +251,7 @@ const RoteiroPlanner = () => {
     <div className="min-h-screen bg-background pb-20">
       {/* Header */}
       <header className="sticky top-0 z-30 bg-background/95 backdrop-blur-sm border-b border-border">
-        <div className="px-4 py-3">
+        <div className="px-4 py-3 flex items-center justify-between">
           <Link
             to={`/destino/${destinationId}`}
             className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -266,9 +259,15 @@ const RoteiroPlanner = () => {
             <ChevronLeft className="w-4 h-4" />
             Voltar
           </Link>
+          
+          {totalItems > 0 && (
+            <span className="text-xs text-muted-foreground">
+              {totalItems} {totalItems === 1 ? 'item' : 'itens'} salvos
+            </span>
+          )}
         </div>
         
-        {/* Day Swiper */}
+        {/* Day Navigation */}
         <div className="pb-3">
           <DaySwiper 
             totalDays={totalDays} 
@@ -283,21 +282,22 @@ const RoteiroPlanner = () => {
         sensors={sensors}
         collisionDetection={closestCenter}
         onDragStart={handleDragStart}
-        onDragOver={handleDragOver}
         onDragEnd={handleDragEnd}
       >
-        <main className="grid grid-cols-2 gap-4 p-4">
-          {/* LEFT COLUMN - Curated Itinerary */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2 mb-2">
-              <Columns className="w-4 h-4 text-primary" />
-              <h2 className="text-xs font-semibold text-foreground uppercase tracking-wide">
-                Lucky Trip
-              </h2>
+        <main className="grid grid-cols-2 gap-3 p-4">
+          {/* LEFT COLUMN — Source (Read-Only) */}
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <BookOpen className="w-4 h-4 text-primary" />
+              <div>
+                <h2 className="text-xs font-semibold text-foreground uppercase tracking-wide">
+                  Lucky Trip
+                </h2>
+                <p className="text-[10px] text-muted-foreground">
+                  {destinationName}
+                </p>
+              </div>
             </div>
-            <p className="text-[10px] text-muted-foreground -mt-2 mb-3">
-              {destinationName}
-            </p>
             
             <DayColumn
               dayId={`curated-day-${currentDay}`}
@@ -307,44 +307,43 @@ const RoteiroPlanner = () => {
             />
           </div>
 
-          {/* RIGHT COLUMN - User Itinerary */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2 mb-2">
+          {/* RIGHT COLUMN — User Roteiro (Editable) */}
+          <div>
+            <div className="flex items-center gap-2 mb-3">
               <div className="w-4 h-4 rounded-full bg-primary/20 flex items-center justify-center">
-                <span className="text-[8px] font-bold text-primary">EU</span>
+                <User className="w-2.5 h-2.5 text-primary" />
               </div>
-              <h2 className="text-xs font-semibold text-foreground uppercase tracking-wide">
-                Meu Roteiro
-              </h2>
+              <div>
+                <h2 className="text-xs font-semibold text-foreground uppercase tracking-wide">
+                  Meu Roteiro
+                </h2>
+                <p className="text-[10px] text-muted-foreground">
+                  Arraste para adicionar
+                </p>
+              </div>
             </div>
-            <p className="text-[10px] text-muted-foreground -mt-2 mb-3">
-              Arraste para adicionar
-            </p>
             
             <DayColumn
               dayId={`user-day-${currentDay}`}
               dayNumber={currentDay}
-              items={userItinerary[currentDay] || []}
+              items={userItems[currentDay] || []}
               isUserColumn={true}
-              onAddItem={() => {
-                toast({
-                  title: "Adicionar item",
-                  description: "Arraste itens da coluna Lucky Trip.",
-                });
-              }}
+              onRemoveItem={(itemId) => removeItem(currentDay, itemId)}
             />
           </div>
         </main>
 
         {/* Drag Overlay */}
         <DragOverlay>
-          {activeItem ? (
-            <ItineraryCard item={activeItem} isOverlay />
-          ) : null}
+          {activeItem && (
+            <div className="w-[160px]">
+              <ItineraryCard item={activeItem} isOverlay />
+            </div>
+          )}
         </DragOverlay>
       </DndContext>
 
-      {/* AI Assistant FAB */}
+      {/* AI Assistant (Assistive Only) */}
       <AIAssistantFAB
         onSuggestActivities={handleAISuggest}
         onAutoFill={handleAutoFill}
