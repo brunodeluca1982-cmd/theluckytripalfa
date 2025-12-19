@@ -4,6 +4,7 @@ import { ChevronLeft } from "lucide-react";
 import { RIO_NEIGHBORHOODS } from "@/data/rio-neighborhoods";
 import LuckyListMarker from "@/components/LuckyListMarker";
 import LuckyListPreviewSheet from "@/components/LuckyListPreviewSheet";
+import RoteiroAccessLink from "@/components/RoteiroAccessLink";
 
 // Lucky List items with map positions (editorial placement)
 const luckyListMarkers = [
@@ -22,8 +23,8 @@ const EatMapView = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="px-6 py-4 border-b border-border">
+      {/* Header with Meu Roteiro access */}
+      <header className="px-6 py-4 border-b border-border flex items-center justify-between">
         <Link
           to="/"
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -31,6 +32,7 @@ const EatMapView = () => {
           <ChevronLeft className="w-4 h-4" />
           Voltar
         </Link>
+        <RoteiroAccessLink />
       </header>
 
       {/* Map Area */}

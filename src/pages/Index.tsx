@@ -1,13 +1,15 @@
 import { Link } from "react-router-dom";
+import RoteiroAccessLink from "@/components/RoteiroAccessLink";
 
 const Index = () => {
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      {/* Header */}
-      <header className="px-6 pt-12 pb-8">
+      {/* Header with Meu Roteiro access */}
+      <header className="px-6 pt-12 pb-8 flex items-center justify-between">
         <p className="text-sm tracking-widest text-muted-foreground uppercase">
           Guia de Viagem
         </p>
+        <RoteiroAccessLink />
       </header>
 
       {/* Main Content */}
