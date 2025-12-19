@@ -1,23 +1,23 @@
 import { Link } from "react-router-dom";
-import { useState, useRef } from "react";
-import { ChevronLeft, MapPin, Bed, Utensils, Compass, Sparkles, Car, Moon, Coffee, Wallet, FileText, Sun, Briefcase, Receipt, Link2, CheckSquare } from "lucide-react";
+import { ChevronLeft, MapPin, Bed, Utensils, Compass, Sparkles } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 /**
- * DESTINATION HUB — CENTERED ACTION LOCK (FINAL)
+ * DESTINATION HUB — EDITORIAL + INTERACTION LOCK (FINAL)
  * 
  * STRUCTURE:
- * - Full-screen hero image (100vh)
- * - Destination name + country centered near top
- * - PRIMARY BUTTONS: Centered vertically, floating over hero (5 buttons in 3+2 grid)
- * - HORIZONTAL SWIPE: Secondary modules on same screen
- * - Pagination dots for secondary swipe
+ * 1. EDITORIAL HEADER ZONE (top 20-25%): Title + country, unobstructed
+ * 2. INTERACTIVE BUTTON ZONE (center-lower): 5 buttons in 3+2 grid
+ * 
+ * BUTTON ORDER (LOCKED):
+ * Row 1: Chegar, Ficar, Comer
+ * Row 2: Lucky List, Fazer
  * 
  * HARD CONSTRAINTS:
- * - Buttons stay centered vertically
- * - No vertical scroll
- * - No page transitions
- * - No layout reinterpretation
+ * - No overlap between zones
+ * - No secondary modules on this screen
+ * - No horizontal swipe
+ * - No auto-repositioning
  */
 
 interface DestinationAction {
@@ -29,13 +29,6 @@ interface DestinationAction {
   isSpecial?: boolean;
 }
 
-interface SecondaryModuleButton {
-  id: string;
-  label: string;
-  icon: LucideIcon;
-  path: string;
-}
-
 interface DestinationHubProps {
   destinationId: string;
   name: string;
@@ -44,42 +37,18 @@ interface DestinationHubProps {
   actions: DestinationAction[];
 }
 
-// Secondary modules grouped into swipeable pages
-const SECONDARY_PAGES: SecondaryModuleButton[][] = [
-  [
-    { id: 'mover', label: 'Mover', icon: Car, path: '/mover' },
-    { id: 'vida-noturna', label: 'Vida Noturna', icon: Moon, path: '/vida-noturna' },
-    { id: 'sabores-locais', label: 'Sabores', icon: Coffee, path: '/sabores-locais' },
-    { id: 'dinheiro', label: 'Dinheiro', icon: Wallet, path: '/dinheiro' },
-  ],
-  [
-    { id: 'documentos-visto', label: 'Documentos', icon: FileText, path: '/documentos-visto' },
-    { id: 'melhor-epoca', label: 'Melhor Época', icon: Sun, path: '/melhor-epoca' },
-    { id: 'o-que-levar', label: 'O Que Levar', icon: Briefcase, path: '/o-que-levar' },
-    { id: 'gastos-viagem', label: 'Gastos', icon: Receipt, path: '/gastos-viagem' },
-  ],
-  [
-    { id: 'links-uteis', label: 'Links Úteis', icon: Link2, path: '/links-uteis' },
-    { id: 'checklist-final', label: 'Checklist', icon: CheckSquare, path: '/checklist-final' },
-  ],
-];
-
 const DestinationHub = ({ destinationId, name, country, backgroundImage, actions }: DestinationHubProps) => {
-  const [currentPage, setCurrentPage] = useState(0);
-  const [showSecondary, setShowSecondary] = useState(false);
-  const scrollRef = useRef<HTMLDivElement>(null);
+  // Fixed order: Chegar, Ficar, Comer, Lucky List, Fazer
+  const reorderedActions = [
+    actions.find(a => a.id === 'chegar'),
+    actions.find(a => a.id === 'ficar'),
+    actions.find(a => a.id === 'comer'),
+    actions.find(a => a.id === 'lucky-list'),
+    actions.find(a => a.id === 'fazer'),
+  ].filter(Boolean) as DestinationAction[];
 
-  // Primary actions (first 5)
-  const primaryActions = actions.slice(0, 5);
-
-  const handleScroll = () => {
-    if (scrollRef.current) {
-      const scrollLeft = scrollRef.current.scrollLeft;
-      const pageWidth = scrollRef.current.offsetWidth;
-      const newPage = Math.round(scrollLeft / pageWidth);
-      setCurrentPage(newPage);
-    }
-  };
+  // Fallback to original if IDs don't match
+  const primaryActions = reorderedActions.length === 5 ? reorderedActions : actions.slice(0, 5);
 
   return (
     <div className="fixed inset-0 overflow-hidden">
@@ -104,9 +73,10 @@ const DestinationHub = ({ destinationId, name, country, backgroundImage, actions
       </Link>
 
       {/* ═══════════════════════════════════════════════════════════════
-          DESTINATION TITLE — Near Top, Centered
+          ZONE 1 — EDITORIAL HEADER (top 20-25% of screen)
+          Destination title + country, fully unobstructed
           ═══════════════════════════════════════════════════════════════ */}
-      <div className="absolute top-24 left-0 right-0 z-20 flex flex-col items-center">
+      <div className="absolute top-0 left-0 right-0 z-20 h-[22vh] flex flex-col items-center justify-end pb-4">
         <h1 className="text-5xl font-serif font-medium text-white leading-tight text-center drop-shadow-lg">
           {name}
         </h1>
@@ -116,98 +86,44 @@ const DestinationHub = ({ destinationId, name, country, backgroundImage, actions
       </div>
 
       {/* ═══════════════════════════════════════════════════════════════
-          PRIMARY + SECONDARY BUTTONS — CENTERED, FLOATING
+          ZONE 2 — INTERACTIVE BUTTON ZONE
+          Positioned below editorial header, slightly below vertical center
+          Optimized for thumb reach
           ═══════════════════════════════════════════════════════════════ */}
-      <div className="absolute inset-0 z-20 flex flex-col items-center justify-center pb-20">
+      <div className="absolute left-0 right-0 z-20 flex flex-col items-center" style={{ top: 'calc(22vh + 28px)' }}>
         
-        {/* Horizontal Swipe Container */}
-        <div 
-          ref={scrollRef}
-          onScroll={handleScroll}
-          className="w-full overflow-x-auto snap-x snap-mandatory scrollbar-hide"
-        >
-          <div 
-            className="flex" 
-            style={{ width: `${(1 + SECONDARY_PAGES.length) * 100}%` }}
-          >
-            {/* PAGE 0: Primary Actions (5 buttons in 3+2 grid) */}
-            <div 
-              className="flex-shrink-0 snap-center flex flex-col items-center justify-center px-6"
-              style={{ width: `${100 / (1 + SECONDARY_PAGES.length)}%` }}
-            >
-              {/* Row 1: 3 buttons */}
-              <div className="flex justify-center gap-5 mb-5">
-                {primaryActions.slice(0, 3).map((action) => (
-                  <CircularButton 
-                    key={action.id} 
-                    icon={action.icon}
-                    label={action.shortLabel}
-                    path={action.path}
-                  />
-                ))}
-              </div>
-              {/* Row 2: 2 buttons (O Que Fazer + Lucky List centered) */}
-              <div className="flex justify-center gap-6">
-                {primaryActions.slice(3, 4).map((action) => (
-                  <CircularButton 
-                    key={action.id} 
-                    icon={action.icon}
-                    label={action.shortLabel}
-                    path={action.path}
-                  />
-                ))}
-                {primaryActions.slice(4, 5).map((action) => (
-                  <CircularButton 
-                    key={action.id} 
-                    icon={action.icon}
-                    label={action.shortLabel}
-                    path={action.path}
-                    isSpecial={action.isSpecial}
-                    isLarge
-                  />
-                ))}
-              </div>
-            </div>
-
-            {/* SECONDARY PAGES */}
-            {SECONDARY_PAGES.map((page, pageIndex) => (
-              <div 
-                key={pageIndex}
-                className="flex-shrink-0 snap-center flex items-center justify-center px-6"
-                style={{ width: `${100 / (1 + SECONDARY_PAGES.length)}%` }}
-              >
-                <div className="flex justify-center gap-4 flex-wrap max-w-xs">
-                  {page.map((module) => (
-                    <SecondaryButton
-                      key={module.id}
-                      icon={module.icon}
-                      label={module.label}
-                      path={`/destino/${destinationId}${module.path}`}
-                    />
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
+        {/* Row 1: Chegar, Ficar, Comer (3 buttons) */}
+        <div className="flex justify-center gap-4 mb-4">
+          {primaryActions.slice(0, 3).map((action) => (
+            <CircularButton 
+              key={action.id} 
+              icon={action.icon}
+              label={action.shortLabel}
+              path={action.path}
+            />
+          ))}
         </div>
 
-        {/* Pagination Dots */}
-        <div className="flex flex-col items-center gap-3 mt-8">
-          <div className="flex gap-2">
-            {[0, ...SECONDARY_PAGES.map((_, i) => i + 1)].map((index) => (
-              <div 
-                key={index}
-                className={`rounded-full transition-all duration-300 ${
-                  index === currentPage 
-                    ? 'w-6 h-2 bg-white/90' 
-                    : 'w-2 h-2 bg-white/40'
-                }`}
-              />
-            ))}
-          </div>
-          <p className="text-[10px] text-white/60 tracking-[0.2em] uppercase">
-            Swipe to explore
-          </p>
+        {/* Row 2: Lucky List (special), Fazer (2 buttons) */}
+        <div className="flex justify-center gap-5">
+          {primaryActions[3] && (
+            <CircularButton 
+              key={primaryActions[3].id} 
+              icon={primaryActions[3].icon}
+              label={primaryActions[3].shortLabel}
+              path={primaryActions[3].path}
+              isSpecial={primaryActions[3].isSpecial}
+              isLarge
+            />
+          )}
+          {primaryActions[4] && (
+            <CircularButton 
+              key={primaryActions[4].id} 
+              icon={primaryActions[4].icon}
+              label={primaryActions[4].shortLabel}
+              path={primaryActions[4].path}
+            />
+          )}
         </div>
       </div>
 
@@ -217,7 +133,7 @@ const DestinationHub = ({ destinationId, name, country, backgroundImage, actions
 };
 
 /**
- * Primary Circular Button — 72-80px, glass effect
+ * Primary Circular Button — 68-74px (5-8% smaller), glass effect
  */
 interface CircularButtonProps {
   icon: LucideIcon;
@@ -228,7 +144,8 @@ interface CircularButtonProps {
 }
 
 const CircularButton = ({ icon: Icon, label, path, isSpecial, isLarge }: CircularButtonProps) => {
-  const size = isLarge ? 'w-[92px] h-[92px]' : 'w-[80px] h-[80px]';
+  // Reduced sizes: standard 74px (was 80), large 86px (was 92)
+  const size = isLarge ? 'w-[86px] h-[86px]' : 'w-[74px] h-[74px]';
   
   return (
     <Link
@@ -243,31 +160,8 @@ const CircularButton = ({ icon: Icon, label, path, isSpecial, isLarge }: Circula
         }
       `}
     >
-      <Icon className={`${isLarge ? 'w-7 h-7' : 'w-6 h-6'} text-white mb-1.5 ${isSpecial ? "drop-shadow-lg" : ""}`} />
-      <span className={`text-white ${isLarge ? 'text-[11px]' : 'text-[10px]'} font-medium tracking-wide text-center px-1 leading-tight`}>
-        {label}
-      </span>
-    </Link>
-  );
-};
-
-/**
- * Secondary Circular Button — Smaller, same glass style
- */
-interface SecondaryButtonProps {
-  icon: LucideIcon;
-  label: string;
-  path: string;
-}
-
-const SecondaryButton = ({ icon: Icon, label, path }: SecondaryButtonProps) => {
-  return (
-    <Link
-      to={path}
-      className="flex flex-col items-center justify-center flex-shrink-0 w-[72px] h-[72px] rounded-full bg-white/15 border border-white/25 backdrop-blur-md hover:bg-white/25 hover:scale-105 transition-all duration-200"
-    >
-      <Icon className="w-5 h-5 text-white/90 mb-1" />
-      <span className="text-white/80 text-[9px] font-medium tracking-wide text-center px-1 leading-tight">
+      <Icon className={`${isLarge ? 'w-6 h-6' : 'w-5 h-5'} text-white mb-1.5 ${isSpecial ? "drop-shadow-lg" : ""}`} />
+      <span className={`text-white ${isLarge ? 'text-[10px]' : 'text-[9px]'} font-medium tracking-wide text-center px-1 leading-tight`}>
         {label}
       </span>
     </Link>
