@@ -1,30 +1,55 @@
 /**
- * PARTNERS ON TRIP — DATA REGISTRY
+ * ═══════════════════════════════════════════════════════════════════════════
+ * 🔒 PARTNER ON TRIP — STRUCTURAL LOCK (DO NOT MODIFY STRUCTURE)
+ * ═══════════════════════════════════════════════════════════════════════════
  * 
- * STRUCTURAL LOCK
+ * DEFINITION
+ * A Partner on Trip is a trusted individual who provides curated travel
+ * content based on real experience. Partners are authoritative human curators
+ * whose content can be explored, referenced, and reused by users.
  * 
- * Partners are human curators who create reference itineraries.
- * Each partner may have itineraries for multiple destinations.
+ * PARTNER IDENTITY
+ * Each Partner has:
+ * - Profile identity (name + image)
+ * - One or more destination-specific reference itineraries
+ * - Personal travel logic and style
  * 
- * RULES:
+ * PARTNER CONTENT SCOPE
+ * Partners MAY provide:
+ * - Reference itineraries ("Roteiros de Referência")
+ * - Destination-specific selections
+ * 
+ * Partners DO NOT:
+ * - Replace the main destination guide
+ * - Override operational content
+ * - Act as generic influencers
+ * 
+ * STRUCTURAL RULES
  * - Partners are editorial, not algorithmic
  * - Each partner links to their reference itineraries
- * - This structure supports future partners without refactoring
+ * - Partners may be added or removed without affecting app logic
+ * - This structure applies to all current and future partners
+ * 
+ * IMMUTABILITY
+ * - Interface structure is LOCKED
+ * - Field names must NOT be renamed
+ * - New optional fields may be added, but existing ones must NOT be removed
+ * ═══════════════════════════════════════════════════════════════════════════
  */
 
 export interface Partner {
-  id: string;
-  name: string;
-  initials: string;
-  bio?: string;
-  imageUrl?: string;
-  destinations: PartnerDestination[];
+  id: string;                           // Unique identifier (kebab-case)
+  name: string;                         // Display name
+  initials: string;                     // Fallback for avatar
+  bio?: string;                         // Short description
+  imageUrl?: string;                    // Profile image
+  destinations: PartnerDestination[];   // Curated destinations
 }
 
 export interface PartnerDestination {
-  destinationId: string;
-  destinationName: string;
-  referenceItineraryId: string;
+  destinationId: string;                // Links to destination
+  destinationName: string;              // Display name
+  referenceItineraryId: string;         // Links to reference-itineraries.ts
 }
 
 /**
