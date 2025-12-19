@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { BookmarkCheck, Calculator, BookOpen, CreditCard, Settings } from "lucide-react";
+import { BookmarkCheck, Calculator, BookOpen, CreditCard, Settings, MessageCircle } from "lucide-react";
 
 /**
  * PROFILE — PERSONAL MANAGEMENT HUB
@@ -61,6 +61,13 @@ const profileModules: ProfileModule[] = [
     description: "Preferências e ajustes",
     icon: Settings,
     path: "/perfil/configuracoes",
+  },
+  {
+    id: "suporte-humano",
+    label: "Falar com o Concierge",
+    description: "Ajuda humana personalizada",
+    icon: MessageCircle,
+    path: "/perfil/suporte",
   },
 ];
 
