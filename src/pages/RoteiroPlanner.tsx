@@ -52,6 +52,18 @@ const RoteiroPlanner = () => {
   const navigate = useNavigate();
   const { tripSetup, tripDays: setupTripDays } = useTripSetup();
   
+  // MANDATORY: Redirect to setup if not complete
+  useEffect(() => {
+    if (!tripSetup.setupComplete) {
+      navigate('/criar-roteiro', { replace: true });
+    }
+  }, [tripSetup.setupComplete, navigate]);
+
+  // Don't render until setup is verified
+  if (!tripSetup.setupComplete) {
+    return null;
+  }
+  
   // Get destination info
   const destination = getDestination(destinationId);
   const destinationName = destination?.name || destinationId;
