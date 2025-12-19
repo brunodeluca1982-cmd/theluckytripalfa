@@ -1,131 +1,142 @@
-import { Link } from "react-router-dom";
-import { ChevronLeft, MessageCircle, Route, Settings2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Link, useNavigate } from "react-router-dom";
+import { ChevronLeft, MessageCircle, CalendarPlus, Sparkles } from "lucide-react";
 
 /**
- * ASSISTENTE THE LUCKY TRIP — IA SCREEN (v1.0)
+ * ═══════════════════════════════════════════════════════════════════════════
+ * TRAVEL ASSISTANT — IA SCREEN (FINAL / LOCKED)
+ * ═══════════════════════════════════════════════════════════════════════════
  * 
- * STRUCTURAL LOCK
+ * This is NOT a generic chatbot.
+ * This is a curated, contextual, human-guided travel assistant.
  * 
- * Conceptual and editorial IA screen, not full AI execution.
- * Designed to reduce anxiety, avoid overpromising, and position
- * the product as intelligent and mature.
+ * PURPOSE:
+ * - Reduce anxiety
+ * - Organize decisions
+ * - Transform content into action (itinerary)
  * 
- * SECTIONS:
- * 1. Chat Editorial (Primary) - Tire dúvidas com a curadoria
- * 2. Roteiros Inteligentes (Concept) - Combine experiences
- * 3. Ajuste de Roteiro (Support) - Review and improve
+ * AI RULES:
+ * - Only uses curated content (Bruno, Partners, Lucky List, Guides)
+ * - Never invents places, tips or information
+ * - Calm, confident, human, experienced tone
  * 
- * RULES:
- * - No backend logic or AI execution at this stage
- * - Premium, editorial, and reassuring feel
- * - Calm spacing, clean layout
+ * VISUAL STYLE:
+ * - Clean, premium, neutral
+ * - No emojis, no playful elements
+ * - Feels like a premium travel concierge
+ * ═══════════════════════════════════════════════════════════════════════════
  */
 
 const IAAssistant = () => {
+  const navigate = useNavigate();
+
   return (
-    <div className="min-h-screen bg-background pb-24">
-      {/* Header */}
-      <header className="px-6 pt-12 pb-8 border-b border-border">
+    <div className="min-h-screen bg-background flex flex-col">
+      {/* ═══════════════════════════════════════════════════════════════
+          HEADER
+          ═══════════════════════════════════════════════════════════════ */}
+      <header className="px-6 pt-12 pb-6">
         <Link 
           to="/" 
-          className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-muted border border-border text-foreground hover:bg-accent transition-colors mb-6"
+          className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-muted border border-border text-foreground hover:bg-accent transition-colors"
         >
           <ChevronLeft className="w-5 h-5" />
         </Link>
-
-        <h1 className="text-2xl font-serif font-medium text-foreground">
-          Assistente The Lucky Trip
-        </h1>
       </header>
 
-      {/* Content */}
-      <div className="px-6 py-8 space-y-10">
+      {/* ═══════════════════════════════════════════════════════════════
+          TITLE SECTION
+          ═══════════════════════════════════════════════════════════════ */}
+      <div className="px-6 pt-4 pb-8 text-center">
+        <h1 className="text-3xl font-serif font-medium text-foreground tracking-tight">
+          Travel Assistant
+        </h1>
+        <p className="text-xs tracking-[0.2em] text-muted-foreground uppercase mt-3">
+          Powered by human experience
+        </p>
+      </div>
+
+      {/* ═══════════════════════════════════════════════════════════════
+          MAIN CONTENT
+          ═══════════════════════════════════════════════════════════════ */}
+      <div className="flex-1 flex flex-col items-center justify-center px-6 pb-32">
         
-        {/* SECTION 1 — CHAT EDITORIAL (PRIMARY) */}
-        <section className="space-y-4">
-          <div className="flex items-start gap-4">
-            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-              <MessageCircle className="w-5 h-5 text-primary" />
-            </div>
-            <div className="flex-1">
-              <h2 className="text-lg font-medium text-foreground mb-2">
-                Tire dúvidas com a curadoria
-              </h2>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                Pergunte sobre destinos, guias, parceiros e escolhas editoriais do The Lucky Trip.
-              </p>
-            </div>
-          </div>
+        {/* Main Question */}
+        <p className="text-lg text-foreground/80 font-light mb-10 text-center">
+          What do you want to do now?
+        </p>
+
+        {/* Action Buttons */}
+        <div className="w-full max-w-sm space-y-4">
           
-          <Link to="/ia/chat">
-            <Button className="w-full" size="lg">
-              Perguntar ao Lucky
-            </Button>
-          </Link>
-        </section>
+          {/* BUTTON 1 — ASK A QUESTION */}
+          <ActionButton
+            icon={MessageCircle}
+            label="Ask about this destination"
+            onClick={() => navigate("/ia/chat")}
+          />
 
-        {/* Divider */}
-        <div className="border-t border-border" />
+          {/* BUTTON 2 — CREATE ITINERARY */}
+          <ActionButton
+            icon={CalendarPlus}
+            label="Create my itinerary"
+            onClick={() => navigate("/ia/create-itinerary")}
+          />
 
-        {/* SECTION 2 — ROTEIROS INTELIGENTES (CONCEPT) */}
-        <section className="space-y-4">
-          <div className="flex items-start gap-4">
-            <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
-              <Route className="w-5 h-5 text-muted-foreground" />
-            </div>
-            <div className="flex-1">
-              <h2 className="text-lg font-medium text-foreground mb-2">
-                Crie roteiros inteligentes
-              </h2>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                Combine experiências de diferentes Partners on Trip em um único roteiro.
-              </p>
-            </div>
-          </div>
+          {/* BUTTON 3 — IMPROVE ITINERARY */}
+          <ActionButton
+            icon={Sparkles}
+            label="Improve my itinerary"
+            onClick={() => navigate("/ia/improve-itinerary")}
+            subtle
+          />
+        </div>
+      </div>
 
-          {/* Example text */}
-          <div className="p-4 rounded-xl bg-muted/50 border border-border">
-            <p className="text-sm text-muted-foreground italic">
-              Exemplo: Verão europeu com Bruno De Luca + Isabeli Fontana + Ronald Domingues
-            </p>
-          </div>
-          
-          <Link to="/ia/roteiros-inteligentes">
-            <Button variant="outline" className="w-full" size="lg">
-              Roteiros Inteligentes (em breve)
-            </Button>
-          </Link>
-        </section>
-
-        {/* Divider */}
-        <div className="border-t border-border" />
-
-        {/* SECTION 3 — AJUSTE DE ROTEIRO (SUPPORT) */}
-        <section className="space-y-4">
-          <div className="flex items-start gap-4">
-            <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
-              <Settings2 className="w-5 h-5 text-muted-foreground" />
-            </div>
-            <div className="flex-1">
-              <h2 className="text-lg font-medium text-foreground mb-2">
-                Ajuste seu roteiro
-              </h2>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                Use a inteligência do app para revisar, equilibrar e melhorar o seu roteiro.
-              </p>
-            </div>
-          </div>
-          
-          <Link to="/ia/revisar-roteiro">
-            <Button variant="outline" className="w-full" size="lg">
-              Revisar meu roteiro (em breve)
-            </Button>
-          </Link>
-        </section>
-
+      {/* ═══════════════════════════════════════════════════════════════
+          FOOTER NOTE
+          ═══════════════════════════════════════════════════════════════ */}
+      <div className="px-6 pb-8 text-center">
+        <p className="text-xs text-muted-foreground/60 leading-relaxed max-w-xs mx-auto">
+          Answers are based exclusively on curated content from our editorial team and trusted partners.
+        </p>
       </div>
     </div>
+  );
+};
+
+/**
+ * Premium Action Button Component
+ */
+interface ActionButtonProps {
+  icon: React.ElementType;
+  label: string;
+  onClick: () => void;
+  subtle?: boolean;
+}
+
+const ActionButton = ({ icon: Icon, label, onClick, subtle }: ActionButtonProps) => {
+  return (
+    <button
+      onClick={onClick}
+      className={`
+        w-full flex items-center gap-4 p-5 rounded-2xl
+        border transition-all duration-200
+        ${subtle 
+          ? "bg-muted/30 border-border/50 hover:bg-muted/50 hover:border-border" 
+          : "bg-card border-border hover:bg-accent hover:border-border"
+        }
+      `}
+    >
+      <div className={`
+        w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0
+        ${subtle ? "bg-muted" : "bg-primary/10"}
+      `}>
+        <Icon className={`w-5 h-5 ${subtle ? "text-muted-foreground" : "text-primary"}`} />
+      </div>
+      <span className="text-base font-medium text-foreground text-left">
+        {label}
+      </span>
+    </button>
   );
 };
 
