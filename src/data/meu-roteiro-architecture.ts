@@ -166,6 +166,190 @@ export const ITEM_RETENTION_RULES = {
 } as const;
 
 // ═══════════════════════════════════════════════════════════════════════════
+// SAVE ACTION
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * SAVE ACTION DEFINITION
+ * 
+ * Any eligible item must expose a single, consistent save action
+ * that allows the user to add it to "Meu Roteiro".
+ * 
+ * The save action must be:
+ * - Contextual (exists where the item is presented)
+ * - Reversible (user can remove later)
+ * - Lightweight (no forced login at first interaction)
+ */
+export const SAVE_ACTION_DEFINITION = {
+  actionType: 'single-consistent-save',
+  isContextual: true,
+  isReversible: true,
+  isLightweight: true,
+  forcesLoginAtFirstInteraction: false,
+} as const;
+
+/**
+ * ELIGIBLE SOURCE MODULES FOR SAVE ACTION
+ * 
+ * Items that may be saved originate from:
+ * - O QUE FAZER
+ * - ONDE COMER
+ * - VIDA NOTURNA
+ * - SABORES LOCAIS
+ * - LUCKY LIST (premium layer, with restrictions)
+ */
+export const SAVE_ELIGIBLE_MODULES: readonly RoteiroSourceModule[] = [
+  'o-que-fazer',
+  'onde-comer',
+  'vida-noturna',
+  'sabores-locais',
+  'lucky-list',
+] as const;
+
+/**
+ * SAVE RULES BY USER STATE
+ */
+
+/**
+ * DRAFT STATE (not logged in)
+ * 
+ * - User may save any free item
+ * - Items are stored locally
+ * - User is informed that progress is temporary
+ */
+export const SAVE_RULES_DRAFT = {
+  state: 'draft' as const,
+  canSaveFreeItems: true,
+  canSaveLuckyListItems: false,
+  storage: 'local',
+  progressIsTemporary: true,
+  userMustBeInformed: true,
+} as const;
+
+/**
+ * SAVED STATE (logged in, non-subscriber)
+ * 
+ * - Free items are saved permanently
+ * - Lucky List items cannot eliminate the save action,
+ *   but saving them must trigger a premium access flow (defined later)
+ */
+export const SAVE_RULES_SAVED = {
+  state: 'saved' as const,
+  canSaveFreeItems: true,
+  canSaveLuckyListItems: false,
+  luckyListSaveActionVisible: true,
+  luckyListSaveTriggersPremiumFlow: true,
+  storage: 'cloud',
+  progressIsPermanent: true,
+} as const;
+
+/**
+ * PREMIUM STATE (subscriber)
+ * 
+ * - All eligible items may be saved permanently
+ */
+export const SAVE_RULES_PREMIUM = {
+  state: 'premium' as const,
+  canSaveFreeItems: true,
+  canSaveLuckyListItems: true,
+  storage: 'cloud',
+  progressIsPermanent: true,
+} as const;
+
+/**
+ * All save rules by state
+ */
+export const SAVE_RULES_BY_STATE = {
+  draft: SAVE_RULES_DRAFT,
+  saved: SAVE_RULES_SAVED,
+  premium: SAVE_RULES_PREMIUM,
+} as const;
+
+/**
+ * SAVE BEHAVIOR RULES
+ * 
+ * - Saving an item must NOT interrupt navigation
+ * - Saving must NOT redirect the user
+ * - The user remains in the same content context
+ */
+export const SAVE_BEHAVIOR_RULES = {
+  interruptsNavigation: false,
+  redirectsUser: false,
+  userRemainsInContext: true,
+} as const;
+
+/**
+ * SAVE FEEDBACK RULE
+ * 
+ * - The system must provide immediate confirmation
+ *   that the item was added to "Meu Roteiro"
+ * - No modal or blocking confirmation is allowed
+ */
+export const SAVE_FEEDBACK_RULES = {
+  providesImmediateConfirmation: true,
+  modalConfirmation: false,
+  blockingConfirmation: false,
+  confirmationType: 'non-blocking',
+} as const;
+
+/**
+ * SAVE ACTION SCALABILITY
+ * 
+ * - This save logic applies identically across all destinations
+ * - Future content types must plug into this same save action
+ */
+export const SAVE_ACTION_SCALABILITY = {
+  appliesToAllDestinations: true,
+  logicIdenticalAcrossDestinations: true,
+  futureContentTypesPlugIn: true,
+} as const;
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SAVE ACTION HELPER FUNCTIONS
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Check if an item can be saved based on user state and source module
+ */
+export const canSaveItemFromModule = (
+  sourceModule: RoteiroSourceModule,
+  userState: RoteiroState
+): { canSave: boolean; triggersPremiumFlow: boolean } => {
+  const isLuckyList = sourceModule === 'lucky-list';
+  
+  if (!isLuckyList) {
+    return { canSave: true, triggersPremiumFlow: false };
+  }
+  
+  // Lucky List items
+  switch (userState) {
+    case 'premium':
+      return { canSave: true, triggersPremiumFlow: false };
+    case 'saved':
+      return { canSave: false, triggersPremiumFlow: true };
+    case 'draft':
+      return { canSave: false, triggersPremiumFlow: true };
+    default:
+      return { canSave: false, triggersPremiumFlow: true };
+  }
+};
+
+/**
+ * Check if save action should be visible for an item
+ * (Save action is always visible, even for Lucky List)
+ */
+export const isSaveActionVisible = (sourceModule: RoteiroSourceModule): boolean => {
+  return SAVE_ELIGIBLE_MODULES.includes(sourceModule);
+};
+
+/**
+ * Get storage type based on user state
+ */
+export const getSaveStorageType = (userState: RoteiroState): 'local' | 'cloud' => {
+  return userState === 'draft' ? 'local' : 'cloud';
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
 // GOOGLE MAPS COMPATIBILITY
 // ═══════════════════════════════════════════════════════════════════════════
 
