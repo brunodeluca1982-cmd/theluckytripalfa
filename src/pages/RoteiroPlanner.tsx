@@ -120,6 +120,7 @@ const RoteiroPlanner = () => {
   
   const [currentDay, setCurrentDay] = useState(1);
   const [activeItem, setActiveItem] = useState<ItineraryItem | null>(null);
+  const [highlightedItemId, setHighlightedItemId] = useState<string | null>(null);
 
   // Transform items into timeline data with travel blocks
   const timelineData = useTimelineData({
@@ -224,7 +225,10 @@ const RoteiroPlanner = () => {
         return;
       }
 
+      const newItemId = `user-${activeId}-${Date.now()}`;
       addItem(targetDay, item as ItineraryItem, activeId);
+      setHighlightedItemId(newItemId);
+      setTimeout(() => setHighlightedItemId(null), 150);
       toast({ title: "Adicionado ✓", description: `${item.name} → Dia ${targetDay}` });
     }
 
@@ -394,6 +398,7 @@ const RoteiroPlanner = () => {
                     onAddFromGoogle={handleAddFromGoogle}
                     onAddWithAI={handleAddWithAI}
                     onShowCuratedPicker={handleShowCuratedPicker}
+                    highlightedItemId={highlightedItemId}
                   />
                 </div>
               </div>

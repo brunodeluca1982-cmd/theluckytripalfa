@@ -47,6 +47,7 @@ interface MultiDayTimelineProps {
   onAddFromGoogle?: (place: PlaceData, day: number) => void;
   onAddWithAI?: (prompt: string, day: number) => void;
   onShowCuratedPicker?: (day: number) => void;
+  highlightedItemId?: string | null;
 }
 
 // Single Day Column in the timeline
@@ -58,6 +59,7 @@ const DayTimelineColumn = ({
   onAddFromGoogle,
   onAddWithAI,
   onShowCuratedPicker,
+  highlightedItemId,
 }: {
   dayData: DayData;
   onRemoveItem: (itemId: string) => void;
@@ -66,6 +68,7 @@ const DayTimelineColumn = ({
   onAddFromGoogle?: (place: PlaceData, day: number) => void;
   onAddWithAI?: (prompt: string, day: number) => void;
   onShowCuratedPicker?: (day: number) => void;
+  highlightedItemId?: string | null;
 }) => {
   const { setNodeRef, isOver } = useDroppable({
     id: `timeline-day-${dayData.dayNumber}`,
@@ -135,7 +138,10 @@ const DayTimelineColumn = ({
           >
             <div className="space-y-0">
               {dayData.activities.map((activity, index) => (
-                <div key={activity.id}>
+                <div 
+                  key={activity.id}
+                  className={highlightedItemId === activity.id ? 'drop-highlight rounded-lg' : ''}
+                >
                   <SortableTimelineCard
                     item={activity}
                     onTap={() => handleTap(activity)}
@@ -190,6 +196,7 @@ export const MultiDayTimeline = ({
   onAddFromGoogle,
   onAddWithAI,
   onShowCuratedPicker,
+  highlightedItemId,
 }: MultiDayTimelineProps) => {
   const totalIssues = days.reduce((acc, day) => acc + day.issueCount, 0);
 
@@ -225,6 +232,7 @@ export const MultiDayTimeline = ({
               onAddFromGoogle={onAddFromGoogle}
               onAddWithAI={onAddWithAI}
               onShowCuratedPicker={onShowCuratedPicker}
+              highlightedItemId={highlightedItemId}
             />
           ))}
         </div>
