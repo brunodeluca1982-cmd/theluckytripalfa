@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { ItineraryItem } from "@/components/roteiro/ItineraryCard";
+import { getReferenceItinerariesForDestination } from "@/data/reference-itineraries";
 
 /**
  * ═══════════════════════════════════════════════════════════════════════════
@@ -61,16 +62,34 @@ export interface RoteiroState {
 
 const STORAGE_KEY = 'user-roteiro';
 
-const createEmptyRoteiro = (destinationId: string, totalDays: number): RoteiroState => ({
-  destinationId,
-  totalDays,
-  items: Object.fromEntries(
+const createEmptyRoteiro = (destinationId: string, totalDays: number): RoteiroState => {
+  const items: Record<number, ItineraryItem[]> = Object.fromEntries(
     Array.from({ length: totalDays }, (_, i) => [i + 1, []])
-  ),
-  status: 'rascunho', // Always starts as draft
-  createdAt: new Date().toISOString(),
-  updatedAt: new Date().toISOString(),
-});
+  );
+  
+  // Auto-populate Day 1 with first Lucky Trip activity
+  const references = getReferenceItinerariesForDestination(destinationId);
+  if (references.length > 0) {
+    const firstReference = references[0];
+    const day1Items = firstReference.days[1]?.items;
+    if (day1Items && day1Items.length > 0) {
+      const firstItem = day1Items[0];
+      items[1] = [{
+        ...firstItem,
+        id: `user-${firstItem.id}-${Date.now()}`,
+      }];
+    }
+  }
+  
+  return {
+    destinationId,
+    totalDays,
+    items,
+    status: 'rascunho',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+};
 
 export const useRoteiroState = (destinationId: string, totalDays: number = 3) => {
   const [roteiro, setRoteiro] = useState<RoteiroState>(() => {
