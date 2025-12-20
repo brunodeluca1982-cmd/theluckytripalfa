@@ -6,16 +6,28 @@ interface RestaurantCardProps {
   id?: string;
   slug?: string;
   neighborhood?: string;
+  imageUrl?: string;
 }
 
-const RestaurantCard = ({ name, description, slug, neighborhood }: RestaurantCardProps) => {
+const RestaurantCard = ({ name, description, slug, neighborhood, imageUrl }: RestaurantCardProps) => {
   const detailUrl = slug ? `/restaurante/${slug}?from=${neighborhood || ''}` : undefined;
 
   const CardContent = () => (
     <>
-      {/* Media Placeholder */}
-      <div className="w-full aspect-[16/9] bg-muted/50 flex items-center justify-center mb-4 rounded">
-        <p className="text-xs text-muted-foreground">Photo placeholder</p>
+      {/* Thumbnail Image */}
+      <div className="w-full aspect-[16/9] bg-muted/50 rounded overflow-hidden mb-4">
+        {imageUrl ? (
+          <img 
+            src={imageUrl} 
+            alt={name}
+            className="w-full h-full object-cover"
+            loading="lazy"
+          />
+        ) : (
+          <div className="w-full h-full bg-gradient-to-br from-muted to-muted-foreground/10 flex items-center justify-center">
+            <span className="text-2xl text-muted-foreground/30">{name.charAt(0)}</span>
+          </div>
+        )}
       </div>
       
       {/* Restaurant Info */}
