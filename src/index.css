@@ -68,62 +68,28 @@
   }
 }
 
-/* Warm gradient overlays for cards */
+/* Destination card image enhancement */
+.destination-card-image {
+  filter: saturate(1.15) contrast(1.05);
+}
+
+/* Subtle dark gradient overlay for destination cards */
 .destination-card-overlay {
   background: linear-gradient(
-    180deg,
-    transparent 0%,
-    transparent 40%,
-    hsl(35 40% 50% / 0.08) 70%,
-    hsl(30 50% 40% / 0.15) 100%
+    to bottom,
+    rgba(0, 0, 0, 0.05),
+    rgba(0, 0, 0, 0.15)
   );
 }
 
-/* Liquid depth micro-interaction for circular bubbles */
-.liquid-bubble {
-  position: relative;
-  overflow: hidden;
-  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+/* Partner bubble hover/tap feedback */
+.partner-bubble {
+  transition: transform 0.2s ease-out;
 }
 
-.liquid-bubble::before {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(
-    ellipse at 30% 30%,
-    hsl(35 30% 90% / 0.4) 0%,
-    transparent 50%
-  );
-  opacity: 0;
-  transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  pointer-events: none;
-}
-
-.liquid-bubble:hover::before,
-.liquid-bubble:active::before {
-  opacity: 1;
-  animation: liquid-shimmer 1.2s ease-in-out;
-}
-
-.liquid-bubble:hover,
-.liquid-bubble:active {
-  filter: saturate(1.15) brightness(1.02);
-}
-
-@keyframes liquid-shimmer {
-  0% {
-    transform: translate(0, 0) rotate(0deg);
-  }
-  50% {
-    transform: translate(5%, 5%) rotate(3deg);
-  }
-  100% {
-    transform: translate(0, 0) rotate(0deg);
-  }
+.partner-bubble:hover,
+.partner-bubble:active {
+  transform: scale(1.03);
 }
 
 @layer base {
