@@ -53,14 +53,17 @@ const DestinationsPortal = () => {
           <Link
             key={destination.id}
             to={destination.available ? destination.path : "#"}
-            className={`block aspect-[2/1] bg-muted rounded-lg border overflow-hidden transition-colors ${
+            className={`block aspect-[2/1] bg-muted rounded-lg border overflow-hidden transition-colors relative ${
               destination.available 
                 ? "border-border hover:border-foreground cursor-pointer" 
                 : "border-border/50 opacity-50 cursor-not-allowed"
             }`}
             onClick={(e) => !destination.available && e.preventDefault()}
           >
-            <div className="h-full flex flex-col justify-end p-4">
+            {/* Warm gradient overlay */}
+            <div className="absolute inset-0 destination-card-overlay pointer-events-none" />
+            
+            <div className="h-full flex flex-col justify-end p-4 relative z-10">
               <p className="text-xs text-muted-foreground uppercase tracking-wide">
                 {destination.country}
               </p>
