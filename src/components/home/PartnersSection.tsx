@@ -50,7 +50,7 @@ const PartnersSection = () => {
             to={`/partner/${partner.id}`}
             className="flex flex-col items-center gap-2 flex-shrink-0"
           >
-            <div className="w-16 h-16 rounded-full bg-muted border border-border flex items-center justify-center hover:border-foreground transition-colors">
+            <div className="w-16 h-16 rounded-full bg-muted border border-border flex items-center justify-center liquid-bubble">
               {partner.imageUrl ? (
                 <img 
                   src={partner.imageUrl}
