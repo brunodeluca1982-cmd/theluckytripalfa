@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useMemo } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
-import { ChevronLeft, User, Map, Info, Ticket, Utensils } from "lucide-react";
+import { ChevronLeft, User, Map, Info, Ticket, Utensils, BookOpen } from "lucide-react";
 import {
   DndContext,
   DragOverlay,
@@ -18,10 +18,12 @@ import { arrayMove, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import { ItineraryTabs } from "@/components/roteiro/ItineraryTabs";
 import { MultiDayTimeline } from "@/components/roteiro/MultiDayTimeline";
 import { PartnersOnTripPanel } from "@/components/roteiro/ReferencesPanel";
+import { MobileReferenceDrawer } from "@/components/roteiro/MobileReferenceDrawer";
 import { ItineraryCard, ItineraryItem } from "@/components/roteiro/ItineraryCard";
 import { useRoteiroState } from "@/hooks/use-roteiro-state";
 import { useTimelineData } from "@/hooks/use-timeline-data";
 import { useTripSetup } from "@/hooks/use-trip-setup";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { getCuratedItinerary, getDestinationDays } from "@/data/curated-itineraries";
 import { getReferenceItinerariesForDestination, ReferenceItem } from "@/data/reference-itineraries";
 import { getDestination } from "@/data/destinations-database";
@@ -85,6 +87,8 @@ const RoteiroPlanner = () => {
   
   const [selectedSources, setSelectedSources] = useState<string[]>(['lucky-trip']);
   const [showReferences, setShowReferences] = useState(true);
+  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
+  const isMobile = useIsMobile();
   
   const handleSourceToggle = useCallback((sourceId: string) => {
     setSelectedSources(prev => 
@@ -351,10 +355,23 @@ const RoteiroPlanner = () => {
               onDragStart={handleDragStart}
               onDragEnd={handleDragEnd}
             >
+              {/* Mobile Reference Toggle */}
+              {isMobile && (
+                <div className="px-4 pt-2 pb-0">
+                  <button
+                    onClick={() => setMobileDrawerOpen(true)}
+                    className="inline-flex items-center gap-2 px-3 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium hover:bg-primary/20 transition-colors"
+                  >
+                    <BookOpen className="w-4 h-4" />
+                    Referência
+                  </button>
+                </div>
+              )}
+
               <div className="flex gap-4 p-4">
-                {/* Left Panel - Partners on Trip */}
-                {showReferences && (
-                  <div className="w-[280px] flex-shrink-0 hidden md:block">
+                {/* Left Panel - Partners on Trip (Desktop only) */}
+                {showReferences && !isMobile && (
+                  <div className="w-[280px] flex-shrink-0">
                     <PartnersOnTripPanel
                       sources={sources}
                       selectedSources={selectedSources}
@@ -380,6 +397,21 @@ const RoteiroPlanner = () => {
                   />
                 </div>
               </div>
+
+              {/* Mobile Reference Drawer */}
+              {isMobile && (
+                <MobileReferenceDrawer
+                  open={mobileDrawerOpen}
+                  onOpenChange={setMobileDrawerOpen}
+                  sources={sources}
+                  selectedSources={selectedSources}
+                  onSourceToggle={handleSourceToggle}
+                  currentDay={currentDay}
+                  curatedItems={curatedItinerary[currentDay] || []}
+                  referenceItineraries={referenceItineraries}
+                  tripDestinationIds={[destinationId]}
+                />
+              )}
 
               {/* Drag Overlay */}
               <DragOverlay>
