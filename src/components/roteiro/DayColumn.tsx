@@ -99,6 +99,9 @@ export const DayColumn = ({
                 <p className="text-xs text-muted-foreground leading-relaxed max-w-[120px] mx-auto">
                   Arraste atividades aqui quando quiser
                 </p>
+                <p className="text-[10px] text-muted-foreground/70 mt-2 max-w-[160px] mx-auto">
+                  Drag activities from Lucky Trip or Partners into your day.
+                </p>
               </>
             ) : (
               <p className="text-xs text-muted-foreground">
