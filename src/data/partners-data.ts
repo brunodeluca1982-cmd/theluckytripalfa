@@ -64,6 +64,7 @@ export const partners: Partner[] = [
     name: "Bruno De Luca",
     initials: "BD",
     bio: "Apresentador e viajante",
+    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Bruno_De_Luca.jpg/440px-Bruno_De_Luca.jpg",
     destinations: [
       {
         destinationId: "rio-de-janeiro",
@@ -77,6 +78,7 @@ export const partners: Partner[] = [
     name: "Carolina Dieckmann",
     initials: "CD",
     bio: "Atriz e exploradora",
+    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Carolina_Dieckmann_2019.jpg/440px-Carolina_Dieckmann_2019.jpg",
     destinations: [],
   },
   {
@@ -84,6 +86,7 @@ export const partners: Partner[] = [
     name: "Celina Locks",
     initials: "CL",
     bio: "Modelo e viajante",
+    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Celina_Locks.jpg/440px-Celina_Locks.jpg",
     destinations: [],
   },
   {
@@ -91,6 +94,7 @@ export const partners: Partner[] = [
     name: "Di Ferrero",
     initials: "DF",
     bio: "Músico e aventureiro",
+    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Di_Ferrero_2018.jpg/440px-Di_Ferrero_2018.jpg",
     destinations: [],
   },
   {
@@ -98,6 +102,7 @@ export const partners: Partner[] = [
     name: "Isabeli Fontana",
     initials: "IF",
     bio: "Top model internacional",
+    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Isabeli_Fontana_Cannes_2017.jpg/440px-Isabeli_Fontana_Cannes_2017.jpg",
     destinations: [],
   },
 ];
