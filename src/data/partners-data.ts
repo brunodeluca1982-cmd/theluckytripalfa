@@ -37,6 +37,13 @@
  * ═══════════════════════════════════════════════════════════════════════════
  */
 
+import brunoDeLucaImg from "@/assets/partners/bruno-de-luca.jpeg";
+import carolinaDieckmannImg from "@/assets/partners/carolina-dieckmann.jpeg";
+import celinaLocksImg from "@/assets/partners/celina-locks.jpeg";
+import diFerreroImg from "@/assets/partners/di-ferrero.jpeg";
+import isabeliFontanaImg from "@/assets/partners/isabeli-fontana.jpeg";
+import ronaldImg from "@/assets/partners/ronald.jpeg";
+
 export interface Partner {
   id: string;                           // Unique identifier (kebab-case)
   name: string;                         // Display name
@@ -64,7 +71,7 @@ export const partners: Partner[] = [
     name: "Bruno De Luca",
     initials: "BD",
     bio: "Apresentador e viajante",
-    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Bruno_De_Luca.jpg/440px-Bruno_De_Luca.jpg",
+    imageUrl: brunoDeLucaImg,
     destinations: [
       {
         destinationId: "rio-de-janeiro",
@@ -78,7 +85,7 @@ export const partners: Partner[] = [
     name: "Carolina Dieckmann",
     initials: "CD",
     bio: "Atriz e exploradora",
-    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Carolina_Dieckmann_2019.jpg/440px-Carolina_Dieckmann_2019.jpg",
+    imageUrl: carolinaDieckmannImg,
     destinations: [],
   },
   {
@@ -86,7 +93,7 @@ export const partners: Partner[] = [
     name: "Celina Locks",
     initials: "CL",
     bio: "Modelo e viajante",
-    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Celina_Locks.jpg/440px-Celina_Locks.jpg",
+    imageUrl: celinaLocksImg,
     destinations: [],
   },
   {
@@ -94,7 +101,7 @@ export const partners: Partner[] = [
     name: "Di Ferrero",
     initials: "DF",
     bio: "Músico e aventureiro",
-    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Di_Ferrero_2018.jpg/440px-Di_Ferrero_2018.jpg",
+    imageUrl: diFerreroImg,
     destinations: [],
   },
   {
@@ -102,7 +109,15 @@ export const partners: Partner[] = [
     name: "Isabeli Fontana",
     initials: "IF",
     bio: "Top model internacional",
-    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Isabeli_Fontana_Cannes_2017.jpg/440px-Isabeli_Fontana_Cannes_2017.jpg",
+    imageUrl: isabeliFontanaImg,
+    destinations: [],
+  },
+  {
+    id: "ronald",
+    name: "Ronald",
+    initials: "RO",
+    bio: "Jogador e viajante",
+    imageUrl: ronaldImg,
     destinations: [],
   },
 ];
