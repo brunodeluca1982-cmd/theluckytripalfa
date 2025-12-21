@@ -2,6 +2,7 @@ import SearchField from "@/components/home/SearchField";
 import PartnersSection from "@/components/home/PartnersSection";
 import HighlightsCarousel from "@/components/home/HighlightsCarousel";
 import DestinationsPortal from "@/components/home/DestinationsPortal";
+import BrandLogo from "@/components/home/BrandLogo";
 
 /**
  * HOME SCREEN — THE LUCKY TRIP
@@ -25,12 +26,7 @@ const Index = () => {
     <div className="min-h-screen flex flex-col bg-background pb-20">
       {/* 1) BRAND HEADER */}
       <header className="px-6 pt-12 pb-6 text-center">
-        <h1 className="text-3xl font-serif font-medium text-foreground">
-          The Lucky Trip
-        </h1>
-        <p className="text-xs tracking-widest text-muted-foreground uppercase mt-2">
-          Inteligência Humana em Viagens
-        </p>
+        <BrandLogo />
       </header>
 
       {/* 2) SEARCH / PROMPT FIELD */}
