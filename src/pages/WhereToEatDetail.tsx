@@ -3,6 +3,7 @@ import { ChevronLeft } from "lucide-react";
 import RestaurantCard from "@/components/RestaurantCard";
 import { getNeighborhoodById } from "@/data/rio-neighborhoods";
 import RoteiroAccessLink from "@/components/RoteiroAccessLink";
+import { getRestaurantImage } from "@/data/place-images";
 
 /**
  * ONDE COMER — NEIGHBORHOOD RESTAURANT LIST
@@ -556,6 +557,7 @@ const WhereToEatDetail = () => {
                       description={restaurant.description}
                       slug={slug}
                       neighborhood={neighborhood}
+                      imageUrl={getRestaurantImage(neighborhood || "")}
                     />
                   );
                 })}

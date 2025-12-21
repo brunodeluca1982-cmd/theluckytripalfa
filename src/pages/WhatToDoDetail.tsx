@@ -3,6 +3,7 @@ import { ChevronLeft } from "lucide-react";
 import { getNeighborhoodById } from "@/data/rio-neighborhoods";
 import { activitiesByNeighborhood } from "@/data/what-to-do-data";
 import RoteiroAccessLink from "@/components/RoteiroAccessLink";
+import { getAttractionImage } from "@/data/place-images";
 
 /**
  * O QUE FAZER — NEIGHBORHOOD ACTIVITY LIST
@@ -59,6 +60,16 @@ const WhatToDoDetail = () => {
                   to={`/atividade/${activity.id}?from=${neighborhood}`}
                   className="block border-b border-border pb-8 last:border-b-0 hover:bg-muted/30 transition-colors -mx-2 px-2 rounded"
                 >
+                  {/* Thumbnail Image */}
+                  <div className="w-full aspect-[16/9] bg-muted/50 rounded overflow-hidden mb-4">
+                    <img 
+                      src={activity.mediaUrl || getAttractionImage(neighborhood || "")} 
+                      alt={activity.title}
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                    />
+                  </div>
+                  
                   {/* Category */}
                   <p className="text-xs tracking-widest text-muted-foreground uppercase mb-2">
                     {activity.category}

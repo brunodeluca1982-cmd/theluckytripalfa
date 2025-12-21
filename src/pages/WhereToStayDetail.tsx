@@ -3,6 +3,7 @@ import { ChevronLeft } from "lucide-react";
 import HotelCard from "@/components/HotelCard";
 import { getNeighborhoodById } from "@/data/rio-neighborhoods";
 import RoteiroAccessLink from "@/components/RoteiroAccessLink";
+import { getHotelImage } from "@/data/place-images";
 
 /**
  * ONDE FICAR — NEIGHBORHOOD HOTEL LIST
@@ -306,6 +307,7 @@ const WhereToStayDetail = () => {
                     description={hotel.description}
                     slug={slug}
                     neighborhood={neighborhood}
+                    imageUrl={getHotelImage(neighborhood || "")}
                   />
                 );
               })}
