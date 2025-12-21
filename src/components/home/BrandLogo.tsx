@@ -6,7 +6,7 @@ const BrandLogo = () => {
       <img 
         src={luckyTripLogo} 
         alt="The Lucky Trip" 
-        className="h-20 w-auto"
+        className="h-20 w-auto mix-blend-multiply dark:mix-blend-screen dark:invert"
       />
       <p className="text-[9px] tracking-[0.2em] text-muted-foreground uppercase mt-2">
         Inteligência Humana em Viagens
