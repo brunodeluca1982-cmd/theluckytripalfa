@@ -5,6 +5,9 @@ import {
   CarouselItem,
 } from "@/components/ui/carousel";
 
+import rioHeroImg from "@/assets/highlights/rio-de-janeiro-hero.jpg";
+import luckyListHeroImg from "@/assets/highlights/lucky-list-hero.jpg";
+
 /**
  * HIGHLIGHTS CAROUSEL
  * 
@@ -19,6 +22,7 @@ interface Highlight {
   subtitle: string;
   type: "destination" | "guide" | "trip";
   path: string;
+  imageUrl?: string;
 }
 
 // Structural placeholder data
@@ -29,6 +33,7 @@ const highlights: Highlight[] = [
     subtitle: "Guia atualizado",
     type: "destination",
     path: "/destino/rio-de-janeiro",
+    imageUrl: rioHeroImg,
   },
   {
     id: "new-spots",
@@ -36,6 +41,7 @@ const highlights: Highlight[] = [
     subtitle: "Lucky List",
     type: "guide",
     path: "/lucky-list",
+    imageUrl: luckyListHeroImg,
   },
   {
     id: "weekend-trip",
@@ -61,13 +67,23 @@ const HighlightsCarousel = () => {
             <CarouselItem key={highlight.id} className="pl-2 basis-[280px]">
               <Link
                 to={highlight.path}
-                className="block aspect-[16/10] bg-muted rounded-lg border border-border overflow-hidden hover:border-foreground transition-colors"
+                className="block aspect-[16/10] bg-muted rounded-lg border border-border overflow-hidden hover:border-foreground transition-colors relative"
               >
-                <div className="h-full flex flex-col justify-end p-4">
-                  <p className="text-xs text-muted-foreground uppercase tracking-wide">
+                {highlight.imageUrl && (
+                  <>
+                    <img
+                      src={highlight.imageUrl}
+                      alt={highlight.title}
+                      className="absolute inset-0 w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                  </>
+                )}
+                <div className="h-full flex flex-col justify-end p-4 relative z-10">
+                  <p className={`text-xs uppercase tracking-wide ${highlight.imageUrl ? 'text-white/80' : 'text-muted-foreground'}`}>
                     {highlight.subtitle}
                   </p>
-                  <h3 className="text-lg font-serif font-medium text-foreground">
+                  <h3 className={`text-lg font-serif font-medium ${highlight.imageUrl ? 'text-white' : 'text-foreground'}`}>
                     {highlight.title}
                   </h3>
                 </div>
