@@ -1,14 +1,10 @@
-import luckyTripLogo from "@/assets/brand/lucky-trip-logo.png";
-
 const BrandLogo = () => {
   return (
     <div className="flex flex-col items-center">
-      <img 
-        src={luckyTripLogo} 
-        alt="The Lucky Trip" 
-        className="h-20 w-auto mix-blend-multiply dark:mix-blend-screen dark:invert"
-      />
-      <p className="text-[9px] tracking-[0.2em] text-muted-foreground uppercase mt-2">
+      <h1 className="font-serif text-2xl font-medium tracking-tight text-foreground">
+        The Lucky Trip
+      </h1>
+      <p className="text-[9px] tracking-[0.2em] text-muted-foreground uppercase mt-1">
         Inteligência Humana em Viagens
       </p>
     </div>
