@@ -7,6 +7,7 @@ import {
 
 import rioHeroImg from "@/assets/highlights/rio-de-janeiro-hero.jpg";
 import luckyListHeroImg from "@/assets/highlights/lucky-list-hero.jpg";
+import saoPauloHeroImg from "@/assets/highlights/sao-paulo-hero.jpg";
 
 /**
  * HIGHLIGHTS CAROUSEL
@@ -45,10 +46,11 @@ const highlights: Highlight[] = [
   },
   {
     id: "weekend-trip",
-    title: "Fim de Semana",
+    title: "Fim de Semana em São Paulo",
     subtitle: "Roteiros curtos",
     type: "trip",
     path: "/destinos",
+    imageUrl: saoPauloHeroImg,
   },
 ];
 
