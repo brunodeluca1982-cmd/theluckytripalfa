@@ -64,9 +64,9 @@ const DestinationEntry = ({ name, country, backgroundImage, actions }: Destinati
         <header className="px-6 pt-12 pb-8">
           <Link 
             to="/destinos" 
-            className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 text-white hover:bg-white/30 transition-colors mb-6"
+            className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white/70 hover:bg-white/20 hover:text-white transition-colors mb-6"
           >
-            <ChevronLeft className="w-5 h-5" />
+            <ChevronLeft className="w-4 h-4" />
           </Link>
           
           <h1 className="text-5xl font-serif font-medium text-white leading-tight">
