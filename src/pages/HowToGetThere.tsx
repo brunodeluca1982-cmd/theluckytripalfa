@@ -64,15 +64,15 @@ const HowToGetThere = () => {
           </Link>
         </div>
 
-        {/* Hero Image - Softened treatment matching Rio destination screen */}
+        {/* Hero Image - Soft atmospheric treatment */}
         <img
           src={santosDumontImage}
           alt="Aeroporto Santos Dumont com Pão de Açúcar ao fundo"
-          className="w-full h-full object-cover contrast-[0.85] saturate-[0.7] brightness-[0.95]"
+          className="w-full h-full object-cover contrast-[0.8] saturate-[0.6] brightness-[0.9]"
         />
 
-        {/* Dark Overlay - Matching Rio destination hub treatment */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/45 via-black/35 to-black/55" />
+        {/* Dark translucent overlay - Calm, premium atmosphere */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-black/55" />
 
         {/* Hero Text */}
         <div className="absolute bottom-0 left-0 right-0 p-6 z-10">
