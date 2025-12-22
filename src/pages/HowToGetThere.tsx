@@ -2,9 +2,46 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { ChevronLeft, Plane, Car, Bus, ExternalLink, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import type { LucideIcon } from "lucide-react";
 import santosDumontImage from "@/assets/places/santos-dumont-airport.jpg";
 
 type TransportType = "aviao" | "carro" | "onibus" | null;
+
+interface RadialButtonProps {
+  icon: LucideIcon;
+  label: string;
+  position: "top-left" | "top-right" | "bottom-center";
+  isActive?: boolean;
+  onClick: () => void;
+}
+
+const RadialButton = ({ icon: Icon, label, position, isActive, onClick }: RadialButtonProps) => {
+  const positionClasses = {
+    "top-left": "absolute top-0 left-0",
+    "top-right": "absolute top-0 right-0",
+    "bottom-center": "absolute bottom-0 left-1/2 -translate-x-1/2",
+  };
+
+  return (
+    <button
+      onClick={onClick}
+      className={`${positionClasses[position]} flex flex-col items-center gap-2 group`}
+    >
+      <div 
+        className={`w-[72px] h-[72px] rounded-full flex items-center justify-center backdrop-blur-md border transition-all duration-200 ${
+          isActive 
+            ? "bg-white/40 border-white/60" 
+            : "bg-white/15 border-white/25 group-hover:bg-white/25 group-hover:border-white/40"
+        }`}
+      >
+        <Icon className="w-7 h-7 text-white drop-shadow-sm" strokeWidth={1.5} />
+      </div>
+      <span className="text-[11px] font-medium text-white/90 tracking-wide uppercase">
+        {label}
+      </span>
+    </button>
+  );
+};
 
 const HowToGetThere = () => {
   const [activeTransport, setActiveTransport] = useState<TransportType>(null);
@@ -23,7 +60,7 @@ const HowToGetThere = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="fixed inset-0 overflow-hidden">
       {/* Webview Overlay */}
       <AnimatePresence>
         {webviewUrl && (
@@ -51,255 +88,220 @@ const HowToGetThere = () => {
         )}
       </AnimatePresence>
 
-      {/* Hero Section */}
-      <div className="relative h-72 overflow-hidden">
-        {/* Back Button - Positioned over hero */}
-        <div className="absolute top-0 left-0 right-0 z-20 px-6 py-4">
-          <Link
-            to="/destino/rio-de-janeiro"
-            className="inline-flex items-center gap-2 text-sm text-white/90 hover:text-white transition-colors"
-          >
-            <ChevronLeft className="w-4 h-4" />
-            Voltar
-          </Link>
-        </div>
+      {/* ═══════════════════════════════════════════════════════════════
+          FULL-SCREEN HERO BACKGROUND (MATCHING RIO DESTINATION SCREEN)
+          ═══════════════════════════════════════════════════════════════ */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center bg-fixed"
+        style={{ backgroundImage: `url(${santosDumontImage})` }}
+      />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/50" />
 
-        {/* Hero Image - Soft atmospheric treatment */}
-        <img
-          src={santosDumontImage}
-          alt="Aeroporto Santos Dumont com Pão de Açúcar ao fundo"
-          className="w-full h-full object-cover contrast-[0.8] saturate-[0.6] brightness-[0.9]"
-        />
+      {/* ═══════════════════════════════════════════════════════════════
+          BACK BUTTON (SAME AS RIO DESTINATION)
+          ═══════════════════════════════════════════════════════════════ */}
+      <Link 
+        to="/destino/rio-de-janeiro" 
+        className="absolute top-12 left-6 z-30 inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 text-white hover:bg-white/30 transition-colors"
+      >
+        <ChevronLeft className="w-5 h-5" />
+      </Link>
 
-        {/* Dark translucent overlay - Calm, premium atmosphere */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-black/55" />
+      {/* ═══════════════════════════════════════════════════════════════
+          EDITORIAL TITLE (SAME STYLE AS RIO DESTINATION)
+          ═══════════════════════════════════════════════════════════════ */}
+      <div className="absolute top-[18vh] left-0 right-0 z-10 flex flex-col items-center px-6">
+        <h1 className="text-[2.5rem] font-serif font-medium text-white leading-tight text-center drop-shadow-lg tracking-tight">
+          Como chegar ao Rio de Janeiro
+        </h1>
+        <p className="text-[10px] tracking-[0.35em] text-white/70 uppercase mt-2.5">
+          Escolha como você prefere chegar
+        </p>
+      </div>
 
-        {/* Hero Text */}
-        <div className="absolute bottom-0 left-0 right-0 p-6 z-10">
-          <h1 className="text-3xl font-serif font-semibold text-white leading-tight mb-2">
-            Como chegar ao Rio de Janeiro
-          </h1>
-          <p className="text-sm text-white/80">
-            Escolha como você prefere chegar
-          </p>
+      {/* ═══════════════════════════════════════════════════════════════
+          RADIAL BUTTONS (SAME STYLE AS RIO DESTINATION)
+          ═══════════════════════════════════════════════════════════════ */}
+      <div className="absolute inset-0 z-20 flex items-center justify-center" style={{ paddingTop: '8vh' }}>
+        <div className="relative w-[280px] h-[220px]">
+          {/* TOP LEFT — Avião */}
+          <RadialButton 
+            icon={Plane}
+            label="Avião"
+            position="top-left"
+            isActive={activeTransport === "aviao"}
+            onClick={() => handleTransportClick("aviao")}
+          />
+          {/* TOP RIGHT — Carro */}
+          <RadialButton 
+            icon={Car}
+            label="Carro"
+            position="top-right"
+            isActive={activeTransport === "carro"}
+            onClick={() => handleTransportClick("carro")}
+          />
+          {/* BOTTOM CENTER — Ônibus */}
+          <RadialButton 
+            icon={Bus}
+            label="Ônibus"
+            position="bottom-center"
+            isActive={activeTransport === "onibus"}
+            onClick={() => handleTransportClick("onibus")}
+          />
         </div>
       </div>
 
-      {/* Content */}
-      <main className="pb-12">
+      {/* ═══════════════════════════════════════════════════════════════
+          CONTENT DRAWER (SLIDES UP FROM BOTTOM)
+          ═══════════════════════════════════════════════════════════════ */}
+      <AnimatePresence>
+        {activeTransport && (
+          <motion.div
+            initial={{ y: "100%" }}
+            animate={{ y: 0 }}
+            exit={{ y: "100%" }}
+            transition={{ type: "spring", damping: 25, stiffness: 300 }}
+            className="absolute bottom-0 left-0 right-0 z-40 bg-background rounded-t-3xl max-h-[55vh] overflow-y-auto"
+          >
+            <div className="p-6">
+              {/* Drag Handle */}
+              <div className="flex justify-center mb-4">
+                <div className="w-10 h-1 bg-muted-foreground/30 rounded-full" />
+              </div>
 
-        {/* Transport Selection Buttons */}
-        <div className="px-6 pb-6">
-          <div className="grid grid-cols-3 gap-3">
-            {/* Avião Button */}
-            <button
-              onClick={() => handleTransportClick("aviao")}
-              className={`flex flex-col items-center justify-center py-6 px-3 rounded-xl border-2 transition-all ${
-                activeTransport === "aviao"
-                  ? "border-foreground bg-foreground text-background"
-                  : "border-border bg-background text-foreground hover:border-foreground/50"
-              }`}
-            >
-              <Plane className="w-8 h-8 mb-2" />
-              <span className="text-sm font-semibold tracking-wide">AVIÃO</span>
-            </button>
+              {/* AVIÃO Content */}
+              {activeTransport === "aviao" && (
+                <div>
+                  <h2 className="text-lg font-serif font-semibold text-foreground mb-4">
+                    Voar para o Rio
+                  </h2>
 
-            {/* Carro Button */}
-            <button
-              onClick={() => handleTransportClick("carro")}
-              className={`flex flex-col items-center justify-center py-6 px-3 rounded-xl border-2 transition-all ${
-                activeTransport === "carro"
-                  ? "border-foreground bg-foreground text-background"
-                  : "border-border bg-background text-foreground hover:border-foreground/50"
-              }`}
-            >
-              <Car className="w-8 h-8 mb-2" />
-              <span className="text-sm font-semibold tracking-wide">CARRO</span>
-            </button>
+                  {/* Aeroportos */}
+                  <div className="mb-5">
+                    <h3 className="text-sm font-medium text-foreground mb-2">Aeroportos</h3>
+                    <ul className="space-y-2 text-sm text-muted-foreground">
+                      <li>• <strong className="text-foreground">Santos Dumont (SDU)</strong> — Zona Sul, Centro, pouso cênico</li>
+                      <li>• <strong className="text-foreground">Galeão (GIG)</strong> — voos internacionais, Barra, Zona Norte</li>
+                    </ul>
+                  </div>
 
-            {/* Ônibus Button */}
-            <button
-              onClick={() => handleTransportClick("onibus")}
-              className={`flex flex-col items-center justify-center py-6 px-3 rounded-xl border-2 transition-all ${
-                activeTransport === "onibus"
-                  ? "border-foreground bg-foreground text-background"
-                  : "border-border bg-background text-foreground hover:border-foreground/50"
-              }`}
-            >
-              <Bus className="w-8 h-8 mb-2" />
-              <span className="text-sm font-semibold tracking-wide">ÔNIBUS</span>
-            </button>
-          </div>
-        </div>
+                  {/* Tempos de voo */}
+                  <div className="mb-5">
+                    <h3 className="text-sm font-medium text-foreground mb-2">Tempos de voo</h3>
+                    <ul className="space-y-2 text-sm text-muted-foreground">
+                      <li>• São Paulo → ~1h</li>
+                      <li>• Belo Horizonte → ~1h10</li>
+                      <li>• Nordeste → 2h30 a 3h30</li>
+                    </ul>
+                  </div>
 
-        {/* Content Sections */}
-        <AnimatePresence mode="wait">
-          {/* AVIÃO Content */}
-          {activeTransport === "aviao" && (
-            <motion.section
-              key="aviao"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.2 }}
-              className="px-6"
-            >
-              <div className="border border-border rounded-xl p-5">
-                <h2 className="text-lg font-serif font-semibold text-foreground mb-4">
-                  Voar para o Rio
-                </h2>
-
-                {/* Aeroportos */}
-                <div className="mb-5">
-                  <h3 className="text-sm font-medium text-foreground mb-2">Aeroportos</h3>
-                  <ul className="space-y-2 text-sm text-muted-foreground">
-                    <li>• <strong className="text-foreground">Santos Dumont (SDU)</strong> — Zona Sul, Centro, pouso cênico</li>
-                    <li>• <strong className="text-foreground">Galeão (GIG)</strong> — voos internacionais, Barra, Zona Norte</li>
-                  </ul>
+                  {/* Action Buttons */}
+                  <div className="flex flex-col gap-3">
+                    <button
+                      onClick={() => openWebview("https://www.google.com/travel/flights?q=voos%20para%20santos%20dumont%20sdu")}
+                      className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-foreground text-background rounded-lg font-medium text-sm hover:opacity-90 transition-opacity"
+                    >
+                      <Plane className="w-4 h-4" />
+                      Ver voos para SDU
+                    </button>
+                    <button
+                      onClick={() => openWebview("https://www.google.com/travel/flights?q=voos%20para%20galeao%20gig")}
+                      className="w-full flex items-center justify-center gap-2 py-3 px-4 border border-foreground text-foreground rounded-lg font-medium text-sm hover:bg-foreground/10 transition-colors"
+                    >
+                      <Plane className="w-4 h-4" />
+                      Ver voos para GIG
+                    </button>
+                  </div>
                 </div>
+              )}
 
-                {/* Tempos de voo */}
-                <div className="mb-5">
-                  <h3 className="text-sm font-medium text-foreground mb-2">Tempos de voo</h3>
-                  <ul className="space-y-2 text-sm text-muted-foreground">
-                    <li>• São Paulo → ~1h</li>
-                    <li>• Belo Horizonte → ~1h10</li>
-                    <li>• Nordeste → 2h30 a 3h30</li>
-                  </ul>
-                </div>
+              {/* CARRO Content */}
+              {activeTransport === "carro" && (
+                <div>
+                  <h2 className="text-lg font-serif font-semibold text-foreground mb-4">
+                    Vir de carro
+                  </h2>
 
-                {/* Action Buttons */}
-                <div className="flex flex-col gap-3">
+                  {/* Acesso */}
+                  <div className="mb-5">
+                    <h3 className="text-sm font-medium text-foreground mb-2">Principais acessos</h3>
+                    <ul className="space-y-2 text-sm text-muted-foreground">
+                      <li>• <strong>BR-101</strong> — São Paulo / Costa Verde</li>
+                      <li>• <strong>BR-040</strong> — Belo Horizonte (~6h de viagem)</li>
+                      <li>• Região Serrana — estradas bem sinalizadas</li>
+                    </ul>
+                  </div>
+
+                  {/* Na cidade */}
+                  <div className="mb-6">
+                    <h3 className="text-sm font-medium text-foreground mb-2">Dentro da cidade</h3>
+                    <ul className="space-y-2 text-sm text-muted-foreground">
+                      <li>• Carro útil na Barra, Recreio e Guaratiba</li>
+                      <li>• Na Zona Sul, andar a pé ou app é mais prático</li>
+                      <li>• Estacionamento pode ser difícil em Ipanema/Leblon</li>
+                    </ul>
+                  </div>
+
+                  {/* Action Button */}
                   <button
-                    onClick={() => openWebview("https://www.google.com/travel/flights?q=voos%20para%20santos%20dumont%20sdu")}
+                    onClick={() => openWebview("https://www.google.com/maps/dir//Rio+de+Janeiro")}
                     className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-foreground text-background rounded-lg font-medium text-sm hover:opacity-90 transition-opacity"
                   >
-                    <Plane className="w-4 h-4" />
-                    Ver voos para SDU
+                    <ExternalLink className="w-4 h-4" />
+                    Traçar rota
                   </button>
+                </div>
+              )}
+
+              {/* ÔNIBUS Content */}
+              {activeTransport === "onibus" && (
+                <div>
+                  <h2 className="text-lg font-serif font-semibold text-foreground mb-4">
+                    Vir de ônibus
+                  </h2>
+
+                  {/* Rodoviária */}
+                  <div className="mb-5">
+                    <h3 className="text-sm font-medium text-foreground mb-2">Rodoviária Novo Rio</h3>
+                    <ul className="space-y-2 text-sm text-muted-foreground">
+                      <li>• Recebe ônibus de todas as capitais do país</li>
+                      <li>• Fica próxima ao Centro e Zona Portuária</li>
+                      <li>• Fácil acesso a metrô e apps de transporte</li>
+                    </ul>
+                  </div>
+
+                  {/* Viagem */}
+                  <div className="mb-6">
+                    <h3 className="text-sm font-medium text-foreground mb-2">Sobre a viagem</h3>
+                    <ul className="space-y-2 text-sm text-muted-foreground">
+                      <li>• Do Sudeste: viagens noturnas bem organizadas</li>
+                      <li>• Ônibus leito são confortáveis para longas distâncias</li>
+                      <li>• Opção econômica comparada ao avião</li>
+                    </ul>
+                  </div>
+
+                  {/* Action Button */}
                   <button
-                    onClick={() => openWebview("https://www.google.com/travel/flights?q=voos%20para%20galeao%20gig")}
-                    className="w-full flex items-center justify-center gap-2 py-3 px-4 border border-foreground text-foreground rounded-lg font-medium text-sm hover:bg-foreground/10 transition-colors"
+                    onClick={() => openWebview("https://www.clickbus.com.br/onibus/para/rio-de-janeiro-rj")}
+                    className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-foreground text-background rounded-lg font-medium text-sm hover:opacity-90 transition-opacity"
                   >
-                    <Plane className="w-4 h-4" />
-                    Ver voos para GIG
+                    <ExternalLink className="w-4 h-4" />
+                    Buscar ônibus
                   </button>
                 </div>
-              </div>
-            </motion.section>
-          )}
+              )}
 
-          {/* CARRO Content */}
-          {activeTransport === "carro" && (
-            <motion.section
-              key="carro"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.2 }}
-              className="px-6"
-            >
-              <div className="border border-border rounded-xl p-5">
-                <h2 className="text-lg font-serif font-semibold text-foreground mb-4">
-                  Vir de carro
-                </h2>
-
-                {/* Acesso */}
-                <div className="mb-5">
-                  <h3 className="text-sm font-medium text-foreground mb-2">Principais acessos</h3>
-                  <ul className="space-y-2 text-sm text-muted-foreground">
-                    <li>• <strong>BR-101</strong> — São Paulo / Costa Verde</li>
-                    <li>• <strong>BR-040</strong> — Belo Horizonte (~6h de viagem)</li>
-                    <li>• Região Serrana — estradas bem sinalizadas</li>
-                  </ul>
-                </div>
-
-                {/* Na cidade */}
-                <div className="mb-6">
-                  <h3 className="text-sm font-medium text-foreground mb-2">Dentro da cidade</h3>
-                  <ul className="space-y-2 text-sm text-muted-foreground">
-                    <li>• Carro útil na Barra, Recreio e Guaratiba</li>
-                    <li>• Na Zona Sul, andar a pé ou app é mais prático</li>
-                    <li>• Estacionamento pode ser difícil em Ipanema/Leblon</li>
-                  </ul>
-                </div>
-
-                {/* Action Button */}
-                <button
-                  onClick={() => openWebview("https://www.google.com/maps/dir//Rio+de+Janeiro")}
-                  className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-foreground text-background rounded-lg font-medium text-sm hover:opacity-90 transition-opacity"
-                >
-                  <ExternalLink className="w-4 h-4" />
-                  Traçar rota
-                </button>
-              </div>
-            </motion.section>
-          )}
-
-          {/* ÔNIBUS Content */}
-          {activeTransport === "onibus" && (
-            <motion.section
-              key="onibus"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.2 }}
-              className="px-6"
-            >
-              <div className="border border-border rounded-xl p-5">
-                <h2 className="text-lg font-serif font-semibold text-foreground mb-4">
-                  Vir de ônibus
-                </h2>
-
-                {/* Rodoviária */}
-                <div className="mb-5">
-                  <h3 className="text-sm font-medium text-foreground mb-2">Rodoviária Novo Rio</h3>
-                  <ul className="space-y-2 text-sm text-muted-foreground">
-                    <li>• Recebe ônibus de todas as capitais do país</li>
-                    <li>• Fica próxima ao Centro e Zona Portuária</li>
-                    <li>• Fácil acesso a metrô e apps de transporte</li>
-                  </ul>
-                </div>
-
-                {/* Viagem */}
-                <div className="mb-6">
-                  <h3 className="text-sm font-medium text-foreground mb-2">Sobre a viagem</h3>
-                  <ul className="space-y-2 text-sm text-muted-foreground">
-                    <li>• Do Sudeste: viagens noturnas bem organizadas</li>
-                    <li>• Ônibus leito são confortáveis para longas distâncias</li>
-                    <li>• Opção econômica comparada ao avião</li>
-                  </ul>
-                </div>
-
-                {/* Action Button */}
-                <button
-                  onClick={() => openWebview("https://www.clickbus.com.br/onibus/para/rio-de-janeiro-rj")}
-                  className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-foreground text-background rounded-lg font-medium text-sm hover:opacity-90 transition-opacity"
-                >
-                  <ExternalLink className="w-4 h-4" />
-                  Buscar ônibus
-                </button>
-              </div>
-            </motion.section>
-          )}
-        </AnimatePresence>
-
-        {/* Empty state hint */}
-        {activeTransport === null && (
-          <div className="px-6 text-center py-8">
-            <p className="text-sm text-muted-foreground">
-              Escolha como você vai chegar ao Rio
-            </p>
-          </div>
+              {/* Close button */}
+              <button
+                onClick={() => setActiveTransport(null)}
+                className="w-full mt-4 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Fechar
+              </button>
+            </div>
+          </motion.div>
         )}
-      </main>
-
-      {/* Footer */}
-      <footer className="px-6 py-8 border-t border-border">
-        <p className="text-xs text-muted-foreground">
-          The Lucky Trip — Rio de Janeiro
-        </p>
-      </footer>
+      </AnimatePresence>
     </div>
   );
 };
