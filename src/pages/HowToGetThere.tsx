@@ -161,7 +161,7 @@ const HowToGetThere = () => {
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="absolute bottom-0 left-0 right-0 z-40 bg-background rounded-t-3xl max-h-[55vh] overflow-y-auto"
+            className="absolute bottom-0 left-0 right-0 z-40 bg-background rounded-t-3xl max-h-[75vh] overflow-y-auto"
           >
             <div className="p-6">
               {/* Drag Handle */}
@@ -195,22 +195,28 @@ const HowToGetThere = () => {
                     </ul>
                   </div>
 
-                  {/* Action Buttons */}
+                  {/* Action Buttons - Skyscanner Links */}
                   <div className="flex flex-col gap-3">
-                    <button
-                      onClick={() => openWebview("https://www.google.com/travel/flights?q=voos%20para%20santos%20dumont%20sdu")}
+                    <a
+                      href="https://www.skyscanner.com.br/transporte/voos-para/sdua/voos-baratos-para-aeroporto-santos-dumont.html"
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-foreground text-background rounded-lg font-medium text-sm hover:opacity-90 transition-opacity"
                     >
                       <Plane className="w-4 h-4" />
-                      Ver voos para SDU
-                    </button>
-                    <button
-                      onClick={() => openWebview("https://www.google.com/travel/flights?q=voos%20para%20galeao%20gig")}
+                      Buscar voos para SDU
+                      <ExternalLink className="w-3.5 h-3.5 ml-1 opacity-70" />
+                    </a>
+                    <a
+                      href="https://www.skyscanner.com.br/transporte/voos-para/rioa/voos-baratos-para-aeroporto-internacional-do-rio-de-janeiro-galeao.html"
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className="w-full flex items-center justify-center gap-2 py-3 px-4 border border-foreground text-foreground rounded-lg font-medium text-sm hover:bg-foreground/10 transition-colors"
                     >
                       <Plane className="w-4 h-4" />
-                      Ver voos para GIG
-                    </button>
+                      Buscar voos para GIG
+                      <ExternalLink className="w-3.5 h-3.5 ml-1 opacity-70" />
+                    </a>
                   </div>
                 </div>
               )}
