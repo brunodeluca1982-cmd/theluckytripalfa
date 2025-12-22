@@ -28,22 +28,22 @@ export interface Neighborhood {
  */
 export const RIO_NEIGHBORHOODS: Neighborhood[] = [
   // Coastal axis (left to right along the coast)
-  { id: "recreio", name: "Recreio", mapPosition: { top: "82%", left: "8%" } },
-  { id: "barra-da-tijuca", name: "Barra da Tijuca", mapPosition: { top: "78%", left: "18%" } },
-  { id: "sao-conrado", name: "São Conrado", mapPosition: { top: "72%", left: "32%" } },
-  { id: "leblon", name: "Leblon", mapPosition: { top: "68%", left: "44%" } },
-  { id: "ipanema", name: "Ipanema", mapPosition: { top: "65%", left: "54%" } },
-  { id: "arpoador", name: "Arpoador", mapPosition: { top: "62%", left: "62%" } },
-  { id: "copacabana", name: "Copacabana", mapPosition: { top: "55%", left: "74%" } },
-  { id: "leme", name: "Leme", mapPosition: { top: "48%", left: "85%" } },
+  { id: "recreio", name: "Recreio", mapPosition: { top: "68%", left: "4%" } },
+  { id: "barra-da-tijuca", name: "Barra da Tijuca", mapPosition: { top: "82%", left: "14%" } },
+  { id: "sao-conrado", name: "São Conrado", mapPosition: { top: "85%", left: "38%" } },
+  { id: "leblon", name: "Leblon", mapPosition: { top: "75%", left: "45%" } },
+  { id: "ipanema", name: "Ipanema", mapPosition: { top: "82%", left: "54%" } },
+  { id: "arpoador", name: "Arpoador", mapPosition: { top: "82%", left: "64%" } },
+  { id: "copacabana", name: "Copacabana", mapPosition: { top: "72%", left: "76%" } },
+  { id: "leme", name: "Leme", mapPosition: { top: "60%", left: "88%" } },
   // Inner neighborhoods (around the lagoon)
-  { id: "lagoa", name: "Lagoa", mapPosition: { top: "52%", left: "58%" } },
-  { id: "jardim-botanico", name: "Jardim Botânico", mapPosition: { top: "48%", left: "50%" } },
-  { id: "gavea", name: "Gávea", mapPosition: { top: "42%", left: "55%" } },
+  { id: "lagoa", name: "Lagoa", mapPosition: { top: "62%", left: "58%" } },
+  { id: "jardim-botanico", name: "Jardim Botânico", mapPosition: { top: "52%", left: "48%" } },
+  { id: "gavea", name: "Gávea", mapPosition: { top: "50%", left: "58%" } },
   // Central / historical
-  { id: "botafogo", name: "Botafogo", mapPosition: { top: "38%", left: "68%" } },
-  { id: "santa-teresa", name: "Santa Teresa", mapPosition: { top: "25%", left: "50%" } },
-  { id: "centro", name: "Centro", mapPosition: { top: "18%", left: "72%" } },
+  { id: "botafogo", name: "Botafogo", mapPosition: { top: "50%", left: "70%" } },
+  { id: "santa-teresa", name: "Santa Teresa", mapPosition: { top: "24%", left: "32%" } },
+  { id: "centro", name: "Centro", mapPosition: { top: "20%", left: "78%" } },
 ];
 
 // Check if a neighborhood is in the canonical base map
