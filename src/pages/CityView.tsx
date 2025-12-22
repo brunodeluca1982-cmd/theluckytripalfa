@@ -89,7 +89,7 @@ const CityView = () => {
       {/* Map Area - Horizontal pan only, full range */}
       <div 
         ref={mapContainerRef}
-        className="relative w-full h-[65vh] overflow-x-scroll overflow-y-hidden cursor-grab active:cursor-grabbing"
+        className="relative w-full h-[65vh] overflow-x-auto overflow-y-hidden cursor-grab active:cursor-grabbing"
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
@@ -103,19 +103,18 @@ const CityView = () => {
           WebkitOverflowScrolling: 'touch'
         }}
       >
-        {/* Map content wrapper - wider than viewport for full pan range */}
+        {/* Map content wrapper - fixed width larger than viewport */}
         <div 
           ref={mapContentRef}
-          className="relative h-full inline-block"
-          style={{ width: '200vw' }}
+          className="relative h-full"
+          style={{ width: '160vw', minWidth: '160vw' }}
         >
-          {/* 3D Illustrated Map Background - full height, proportional width */}
+          {/* 3D Illustrated Map Background */}
           <img 
             src="/assets/maps/rio-3d-map.png" 
             alt="Rio de Janeiro 3D Map"
-            className="h-full w-auto max-w-none pointer-events-none select-none"
+            className="absolute inset-0 w-full h-full object-cover pointer-events-none select-none"
             draggable={false}
-            style={{ minWidth: '200vw' }}
           />
 
           {/* Tappable neighborhood markers - anchored to map coordinates */}
