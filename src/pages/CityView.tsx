@@ -37,12 +37,13 @@ const CityView = () => {
       </header>
 
       {/* Map Area */}
-      <div className="relative w-full aspect-[3/4] bg-muted">
-        {/* Static map placeholder background */}
-        <div className="absolute inset-0 bg-gradient-to-b from-muted to-muted-foreground/10">
-          {/* Coastline suggestion */}
-          <div className="absolute top-0 right-0 w-1/3 h-full bg-accent/5" />
-        </div>
+      <div className="relative w-full aspect-[4/3] bg-muted overflow-hidden">
+        {/* 3D Illustrated Map Background */}
+        <img 
+          src="/assets/maps/rio-3d-map.png" 
+          alt="Rio de Janeiro 3D Map"
+          className="absolute inset-0 w-full h-full object-cover object-center"
+        />
 
         {/* Tappable neighborhood markers */}
         {RIO_NEIGHBORHOODS.map((neighborhood) => (
