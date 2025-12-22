@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { ChevronLeft, Plane, Car, Bus, ExternalLink, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import santosDumontImage from "@/assets/places/santos-dumont-airport.jpg";
 
 type TransportType = "aviao" | "carro" | "onibus" | null;
 
@@ -50,35 +51,42 @@ const HowToGetThere = () => {
         )}
       </AnimatePresence>
 
-      {/* Header */}
-      <header className="px-6 py-4 border-b border-border">
-        <Link
-          to="/destino/rio-de-janeiro"
-          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <ChevronLeft className="w-4 h-4" />
-          Voltar
-        </Link>
-      </header>
+      {/* Hero Section */}
+      <div className="relative h-72 overflow-hidden">
+        {/* Back Button - Positioned over hero */}
+        <div className="absolute top-0 left-0 right-0 z-20 px-6 py-4">
+          <Link
+            to="/destino/rio-de-janeiro"
+            className="inline-flex items-center gap-2 text-sm text-white/90 hover:text-white transition-colors"
+          >
+            <ChevronLeft className="w-4 h-4" />
+            Voltar
+          </Link>
+        </div>
+
+        {/* Hero Image */}
+        <img
+          src={santosDumontImage}
+          alt="Aeroporto Santos Dumont com Pão de Açúcar ao fundo"
+          className="w-full h-full object-cover"
+        />
+
+        {/* Gradient Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-black/20" />
+
+        {/* Hero Text */}
+        <div className="absolute bottom-0 left-0 right-0 p-6 z-10">
+          <h1 className="text-3xl font-serif font-semibold text-white leading-tight mb-2">
+            Como chegar ao Rio de Janeiro
+          </h1>
+          <p className="text-sm text-white/80">
+            Escolha como você prefere chegar
+          </p>
+        </div>
+      </div>
 
       {/* Content */}
       <main className="pb-12">
-        {/* Title */}
-        <div className="px-6 pt-8 pb-6">
-          <h1 className="text-4xl font-serif font-semibold text-foreground leading-tight">
-            Como Chegar
-          </h1>
-          <p className="text-lg text-muted-foreground mt-2">
-            Rio de Janeiro
-          </p>
-        </div>
-
-        {/* Introduction */}
-        <div className="px-6 pb-8">
-          <p className="text-base text-foreground leading-relaxed">
-            Chegar ao Rio é fácil. Difícil é ir embora.
-          </p>
-        </div>
 
         {/* Transport Selection Buttons */}
         <div className="px-6 pb-6">
@@ -145,49 +153,38 @@ const HowToGetThere = () => {
                 <div className="mb-5">
                   <h3 className="text-sm font-medium text-foreground mb-2">Aeroportos</h3>
                   <ul className="space-y-2 text-sm text-muted-foreground">
-                    <li>• <strong>Galeão (GIG)</strong> — voos internacionais e nacionais</li>
-                    <li>• <strong>Santos Dumont (SDU)</strong> — no Centro, ideal para Zona Sul</li>
-                    <li>• SDU tem uma das aproximações mais bonitas do mundo</li>
+                    <li>• <strong className="text-foreground">Santos Dumont (SDU)</strong> — Zona Sul, Centro, pouso cênico</li>
+                    <li>• <strong className="text-foreground">Galeão (GIG)</strong> — voos internacionais, Barra, Zona Norte</li>
                   </ul>
                 </div>
 
-                {/* Rotas principais */}
+                {/* Tempos de voo */}
                 <div className="mb-5">
-                  <h3 className="text-sm font-medium text-foreground mb-2">Rotas principais</h3>
+                  <h3 className="text-sm font-medium text-foreground mb-2">Tempos de voo</h3>
                   <ul className="space-y-2 text-sm text-muted-foreground">
-                    <li>• São Paulo → Rio: ~1h, voos a cada poucos minutos</li>
-                    <li>• Belo Horizonte → Rio: ~1h10</li>
-                    <li>• Porto Alegre → Rio: ~2h</li>
-                    <li>• Florianópolis → Rio: ~1h45</li>
-                    <li>• Fortaleza → Rio: ~3h</li>
+                    <li>• São Paulo → ~1h</li>
+                    <li>• Belo Horizonte → ~1h10</li>
+                    <li>• Nordeste → 2h30 a 3h30</li>
                   </ul>
                 </div>
 
-                {/* Dica */}
-                <div className="mb-5 border-l-2 border-border pl-3 py-1">
-                  <p className="text-sm text-muted-foreground">
-                    <strong className="text-foreground">Dica:</strong> Zona Sul? Prefira SDU. Barra/Recreio? Galeão é mais prático.
-                  </p>
+                {/* Action Buttons */}
+                <div className="flex flex-col gap-3">
+                  <button
+                    onClick={() => openWebview("https://www.google.com/travel/flights?q=voos%20para%20santos%20dumont%20sdu")}
+                    className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-foreground text-background rounded-lg font-medium text-sm hover:opacity-90 transition-opacity"
+                  >
+                    <Plane className="w-4 h-4" />
+                    Ver voos para SDU
+                  </button>
+                  <button
+                    onClick={() => openWebview("https://www.google.com/travel/flights?q=voos%20para%20galeao%20gig")}
+                    className="w-full flex items-center justify-center gap-2 py-3 px-4 border border-foreground text-foreground rounded-lg font-medium text-sm hover:bg-foreground/10 transition-colors"
+                  >
+                    <Plane className="w-4 h-4" />
+                    Ver voos para GIG
+                  </button>
                 </div>
-
-                {/* Do aeroporto */}
-                <div className="mb-6">
-                  <h3 className="text-sm font-medium text-foreground mb-2">Do aeroporto à cidade</h3>
-                  <ul className="space-y-2 text-sm text-muted-foreground">
-                    <li>• Uber e 99 funcionam bem</li>
-                    <li>• Táxi oficial é seguro</li>
-                    <li>• SDU: dá pra sair caminhando até o Centro</li>
-                  </ul>
-                </div>
-
-                {/* Action Button */}
-                <button
-                  onClick={() => openWebview("https://www.google.com/travel/flights?q=voos%20para%20rio%20de%20janeiro")}
-                  className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-foreground text-background rounded-lg font-medium text-sm hover:opacity-90 transition-opacity"
-                >
-                  <ExternalLink className="w-4 h-4" />
-                  Ver preços de voos
-                </button>
               </div>
             </motion.section>
           )}
