@@ -110,8 +110,8 @@ const HowToGetThere = () => {
       {/* ═══════════════════════════════════════════════════════════════
           EDITORIAL TITLE (SAME STYLE AS RIO DESTINATION)
           ═══════════════════════════════════════════════════════════════ */}
-      <div className="absolute top-[18vh] left-0 right-0 z-10 flex flex-col items-center px-6">
-        <h1 className="text-[2.5rem] font-serif font-medium text-white leading-tight text-center drop-shadow-lg tracking-tight">
+      <div className="absolute top-[14vh] left-0 right-0 z-10 flex flex-col items-center">
+        <h1 className="text-[3.25rem] font-serif font-medium text-white leading-none text-center drop-shadow-lg tracking-tight">
           Como chegar?
         </h1>
         <p className="text-[10px] tracking-[0.35em] text-white/70 uppercase mt-2.5">
