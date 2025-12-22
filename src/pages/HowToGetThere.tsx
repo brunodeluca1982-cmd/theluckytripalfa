@@ -95,7 +95,7 @@ const HowToGetThere = () => {
         className="absolute inset-0 bg-cover bg-center bg-fixed"
         style={{ backgroundImage: `url(${santosDumontImage})` }}
       />
-      <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/50" />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/45 to-black/60" />
 
       {/* ═══════════════════════════════════════════════════════════════
           BACK BUTTON (SAME AS RIO DESTINATION)
@@ -112,10 +112,10 @@ const HowToGetThere = () => {
           ═══════════════════════════════════════════════════════════════ */}
       <div className="absolute top-[18vh] left-0 right-0 z-10 flex flex-col items-center px-6">
         <h1 className="text-[2.5rem] font-serif font-medium text-white leading-tight text-center drop-shadow-lg tracking-tight">
-          Como chegar ao Rio de Janeiro
+          Como chegar?
         </h1>
         <p className="text-[10px] tracking-[0.35em] text-white/70 uppercase mt-2.5">
-          Escolha como você prefere chegar
+          Escolha como você quer
         </p>
       </div>
 
