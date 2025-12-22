@@ -86,10 +86,10 @@ const CityView = () => {
         <RoteiroAccessLink />
       </header>
 
-      {/* Map Area - Horizontal pan only */}
+      {/* Map Area - Horizontal pan only, full range */}
       <div 
         ref={mapContainerRef}
-        className="relative w-full h-[65vh] overflow-x-auto overflow-y-hidden scrollbar-hide cursor-grab active:cursor-grabbing"
+        className="relative w-full h-[65vh] overflow-x-scroll overflow-y-hidden cursor-grab active:cursor-grabbing"
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
@@ -97,23 +97,28 @@ const CityView = () => {
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleMouseUp}
-        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        style={{ 
+          scrollbarWidth: 'none', 
+          msOverflowStyle: 'none',
+          WebkitOverflowScrolling: 'touch'
+        }}
       >
-        {/* Map content wrapper - natural width, not fitted */}
+        {/* Map content wrapper - wider than viewport for full pan range */}
         <div 
           ref={mapContentRef}
-          className="relative h-full"
-          style={{ width: '180vw', minWidth: '180vw' }}
+          className="relative h-full inline-block"
+          style={{ width: '200vw' }}
         >
-          {/* 3D Illustrated Map Background */}
+          {/* 3D Illustrated Map Background - full height, proportional width */}
           <img 
             src="/assets/maps/rio-3d-map.png" 
             alt="Rio de Janeiro 3D Map"
-            className="h-full w-full object-cover object-center pointer-events-none select-none"
+            className="h-full w-auto max-w-none pointer-events-none select-none"
             draggable={false}
+            style={{ minWidth: '200vw' }}
           />
 
-          {/* Tappable neighborhood markers */}
+          {/* Tappable neighborhood markers - anchored to map coordinates */}
           {RIO_NEIGHBORHOODS.map((neighborhood) => (
             <Link
               key={neighborhood.id}
