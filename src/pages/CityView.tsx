@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ChevronLeft } from "lucide-react";
 import { RIO_NEIGHBORHOODS } from "@/data/rio-neighborhoods";
@@ -22,6 +22,56 @@ const CityView = () => {
     setPreviewOpen(true);
   };
 
+  const mapContainerRef = useRef<HTMLDivElement>(null);
+  const mapContentRef = useRef<HTMLDivElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
+
+  // Center on main area (Copacabana/Ipanema/Botafogo) on mount
+  useEffect(() => {
+    if (mapContainerRef.current && mapContentRef.current) {
+      const container = mapContainerRef.current;
+      const content = mapContentRef.current;
+      // Center the scroll position (main city area is roughly in the center-right)
+      const scrollCenter = (content.scrollWidth - container.clientWidth) * 0.55;
+      container.scrollLeft = scrollCenter;
+    }
+  }, []);
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (!mapContainerRef.current) return;
+    setIsDragging(true);
+    setStartX(e.pageX - mapContainerRef.current.offsetLeft);
+    setScrollLeft(mapContainerRef.current.scrollLeft);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging || !mapContainerRef.current) return;
+    e.preventDefault();
+    const x = e.pageX - mapContainerRef.current.offsetLeft;
+    const walk = (x - startX) * 1.2;
+    mapContainerRef.current.scrollLeft = scrollLeft - walk;
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (!mapContainerRef.current) return;
+    setIsDragging(true);
+    setStartX(e.touches[0].pageX - mapContainerRef.current.offsetLeft);
+    setScrollLeft(mapContainerRef.current.scrollLeft);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isDragging || !mapContainerRef.current) return;
+    const x = e.touches[0].pageX - mapContainerRef.current.offsetLeft;
+    const walk = (x - startX) * 1.2;
+    mapContainerRef.current.scrollLeft = scrollLeft - walk;
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header with Meu Roteiro access */}
@@ -36,39 +86,59 @@ const CityView = () => {
         <RoteiroAccessLink />
       </header>
 
-      {/* Map Area */}
-      <div className="relative w-full aspect-[4/3] bg-muted overflow-hidden">
-        {/* 3D Illustrated Map Background */}
-        <img 
-          src="/assets/maps/rio-3d-map.png" 
-          alt="Rio de Janeiro 3D Map"
-          className="absolute inset-0 w-full h-full object-cover object-center"
-        />
-
-        {/* Tappable neighborhood markers */}
-        {RIO_NEIGHBORHOODS.map((neighborhood) => (
-          <Link
-            key={neighborhood.id}
-            to={`/onde-ficar/${neighborhood.id}?from=map`}
-            className="absolute w-10 h-10 -ml-5 -mt-5 rounded-full bg-foreground/10 border border-foreground/20 hover:bg-foreground/20 hover:border-foreground/40 transition-colors flex items-center justify-center"
-            style={{ top: neighborhood.mapPosition.top, left: neighborhood.mapPosition.left }}
-            aria-label={`Explorar ${neighborhood.name}`}
-          >
-            <div className="w-2 h-2 rounded-full bg-foreground/60" />
-          </Link>
-        ))}
-
-        {/* Lucky List markers */}
-        {luckyListMarkers.map((marker) => (
-          <LuckyListMarker
-            key={marker.id}
-            id={marker.id}
-            top={marker.top}
-            left={marker.left}
-            isSubscriber={isSubscriber}
-            onLockedTap={handleLockedTap}
+      {/* Map Area - Horizontal pan only */}
+      <div 
+        ref={mapContainerRef}
+        className="relative w-full h-[65vh] overflow-x-auto overflow-y-hidden scrollbar-hide cursor-grab active:cursor-grabbing"
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleMouseUp}
+        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+      >
+        {/* Map content wrapper - natural width, not fitted */}
+        <div 
+          ref={mapContentRef}
+          className="relative h-full"
+          style={{ width: '180vw', minWidth: '180vw' }}
+        >
+          {/* 3D Illustrated Map Background */}
+          <img 
+            src="/assets/maps/rio-3d-map.png" 
+            alt="Rio de Janeiro 3D Map"
+            className="h-full w-full object-cover object-center pointer-events-none select-none"
+            draggable={false}
           />
-        ))}
+
+          {/* Tappable neighborhood markers */}
+          {RIO_NEIGHBORHOODS.map((neighborhood) => (
+            <Link
+              key={neighborhood.id}
+              to={`/onde-ficar/${neighborhood.id}?from=map`}
+              className="absolute w-10 h-10 -ml-5 -mt-5 rounded-full bg-foreground/10 border border-foreground/20 hover:bg-foreground/20 hover:border-foreground/40 transition-colors flex items-center justify-center"
+              style={{ top: neighborhood.mapPosition.top, left: neighborhood.mapPosition.left }}
+              aria-label={`Explorar ${neighborhood.name}`}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="w-2 h-2 rounded-full bg-foreground/60" />
+            </Link>
+          ))}
+
+          {/* Lucky List markers */}
+          {luckyListMarkers.map((marker) => (
+            <LuckyListMarker
+              key={marker.id}
+              id={marker.id}
+              top={marker.top}
+              left={marker.left}
+              isSubscriber={isSubscriber}
+              onLockedTap={handleLockedTap}
+            />
+          ))}
+        </div>
       </div>
 
       {/* Instruction */}
