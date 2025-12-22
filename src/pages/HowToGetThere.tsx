@@ -1,25 +1,55 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, Plane, Car, Bus, ExternalLink, X } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
-/**
- * Como Chegar — Rio de Janeiro
- * 
- * STRUCTURAL LOCK:
- * - City-level only (not neighborhood-based)
- * - Section anchors enabled for deep-linking
- * - Authority callout semantically marked
- * 
- * SECTION ANCHORS:
- * - #aviao
- * - #principais-rotas
- * - #carro
- * - #onibus
- * - #do-aeroporto
- */
+type TransportType = "aviao" | "carro" | "onibus" | null;
 
 const HowToGetThere = () => {
+  const [activeTransport, setActiveTransport] = useState<TransportType>(null);
+  const [webviewUrl, setWebviewUrl] = useState<string | null>(null);
+
+  const handleTransportClick = (transport: TransportType) => {
+    setActiveTransport(activeTransport === transport ? null : transport);
+  };
+
+  const openWebview = (url: string) => {
+    setWebviewUrl(url);
+  };
+
+  const closeWebview = () => {
+    setWebviewUrl(null);
+  };
+
   return (
     <div className="min-h-screen bg-background">
+      {/* Webview Overlay */}
+      <AnimatePresence>
+        {webviewUrl && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-background"
+          >
+            <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+              <button
+                onClick={closeWebview}
+                className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <X className="w-5 h-5" />
+                Fechar
+              </button>
+            </div>
+            <iframe
+              src={webviewUrl}
+              className="w-full h-[calc(100vh-56px)]"
+              title="External content"
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Header */}
       <header className="px-6 py-4 border-b border-border">
         <Link
@@ -48,245 +78,223 @@ const HowToGetThere = () => {
           <p className="text-base text-foreground leading-relaxed">
             Chegar ao Rio é fácil. Difícil é ir embora.
           </p>
-          <p className="text-base text-muted-foreground leading-relaxed mt-3">
-            A cidade é uma das mais bem conectadas do Brasil, com voos frequentes, bons aeroportos e acesso simples por estrada a partir de vários estados.
-          </p>
         </div>
 
-        {/* Divider */}
-        <div className="mx-6 border-t border-border" />
+        {/* Transport Selection Buttons */}
+        <div className="px-6 pb-6">
+          <div className="grid grid-cols-3 gap-3">
+            {/* Avião Button */}
+            <button
+              onClick={() => handleTransportClick("aviao")}
+              className={`flex flex-col items-center justify-center py-6 px-3 rounded-xl border-2 transition-all ${
+                activeTransport === "aviao"
+                  ? "border-foreground bg-foreground text-background"
+                  : "border-border bg-background text-foreground hover:border-foreground/50"
+              }`}
+            >
+              <Plane className="w-8 h-8 mb-2" />
+              <span className="text-sm font-semibold tracking-wide">AVIÃO</span>
+            </button>
 
-        {/* ═══════════════════════════════════════════════════════════════
-            SECTION ANCHOR: AVIÃO
-            ID: #aviao
-            ═══════════════════════════════════════════════════════════════ */}
-        <section id="aviao" className="px-6 pt-8">
-          <h2 className="text-xl font-serif font-semibold text-foreground mb-4">
-            AVIÃO
-          </h2>
-          <p className="text-base text-muted-foreground leading-relaxed mb-6">
-            O Rio tem dois aeroportos principais, e a escolha faz diferença dependendo do seu roteiro.
-          </p>
+            {/* Carro Button */}
+            <button
+              onClick={() => handleTransportClick("carro")}
+              className={`flex flex-col items-center justify-center py-6 px-3 rounded-xl border-2 transition-all ${
+                activeTransport === "carro"
+                  ? "border-foreground bg-foreground text-background"
+                  : "border-border bg-background text-foreground hover:border-foreground/50"
+              }`}
+            >
+              <Car className="w-8 h-8 mb-2" />
+              <span className="text-sm font-semibold tracking-wide">CARRO</span>
+            </button>
 
-          {/* Galeão */}
-          <div className="mb-6">
-            <h3 className="text-lg font-serif font-medium text-foreground mb-2">
-              Aeroporto Internacional do Galeão (GIG)
-            </h3>
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              É a principal porta de entrada para quem vem de fora do Brasil e também para muitos voos nacionais.
-            </p>
-            <p className="text-sm text-muted-foreground leading-relaxed mt-2">
-              Fica a cerca de 20 km do Centro e funciona melhor para quem vai se hospedar na Zona Norte, Centro, Barra ou Recreio.
+            {/* Ônibus Button */}
+            <button
+              onClick={() => handleTransportClick("onibus")}
+              className={`flex flex-col items-center justify-center py-6 px-3 rounded-xl border-2 transition-all ${
+                activeTransport === "onibus"
+                  ? "border-foreground bg-foreground text-background"
+                  : "border-border bg-background text-foreground hover:border-foreground/50"
+              }`}
+            >
+              <Bus className="w-8 h-8 mb-2" />
+              <span className="text-sm font-semibold tracking-wide">ÔNIBUS</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Content Sections */}
+        <AnimatePresence mode="wait">
+          {/* AVIÃO Content */}
+          {activeTransport === "aviao" && (
+            <motion.section
+              key="aviao"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
+              className="px-6"
+            >
+              <div className="border border-border rounded-xl p-5">
+                <h2 className="text-lg font-serif font-semibold text-foreground mb-4">
+                  Voar para o Rio
+                </h2>
+
+                {/* Aeroportos */}
+                <div className="mb-5">
+                  <h3 className="text-sm font-medium text-foreground mb-2">Aeroportos</h3>
+                  <ul className="space-y-2 text-sm text-muted-foreground">
+                    <li>• <strong>Galeão (GIG)</strong> — voos internacionais e nacionais</li>
+                    <li>• <strong>Santos Dumont (SDU)</strong> — no Centro, ideal para Zona Sul</li>
+                    <li>• SDU tem uma das aproximações mais bonitas do mundo</li>
+                  </ul>
+                </div>
+
+                {/* Rotas principais */}
+                <div className="mb-5">
+                  <h3 className="text-sm font-medium text-foreground mb-2">Rotas principais</h3>
+                  <ul className="space-y-2 text-sm text-muted-foreground">
+                    <li>• São Paulo → Rio: ~1h, voos a cada poucos minutos</li>
+                    <li>• Belo Horizonte → Rio: ~1h10</li>
+                    <li>• Porto Alegre → Rio: ~2h</li>
+                    <li>• Florianópolis → Rio: ~1h45</li>
+                    <li>• Fortaleza → Rio: ~3h</li>
+                  </ul>
+                </div>
+
+                {/* Dica */}
+                <div className="mb-5 border-l-2 border-border pl-3 py-1">
+                  <p className="text-sm text-muted-foreground">
+                    <strong className="text-foreground">Dica:</strong> Zona Sul? Prefira SDU. Barra/Recreio? Galeão é mais prático.
+                  </p>
+                </div>
+
+                {/* Do aeroporto */}
+                <div className="mb-6">
+                  <h3 className="text-sm font-medium text-foreground mb-2">Do aeroporto à cidade</h3>
+                  <ul className="space-y-2 text-sm text-muted-foreground">
+                    <li>• Uber e 99 funcionam bem</li>
+                    <li>• Táxi oficial é seguro</li>
+                    <li>• SDU: dá pra sair caminhando até o Centro</li>
+                  </ul>
+                </div>
+
+                {/* Action Button */}
+                <button
+                  onClick={() => openWebview("https://www.google.com/travel/flights?q=voos%20para%20rio%20de%20janeiro")}
+                  className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-foreground text-background rounded-lg font-medium text-sm hover:opacity-90 transition-opacity"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  Ver preços de voos
+                </button>
+              </div>
+            </motion.section>
+          )}
+
+          {/* CARRO Content */}
+          {activeTransport === "carro" && (
+            <motion.section
+              key="carro"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
+              className="px-6"
+            >
+              <div className="border border-border rounded-xl p-5">
+                <h2 className="text-lg font-serif font-semibold text-foreground mb-4">
+                  Vir de carro
+                </h2>
+
+                {/* Acesso */}
+                <div className="mb-5">
+                  <h3 className="text-sm font-medium text-foreground mb-2">Principais acessos</h3>
+                  <ul className="space-y-2 text-sm text-muted-foreground">
+                    <li>• <strong>BR-101</strong> — São Paulo / Costa Verde</li>
+                    <li>• <strong>BR-040</strong> — Belo Horizonte (~6h de viagem)</li>
+                    <li>• Região Serrana — estradas bem sinalizadas</li>
+                  </ul>
+                </div>
+
+                {/* Na cidade */}
+                <div className="mb-6">
+                  <h3 className="text-sm font-medium text-foreground mb-2">Dentro da cidade</h3>
+                  <ul className="space-y-2 text-sm text-muted-foreground">
+                    <li>• Carro útil na Barra, Recreio e Guaratiba</li>
+                    <li>• Na Zona Sul, andar a pé ou app é mais prático</li>
+                    <li>• Estacionamento pode ser difícil em Ipanema/Leblon</li>
+                  </ul>
+                </div>
+
+                {/* Action Button */}
+                <button
+                  onClick={() => openWebview("https://www.google.com/maps/dir//Rio+de+Janeiro")}
+                  className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-foreground text-background rounded-lg font-medium text-sm hover:opacity-90 transition-opacity"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  Traçar rota
+                </button>
+              </div>
+            </motion.section>
+          )}
+
+          {/* ÔNIBUS Content */}
+          {activeTransport === "onibus" && (
+            <motion.section
+              key="onibus"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
+              className="px-6"
+            >
+              <div className="border border-border rounded-xl p-5">
+                <h2 className="text-lg font-serif font-semibold text-foreground mb-4">
+                  Vir de ônibus
+                </h2>
+
+                {/* Rodoviária */}
+                <div className="mb-5">
+                  <h3 className="text-sm font-medium text-foreground mb-2">Rodoviária Novo Rio</h3>
+                  <ul className="space-y-2 text-sm text-muted-foreground">
+                    <li>• Recebe ônibus de todas as capitais do país</li>
+                    <li>• Fica próxima ao Centro e Zona Portuária</li>
+                    <li>• Fácil acesso a metrô e apps de transporte</li>
+                  </ul>
+                </div>
+
+                {/* Viagem */}
+                <div className="mb-6">
+                  <h3 className="text-sm font-medium text-foreground mb-2">Sobre a viagem</h3>
+                  <ul className="space-y-2 text-sm text-muted-foreground">
+                    <li>• Do Sudeste: viagens noturnas bem organizadas</li>
+                    <li>• Ônibus leito são confortáveis para longas distâncias</li>
+                    <li>• Opção econômica comparada ao avião</li>
+                  </ul>
+                </div>
+
+                {/* Action Button */}
+                <button
+                  onClick={() => openWebview("https://www.clickbus.com.br/onibus/para/rio-de-janeiro-rj")}
+                  className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-foreground text-background rounded-lg font-medium text-sm hover:opacity-90 transition-opacity"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  Buscar ônibus
+                </button>
+              </div>
+            </motion.section>
+          )}
+        </AnimatePresence>
+
+        {/* Empty state hint */}
+        {activeTransport === null && (
+          <div className="px-6 text-center py-8">
+            <p className="text-sm text-muted-foreground">
+              Escolha como você vai chegar ao Rio
             </p>
           </div>
-
-          {/* Santos Dumont */}
-          <div className="mb-6">
-            <h3 className="text-lg font-serif font-medium text-foreground mb-2">
-              Aeroporto Santos Dumont (SDU)
-            </h3>
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              No coração da cidade, de frente para a Baía de Guanabara.
-            </p>
-            <p className="text-sm text-muted-foreground leading-relaxed mt-2">
-              É, sem exagero, uma das aproximações mais bonitas do mundo.
-            </p>
-            <p className="text-sm text-muted-foreground leading-relaxed mt-2">
-              Ideal para quem vai ficar na Zona Sul. Você pousa praticamente dentro da cidade.
-            </p>
-          </div>
-        </section>
-
-        {/* Divider */}
-        <div className="mx-6 border-t border-border" />
-
-        {/* ═══════════════════════════════════════════════════════════════
-            SECTION ANCHOR: PRINCIPAIS ROTAS DO BRASIL
-            ID: #principais-rotas
-            ═══════════════════════════════════════════════════════════════ */}
-        <section id="principais-rotas" className="px-6 pt-8">
-          <h2 className="text-xl font-serif font-semibold text-foreground mb-6">
-            PRINCIPAIS ROTAS DO BRASIL
-          </h2>
-
-          {/* São Paulo */}
-          <div className="mb-6 pb-6 border-b border-border">
-            <h3 className="text-base font-serif font-medium text-foreground mb-2">
-              São Paulo → Rio de Janeiro
-            </h3>
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              É praticamente uma ponte aérea.
-            </p>
-            <p className="text-sm text-muted-foreground leading-relaxed mt-1">
-              Há voos a cada poucos minutos, tanto para o Santos Dumont quanto para o Galeão.
-            </p>
-            <p className="text-sm text-muted-foreground leading-relaxed mt-1">
-              Duração média: 1h.
-            </p>
-          </div>
-
-          {/* Belo Horizonte */}
-          <div className="mb-6 pb-6 border-b border-border">
-            <h3 className="text-base font-serif font-medium text-foreground mb-2">
-              Belo Horizonte → Rio de Janeiro
-            </h3>
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              Voos diretos frequentes.
-            </p>
-            <p className="text-sm text-muted-foreground leading-relaxed mt-1">
-              Duração média: 1h10.
-            </p>
-            <p className="text-sm text-muted-foreground leading-relaxed mt-1">
-              Também é possível ir de carro, numa viagem bonita pela BR-040, com cerca de 6 horas.
-            </p>
-          </div>
-
-          {/* Porto Alegre */}
-          <div className="mb-6 pb-6 border-b border-border">
-            <h3 className="text-base font-serif font-medium text-foreground mb-2">
-              Porto Alegre → Rio de Janeiro
-            </h3>
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              Voos diretos diários.
-            </p>
-            <p className="text-sm text-muted-foreground leading-relaxed mt-1">
-              Duração média: 2h.
-            </p>
-            <p className="text-sm text-muted-foreground leading-relaxed mt-1">
-              Costuma ter boas tarifas fora de feriados.
-            </p>
-          </div>
-
-          {/* Florianópolis */}
-          <div className="mb-6 pb-6 border-b border-border">
-            <h3 className="text-base font-serif font-medium text-foreground mb-2">
-              Florianópolis → Rio de Janeiro
-            </h3>
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              Voos diretos regulares.
-            </p>
-            <p className="text-sm text-muted-foreground leading-relaxed mt-1">
-              Duração média: 1h45.
-            </p>
-            <p className="text-sm text-muted-foreground leading-relaxed mt-1">
-              É uma rota muito usada por quem vem no verão.
-            </p>
-          </div>
-
-          {/* Fortaleza */}
-          <div className="mb-6 pb-6 border-b border-border">
-            <h3 className="text-base font-serif font-medium text-foreground mb-2">
-              Fortaleza → Rio de Janeiro
-            </h3>
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              Voos diretos.
-            </p>
-            <p className="text-sm text-muted-foreground leading-relaxed mt-1">
-              Duração média: 3h.
-            </p>
-            <p className="text-sm text-muted-foreground leading-relaxed mt-1">
-              Ótima opção para quem vem do Nordeste sem precisar de conexão.
-            </p>
-          </div>
-
-          {/* General note */}
-          <p className="text-sm text-muted-foreground leading-relaxed">
-            De forma geral, o Rio é bem conectado com todas as capitais do Sudeste, Sul e Nordeste.
-          </p>
-          <p className="text-sm text-muted-foreground leading-relaxed mt-2">
-            Se você vem de uma capital média ou menor, normalmente faz uma conexão rápida em São Paulo, Brasília ou Belo Horizonte.
-          </p>
-        </section>
-
-        {/* Divider */}
-        <div className="mx-6 border-t border-border mt-8" />
-
-        {/* ═══════════════════════════════════════════════════════════════
-            SECTION ANCHOR: CARRO
-            ID: #carro
-            ═══════════════════════════════════════════════════════════════ */}
-        <section id="carro" className="px-6 pt-8">
-          <h2 className="text-xl font-serif font-semibold text-foreground mb-4">
-            CARRO
-          </h2>
-          <p className="text-sm text-muted-foreground leading-relaxed mb-4">
-            Para quem vem de carro, o acesso é simples:
-          </p>
-          <ul className="text-sm text-muted-foreground leading-relaxed space-y-1 mb-4">
-            <li>• São Paulo / Costa Verde: BR-101</li>
-            <li>• Minas Gerais: BR-040</li>
-            <li>• Região Serrana: estradas bem sinalizadas</li>
-          </ul>
-          <p className="text-sm text-muted-foreground leading-relaxed">
-            Vale lembrar: dentro da cidade, carro faz sentido principalmente na Barra, Recreio e Guaratiba.
-          </p>
-          <p className="text-sm text-muted-foreground leading-relaxed mt-2">
-            Na Zona Sul, muitas vezes andar a pé ou usar aplicativo é mais prático.
-          </p>
-        </section>
-
-        {/* Divider */}
-        <div className="mx-6 border-t border-border mt-8" />
-
-        {/* ═══════════════════════════════════════════════════════════════
-            SECTION ANCHOR: ÔNIBUS
-            ID: #onibus
-            ═══════════════════════════════════════════════════════════════ */}
-        <section id="onibus" className="px-6 pt-8">
-          <h2 className="text-xl font-serif font-semibold text-foreground mb-4">
-            ÔNIBUS
-          </h2>
-          <p className="text-sm text-muted-foreground leading-relaxed">
-            A Rodoviária Novo Rio recebe ônibus de praticamente todas as capitais do país.
-          </p>
-          <p className="text-sm text-muted-foreground leading-relaxed mt-2">
-            Fica próxima ao Centro e à Zona Portuária.
-          </p>
-          <p className="text-sm text-muted-foreground leading-relaxed mt-2">
-            Para quem vem do Sudeste, é uma opção confortável, com viagens noturnas bem organizadas.
-          </p>
-        </section>
-
-        {/* Divider */}
-        <div className="mx-6 border-t border-border mt-8" />
-
-        {/* ═══════════════════════════════════════════════════════════════
-            SECTION ANCHOR: DO AEROPORTO ATÉ A CIDADE
-            ID: #do-aeroporto
-            ═══════════════════════════════════════════════════════════════ */}
-        <section id="do-aeroporto" className="px-6 pt-8">
-          <h2 className="text-xl font-serif font-semibold text-foreground mb-4">
-            DO AEROPORTO ATÉ A CIDADE
-          </h2>
-          <ul className="text-sm text-muted-foreground leading-relaxed space-y-1 mb-6">
-            <li>• Aplicativos como Uber e 99 funcionam bem</li>
-            <li>• Táxi oficial é seguro</li>
-            <li>• Do Santos Dumont, muitas vezes dá pra sair caminhando ou chegar rápido de carro à Zona Sul</li>
-            <li>• Do Galeão, o carro ou app é a melhor opção</li>
-          </ul>
-
-          {/* ═══════════════════════════════════════════════════════════════
-              AUTHORITY CALLOUT
-              Type: Personal recommendation from the guide
-              Semantic role: trusted editorial advice
-              ═══════════════════════════════════════════════════════════════ */}
-          <aside 
-            className="border-l-2 border-border pl-4 py-2"
-            role="note"
-            aria-label="Dica pessoal do guia"
-          >
-            <p className="text-sm font-medium text-foreground mb-2">
-              Minha dica pessoal:
-            </p>
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              Se você vai ficar em Ipanema, Leblon ou Copacabana, prefira voar para o Santos Dumont.
-            </p>
-            <p className="text-sm text-muted-foreground leading-relaxed mt-1">
-              Se vai para a Barra, Recreio ou Guaratiba, o Galeão costuma ser mais prático.
-            </p>
-          </aside>
-        </section>
+        )}
       </main>
 
       {/* Footer */}
