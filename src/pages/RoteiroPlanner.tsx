@@ -325,11 +325,11 @@ const RoteiroPlanner = () => {
       <header className="sticky top-0 z-30 bg-background/95 backdrop-blur-sm border-b border-border">
         <div className="px-4 py-3 flex items-center justify-between">
           <Link
-            to={`/destino/${destinationId}`}
+            to="/meu-roteiro"
             className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             <ChevronLeft className="w-4 h-4" />
-            {destinationName}
+            Meu Roteiro
           </Link>
           
           {totalItems > 0 && (
