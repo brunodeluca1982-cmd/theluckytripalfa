@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { ChevronLeft } from "lucide-react";
 import { RIO_NEIGHBORHOODS } from "@/data/rio-neighborhoods";
@@ -14,64 +14,86 @@ const luckyListMarkers = [
 
 const CityView = () => {
   const [previewOpen, setPreviewOpen] = useState(false);
-  
-  // Mock subscriber state - replace with actual auth logic
   const isSubscriber = false;
 
   const handleLockedTap = () => {
     setPreviewOpen(true);
   };
 
-  const mapContainerRef = useRef<HTMLDivElement>(null);
-  const mapContentRef = useRef<HTMLDivElement>(null);
+  // Map panning state
+  const viewportRef = useRef<HTMLDivElement>(null);
+  const layerRef = useRef<HTMLDivElement>(null);
+  const [translateX, setTranslateX] = useState(0);
+  const [bounds, setBounds] = useState({ minX: 0, maxX: 0 });
   const [isDragging, setIsDragging] = useState(false);
-  const [startX, setStartX] = useState(0);
-  const [scrollLeft, setScrollLeft] = useState(0);
+  const dragStartRef = useRef({ x: 0, translateX: 0 });
 
-  // Fixed map width in pixels for consistent pan range
-  const MAP_WIDTH = 3200;
-
-  // Set initial scroll to center on main area (Copacabana/Ipanema)
-  useEffect(() => {
-    if (mapContainerRef.current) {
-      const container = mapContainerRef.current;
-      // Fixed initial position: center of map minus half viewport
-      const initialScroll = (MAP_WIDTH - container.clientWidth) / 2;
-      container.scrollLeft = Math.max(0, initialScroll);
+  // Calculate bounds after image loads
+  const handleImageLoad = useCallback(() => {
+    if (viewportRef.current && layerRef.current) {
+      const viewportWidth = viewportRef.current.clientWidth;
+      const layerWidth = layerRef.current.scrollWidth;
+      const minX = viewportWidth - layerWidth; // rightmost pan (shows Leme)
+      const maxX = 0; // leftmost pan (shows Recreio)
+      setBounds({ minX, maxX });
+      // Center initially
+      const initialX = minX / 2;
+      setTranslateX(Math.min(maxX, Math.max(minX, initialX)));
     }
   }, []);
 
-  const handleMouseDown = (e: React.MouseEvent) => {
-    if (!mapContainerRef.current) return;
+  // Recalculate on resize
+  useEffect(() => {
+    const handleResize = () => handleImageLoad();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [handleImageLoad]);
+
+  // Clamp helper
+  const clamp = (value: number) => Math.min(bounds.maxX, Math.max(bounds.minX, value));
+
+  // Pointer/Touch handlers
+  const handleDragStart = (clientX: number) => {
     setIsDragging(true);
-    setStartX(e.pageX - mapContainerRef.current.offsetLeft);
-    setScrollLeft(mapContainerRef.current.scrollLeft);
+    dragStartRef.current = { x: clientX, translateX };
   };
 
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging || !mapContainerRef.current) return;
-    e.preventDefault();
-    const x = e.pageX - mapContainerRef.current.offsetLeft;
-    const walk = (x - startX) * 1.2;
-    mapContainerRef.current.scrollLeft = scrollLeft - walk;
+  const handleDragMove = (clientX: number) => {
+    if (!isDragging) return;
+    const deltaX = clientX - dragStartRef.current.x;
+    const newX = dragStartRef.current.translateX + deltaX;
+    setTranslateX(clamp(newX));
   };
 
-  const handleMouseUp = () => {
+  const handleDragEnd = () => {
     setIsDragging(false);
   };
 
-  const handleTouchStart = (e: React.TouchEvent) => {
-    if (!mapContainerRef.current) return;
-    setIsDragging(true);
-    setStartX(e.touches[0].pageX - mapContainerRef.current.offsetLeft);
-    setScrollLeft(mapContainerRef.current.scrollLeft);
+  // Mouse events
+  const onMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    handleDragStart(e.clientX);
   };
+  const onMouseMove = (e: React.MouseEvent) => handleDragMove(e.clientX);
+  const onMouseUp = () => handleDragEnd();
+  const onMouseLeave = () => handleDragEnd();
 
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isDragging || !mapContainerRef.current) return;
-    const x = e.touches[0].pageX - mapContainerRef.current.offsetLeft;
-    const walk = (x - startX) * 1.2;
-    mapContainerRef.current.scrollLeft = scrollLeft - walk;
+  // Touch events
+  const onTouchStart = (e: React.TouchEvent) => {
+    if (e.touches.length === 1) {
+      handleDragStart(e.touches[0].clientX);
+    }
+  };
+  const onTouchMove = (e: React.TouchEvent) => {
+    if (e.touches.length === 1) {
+      handleDragMove(e.touches[0].clientX);
+    }
+  };
+  const onTouchEnd = () => handleDragEnd();
+
+  // Prevent wheel zoom
+  const onWheel = (e: React.WheelEvent) => {
+    e.preventDefault();
   };
 
   return (
@@ -88,35 +110,41 @@ const CityView = () => {
         <RoteiroAccessLink />
       </header>
 
-      {/* Map Area - Horizontal pan only, full range */}
+      {/* Map Viewport - fixed overflow, horizontal pan only */}
       <div 
-        ref={mapContainerRef}
-        className="relative w-full h-[65vh] overflow-x-auto overflow-y-hidden cursor-grab active:cursor-grabbing"
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleMouseUp}
-        style={{ 
-          scrollbarWidth: 'none', 
-          msOverflowStyle: 'none',
-          WebkitOverflowScrolling: 'touch'
-        }}
+        ref={viewportRef}
+        className="relative w-full h-[65vh] overflow-hidden cursor-grab active:cursor-grabbing select-none"
+        style={{ touchAction: "pan-x" }}
+        onMouseDown={onMouseDown}
+        onMouseMove={onMouseMove}
+        onMouseUp={onMouseUp}
+        onMouseLeave={onMouseLeave}
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+        onWheel={onWheel}
       >
-        {/* Map content wrapper - fixed pixel width for consistent pan range */}
+        {/* Map Layer - translated horizontally only, fixed scale */}
         <div 
-          ref={mapContentRef}
-          className="relative h-full"
-          style={{ width: `${MAP_WIDTH}px`, minWidth: `${MAP_WIDTH}px` }}
+          ref={layerRef}
+          className="absolute top-0 left-0 h-full"
+          style={{ 
+            transform: `translate3d(${translateX}px, 0, 0)`,
+            willChange: "transform"
+          }}
         >
-          {/* 3D Illustrated Map Background */}
+          {/* Map Image - fixed scale, no zoom */}
           <img 
             src="/assets/maps/rio-3d-map.png" 
             alt="Rio de Janeiro 3D Map"
-            className="absolute inset-0 w-full h-full object-cover pointer-events-none select-none"
+            className="h-full w-auto max-w-none pointer-events-none"
+            style={{ 
+              userSelect: "none",
+              WebkitUserDrag: "none",
+              userDrag: "none"
+            } as React.CSSProperties}
             draggable={false}
+            onLoad={handleImageLoad}
           />
 
           {/* Tappable neighborhood markers - anchored to map coordinates */}
