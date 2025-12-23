@@ -1,5 +1,5 @@
 import { useEffect, useRef, useCallback } from "react";
-import { useNavigate, useParams, useLocation } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 /**
  * ═══════════════════════════════════════════════════════════════════════════
@@ -7,15 +7,17 @@ import { useNavigate, useParams, useLocation } from "react-router-dom";
  * ═══════════════════════════════════════════════════════════════════════════
  * 
  * LOCKED FLOW (STEP 1 OF DESTINATION JOURNEY):
- * 1. Destination click → Hero video plays (15–30s)
+ * 1. Destination click → Hero video plays (15–30s) ONLY FIRST TIME per city
  * 2. Video ends → Automatic transition to destination hub
  * 3. User can skip anytime with "Pular" button
+ * 4. Subsequent visits skip video entirely
  * 
  * IMMUTABILITY RULES:
- * - Video must auto-play on entry
+ * - Video must auto-play on FIRST entry only
  * - Video must auto-advance to hub on completion
  * - Skip button must always be visible
  * - Replace history entry (no back to video from hub)
+ * - Use localStorage to persist "seen" state per city
  * 
  * DO NOT MODIFY:
  * - Flow sequence (video → hub)
@@ -47,20 +49,51 @@ const destinationVideos: Record<string, DestinationConfig> = {
   // "lisboa": { videoUrl: "...", hubPath: "/destino/lisboa", name: "Lisboa" },
 };
 
+// Helper to get localStorage key for a city
+const getSeenKey = (cityId: string) => `heroVideoSeen:${cityId}`;
+
+// Check if video was already seen for this city
+const hasSeenVideo = (cityId: string): boolean => {
+  try {
+    return localStorage.getItem(getSeenKey(cityId)) === "true";
+  } catch {
+    return false;
+  }
+};
+
+// Mark video as seen for this city
+const markVideoAsSeen = (cityId: string): void => {
+  try {
+    localStorage.setItem(getSeenKey(cityId), "true");
+  } catch {
+    // Silently fail if localStorage is unavailable
+  }
+};
+
+// Clear video seen flag for a city (for replay functionality)
+export const clearVideoSeen = (cityId: string): void => {
+  try {
+    localStorage.removeItem(getSeenKey(cityId));
+  } catch {
+    // Silently fail if localStorage is unavailable
+  }
+};
+
 const DestinationVideoIntro = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const location = useLocation();
   const videoRef = useRef<HTMLVideoElement>(null);
 
   const config = id ? destinationVideos[id] : null;
 
   const goToHub = useCallback(() => {
-    if (config) {
+    if (config && id) {
+      // Mark as seen before navigating
+      markVideoAsSeen(id);
       // Replace current history entry so back from hub doesn't return to video
       navigate(config.hubPath, { replace: true });
     }
-  }, [config, navigate]);
+  }, [config, id, navigate]);
 
   const handleSkip = useCallback(() => {
     goToHub();
@@ -72,8 +105,14 @@ const DestinationVideoIntro = () => {
 
   useEffect(() => {
     // If no valid destination, redirect to destinos list
-    if (!config) {
+    if (!config || !id) {
       navigate("/destinos", { replace: true });
+      return;
+    }
+
+    // If video already seen for this city, skip directly to hub
+    if (hasSeenVideo(id)) {
+      navigate(config.hubPath, { replace: true });
       return;
     }
 
@@ -84,9 +123,10 @@ const DestinationVideoIntro = () => {
         goToHub();
       });
     }
-  }, [config, navigate, goToHub]);
+  }, [config, id, navigate, goToHub]);
 
-  if (!config) {
+  // Don't render if redirecting
+  if (!config || !id || hasSeenVideo(id)) {
     return null;
   }
 

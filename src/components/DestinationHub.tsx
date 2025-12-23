@@ -1,8 +1,10 @@
 import { Link } from "react-router-dom";
-import { ChevronLeft, MapPin, Bed, Utensils, Compass, Sparkles, Car, Moon, Coffee, Wallet, Shield, Calendar, Lightbulb, Map } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { ChevronLeft, MapPin, Bed, Utensils, Compass, Sparkles, Car, Moon, Coffee, Wallet, Shield, Calendar, Lightbulb, Map, Play } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import useEmblaCarousel from "embla-carousel-react";
 import { useCallback, useEffect, useState } from "react";
+import { clearVideoSeen } from "@/pages/DestinationVideoIntro";
 
 /**
  * ═══════════════════════════════════════════════════════════════════════════
@@ -106,6 +108,7 @@ const SWIPE_3_MODULES = [
 ];
 
 const DestinationHub = ({ destinationId, name, country, backgroundImage, actions }: DestinationHubProps) => {
+  const navigate = useNavigate();
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: false, dragFree: false });
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [scrollSnaps, setScrollSnaps] = useState<number[]>([]);
@@ -131,6 +134,12 @@ const DestinationHub = ({ destinationId, name, country, backgroundImage, actions
     onSelect();
   }, [emblaApi, onSelect]);
 
+  // Replay intro handler - clears the seen flag and navigates to intro
+  const handleReplayIntro = useCallback(() => {
+    clearVideoSeen(destinationId);
+    navigate(`/destino/${destinationId}/intro`, { replace: true });
+  }, [destinationId, navigate]);
+
   return (
     <div className="fixed inset-0 overflow-hidden">
       {/* ═══════════════════════════════════════════════════════════════
@@ -151,6 +160,17 @@ const DestinationHub = ({ destinationId, name, country, backgroundImage, actions
       >
         <ChevronLeft className="w-4 h-4" />
       </Link>
+
+      {/* ═══════════════════════════════════════════════════════════════
+          REPLAY INTRO BUTTON (small, top-right)
+          ═══════════════════════════════════════════════════════════════ */}
+      <button 
+        onClick={handleReplayIntro}
+        className="absolute top-8 right-4 z-30 inline-flex items-center justify-center w-9 h-9 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white/70 hover:bg-white/20 hover:text-white transition-colors"
+        aria-label="Replay intro video"
+      >
+        <Play className="w-3.5 h-3.5" />
+      </button>
 
       {/* ═══════════════════════════════════════════════════════════════
           EDITORIAL TITLE (LOCKED)
