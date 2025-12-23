@@ -63,8 +63,8 @@ const TripPreferences = () => {
   }
 
   const handleContinue = () => {
-    // Navigate to the existing planner
-    navigate(`/planejar/${draft.destinationSlug}`);
+    // Navigate to decision step (automatic vs manual)
+    navigate('/meu-roteiro/decisao');
   };
 
   return (
