@@ -27,8 +27,9 @@ const EatMapView = () => {
   const [startX, setStartX] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
 
-  // Fixed map width in pixels for consistent pan range
-  const MAP_WIDTH = 3200;
+  // Fixed map width in pixels - closer neighborhood-level zoom for Onde Comer
+  // This value is independent and locked - does not inherit from other pages
+  const MAP_WIDTH = 1600;
 
   // Set initial scroll to center on main area (Copacabana/Ipanema)
   useEffect(() => {
