@@ -28,14 +28,16 @@ const CityView = () => {
   const [startX, setStartX] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
 
-  // Center on main area (Copacabana/Ipanema/Botafogo) on mount
+  // Fixed map width in pixels for consistent pan range
+  const MAP_WIDTH = 2400;
+
+  // Set initial scroll to center on main area (Copacabana/Ipanema)
   useEffect(() => {
-    if (mapContainerRef.current && mapContentRef.current) {
+    if (mapContainerRef.current) {
       const container = mapContainerRef.current;
-      const content = mapContentRef.current;
-      // Center the scroll position (main city area is roughly in the center-right)
-      const scrollCenter = (content.scrollWidth - container.clientWidth) * 0.55;
-      container.scrollLeft = scrollCenter;
+      // Fixed initial position: center of map minus half viewport
+      const initialScroll = (MAP_WIDTH - container.clientWidth) / 2;
+      container.scrollLeft = Math.max(0, initialScroll);
     }
   }, []);
 
@@ -103,11 +105,11 @@ const CityView = () => {
           WebkitOverflowScrolling: 'touch'
         }}
       >
-        {/* Map content wrapper - fixed width larger than viewport */}
+        {/* Map content wrapper - fixed pixel width for consistent pan range */}
         <div 
           ref={mapContentRef}
           className="relative h-full"
-          style={{ width: '160vw', minWidth: '160vw' }}
+          style={{ width: `${MAP_WIDTH}px`, minWidth: `${MAP_WIDTH}px` }}
         >
           {/* 3D Illustrated Map Background */}
           <img 
