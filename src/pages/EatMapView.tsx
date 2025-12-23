@@ -28,7 +28,7 @@ const EatMapView = () => {
   const [scrollLeft, setScrollLeft] = useState(0);
 
   // Fixed map width in pixels for consistent pan range
-  const MAP_WIDTH = 2400;
+  const MAP_WIDTH = 3200;
 
   // Set initial scroll to center on main area (Copacabana/Ipanema)
   useEffect(() => {
