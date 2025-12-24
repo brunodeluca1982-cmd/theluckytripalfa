@@ -128,7 +128,7 @@ const EatMapView = () => {
         >
           {/* 3D Illustrated Map Background */}
           <img 
-            src="/assets/maps/rio-3d-map.png" 
+            src="/assets/maps/rio-3d-map-eat.png" 
             alt="Rio de Janeiro 3D Map"
             className="absolute inset-0 w-full h-full object-cover pointer-events-none select-none"
             draggable={false}
