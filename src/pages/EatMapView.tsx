@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { RIO_NEIGHBORHOODS, getNeighborhoodById } from "@/data/rio-neighborhoods";
@@ -38,37 +38,29 @@ const EatMapView = () => {
   };
 
   const mapContainerRef = useRef<HTMLDivElement>(null);
-  const mapContentRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
-  const [scrollLeft, setScrollLeft] = useState(0);
+  const [translateX, setTranslateX] = useState(0);
+  const [currentTranslate, setCurrentTranslate] = useState(0);
 
-  // Fixed map width - reduced for less horizontal panning
-  // Smaller value = more zoomed out overview, less dragging required
-  const MAP_WIDTH = 900;
+  // Limited horizontal pan range (small exploration only)
+  const MAX_PAN = 60; // Maximum pixels to pan in each direction
 
-  // Set initial scroll to center
-  useEffect(() => {
-    if (mapContainerRef.current) {
-      const container = mapContainerRef.current;
-      const initialScroll = (MAP_WIDTH - container.clientWidth) / 2;
-      container.scrollLeft = Math.max(0, initialScroll);
-    }
-  }, []);
+  const clampTranslate = (value: number) => {
+    return Math.max(-MAX_PAN, Math.min(MAX_PAN, value));
+  };
 
   const handleMouseDown = (e: React.MouseEvent) => {
-    if (!mapContainerRef.current) return;
     setIsDragging(true);
-    setStartX(e.pageX - mapContainerRef.current.offsetLeft);
-    setScrollLeft(mapContainerRef.current.scrollLeft);
+    setStartX(e.clientX);
+    setCurrentTranslate(translateX);
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging || !mapContainerRef.current) return;
+    if (!isDragging) return;
     e.preventDefault();
-    const x = e.pageX - mapContainerRef.current.offsetLeft;
-    const walk = (x - startX) * 1.2;
-    mapContainerRef.current.scrollLeft = scrollLeft - walk;
+    const deltaX = e.clientX - startX;
+    setTranslateX(clampTranslate(currentTranslate + deltaX));
   };
 
   const handleMouseUp = () => {
@@ -76,17 +68,15 @@ const EatMapView = () => {
   };
 
   const handleTouchStart = (e: React.TouchEvent) => {
-    if (!mapContainerRef.current) return;
     setIsDragging(true);
-    setStartX(e.touches[0].pageX - mapContainerRef.current.offsetLeft);
-    setScrollLeft(mapContainerRef.current.scrollLeft);
+    setStartX(e.touches[0].clientX);
+    setCurrentTranslate(translateX);
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isDragging || !mapContainerRef.current) return;
-    const x = e.touches[0].pageX - mapContainerRef.current.offsetLeft;
-    const walk = (x - startX) * 1.2;
-    mapContainerRef.current.scrollLeft = scrollLeft - walk;
+    if (!isDragging) return;
+    const deltaX = e.touches[0].clientX - startX;
+    setTranslateX(clampTranslate(currentTranslate + deltaX));
   };
 
   return (
@@ -103,10 +93,10 @@ const EatMapView = () => {
         <RoteiroAccessLink />
       </header>
 
-      {/* Map Area - Fixed at top */}
+      {/* Map Area - Fixed at top, full map visible with limited horizontal pan */}
       <div 
         ref={mapContainerRef}
-        className="relative w-full h-[40vh] overflow-x-auto overflow-y-hidden cursor-grab active:cursor-grabbing flex-shrink-0"
+        className="relative w-full h-[40vh] overflow-hidden cursor-grab active:cursor-grabbing flex-shrink-0"
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
@@ -114,23 +104,20 @@ const EatMapView = () => {
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleMouseUp}
-        style={{ 
-          scrollbarWidth: 'none', 
-          msOverflowStyle: 'none',
-          WebkitOverflowScrolling: 'touch'
-        }}
       >
-        {/* Map content wrapper - fixed pixel width for consistent pan range */}
+        {/* Map content wrapper with transform for limited pan */}
         <div 
-          ref={mapContentRef}
-          className="relative h-full"
-          style={{ width: `${MAP_WIDTH}px`, minWidth: `${MAP_WIDTH}px` }}
+          className="relative w-full h-full"
+          style={{ 
+            transform: `translateX(${translateX}px)`,
+            transition: isDragging ? 'none' : 'transform 0.2s ease-out'
+          }}
         >
-          {/* 3D Illustrated Map Background */}
+          {/* 3D Illustrated Map Background - contain to show entire map */}
           <img 
             src="/assets/maps/rio-3d-map-eat.png" 
             alt="Rio de Janeiro 3D Map"
-            className="absolute inset-0 w-full h-full object-cover pointer-events-none select-none"
+            className="w-full h-full object-contain pointer-events-none select-none"
             draggable={false}
           />
 
