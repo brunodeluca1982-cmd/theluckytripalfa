@@ -7,6 +7,23 @@ import LuckyListPreviewSheet from "@/components/LuckyListPreviewSheet";
 import RoteiroAccessLink from "@/components/RoteiroAccessLink";
 import NeighborhoodDetailSheet from "@/components/eat/NeighborhoodDetailSheet";
 
+// Fixed editorial neighborhood order
+const NEIGHBORHOOD_ORDER = [
+  "recreio",
+  "barra-da-tijuca",
+  "sao-conrado",
+  "leblon",
+  "ipanema",
+  "arpoador",
+  "copacabana",
+  "leme",
+  "botafogo",
+  "jardim-botanico",
+  "gavea",
+  "santa-teresa",
+  "centro",
+];
+
 // Lucky List items with map positions (editorial placement)
 const luckyListMarkers = [
   { id: "confeitaria-colombo", top: "20%", left: "60%" },
@@ -166,39 +183,58 @@ const EatMapView = () => {
         </p>
       </div>
 
-      {/* Restaurant List */}
+      {/* Restaurant List - Grouped by editorial neighborhood order */}
       <div className="flex-1 overflow-y-auto">
         <div className="px-6 py-6">
           <h2 className="text-lg font-serif font-medium text-foreground mb-4">
             Restaurantes
           </h2>
-          <div className="space-y-1">
-            {restaurantListData.map((restaurant) => {
-              const neighborhoodData = getNeighborhoodById(restaurant.neighborhood);
-              const slug = restaurant.name
-                .toLowerCase()
-                .normalize("NFD")
-                .replace(/[\u0300-\u036f]/g, "")
-                .replace(/[^a-z0-9\s-]/g, "")
-                .replace(/\s+/g, "-");
+          <div className="space-y-6">
+            {NEIGHBORHOOD_ORDER.map((neighborhoodId) => {
+              const neighborhoodRestaurants = restaurantListData.filter(
+                (r) => r.neighborhood === neighborhoodId
+              );
+              
+              // Skip neighborhoods with no restaurants
+              if (neighborhoodRestaurants.length === 0) return null;
+              
+              const neighborhoodData = getNeighborhoodById(neighborhoodId);
               
               return (
-                <Link
-                  key={restaurant.id}
-                  to={`/restaurante/${slug}?from=${restaurant.neighborhood}`}
-                  className="flex items-center justify-between py-4 border-b border-border hover:bg-muted/30 transition-colors -mx-2 px-2 rounded"
-                >
-                  <div className="flex-1 min-w-0">
-                    <p className="text-base text-foreground truncate">{restaurant.name}</p>
-                    <p className="text-sm text-muted-foreground truncate">{neighborhoodData?.name || restaurant.neighborhood}</p>
+                <div key={neighborhoodId}>
+                  {/* Section Header */}
+                  <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3">
+                    {neighborhoodData?.name || neighborhoodId}
+                  </h3>
+                  <div className="space-y-1">
+                    {neighborhoodRestaurants.map((restaurant) => {
+                      const slug = restaurant.name
+                        .toLowerCase()
+                        .normalize("NFD")
+                        .replace(/[\u0300-\u036f]/g, "")
+                        .replace(/[^a-z0-9\s-]/g, "")
+                        .replace(/\s+/g, "-");
+                      
+                      return (
+                        <Link
+                          key={restaurant.id}
+                          to={`/restaurante/${slug}?from=${restaurant.neighborhood}`}
+                          className="flex items-center justify-between py-4 border-b border-border hover:bg-muted/30 transition-colors -mx-2 px-2 rounded"
+                        >
+                          <div className="flex-1 min-w-0">
+                            <p className="text-base text-foreground truncate">{restaurant.name}</p>
+                          </div>
+                          <div className="flex items-center gap-3 flex-shrink-0">
+                            <span className="text-xs text-muted-foreground/80 bg-muted/50 px-2 py-1 rounded">
+                              {restaurant.tag}
+                            </span>
+                            <ChevronRight className="w-4 h-4 text-muted-foreground/50" />
+                          </div>
+                        </Link>
+                      );
+                    })}
                   </div>
-                  <div className="flex items-center gap-3 flex-shrink-0">
-                    <span className="text-xs text-muted-foreground/80 bg-muted/50 px-2 py-1 rounded">
-                      {restaurant.tag}
-                    </span>
-                    <ChevronRight className="w-4 h-4 text-muted-foreground/50" />
-                  </div>
-                </Link>
+                </div>
               );
             })}
           </div>
