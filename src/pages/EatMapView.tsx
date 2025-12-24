@@ -43,10 +43,10 @@ const EatMapView = () => {
   const [startX, setStartX] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
 
-  // Fixed map width in pixels - wider city overview for Onde Comer
+  // Fixed map width in pixels - wider to show all markers including Barra da Tijuca
   // This value is independent and locked - does not inherit from other pages
-  // Smaller value = more zoomed out, less panning required
-  const MAP_WIDTH = 1100;
+  // Larger value = all markers visible, proper bounds coverage
+  const MAP_WIDTH = 1400;
 
   // Set initial scroll to center on main area (Copacabana/Ipanema)
   useEffect(() => {
@@ -128,11 +128,12 @@ const EatMapView = () => {
           className="relative h-full"
           style={{ width: `${MAP_WIDTH}px`, minWidth: `${MAP_WIDTH}px` }}
         >
-          {/* 3D Illustrated Map Background */}
+          {/* 3D Illustrated Map Background - object-fit adjusted to show full bounds */}
           <img 
             src="/assets/maps/rio-3d-map.png" 
             alt="Rio de Janeiro 3D Map"
-            className="absolute inset-0 w-full h-full object-cover pointer-events-none select-none"
+            className="absolute inset-0 w-full h-full object-contain object-center pointer-events-none select-none"
+            style={{ backgroundColor: 'hsl(var(--muted))' }}
             draggable={false}
           />
 

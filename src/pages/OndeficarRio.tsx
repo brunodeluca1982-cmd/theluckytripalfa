@@ -27,8 +27,9 @@ const OndeficarRio = () => {
   const [startX, setStartX] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
 
-  // Fixed map width - independent from Onde Comer
-  const MAP_WIDTH = 1100;
+  // Fixed map width - reduced for less horizontal panning
+  // Smaller value = more zoomed out overview, less dragging required
+  const MAP_WIDTH = 900;
 
   // Set initial scroll to center
   useEffect(() => {
