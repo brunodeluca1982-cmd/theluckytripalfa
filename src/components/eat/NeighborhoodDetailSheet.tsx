@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, ExternalLink, Instagram } from "lucide-react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { getNeighborhoodById } from "@/data/rio-neighborhoods";
 
@@ -8,6 +8,11 @@ interface Restaurant {
   name: string;
   neighborhood: string;
   tag: string;
+  category?: string;
+  price?: string;
+  mapsLink?: string;
+  instagram?: string;
+  editorial?: string;
 }
 
 interface NeighborhoodDetailSheetProps {
@@ -17,23 +22,17 @@ interface NeighborhoodDetailSheetProps {
   restaurants: Restaurant[];
 }
 
-// Short descriptions for each neighborhood (static, 1 line)
-const neighborhoodShortDescriptions: Record<string, string> = {
-  ipanema: "Gastronomia diversa como a própria praia",
-  leblon: "Restaurantes maduros, cozinhas sólidas",
-  copacabana: "Tradição à mesa, restaurantes históricos",
-  leme: "Discreto e local, clima de bairro",
-  arpoador: "Pequeno no mapa, estratégico",
-  "jardim-botanico": "Gastronomia verde, calma e cuidadosa",
-  gavea: "Bares clássicos, extensão da sala de casa",
-  botafogo: "Polo gastronômico criativo",
-  flamengo: "Funcional, com boas surpresas",
-  "santa-teresa": "Comer faz parte da experiência",
-  "sao-conrado": "Poucas opções, bem pontuais",
-  "barra-da-tijuca": "Restaurantes amplos e confortáveis",
-  recreio: "Comida ligada ao esporte e natureza",
-  centro: "Balcões históricos e confeitarias centenárias",
-  lagoa: "Restaurantes sofisticados à beira d'água",
+// Editorial intro text for each neighborhood (2-3 sentences)
+const neighborhoodIntros: Record<string, string> = {
+  ipanema: "Ipanema é onde o Rio fica mais \"curado\": bonito, caminhável e com uma cena gastronômica que vai do boteco perfeito à alta cozinha mais séria. Funciona para jantar especial, almoço sem pressa e começo de noite com clima leve.",
+  leblon: "Leblon é mais maduro: cozinha sólida, serviço bom e lugares onde você volta porque entrega sempre. É ótimo para almoço longo, jantar calmo e programas que não dependem de moda.",
+  copacabana: "Copacabana tem aquela mistura de clássico e grandioso: hotéis históricos, ocasiões especiais e jantar com sensação de \"evento\". Ótimo quando você quer um programa marcante, sem pressa.",
+  "jardim-botanico": "Jardim Botânico é charme com repertório: lugares autorais, bons encontros e uma energia mais \"bairro\", sem perder sofisticação. Funciona muito bem de dia e à noite.",
+  lagoa: "Lagoa é vista e respiro: lugares que funcionam bem no almoço, no fim de tarde e em jantares leves, com o entorno ajudando a experiência. Bom para programar sem correria.",
+  "sao-conrado": "São Conrado é cenário e logística: um bairro com poucos pontos certeiros, então quando funciona, vira porto seguro. Aqui vale muito mais a atmosfera, a vista e a praticidade do que \"caçar novidade\".",
+  "barra-da-tijuca": "Barra é ampla e confortável: restaurantes grandes, fáceis para grupo e com cara de programa completo. Tem muito churrasco, japonês, casas maiores e opções que funcionam sem susto. Jardim Oceânico entra aqui como a parte mais caminhável e \"bairro\" da Barra.",
+  gavea: "Gávea é boteco bom e conversa: lugar de rotina carioca, sem frescura, com aquele clima de \"sempre acontece\". Ótimo pra ir com amigos e emendar a noite.",
+  "santa-teresa": "Santa Teresa é programa com história: vista, clima de bairro antigo e lugares que pedem tempo. Aqui o certo é ir sem pressa e transformar a refeição em memória.",
 };
 
 const NeighborhoodDetailSheet = ({
@@ -49,8 +48,8 @@ const NeighborhoodDetailSheet = ({
     (r) => r.neighborhood === neighborhoodId
   );
 
-  const shortDescription = neighborhoodId 
-    ? neighborhoodShortDescriptions[neighborhoodId] || ""
+  const introText = neighborhoodId 
+    ? neighborhoodIntros[neighborhoodId] || ""
     : "";
 
   return (
@@ -69,56 +68,104 @@ const NeighborhoodDetailSheet = ({
           </header>
 
           {/* Content */}
-          <div className="flex-1 overflow-y-auto px-6 py-6">
-            {/* Neighborhood Title */}
-            <h1 className="text-2xl font-serif font-medium text-foreground mb-1">
-              {neighborhood?.name || neighborhoodId}
-            </h1>
-            
-            {/* Short Description */}
-            {shortDescription && (
-              <p className="text-sm text-muted-foreground mb-6">
-                {shortDescription}
+          <div className="flex-1 overflow-y-auto">
+            {/* Media Placeholder */}
+            <div className="w-full h-48 bg-muted/30 flex items-center justify-center border-b border-border">
+              <p className="text-sm text-muted-foreground">
+                Espaço para imagem ou vídeo
               </p>
-            )}
+            </div>
 
-            {/* Restaurant List */}
-            {filteredRestaurants.length > 0 ? (
-              <div className="space-y-1">
-                {filteredRestaurants.map((restaurant) => {
-                  const slug = restaurant.name
-                    .toLowerCase()
-                    .normalize("NFD")
-                    .replace(/[\u0300-\u036f]/g, "")
-                    .replace(/[^a-z0-9\s-]/g, "")
-                    .replace(/\s+/g, "-");
+            <div className="px-6 py-6">
+              {/* Neighborhood Title */}
+              <h1 className="text-2xl font-serif font-medium text-foreground mb-2">
+                Onde comer em {neighborhood?.name || neighborhoodId}
+              </h1>
+              
+              {/* Intro Text */}
+              {introText && (
+                <p className="text-base text-muted-foreground mb-6 leading-relaxed">
+                  {introText}
+                </p>
+              )}
 
-                  return (
-                    <Link
-                      key={restaurant.id}
-                      to={`/restaurante/${slug}?from=${restaurant.neighborhood}`}
-                      className="flex items-center justify-between py-4 border-b border-border hover:bg-muted/30 transition-colors -mx-2 px-2 rounded"
-                    >
-                      <div className="flex-1 min-w-0">
-                        <p className="text-base text-foreground truncate">
-                          {restaurant.name}
-                        </p>
+              {/* Restaurant List */}
+              {filteredRestaurants.length > 0 ? (
+                <div className="space-y-6">
+                  {filteredRestaurants.map((restaurant) => {
+                    const slug = restaurant.name
+                      .toLowerCase()
+                      .normalize("NFD")
+                      .replace(/[\u0300-\u036f]/g, "")
+                      .replace(/[^a-z0-9\s-]/g, "")
+                      .replace(/\s+/g, "-");
+
+                    return (
+                      <div
+                        key={restaurant.id}
+                        className="pb-6 border-b border-border last:border-0"
+                      >
+                        {/* Restaurant Header */}
+                        <div className="flex items-start justify-between gap-3 mb-2">
+                          <h3 className="text-lg font-medium text-foreground">
+                            {restaurant.name}
+                          </h3>
+                          {restaurant.price && (
+                            <span className="text-sm text-muted-foreground font-medium flex-shrink-0">
+                              {restaurant.price}
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Category Tag */}
+                        {restaurant.category && (
+                          <span className="inline-block text-xs text-muted-foreground/80 bg-muted/50 px-2 py-1 rounded mb-3">
+                            {restaurant.category}
+                          </span>
+                        )}
+
+                        {/* Editorial Text */}
+                        {restaurant.editorial && (
+                          <p className="text-sm text-muted-foreground leading-relaxed mb-3 whitespace-pre-line">
+                            {restaurant.editorial}
+                          </p>
+                        )}
+
+                        {/* Links */}
+                        <div className="flex items-center gap-4">
+                          {restaurant.mapsLink && (
+                            <a
+                              href={restaurant.mapsLink}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1.5 text-xs text-primary hover:text-primary/80 transition-colors"
+                            >
+                              <ExternalLink className="w-3.5 h-3.5" />
+                              Google Maps
+                            </a>
+                          )}
+                          {restaurant.instagram && (
+                            <a
+                              href={`https://instagram.com/${restaurant.instagram.replace('@', '')}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1.5 text-xs text-primary hover:text-primary/80 transition-colors"
+                            >
+                              <Instagram className="w-3.5 h-3.5" />
+                              {restaurant.instagram}
+                            </a>
+                          )}
+                        </div>
                       </div>
-                      <div className="flex items-center gap-3 flex-shrink-0">
-                        <span className="text-xs text-muted-foreground/80 bg-muted/50 px-2 py-1 rounded">
-                          {restaurant.tag}
-                        </span>
-                        <ChevronRight className="w-4 h-4 text-muted-foreground/50" />
-                      </div>
-                    </Link>
-                  );
-                })}
-              </div>
-            ) : (
-              <p className="text-sm text-muted-foreground text-center py-8">
-                Nenhum restaurante cadastrado neste bairro
-              </p>
-            )}
+                    );
+                  })}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-8">
+                  Nenhum restaurante cadastrado neste bairro
+                </p>
+              )}
+            </div>
           </div>
 
           {/* Footer */}
