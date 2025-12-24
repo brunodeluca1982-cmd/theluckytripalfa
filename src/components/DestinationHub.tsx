@@ -188,7 +188,7 @@ const DestinationHub = ({ destinationId, name, country, backgroundImage, actions
           HORIZONTAL SWIPE CAROUSEL (4 PAGES)
           ═══════════════════════════════════════════════════════════════ */}
       <div className="absolute inset-0 z-20 overflow-hidden" ref={emblaRef}>
-        <div className="flex h-full">
+        <div className="flex h-full transition-transform duration-200 ease-out">
           
           {/* ═══════════════════════════════════════════════════════════
               SWIPE 0 — PRIMARY HUB (ENTRY POINT)
