@@ -19,9 +19,11 @@ const NEIGHBORHOOD_ORDER = [
   "leme",
   "botafogo",
   "jardim-botanico",
+  "lagoa",
   "gavea",
   "santa-teresa",
   "centro",
+  "guaratiba",
 ];
 
 // Lucky List items with map positions (editorial placement)
@@ -31,18 +33,48 @@ const luckyListMarkers = [
 
 // Static restaurant data with tags for the list
 const restaurantListData = [
-  { id: "lasai", name: "Lasai", neighborhood: "botafogo", tag: "Alta Gastronomia" },
-  { id: "oteque", name: "Oteque", neighborhood: "botafogo", tag: "Alta Gastronomia" },
-  { id: "satyricon", name: "Satyricon", neighborhood: "leblon", tag: "Clássico" },
-  { id: "mr-lam", name: "Mr. Lam", neighborhood: "leblon", tag: "Japonesa" },
+  // IPANEMA
+  { id: "lasai", name: "Lasai", neighborhood: "ipanema", tag: "Alta Gastronomia" },
+  { id: "oteque", name: "Oteque", neighborhood: "ipanema", tag: "Alta Gastronomia" },
   { id: "nido-ristorante", name: "Nido Ristorante", neighborhood: "ipanema", tag: "Italiana" },
+  { id: "zaza-bistro", name: "Zazá Bistrô Café", neighborhood: "ipanema", tag: "Bistrô" },
   { id: "jobi", name: "Jobi", neighborhood: "ipanema", tag: "Boteco" },
+  { id: "barzin", name: "Barzin", neighborhood: "ipanema", tag: "Bar" },
+  // LEBLON
+  { id: "satyricon", name: "Satyricon", neighborhood: "leblon", tag: "Peixes" },
+  { id: "boteco-rainha", name: "Boteco Rainha", neighborhood: "leblon", tag: "Brasileira" },
+  { id: "gula-gula-leblon", name: "Gula Gula", neighborhood: "leblon", tag: "Carioca" },
+  { id: "casa-tua", name: "Casa Tua", neighborhood: "leblon", tag: "Italiana" },
+  { id: "belmonte-praia", name: "Belmonte Praia", neighborhood: "leblon", tag: "Clássico" },
+  // COPACABANA
   { id: "mee", name: "Mee", neighborhood: "copacabana", tag: "Alta Gastronomia" },
   { id: "cipriani", name: "Cipriani", neighborhood: "copacabana", tag: "Italiana" },
+  // JARDIM BOTÂNICO
+  { id: "elena", name: "Elena", neighborhood: "jardim-botanico", tag: "Contemporâneo" },
+  { id: "ella-pizzaria", name: "Ella Pizzaria", neighborhood: "jardim-botanico", tag: "Pizza" },
+  { id: "emporio-jardim", name: "Empório Jardim", neighborhood: "jardim-botanico", tag: "Brunch" },
+  // LAGOA
+  { id: "capricciosa", name: "Capricciosa", neighborhood: "lagoa", tag: "Italiana" },
+  { id: "gula-gula-lagoa", name: "Gula Gula", neighborhood: "lagoa", tag: "Carioca" },
+  { id: "ct-boucherie", name: "CT Boucherie – Claude Troisgros", neighborhood: "lagoa", tag: "Autoral" },
+  // SÃO CONRADO
+  { id: "a-sereia", name: "A Sereia", neighborhood: "sao-conrado", tag: "Vista" },
+  { id: "gurume-fashion-mall", name: "Gurumê – Fashion Mall", neighborhood: "sao-conrado", tag: "Japonesa" },
+  { id: "qui-qui", name: "Qui Qui", neighborhood: "sao-conrado", tag: "Quiosque" },
+  // BARRA DA TIJUCA (including Jardim Oceânico)
+  { id: "mocellin", name: "Mocellin", neighborhood: "barra-da-tijuca", tag: "Carnes" },
+  { id: "barra-grill", name: "Barra Grill", neighborhood: "barra-da-tijuca", tag: "Carnes" },
+  { id: "mocellin-mar", name: "Mocellin Mar", neighborhood: "barra-da-tijuca", tag: "Peixes" },
+  { id: "gurume-barra", name: "Gurumê", neighborhood: "barra-da-tijuca", tag: "Japonesa" },
+  { id: "pobre-juan", name: "Pobre Juan – VillageMall", neighborhood: "barra-da-tijuca", tag: "Carnes" },
+  { id: "tt-burger", name: "TT Burger", neighborhood: "barra-da-tijuca", tag: "Hambúrguer" },
+  { id: "golden-sucos", name: "Golden Sucos – Posto 7", neighborhood: "barra-da-tijuca", tag: "Pós-Praia" },
+  { id: "joao-padeiro", name: "João Padeiro", neighborhood: "barra-da-tijuca", tag: "Padaria" },
+  // GÁVEA
   { id: "braseiro-da-gavea", name: "Braseiro da Gávea", neighborhood: "gavea", tag: "Boteco" },
-  { id: "chez-claude", name: "Chez Claude", neighborhood: "jardim-botanico", tag: "Francesa" },
-  { id: "elena", name: "Elena", neighborhood: "jardim-botanico", tag: "Experiência" },
-  { id: "academia-da-cachaca", name: "Academia da Cachaça", neighborhood: "leblon", tag: "Brasileira" },
+  // SANTA TERESA
+  { id: "aprazivel", name: "Aprazível", neighborhood: "santa-teresa", tag: "Alta Gastronomia" },
+  { id: "bar-do-mineiro", name: "Bar do Mineiro", neighborhood: "santa-teresa", tag: "Brasileira" },
 ];
 
 const EatMapView = () => {
