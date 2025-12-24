@@ -43,16 +43,14 @@ const EatMapView = () => {
   const [startX, setStartX] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
 
-  // Fixed map width in pixels - wider to show all markers including Barra da Tijuca
-  // This value is independent and locked - does not inherit from other pages
-  // Larger value = all markers visible, proper bounds coverage
-  const MAP_WIDTH = 1400;
+  // Fixed map width - reduced for less horizontal panning
+  // Smaller value = more zoomed out overview, less dragging required
+  const MAP_WIDTH = 900;
 
-  // Set initial scroll to center on main area (Copacabana/Ipanema)
+  // Set initial scroll to center
   useEffect(() => {
     if (mapContainerRef.current) {
       const container = mapContainerRef.current;
-      // Fixed initial position: center of map minus half viewport
       const initialScroll = (MAP_WIDTH - container.clientWidth) / 2;
       container.scrollLeft = Math.max(0, initialScroll);
     }
@@ -108,7 +106,7 @@ const EatMapView = () => {
       {/* Map Area - Fixed at top */}
       <div 
         ref={mapContainerRef}
-        className="relative w-full h-[50vh] overflow-x-auto overflow-y-hidden cursor-grab active:cursor-grabbing flex-shrink-0"
+        className="relative w-full h-[40vh] overflow-x-auto overflow-y-hidden cursor-grab active:cursor-grabbing flex-shrink-0"
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
@@ -128,12 +126,11 @@ const EatMapView = () => {
           className="relative h-full"
           style={{ width: `${MAP_WIDTH}px`, minWidth: `${MAP_WIDTH}px` }}
         >
-          {/* 3D Illustrated Map Background - object-fit adjusted to show full bounds */}
+          {/* 3D Illustrated Map Background */}
           <img 
             src="/assets/maps/rio-3d-map.png" 
             alt="Rio de Janeiro 3D Map"
-            className="absolute inset-0 w-full h-full object-contain object-center pointer-events-none select-none"
-            style={{ backgroundColor: 'hsl(var(--muted))' }}
+            className="absolute inset-0 w-full h-full object-cover pointer-events-none select-none"
             draggable={false}
           />
 
