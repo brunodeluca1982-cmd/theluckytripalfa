@@ -71,8 +71,8 @@ const NeighborhoodDetailSheet = ({
           <div className="flex-1 overflow-y-auto">
             {/* Media Placeholder */}
             <div className="w-full h-48 bg-muted/30 flex items-center justify-center border-b border-border">
-              <p className="text-sm text-muted-foreground">
-                Espaço para imagem ou vídeo
+              <p className="text-sm text-muted-foreground text-center px-4">
+                Espaço para imagem ou vídeo do bairro
               </p>
             </div>
 
