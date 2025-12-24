@@ -5,6 +5,7 @@ import { RIO_NEIGHBORHOODS, getNeighborhoodById } from "@/data/rio-neighborhoods
 import LuckyListMarker from "@/components/LuckyListMarker";
 import LuckyListPreviewSheet from "@/components/LuckyListPreviewSheet";
 import RoteiroAccessLink from "@/components/RoteiroAccessLink";
+import NeighborhoodDetailSheet from "@/components/eat/NeighborhoodDetailSheet";
 
 // Lucky List items with map positions (editorial placement)
 const luckyListMarkers = [
@@ -29,12 +30,19 @@ const restaurantListData = [
 
 const EatMapView = () => {
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [neighborhoodSheetOpen, setNeighborhoodSheetOpen] = useState(false);
+  const [selectedNeighborhood, setSelectedNeighborhood] = useState<string | null>(null);
   
   // Mock subscriber state - replace with actual auth logic
   const isSubscriber = false;
 
   const handleLockedTap = () => {
     setPreviewOpen(true);
+  };
+
+  const handleNeighborhoodTap = (neighborhoodId: string) => {
+    setSelectedNeighborhood(neighborhoodId);
+    setNeighborhoodSheetOpen(true);
   };
 
   const mapContainerRef = useRef<HTMLDivElement>(null);
@@ -123,16 +131,18 @@ const EatMapView = () => {
 
           {/* Tappable neighborhood markers - anchored to map coordinates */}
           {RIO_NEIGHBORHOODS.map((neighborhood) => (
-            <Link
+            <button
               key={neighborhood.id}
-              to={`/onde-comer/${neighborhood.id}?from=map`}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleNeighborhoodTap(neighborhood.id);
+              }}
               className="absolute w-10 h-10 -ml-5 -mt-5 rounded-full bg-foreground/10 border border-foreground/20 hover:bg-foreground/20 hover:border-foreground/40 transition-colors flex items-center justify-center"
               style={{ top: neighborhood.mapPosition.top, left: neighborhood.mapPosition.left }}
               aria-label={`Explorar restaurantes em ${neighborhood.name}`}
-              onClick={(e) => e.stopPropagation()}
             >
               <div className="w-2 h-2 rounded-full bg-foreground/60" />
-            </Link>
+            </button>
           ))}
 
           {/* Lucky List markers */}
@@ -204,6 +214,14 @@ const EatMapView = () => {
 
       {/* Lucky List Preview Sheet */}
       <LuckyListPreviewSheet open={previewOpen} onOpenChange={setPreviewOpen} />
+
+      {/* Neighborhood Detail Sheet */}
+      <NeighborhoodDetailSheet
+        open={neighborhoodSheetOpen}
+        onOpenChange={setNeighborhoodSheetOpen}
+        neighborhoodId={selectedNeighborhood}
+        restaurants={restaurantListData}
+      />
     </div>
   );
 };
