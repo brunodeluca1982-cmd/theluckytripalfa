@@ -4,6 +4,23 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { RIO_NEIGHBORHOODS, getNeighborhoodById } from "@/data/rio-neighborhoods";
 import RoteiroAccessLink from "@/components/RoteiroAccessLink";
 
+// Fixed editorial neighborhood order
+const NEIGHBORHOOD_ORDER = [
+  "recreio",
+  "barra-da-tijuca",
+  "sao-conrado",
+  "leblon",
+  "ipanema",
+  "arpoador",
+  "copacabana",
+  "leme",
+  "botafogo",
+  "jardim-botanico",
+  "gavea",
+  "santa-teresa",
+  "centro",
+];
+
 // Static hotel data with tags for the list
 const hotelListData = [
   { id: "hotel-fasano-rio", name: "Hotel Fasano Rio de Janeiro", neighborhood: "ipanema", tag: "Luxo" },
@@ -150,39 +167,58 @@ const OndeficarRio = () => {
         </p>
       </div>
 
-      {/* Hotel List */}
+      {/* Hotel List - Grouped by editorial neighborhood order */}
       <div className="flex-1 overflow-y-auto">
         <div className="px-6 py-6">
           <h2 className="text-lg font-serif font-medium text-foreground mb-4">
             Hotéis
           </h2>
-          <div className="space-y-1">
-            {hotelListData.map((hotel) => {
-              const neighborhoodData = getNeighborhoodById(hotel.neighborhood);
-              const slug = hotel.name
-                .toLowerCase()
-                .normalize("NFD")
-                .replace(/[\u0300-\u036f]/g, "")
-                .replace(/[^a-z0-9\s-]/g, "")
-                .replace(/\s+/g, "-");
+          <div className="space-y-6">
+            {NEIGHBORHOOD_ORDER.map((neighborhoodId) => {
+              const neighborhoodHotels = hotelListData.filter(
+                (h) => h.neighborhood === neighborhoodId
+              );
+              
+              // Skip neighborhoods with no hotels
+              if (neighborhoodHotels.length === 0) return null;
+              
+              const neighborhoodData = getNeighborhoodById(neighborhoodId);
               
               return (
-                <Link
-                  key={hotel.id}
-                  to={`/hotel/${slug}?from=${hotel.neighborhood}`}
-                  className="flex items-center justify-between py-4 border-b border-border hover:bg-muted/30 transition-colors -mx-2 px-2 rounded"
-                >
-                  <div className="flex-1 min-w-0">
-                    <p className="text-base text-foreground truncate">{hotel.name}</p>
-                    <p className="text-sm text-muted-foreground truncate">{neighborhoodData?.name || hotel.neighborhood}</p>
+                <div key={neighborhoodId}>
+                  {/* Section Header */}
+                  <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3">
+                    {neighborhoodData?.name || neighborhoodId}
+                  </h3>
+                  <div className="space-y-1">
+                    {neighborhoodHotels.map((hotel) => {
+                      const slug = hotel.name
+                        .toLowerCase()
+                        .normalize("NFD")
+                        .replace(/[\u0300-\u036f]/g, "")
+                        .replace(/[^a-z0-9\s-]/g, "")
+                        .replace(/\s+/g, "-");
+                      
+                      return (
+                        <Link
+                          key={hotel.id}
+                          to={`/hotel/${slug}?from=${hotel.neighborhood}`}
+                          className="flex items-center justify-between py-4 border-b border-border hover:bg-muted/30 transition-colors -mx-2 px-2 rounded"
+                        >
+                          <div className="flex-1 min-w-0">
+                            <p className="text-base text-foreground truncate">{hotel.name}</p>
+                          </div>
+                          <div className="flex items-center gap-3 flex-shrink-0">
+                            <span className="text-xs text-muted-foreground/80 bg-muted/50 px-2 py-1 rounded">
+                              {hotel.tag}
+                            </span>
+                            <ChevronRight className="w-4 h-4 text-muted-foreground/50" />
+                          </div>
+                        </Link>
+                      );
+                    })}
                   </div>
-                  <div className="flex items-center gap-3 flex-shrink-0">
-                    <span className="text-xs text-muted-foreground/80 bg-muted/50 px-2 py-1 rounded">
-                      {hotel.tag}
-                    </span>
-                    <ChevronRight className="w-4 h-4 text-muted-foreground/50" />
-                  </div>
-                </Link>
+                </div>
               );
             })}
           </div>
