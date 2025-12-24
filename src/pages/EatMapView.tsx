@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { ChevronLeft } from "lucide-react";
-import { RIO_NEIGHBORHOODS } from "@/data/rio-neighborhoods";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { RIO_NEIGHBORHOODS, getNeighborhoodById } from "@/data/rio-neighborhoods";
 import LuckyListMarker from "@/components/LuckyListMarker";
 import LuckyListPreviewSheet from "@/components/LuckyListPreviewSheet";
 import RoteiroAccessLink from "@/components/RoteiroAccessLink";
@@ -9,6 +9,22 @@ import RoteiroAccessLink from "@/components/RoteiroAccessLink";
 // Lucky List items with map positions (editorial placement)
 const luckyListMarkers = [
   { id: "confeitaria-colombo", top: "20%", left: "60%" },
+];
+
+// Static restaurant data with tags for the list
+const restaurantListData = [
+  { id: "lasai", name: "Lasai", neighborhood: "botafogo", tag: "Alta Gastronomia" },
+  { id: "oteque", name: "Oteque", neighborhood: "botafogo", tag: "Alta Gastronomia" },
+  { id: "satyricon", name: "Satyricon", neighborhood: "leblon", tag: "Clássico" },
+  { id: "mr-lam", name: "Mr. Lam", neighborhood: "leblon", tag: "Japonesa" },
+  { id: "nido-ristorante", name: "Nido Ristorante", neighborhood: "ipanema", tag: "Italiana" },
+  { id: "jobi", name: "Jobi", neighborhood: "ipanema", tag: "Boteco" },
+  { id: "mee", name: "Mee", neighborhood: "copacabana", tag: "Alta Gastronomia" },
+  { id: "cipriani", name: "Cipriani", neighborhood: "copacabana", tag: "Italiana" },
+  { id: "braseiro-da-gavea", name: "Braseiro da Gávea", neighborhood: "gavea", tag: "Boteco" },
+  { id: "chez-claude", name: "Chez Claude", neighborhood: "jardim-botanico", tag: "Francesa" },
+  { id: "elena", name: "Elena", neighborhood: "jardim-botanico", tag: "Experiência" },
+  { id: "academia-da-cachaca", name: "Academia da Cachaça", neighborhood: "leblon", tag: "Brasileira" },
 ];
 
 const EatMapView = () => {
@@ -76,7 +92,7 @@ const EatMapView = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       {/* Header with Meu Roteiro access */}
       <header className="px-6 py-4 border-b border-border flex items-center justify-between">
         <Link
@@ -89,10 +105,10 @@ const EatMapView = () => {
         <RoteiroAccessLink />
       </header>
 
-      {/* Map Area - Horizontal pan only, full range */}
+      {/* Map Area - Fixed at top */}
       <div 
         ref={mapContainerRef}
-        className="relative w-full h-[65vh] overflow-x-auto overflow-y-hidden cursor-grab active:cursor-grabbing"
+        className="relative w-full h-[50vh] overflow-x-auto overflow-y-hidden cursor-grab active:cursor-grabbing flex-shrink-0"
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
@@ -149,10 +165,49 @@ const EatMapView = () => {
       </div>
 
       {/* Instruction */}
-      <div className="px-6 py-8">
+      <div className="px-6 py-4 border-b border-border">
         <p className="text-sm text-muted-foreground text-center">
           Toque em um bairro para explorar onde comer
         </p>
+      </div>
+
+      {/* Restaurant List */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="px-6 py-6">
+          <h2 className="text-lg font-serif font-medium text-foreground mb-4">
+            Restaurantes
+          </h2>
+          <div className="space-y-1">
+            {restaurantListData.map((restaurant) => {
+              const neighborhoodData = getNeighborhoodById(restaurant.neighborhood);
+              const slug = restaurant.name
+                .toLowerCase()
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "")
+                .replace(/[^a-z0-9\s-]/g, "")
+                .replace(/\s+/g, "-");
+              
+              return (
+                <Link
+                  key={restaurant.id}
+                  to={`/restaurante/${slug}?from=${restaurant.neighborhood}`}
+                  className="flex items-center justify-between py-4 border-b border-border hover:bg-muted/30 transition-colors -mx-2 px-2 rounded"
+                >
+                  <div className="flex-1 min-w-0">
+                    <p className="text-base text-foreground truncate">{restaurant.name}</p>
+                    <p className="text-sm text-muted-foreground truncate">{neighborhoodData?.name || restaurant.neighborhood}</p>
+                  </div>
+                  <div className="flex items-center gap-3 flex-shrink-0">
+                    <span className="text-xs text-muted-foreground/80 bg-muted/50 px-2 py-1 rounded">
+                      {restaurant.tag}
+                    </span>
+                    <ChevronRight className="w-4 h-4 text-muted-foreground/50" />
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
       </div>
 
       {/* Footer */}
