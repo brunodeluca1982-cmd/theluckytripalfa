@@ -153,7 +153,7 @@ const AutomaticItinerary = () => {
       itinerary,
       createdAt: new Date().toISOString()
     }));
-    navigate(`/planejar/${draft.destinationSlug}`);
+    navigate('/roteiro/rio-3-dias-final');
   };
 
   return (
