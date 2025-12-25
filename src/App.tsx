@@ -48,6 +48,7 @@ import IARevisarRoteiro from "./pages/ia/IARevisarRoteiro";
 import IAPerguntar from "./pages/ia/IAPerguntar";
 import IACriarRoteiro from "./pages/ia/IACriarRoteiro";
 import IAMelhorarRoteiro from "./pages/ia/IAMelhorarRoteiro";
+import RoteiroFinal from "./pages/RoteiroFinal";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -113,6 +114,7 @@ const App = () => {
               <Route path="/meu-roteiro/manual" element={<ManualItinerary />} />
               <Route path="/favoritos" element={<Favoritos />} />
               <Route path="/planejar/:destinationId" element={<RoteiroPlanner />} />
+              <Route path="/roteiro/rio-3-dias-final" element={<RoteiroFinal />} />
               
               {/* Profile */}
               <Route path="/perfil" element={<Profile />} />
