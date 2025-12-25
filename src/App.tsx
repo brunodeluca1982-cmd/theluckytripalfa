@@ -108,6 +108,9 @@ const App = () => {
               {/* Meu Roteiro */}
               <Route path="/meu-roteiro" element={<MeuRoteiro />} />
               <Route path="/meu-roteiro/preferencias" element={<TripPreferences />} />
+              <Route path="/meu-roteiro/decisao" element={<ItineraryDecision />} />
+              <Route path="/meu-roteiro/automatico" element={<AutomaticItinerary />} />
+              <Route path="/meu-roteiro/manual" element={<ManualItinerary />} />
               <Route path="/favoritos" element={<Favoritos />} />
               <Route path="/planejar/:destinationId" element={<RoteiroPlanner />} />
               
