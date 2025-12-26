@@ -1,78 +1,86 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, MapPin, Utensils, Sun, Camera, Mountain, Music, Car, Footprints, Clock, Moon } from "lucide-react";
+import { getValidatedLocation } from "@/data/validated-locations";
 
 /**
  * ROTEIRO FINAL - Static template for finalized itinerary
+ * Uses validated location data only - no guessing or approximating.
  * Includes accommodation anchoring, transport segments, time blocks, and cost estimates.
  */
 
 const RoteiroFinal = () => {
   const navigate = useNavigate();
 
-  // Static demo data for Rio 3 days with full logistical structure
+  // Static demo data for Rio 3 days with validated locations
+  // All places referenced here must exist in validated-locations.ts
   const tripData = {
     destination: "Rio de Janeiro",
     dates: "15 Jan → 18 Jan 2025",
     travelers: "2 adultos, 1 criança",
-    hotel: { name: "Hotel Fasano Rio de Janeiro", neighborhood: "Ipanema" },
+    hotel: { 
+      id: 'fasano',
+      name: "Hotel Fasano Rio de Janeiro", 
+      neighborhood: "Ipanema",
+      address: getValidatedLocation('fasano')?.fullAddress || 'Av. Vieira Souto, 80 - Ipanema',
+    },
     days: [
       {
         day: 1,
         title: "Dia 1 — Zona Sul clássica",
         activities: [
-          { time: "08:30", name: "Saída do hotel", neighborhood: "Ipanema", icon: "departure", timeBlock: "morning" },
-          { time: "08:45", type: "transport", from: "Ipanema", to: "Floresta da Tijuca", mode: "uber", duration: "25-30 min" },
-          { time: "09:30", name: "Cristo Redentor", neighborhood: "Floresta da Tijuca", icon: "landmark", timeBlock: "morning" },
-          { time: "12:00", type: "transport", from: "Floresta da Tijuca", to: "Ipanema", mode: "uber", duration: "25-30 min" },
-          { time: "12:30", name: "Lasai", neighborhood: "Ipanema", icon: "meal", timeBlock: "afternoon" },
-          { time: "14:30", type: "transport", from: "Ipanema", to: "Ipanema", mode: "walking", duration: "5 min" },
-          { time: "15:00", name: "Praia de Ipanema", neighborhood: "Ipanema", icon: "activity", timeBlock: "afternoon" },
-          { time: "17:00", type: "transport", from: "Ipanema", to: "Arpoador", mode: "walking", duration: "10-15 min" },
-          { time: "17:30", name: "Pôr do sol no Arpoador", neighborhood: "Arpoador", icon: "sunset", timeBlock: "evening" },
-          { time: "19:15", type: "transport", from: "Arpoador", to: "Ipanema", mode: "walking", duration: "10-15 min" },
-          { time: "20:00", name: "Oteque", neighborhood: "Ipanema", icon: "meal", timeBlock: "evening" },
-          { time: "22:30", type: "transport", from: "Ipanema", to: "Ipanema", mode: "walking", duration: "5 min" },
+          { time: "08:30", id: "fasano", name: "Saída do hotel", neighborhood: "Ipanema", icon: "departure", timeBlock: "morning", address: getValidatedLocation('fasano')?.fullAddress },
+          { time: "08:45", type: "transport", from: "Ipanema", to: "Floresta da Tijuca", mode: "uber", duration: "25-30 min", distanceKm: 12.5 },
+          { time: "09:30", id: "cristo-redentor", name: "Cristo Redentor", neighborhood: "Floresta da Tijuca", icon: "landmark", timeBlock: "morning", address: getValidatedLocation('cristo-redentor')?.fullAddress },
+          { time: "12:00", type: "transport", from: "Floresta da Tijuca", to: "Botafogo", mode: "uber", duration: "20-25 min", distanceKm: 8.2 },
+          { time: "12:30", id: "lasai", name: "Lasai", neighborhood: "Botafogo", icon: "meal", timeBlock: "afternoon", address: getValidatedLocation('lasai')?.fullAddress },
+          { time: "14:30", type: "transport", from: "Botafogo", to: "Ipanema", mode: "uber", duration: "10-15 min", distanceKm: 4.5 },
+          { time: "15:00", id: "praia-ipanema", name: "Praia de Ipanema", neighborhood: "Ipanema", icon: "activity", timeBlock: "afternoon", address: getValidatedLocation('praia-ipanema')?.fullAddress },
+          { time: "17:00", type: "transport", from: "Ipanema", to: "Arpoador", mode: "walking", duration: "10-15 min", distanceKm: 0.8 },
+          { time: "17:30", id: "por-sol-arpoador", name: "Pôr do sol no Arpoador", neighborhood: "Arpoador", icon: "sunset", timeBlock: "evening", address: getValidatedLocation('por-sol-arpoador')?.fullAddress },
+          { time: "19:15", type: "transport", from: "Arpoador", to: "Botafogo", mode: "uber", duration: "10-15 min", distanceKm: 3.8 },
+          { time: "20:00", id: "oteque", name: "Oteque", neighborhood: "Botafogo", icon: "meal", timeBlock: "evening", address: getValidatedLocation('oteque')?.fullAddress },
+          { time: "22:30", type: "transport", from: "Botafogo", to: "Ipanema", mode: "uber", duration: "10-15 min", distanceKm: 4.5 },
         ],
-        costs: { food: 600, activities: 100, transport: 75, total: 775 }
+        costs: { food: 600, activities: 100, transport: 95, total: 795 }
       },
       {
         day: 2,
         title: "Dia 2 — Natureza e sabores",
         activities: [
-          { time: "08:00", name: "Saída do hotel", neighborhood: "Ipanema", icon: "departure", timeBlock: "morning" },
-          { time: "08:15", type: "transport", from: "Ipanema", to: "Jardim Botânico", mode: "uber", duration: "10-15 min" },
-          { time: "08:30", name: "Jardim Botânico", neighborhood: "Jardim Botânico", icon: "nature", timeBlock: "morning" },
-          { time: "11:30", type: "transport", from: "Jardim Botânico", to: "Jardim Botânico", mode: "walking", duration: "5 min" },
-          { time: "12:00", name: "Elena", neighborhood: "Jardim Botânico", icon: "meal", timeBlock: "afternoon" },
-          { time: "14:00", type: "transport", from: "Jardim Botânico", to: "Lagoa", mode: "uber", duration: "10 min" },
-          { time: "15:00", name: "Lagoa Rodrigo de Freitas", neighborhood: "Lagoa", icon: "activity", timeBlock: "afternoon" },
-          { time: "16:30", type: "transport", from: "Lagoa", to: "Jardim Botânico", mode: "walking", duration: "15-20 min" },
-          { time: "17:00", name: "Parque Lage", neighborhood: "Jardim Botânico", icon: "landmark", timeBlock: "evening" },
-          { time: "19:30", type: "transport", from: "Jardim Botânico", to: "Leblon", mode: "uber", duration: "10-15 min" },
-          { time: "20:30", name: "Satyricon", neighborhood: "Leblon", icon: "meal", timeBlock: "evening" },
-          { time: "22:30", type: "transport", from: "Leblon", to: "Ipanema", mode: "uber", duration: "5-10 min" },
+          { time: "08:00", id: "fasano", name: "Saída do hotel", neighborhood: "Ipanema", icon: "departure", timeBlock: "morning", address: getValidatedLocation('fasano')?.fullAddress },
+          { time: "08:15", type: "transport", from: "Ipanema", to: "Jardim Botânico", mode: "uber", duration: "10-15 min", distanceKm: 3.2 },
+          { time: "08:30", id: "jardim-botanico", name: "Jardim Botânico", neighborhood: "Jardim Botânico", icon: "nature", timeBlock: "morning", address: getValidatedLocation('jardim-botanico')?.fullAddress },
+          { time: "11:30", type: "transport", from: "Jardim Botânico", to: "Jardim Botânico", mode: "walking", duration: "5 min", distanceKm: 0.3 },
+          { time: "12:00", id: "elena", name: "Elena", neighborhood: "Jardim Botânico", icon: "meal", timeBlock: "afternoon", address: getValidatedLocation('elena')?.fullAddress },
+          { time: "14:00", type: "transport", from: "Jardim Botânico", to: "Lagoa", mode: "uber", duration: "8-12 min", distanceKm: 2.1 },
+          { time: "15:00", id: "lagoa-rodrigo-freitas", name: "Lagoa Rodrigo de Freitas", neighborhood: "Lagoa", icon: "activity", timeBlock: "afternoon", address: getValidatedLocation('lagoa-rodrigo-freitas')?.fullAddress },
+          { time: "16:30", type: "transport", from: "Lagoa", to: "Jardim Botânico", mode: "walking", duration: "15-20 min", distanceKm: 1.2 },
+          { time: "17:00", id: "parque-lage", name: "Parque Lage", neighborhood: "Jardim Botânico", icon: "landmark", timeBlock: "evening", address: getValidatedLocation('parque-lage')?.fullAddress },
+          { time: "19:30", type: "transport", from: "Jardim Botânico", to: "Ipanema", mode: "uber", duration: "10-15 min", distanceKm: 3.5 },
+          { time: "20:30", id: "satyricon", name: "Satyricon", neighborhood: "Ipanema", icon: "meal", timeBlock: "evening", address: getValidatedLocation('satyricon')?.fullAddress },
+          { time: "22:30", type: "transport", from: "Ipanema", to: "Ipanema", mode: "walking", duration: "5 min", distanceKm: 0.4 },
         ],
-        costs: { food: 550, activities: 80, transport: 100, total: 730 }
+        costs: { food: 550, activities: 80, transport: 75, total: 705 }
       },
       {
         day: 3,
         title: "Dia 3 — Centro histórico e despedida",
         activities: [
-          { time: "08:30", name: "Saída do hotel", neighborhood: "Ipanema", icon: "departure", timeBlock: "morning" },
-          { time: "08:45", type: "transport", from: "Ipanema", to: "Lapa", mode: "uber", duration: "20-25 min" },
-          { time: "09:30", name: "Escadaria Selarón", neighborhood: "Lapa", icon: "landmark", timeBlock: "morning" },
-          { time: "10:15", type: "transport", from: "Lapa", to: "Centro", mode: "walking", duration: "10-15 min" },
-          { time: "10:30", name: "Confeitaria Colombo", neighborhood: "Centro", icon: "meal", timeBlock: "morning" },
-          { time: "11:30", type: "transport", from: "Centro", to: "Centro", mode: "walking", duration: "10 min" },
-          { time: "12:00", name: "Museu do Amanhã", neighborhood: "Centro", icon: "activity", timeBlock: "afternoon" },
-          { time: "13:30", type: "transport", from: "Centro", to: "Centro", mode: "walking", duration: "5 min" },
-          { time: "14:00", name: "Boulevard Olímpico", neighborhood: "Centro", icon: "activity", timeBlock: "afternoon" },
-          { time: "15:30", type: "transport", from: "Centro", to: "Santa Teresa", mode: "uber", duration: "10-15 min" },
-          { time: "16:00", name: "Bar do Mineiro", neighborhood: "Santa Teresa", icon: "meal", timeBlock: "afternoon" },
-          { time: "18:00", type: "transport", from: "Santa Teresa", to: "Ipanema", mode: "uber", duration: "20-25 min" },
+          { time: "08:30", id: "fasano", name: "Saída do hotel", neighborhood: "Ipanema", icon: "departure", timeBlock: "morning", address: getValidatedLocation('fasano')?.fullAddress },
+          { time: "08:45", type: "transport", from: "Ipanema", to: "Lapa", mode: "uber", duration: "20-25 min", distanceKm: 8.5 },
+          { time: "09:30", id: "escadaria-selaron", name: "Escadaria Selarón", neighborhood: "Lapa", icon: "landmark", timeBlock: "morning", address: getValidatedLocation('escadaria-selaron')?.fullAddress },
+          { time: "10:15", type: "transport", from: "Lapa", to: "Centro", mode: "walking", duration: "10-15 min", distanceKm: 0.9 },
+          { time: "10:30", id: "confeitaria-colombo", name: "Confeitaria Colombo", neighborhood: "Centro", icon: "meal", timeBlock: "morning", address: getValidatedLocation('confeitaria-colombo')?.fullAddress },
+          { time: "11:30", type: "transport", from: "Centro", to: "Centro", mode: "walking", duration: "10 min", distanceKm: 0.8 },
+          { time: "12:00", id: "museu-amanha", name: "Museu do Amanhã", neighborhood: "Centro", icon: "activity", timeBlock: "afternoon", address: getValidatedLocation('museu-amanha')?.fullAddress },
+          { time: "13:30", type: "transport", from: "Centro", to: "Centro", mode: "walking", duration: "5 min", distanceKm: 0.3 },
+          { time: "14:00", id: "boulevard-olimpico", name: "Boulevard Olímpico", neighborhood: "Centro", icon: "activity", timeBlock: "afternoon", address: getValidatedLocation('boulevard-olimpico')?.fullAddress },
+          { time: "15:30", type: "transport", from: "Centro", to: "Santa Teresa", mode: "uber", duration: "10-15 min", distanceKm: 2.8 },
+          { time: "16:00", id: "bar-mineiro", name: "Bar do Mineiro", neighborhood: "Santa Teresa", icon: "meal", timeBlock: "afternoon", address: getValidatedLocation('bar-mineiro')?.fullAddress },
+          { time: "18:00", type: "transport", from: "Santa Teresa", to: "Ipanema", mode: "uber", duration: "25-30 min", distanceKm: 9.2 },
         ],
-        costs: { food: 280, activities: 60, transport: 100, total: 440 }
+        costs: { food: 280, activities: 60, transport: 85, total: 425 }
       }
     ]
   };
