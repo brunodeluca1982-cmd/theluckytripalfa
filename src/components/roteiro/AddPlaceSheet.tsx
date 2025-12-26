@@ -8,35 +8,42 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { GooglePlacesAutocomplete, PlaceData } from "./GooglePlacesAutocomplete";
+import { HybridPlaceSearch, HybridPlaceResult } from "./HybridPlaceSearch";
 import { toast } from "@/hooks/use-toast";
 
 /**
- * ADD PLACE SHEET
+ * ADD PLACE SHEET (PT-BR)
  * 
  * FAB + Bottom sheet for manually adding places to the itinerary.
- * Uses Google Places Autocomplete to ensure valid place_id.
+ * Uses 2-source search:
+ * 1. Lucky Trip curated database first
+ * 2. Google Places fallback only if not found
  * 
  * Rules:
- * - Only places with valid Google place_id can be added
- * - Free text is NOT allowed
- * - AI does NOT describe or recommend these places
- * - Used only for distance, time and consistency checks
+ * - Curated places are marked as curated=true
+ * - Google places require valid place_id and are marked curated=false
+ * - AI does NOT describe or recommend non-curated places
+ * - Non-curated used only for distance, time and consistency checks
  */
 
 interface AddPlaceSheetProps {
   totalDays: number;
-  onAddPlace: (day: number, place: PlaceData) => void;
+  onAddPlace: (day: number, place: HybridPlaceResult) => void;
+  destinationId?: string;
 }
 
 type Step = 'search' | 'select-day';
 
-export const AddPlaceSheet = ({ totalDays, onAddPlace }: AddPlaceSheetProps) => {
+export const AddPlaceSheet = ({ 
+  totalDays, 
+  onAddPlace,
+  destinationId = "rio-de-janeiro" 
+}: AddPlaceSheetProps) => {
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState<Step>('search');
-  const [selectedPlace, setSelectedPlace] = useState<PlaceData | null>(null);
+  const [selectedPlace, setSelectedPlace] = useState<HybridPlaceResult | null>(null);
 
-  const handlePlaceSelect = (place: PlaceData) => {
+  const handlePlaceSelect = (place: HybridPlaceResult) => {
     setSelectedPlace(place);
     setStep('select-day');
   };
@@ -44,10 +51,20 @@ export const AddPlaceSheet = ({ totalDays, onAddPlace }: AddPlaceSheetProps) => 
   const handleDaySelect = (day: number) => {
     if (selectedPlace) {
       onAddPlace(day, selectedPlace);
-      toast({
-        title: "Local adicionado",
-        description: `${selectedPlace.name} foi adicionado ao Dia ${day}.`,
-      });
+      
+      // Different toast message based on source (PT-BR)
+      if (selectedPlace.curated) {
+        toast({
+          title: "Local adicionado",
+          description: `${selectedPlace.name} foi adicionado ao Dia ${day}.`,
+        });
+      } else {
+        // Non-curated disclosure as per requirements
+        toast({
+          title: "Local adicionado",
+          description: `Adicionado como 'Fora da curadoria' (Google Maps).`,
+        });
+      }
       handleClose();
     }
   };
@@ -71,7 +88,7 @@ export const AddPlaceSheet = ({ totalDays, onAddPlace }: AddPlaceSheetProps) => 
           <Button
             size="lg"
             className="fixed bottom-24 right-4 z-40 w-14 h-14 rounded-full shadow-lg bg-primary text-primary-foreground hover:bg-primary/90"
-            aria-label="Adicionar local"
+            aria-label="Adicionar lugar"
           >
             <Plus className="w-6 h-6" />
           </Button>
@@ -80,21 +97,22 @@ export const AddPlaceSheet = ({ totalDays, onAddPlace }: AddPlaceSheetProps) => 
         <SheetContent side="bottom" className="h-auto max-h-[85vh] rounded-t-2xl">
           <SheetHeader className="pb-4">
             <SheetTitle className="text-xl font-serif">
-              {step === 'search' ? 'Adicionar local manualmente' : 'Escolha o dia'}
+              {step === 'search' ? 'Adicionar lugar' : 'Escolha o dia'}
             </SheetTitle>
           </SheetHeader>
 
           {step === 'search' && (
             <div className="pb-8">
               <p className="text-sm text-muted-foreground mb-4">
-                Busque um local no Google para adicionar ao seu roteiro.
+                Busque primeiro na nossa curadoria. Se não encontrar, pesquise no Google.
               </p>
-              <GooglePlacesAutocomplete
+              <HybridPlaceSearch
                 onPlaceSelect={handlePlaceSelect}
-                placeholder="Buscar restaurante, hotel, atração..."
+                placeholder="Buscar lugar…"
+                destinationId={destinationId}
               />
               <p className="text-xs text-muted-foreground mt-3">
-                Apenas locais com informações do Google podem ser adicionados.
+                Locais fora da curadoria são usados apenas para cálculo de distâncias.
               </p>
             </div>
           )}
@@ -102,8 +120,21 @@ export const AddPlaceSheet = ({ totalDays, onAddPlace }: AddPlaceSheetProps) => 
           {step === 'select-day' && selectedPlace && (
             <div className="pb-8">
               <div className="bg-muted/50 rounded-lg p-4 mb-6">
-                <p className="font-medium text-foreground">{selectedPlace.name}</p>
-                <p className="text-sm text-muted-foreground">{selectedPlace.address}</p>
+                <div className="flex items-center gap-2 mb-1">
+                  <p className="font-medium text-foreground">{selectedPlace.name}</p>
+                  {selectedPlace.curated ? (
+                    <span className="text-xs px-1.5 py-0.5 rounded bg-primary/10 text-primary">
+                      Dica The Lucky Trip
+                    </span>
+                  ) : (
+                    <span className="text-xs px-1.5 py-0.5 rounded border border-border text-muted-foreground">
+                      Fora da curadoria
+                    </span>
+                  )}
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  {selectedPlace.neighborhood || selectedPlace.address}
+                </p>
               </div>
               
               <p className="text-sm text-muted-foreground mb-4">
@@ -131,7 +162,7 @@ export const AddPlaceSheet = ({ totalDays, onAddPlace }: AddPlaceSheetProps) => 
                   setSelectedPlace(null);
                 }}
               >
-                Buscar outro local
+                Buscar outro lugar
               </Button>
             </div>
           )}

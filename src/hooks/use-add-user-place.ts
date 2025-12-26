@@ -1,21 +1,26 @@
 import { useCallback } from "react";
-import { PlaceData } from "@/components/roteiro/GooglePlacesAutocomplete";
+import { HybridPlaceResult } from "@/components/roteiro/HybridPlaceSearch";
 import { toast } from "sonner";
 
 /**
  * User-added place item structure
  * Compliant with MAP_DATA_REQUIREMENTS from architecture
+ * 
+ * Supports both curated and non-curated (Google) places:
+ * - curated=true: From Lucky Trip database, AI can recommend
+ * - curated=false: From Google, AI must NOT recommend
  */
 export interface UserAddedPlace {
   id: string;
   name: string;
-  placeId: string; // Required - Google Places ID
-  lat: number;
-  lng: number;
+  placeId: string; // Google Places ID (for Google sources) or internal ID (for curated)
+  lat: number | null;
+  lng: number | null;
   address: string;
   neighborhood: string | null;
   city: string | null;
-  source: 'user-added';
+  source: 'curated' | 'google';
+  curated: boolean;
   addedAt: string;
 }
 
@@ -41,33 +46,35 @@ export const useAddUserPlace = () => {
   }, []);
 
   // Save a new user-added place
-  const addUserPlace = useCallback((placeData: PlaceData): UserAddedPlace => {
+  const addUserPlace = useCallback((placeData: HybridPlaceResult): UserAddedPlace => {
+    const placeId = placeData.placeId || placeData.id;
+    
     const newPlace: UserAddedPlace = {
-      id: `user-place-${placeData.placeId}-${Date.now()}`,
+      id: `user-place-${placeId}-${Date.now()}`,
       name: placeData.name,
-      placeId: placeData.placeId,
+      placeId: placeId,
       lat: placeData.lat,
       lng: placeData.lng,
       address: placeData.address,
       neighborhood: placeData.neighborhood,
-      city: placeData.city,
-      source: 'user-added',
+      city: null,
+      source: placeData.source,
+      curated: placeData.curated,
       addedAt: new Date().toISOString(),
     };
 
     const existingPlaces = getUserPlaces();
     
     // Check if place already exists
-    const exists = existingPlaces.some(p => p.placeId === placeData.placeId);
+    const exists = existingPlaces.some(p => p.placeId === placeId);
     if (exists) {
       toast.info("Local já adicionado");
-      return existingPlaces.find(p => p.placeId === placeData.placeId)!;
+      return existingPlaces.find(p => p.placeId === placeId)!;
     }
 
     const updatedPlaces = [...existingPlaces, newPlace];
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedPlaces));
     
-    toast.success("Local adicionado ao roteiro");
     return newPlace;
   }, [getUserPlaces]);
 
