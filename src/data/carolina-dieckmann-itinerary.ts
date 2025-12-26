@@ -2,37 +2,37 @@ import { ReferenceItinerary } from "./reference-itineraries";
 
 /**
  * ROTEIRO DA CAROLINA — RIO DE JANEIRO
- * Author: Carolina Dieckmann
- * Type: Reference itinerary (read-only)
+ * Autora: Carolina Dieckmann
+ * Tipo: Roteiro de referência (somente leitura)
  * 
- * Rio de Janeiro — Carolina Dieckmann's Itinerary
- * 7 days in my Rio
- * Profile: 2 adults, 1 young person
+ * Rio de Janeiro — Roteiro da Carolina Dieckmann
+ * 7 dias no meu Rio
+ * Perfil: 2 adultos, 1 jovem
  * Hotel: Hotel Fasano Rio de Janeiro — Ipanema
  * 
- * Content preserved exactly as provided.
- * DO NOT modify any text.
+ * Conteúdo preservado exatamente como fornecido.
+ * NÃO modificar nenhum texto.
  */
 export const carolinaDieckmannRio: ReferenceItinerary = {
   id: 'carolina-dieckmann-rio',
   author: 'Carolina Dieckmann',
-  title: 'Rio de Janeiro — Carolina Dieckmann\'s Itinerary',
+  title: 'Rio de Janeiro — Roteiro da Carolina Dieckmann',
   destinationId: 'rio-de-janeiro',
-  description: '7 days in my Rio | Hotel Fasano Rio de Janeiro — Ipanema',
+  description: '7 dias no meu Rio | Hotel Fasano Rio de Janeiro — Ipanema',
   days: {
     1: {
       dayNumber: 1,
-      title: 'DAY 1 — ARRIVAL AND SETTLING IN',
-      subtitle: 'Ipanema, first steps',
+      title: 'DIA 1 — CHEGADA E INSTALAÇÃO',
+      subtitle: 'Ipanema, primeiros passos',
       items: [
         {
           id: 'carolina-d1-1',
-          name: 'Arrival at Santos Dumont Airport',
+          name: 'Chegada no Aeroporto Santos Dumont',
           category: 'experience',
           duration: '1h',
           source: 'partner',
           time: '10:00',
-          editorial: 'I always fly into Santos Dumont when I can. Twenty minutes to Ipanema, and you skip the chaos of Galeao.',
+          editorial: 'Eu sempre voo para o Santos Dumont quando posso. Vinte minutos até Ipanema, e você escapa do caos do Galeão.',
         },
         {
           id: 'carolina-d1-2',
@@ -41,7 +41,7 @@ export const carolinaDieckmannRio: ReferenceItinerary = {
           duration: '1h',
           source: 'partner',
           time: '11:00',
-          editorial: 'Check-in or leave luggage. The lobby is calm, the staff knows what they are doing. No fuss.',
+          editorial: 'Check-in ou deixar a bagagem. O lobby é calmo, a equipe sabe o que está fazendo. Sem frescura.',
         },
         {
           id: 'carolina-d1-3',
@@ -50,16 +50,16 @@ export const carolinaDieckmannRio: ReferenceItinerary = {
           duration: '2h',
           source: 'partner',
           time: '13:00',
-          editorial: 'First meal in Rio has to be simple and good. Nido does Italian the way I like it — honest, no pretension, and three blocks from the hotel.',
+          editorial: 'A primeira refeição no Rio tem que ser simples e boa. O Nido faz italiano do jeito que eu gosto — honesto, sem pretensão, e a três quadras do hotel.',
         },
         {
           id: 'carolina-d1-4',
-          name: 'Walk along Garcia d\'Avila street',
+          name: 'Caminhada pela Rua Garcia d\'Ávila',
           category: 'experience',
           duration: '1h30',
           source: 'partner',
           time: '15:30',
-          editorial: 'This is the street where I do my errands when I am in Ipanema. Small shops, good coffee, nobody rushing.',
+          editorial: 'Esta é a rua onde eu faço minhas coisas quando estou em Ipanema. Lojinhas, bom café, ninguém correndo.',
         },
         {
           id: 'carolina-d1-5',
@@ -68,59 +68,59 @@ export const carolinaDieckmannRio: ReferenceItinerary = {
           duration: '1h',
           source: 'partner',
           time: '17:00',
-          editorial: 'Lucky List. I can spend an hour here without noticing. Good selection, quiet, and they always have something I was not looking for but end up buying.',
+          editorial: 'Lucky List. Eu posso passar uma hora aqui sem perceber. Boa seleção, silêncio, e sempre tem algo que eu não estava procurando mas acabo comprando.',
         },
         {
           id: 'carolina-d1-6',
-          name: 'Sunset at Arpoador',
+          name: 'Pôr do sol no Arpoador',
           category: 'experience',
           duration: '1h',
           source: 'partner',
           time: '18:00',
-          editorial: 'If the sky is clear, we walk to Arpoador. The applause when the sun goes down is silly, but I still like it.',
+          editorial: 'Se o céu estiver limpo, a gente caminha até o Arpoador. Os aplausos quando o sol se põe são bobos, mas eu ainda gosto.',
         },
         {
           id: 'carolina-d1-7',
-          name: 'Zaza Bistro',
+          name: 'Zazá Bistrô',
           category: 'food',
           duration: '2h',
           source: 'partner',
           time: '20:30',
-          editorial: 'First night should be relaxed. Zaza is comfortable, the food is light, and you can sit outside and watch Ipanema go by.',
+          editorial: 'A primeira noite tem que ser relaxada. O Zazá é confortável, a comida é leve, e dá pra sentar do lado de fora e ver Ipanema passar.',
         },
       ],
     },
     2: {
       dayNumber: 2,
-      title: 'DAY 2 — SANTA TERESA',
-      subtitle: 'The neighborhood where I grew up',
+      title: 'DIA 2 — SANTA TERESA',
+      subtitle: 'O bairro onde eu cresci',
       items: [
         {
           id: 'carolina-d2-1',
-          name: 'Breakfast at Fasano',
+          name: 'Café da manhã no Fasano',
           category: 'food',
           duration: '1h',
           source: 'partner',
           time: '08:30',
-          editorial: 'No rush. Good coffee, fresh fruit, the ocean right there. This is how mornings should start.',
+          editorial: 'Sem pressa. Bom café, frutas frescas, o mar ali do lado. É assim que as manhãs deveriam começar.',
         },
         {
           id: 'carolina-d2-2',
-          name: 'Transfer to Santa Teresa',
+          name: 'Traslado para Santa Teresa',
           category: 'experience',
           duration: '30min',
           source: 'partner',
           time: '10:00',
-          editorial: 'By car, 25-30 minutes depending on traffic. The road up is narrow but the driver will know it.',
+          editorial: 'De carro, 25-30 minutos dependendo do trânsito. A subida é estreita mas o motorista conhece.',
         },
         {
           id: 'carolina-d2-3',
-          name: 'Santa Teresa ateliers and street fair',
+          name: 'Ateliês e feira de rua de Santa Teresa',
           category: 'experience',
           duration: '2h',
           source: 'partner',
           time: '10:30',
-          editorial: 'Lucky List. I grew up here. The streets are the same, the houses, the views. Walking here is walking through my childhood. The ateliers sell local art, ceramics, things you cannot find anywhere else.',
+          editorial: 'Lucky List. Eu cresci aqui. As ruas são as mesmas, as casas, as vistas. Caminhar aqui é caminhar pela minha infância. Os ateliês vendem arte local, cerâmicas, coisas que você não encontra em nenhum outro lugar.',
         },
         {
           id: 'carolina-d2-4',
@@ -129,25 +129,25 @@ export const carolinaDieckmannRio: ReferenceItinerary = {
           duration: '1h30',
           source: 'partner',
           time: '12:30',
-          editorial: 'Simple, loud, real. The feijoada is good, the pasteis are better. This is not a tourist spot pretending to be local — it is local.',
+          editorial: 'Simples, barulhento, real. A feijoada é boa, os pastéis são melhores. Isso não é lugar de turista fingindo ser local — é local.',
         },
         {
           id: 'carolina-d2-5',
-          name: 'Aprazivel',
+          name: 'Aprazível',
           category: 'food',
           duration: '2h30',
           source: 'partner',
           time: '14:30',
-          editorial: 'Lunch with a view. The terrace looks over the entire city. Brazilian cuisine done with care. Long meal, no hurry.',
+          editorial: 'Almoço com vista. O terraço olha pra cidade inteira. Cozinha brasileira feita com cuidado. Refeição longa, sem pressa.',
         },
         {
           id: 'carolina-d2-6',
-          name: 'Return to Ipanema',
+          name: 'Volta para Ipanema',
           category: 'experience',
           duration: '30min',
           source: 'partner',
           time: '17:30',
-          editorial: 'Back by car. Rest at the hotel, maybe a nap.',
+          editorial: 'De volta de carro. Descanso no hotel, talvez uma soneca.',
         },
         {
           id: 'carolina-d2-7',
@@ -156,18 +156,18 @@ export const carolinaDieckmannRio: ReferenceItinerary = {
           duration: '2h30',
           source: 'partner',
           time: '20:00',
-          editorial: 'Italian at the Copacabana Palace. Classic, reliable, elegant without being stiff. Good for a proper dinner after a day of nostalgia.',
+          editorial: 'Italiano no Copacabana Palace. Clássico, confiável, elegante sem ser duro. Bom pra um jantar de verdade depois de um dia de nostalgia.',
         },
       ],
     },
     3: {
       dayNumber: 3,
-      title: 'DAY 3 — JARDIM BOTANICO AND GAVEA',
-      subtitle: 'Green and quiet',
+      title: 'DIA 3 — JARDIM BOTÂNICO E GÁVEA',
+      subtitle: 'Verde e silêncio',
       items: [
         {
           id: 'carolina-d3-1',
-          name: 'Breakfast at Fasano',
+          name: 'Café da manhã no Fasano',
           category: 'food',
           duration: '1h',
           source: 'partner',
@@ -175,30 +175,30 @@ export const carolinaDieckmannRio: ReferenceItinerary = {
         },
         {
           id: 'carolina-d3-2',
-          name: 'Jardim Botanico',
+          name: 'Jardim Botânico',
           category: 'attraction',
           duration: '2h30',
           source: 'partner',
           time: '10:00',
-          editorial: 'The palm avenue is beautiful. The garden is old, well kept, and quiet in the morning. Bring water.',
+          editorial: 'A aléia das palmeiras é linda. O jardim é antigo, bem cuidado, e silencioso de manhã. Leve água.',
         },
         {
           id: 'carolina-d3-3',
-          name: 'Emporio Jardim',
+          name: 'Empório Jardim',
           category: 'food',
           duration: '1h30',
           source: 'partner',
           time: '12:30',
-          editorial: 'Right next to the botanical garden. Light food, good salads, calm atmosphere. Perfect after walking.',
+          editorial: 'Ao lado do jardim botânico. Comida leve, boas saladas, ambiente calmo. Perfeito depois de caminhar.',
         },
         {
           id: 'carolina-d3-4',
-          name: 'Transfer to Gavea',
+          name: 'Traslado para Gávea',
           category: 'experience',
           duration: '15min',
           source: 'partner',
           time: '14:00',
-          editorial: 'Short drive, same neighborhood.',
+          editorial: 'Trajeto curto, mesmo bairro.',
         },
         {
           id: 'carolina-d3-5',
@@ -207,20 +207,20 @@ export const carolinaDieckmannRio: ReferenceItinerary = {
           duration: '1h',
           source: 'partner',
           time: '14:15',
-          editorial: 'Lucky List. The Instituto Moreira Salles has one of the best museum shops in the city. Books, photography, design objects. Worth the stop.',
+          editorial: 'Lucky List. O Instituto Moreira Salles tem uma das melhores lojas de museu da cidade. Livros, fotografia, objetos de design. Vale a parada.',
         },
         {
           id: 'carolina-d3-6',
-          name: 'Farm at Shopping da Gavea',
+          name: 'Farm no Shopping da Gávea',
           category: 'experience',
           duration: '45min',
           source: 'partner',
           time: '15:30',
-          editorial: 'Lucky List. Brazilian brand, colorful prints, comfortable clothes. Good for gifts or for yourself.',
+          editorial: 'Lucky List. Marca brasileira, estampas coloridas, roupas confortáveis. Bom pra presentes ou pra você mesma.',
         },
         {
           id: 'carolina-d3-7',
-          name: 'Return to hotel',
+          name: 'Volta para o hotel',
           category: 'experience',
           duration: '20min',
           source: 'partner',
@@ -233,32 +233,32 @@ export const carolinaDieckmannRio: ReferenceItinerary = {
           duration: '2h30',
           source: 'partner',
           time: '20:00',
-          editorial: 'Good music, good drinks, good food. Works for any mood. The crowd is interesting and the energy is right.',
+          editorial: 'Boa música, bons drinks, boa comida. Funciona pra qualquer humor. A galera é interessante e a energia é certa.',
         },
       ],
     },
     4: {
       dayNumber: 4,
-      title: 'DAY 4 — LEBLON AND FINE DINING',
-      subtitle: 'Taking it slow',
+      title: 'DIA 4 — LEBLON E ALTA GASTRONOMIA',
+      subtitle: 'Devagar',
       items: [
         {
           id: 'carolina-d4-1',
-          name: 'Late breakfast at Fasano',
+          name: 'Café da manhã tardio no Fasano',
           category: 'food',
           duration: '1h30',
           source: 'partner',
           time: '09:30',
-          editorial: 'Sleep in. No alarms. Breakfast when you wake up.',
+          editorial: 'Dorme até mais tarde. Sem despertador. Café da manhã quando acordar.',
         },
         {
           id: 'carolina-d4-2',
-          name: 'Walk to Leblon',
+          name: 'Caminhada até o Leblon',
           category: 'experience',
           duration: '30min',
           source: 'partner',
           time: '11:00',
-          editorial: 'Along the beach, through Ipanema, into Leblon. Twenty minutes if you walk fast, but why would you.',
+          editorial: 'Pela praia, passando por Ipanema, entrando no Leblon. Vinte minutos se você andar rápido, mas pra quê.',
         },
         {
           id: 'carolina-d4-3',
@@ -267,7 +267,7 @@ export const carolinaDieckmannRio: ReferenceItinerary = {
           duration: '45min',
           source: 'partner',
           time: '11:30',
-          editorial: 'Lucky List. Brazilian brand that I have worn for years. Clean design, good quality, understated.',
+          editorial: 'Lucky List. Marca brasileira que eu uso há anos. Design limpo, boa qualidade, discreto.',
         },
         {
           id: 'carolina-d4-4',
@@ -276,25 +276,25 @@ export const carolinaDieckmannRio: ReferenceItinerary = {
           duration: '1h30',
           source: 'partner',
           time: '13:00',
-          editorial: 'Pizzeria that has been here forever. Thin crust, simple toppings, no reinvention. Works every time.',
+          editorial: 'Pizzaria que está aqui há muito tempo. Massa fina, recheios simples, sem reinvenção. Funciona sempre.',
         },
         {
           id: 'carolina-d4-5',
-          name: 'Beach at Leblon',
+          name: 'Praia do Leblon',
           category: 'experience',
           duration: '3h',
           source: 'partner',
           time: '15:00',
-          editorial: 'Find a spot, order a coconut water, do nothing. This is the point.',
+          editorial: 'Acha um lugar, pede uma água de coco, não faz nada. Esse é o objetivo.',
         },
         {
           id: 'carolina-d4-6',
-          name: 'Return to hotel',
+          name: 'Volta para o hotel',
           category: 'experience',
           duration: '20min',
           source: 'partner',
           time: '18:30',
-          editorial: 'By car. Shower, change, rest.',
+          editorial: 'De carro. Banho, troca de roupa, descanso.',
         },
         {
           id: 'carolina-d4-7',
@@ -303,32 +303,32 @@ export const carolinaDieckmannRio: ReferenceItinerary = {
           duration: '3h',
           source: 'partner',
           time: '20:00',
-          editorial: 'Two Michelin stars. Seafood done with precision. This is a special dinner, so book ahead and dress accordingly.',
+          editorial: 'Duas estrelas Michelin. Frutos do mar feitos com precisão. É um jantar especial, então reserve com antecedência e vista-se adequadamente.',
         },
       ],
     },
     5: {
       dayNumber: 5,
-      title: 'DAY 5 — DOWNTOWN RIO',
-      subtitle: 'History and street life',
+      title: 'DIA 5 — CENTRO DO RIO',
+      subtitle: 'História e vida de rua',
       items: [
         {
           id: 'carolina-d5-1',
-          name: 'Breakfast at Fasano',
+          name: 'Café da manhã no Fasano',
           category: 'food',
           duration: '1h',
           source: 'partner',
           time: '08:00',
-          editorial: 'Early start today. The Centro is best in the morning before it gets too hot.',
+          editorial: 'Saída cedo hoje. O Centro é melhor de manhã, antes de ficar muito quente.',
         },
         {
           id: 'carolina-d5-2',
-          name: 'Transfer to Downtown',
+          name: 'Traslado para o Centro',
           category: 'experience',
           duration: '30min',
           source: 'partner',
           time: '09:30',
-          editorial: 'By car, 25-30 minutes. Ask the driver to drop you near Praca XV.',
+          editorial: 'De carro, 25-30 minutos. Peça pro motorista te deixar perto da Praça XV.',
         },
         {
           id: 'carolina-d5-3',
@@ -337,34 +337,34 @@ export const carolinaDieckmannRio: ReferenceItinerary = {
           duration: '2h',
           source: 'partner',
           time: '10:00',
-          editorial: 'Lucky List. Antiques, vintage furniture, old records, things with history. Even if you do not buy, it is worth walking through.',
+          editorial: 'Lucky List. Antiguidades, móveis vintage, discos antigos, coisas com história. Mesmo que você não compre, vale caminhar por lá.',
         },
         {
           id: 'carolina-d5-4',
-          name: 'Walk through Centro Historico',
+          name: 'Caminhada pelo Centro Histórico',
           category: 'experience',
           duration: '1h30',
           source: 'partner',
           time: '12:00',
-          editorial: 'Old buildings, churches, narrow streets. This is where Rio started. Most tourists never see it.',
+          editorial: 'Prédios antigos, igrejas, ruas estreitas. É onde o Rio começou. A maioria dos turistas nunca vê.',
         },
         {
           id: 'carolina-d5-5',
-          name: 'Lunch downtown',
+          name: 'Almoço no Centro',
           category: 'food',
           duration: '1h30',
           source: 'partner',
           time: '13:30',
-          editorial: 'There are many small restaurants around Rua do Ouvidor. Simple food, fast service, real carioca atmosphere.',
+          editorial: 'Tem muitos restaurantes pequenos na Rua do Ouvidor. Comida simples, serviço rápido, atmosfera carioca de verdade.',
         },
         {
           id: 'carolina-d5-6',
-          name: 'Return to Zona Sul',
+          name: 'Volta para a Zona Sul',
           category: 'experience',
           duration: '40min',
           source: 'partner',
           time: '15:30',
-          editorial: 'By car. Traffic can be heavy in the afternoon.',
+          editorial: 'De carro. O trânsito pode ser pesado à tarde.',
         },
         {
           id: 'carolina-d5-7',
@@ -373,11 +373,11 @@ export const carolinaDieckmannRio: ReferenceItinerary = {
           duration: '30min',
           source: 'partner',
           time: '16:30',
-          editorial: 'Lucky List. Brazilian pharmacy brand since 1870. Soaps, creams, perfumes. Beautiful packaging, good products.',
+          editorial: 'Lucky List. Marca de farmácia brasileira desde 1870. Sabonetes, cremes, perfumes. Embalagem bonita, bons produtos.',
         },
         {
           id: 'carolina-d5-8',
-          name: 'Rest at hotel',
+          name: 'Descanso no hotel',
           category: 'experience',
           duration: '2h',
           source: 'partner',
@@ -390,18 +390,18 @@ export const carolinaDieckmannRio: ReferenceItinerary = {
           duration: '3h',
           source: 'partner',
           time: '20:00',
-          editorial: 'Chef Rafa Costa e Silva serves Brazilian ingredients with French technique. Small plates, tasting menu, serious cooking. One of the best restaurants in the city.',
+          editorial: 'O chef Rafa Costa e Silva serve ingredientes brasileiros com técnica francesa. Pratos pequenos, menu degustação, cozinha séria. Um dos melhores restaurantes da cidade.',
         },
       ],
     },
     6: {
       dayNumber: 6,
-      title: 'DAY 6 — BARRA DA TIJUCA',
-      subtitle: 'Beaches and sunset',
+      title: 'DIA 6 — BARRA DA TIJUCA',
+      subtitle: 'Praias e pôr do sol',
       items: [
         {
           id: 'carolina-d6-1',
-          name: 'Breakfast at Fasano',
+          name: 'Café da manhã no Fasano',
           category: 'food',
           duration: '1h',
           source: 'partner',
@@ -409,12 +409,12 @@ export const carolinaDieckmannRio: ReferenceItinerary = {
         },
         {
           id: 'carolina-d6-2',
-          name: 'Transfer to Barra',
+          name: 'Traslado para a Barra',
           category: 'experience',
           duration: '45min',
           source: 'partner',
           time: '10:00',
-          editorial: 'By car, 40-50 minutes. The coast road is beautiful.',
+          editorial: 'De carro, 40-50 minutos. A estrada pela costa é linda.',
         },
         {
           id: 'carolina-d6-3',
@@ -423,7 +423,7 @@ export const carolinaDieckmannRio: ReferenceItinerary = {
           duration: '3h',
           source: 'partner',
           time: '11:00',
-          editorial: 'Long beach, wide sand, less crowded than Ipanema. Good for swimming, good for walking.',
+          editorial: 'Praia longa, areia larga, menos cheia que Ipanema. Boa pra nadar, boa pra caminhar.',
         },
         {
           id: 'carolina-d6-4',
@@ -432,7 +432,7 @@ export const carolinaDieckmannRio: ReferenceItinerary = {
           duration: '1h',
           source: 'partner',
           time: '14:00',
-          editorial: 'Lucky List. Fresh juices, acai, light snacks. This is what I drank growing up. Simple and perfect after the beach.',
+          editorial: 'Lucky List. Sucos frescos, açaí, lanches leves. É isso que eu tomava quando era nova. Simples e perfeito depois da praia.',
         },
         {
           id: 'carolina-d6-5',
@@ -441,59 +441,59 @@ export const carolinaDieckmannRio: ReferenceItinerary = {
           duration: '2h',
           source: 'partner',
           time: '15:30',
-          editorial: 'Seafood by the water. Good fish, good view, no pretension. This is lunch the way it should be at the beach.',
+          editorial: 'Frutos do mar de frente pro mar. Bom peixe, boa vista, sem pretensão. É assim que o almoço deveria ser na praia.',
         },
         {
           id: 'carolina-d6-6',
-          name: 'Sunset at Pier',
+          name: 'Pôr do sol no Píer',
           category: 'experience',
           duration: '1h',
           source: 'partner',
           time: '18:00',
-          editorial: 'The sunset from Barra is different. Wider sky, calmer water.',
+          editorial: 'O pôr do sol da Barra é diferente. Céu mais aberto, água mais calma.',
         },
         {
           id: 'carolina-d6-7',
-          name: 'Return to Ipanema',
+          name: 'Volta para Ipanema',
           category: 'experience',
           duration: '50min',
           source: 'partner',
           time: '19:00',
-          editorial: 'By car. Evening traffic can be slow.',
+          editorial: 'De carro. O trânsito da noite pode ser lento.',
         },
         {
           id: 'carolina-d6-8',
-          name: 'Gurume',
+          name: 'Gurumê',
           category: 'food',
           duration: '2h',
           source: 'partner',
           time: '21:00',
-          editorial: 'Japanese with a Brazilian twist. Light dinner after a beach day. Fresh, reliable, consistent.',
+          editorial: 'Japonês com um toque brasileiro. Jantar leve depois de um dia de praia. Fresco, confiável, consistente.',
         },
       ],
     },
     7: {
       dayNumber: 7,
-      title: 'DAY 7 — LAST DAY',
-      subtitle: 'Slow morning and farewell dinner',
+      title: 'DIA 7 — ÚLTIMO DIA',
+      subtitle: 'Manhã tranquila e jantar de despedida',
       items: [
         {
           id: 'carolina-d7-1',
-          name: 'Late breakfast at Fasano',
+          name: 'Café da manhã tardio no Fasano',
           category: 'food',
           duration: '1h30',
           source: 'partner',
           time: '09:30',
-          editorial: 'No plans until noon. Enjoy the last morning.',
+          editorial: 'Sem planos até o meio-dia. Aproveita a última manhã.',
         },
         {
           id: 'carolina-d7-2',
-          name: 'Walk on Ipanema beach',
+          name: 'Caminhada na praia de Ipanema',
           category: 'experience',
           duration: '1h30',
           source: 'partner',
           time: '11:00',
-          editorial: 'One last walk. From the hotel to Arpoador and back. Take your time.',
+          editorial: 'Uma última caminhada. Do hotel até o Arpoador e de volta. Sem pressa.',
         },
         {
           id: 'carolina-d7-3',
@@ -502,16 +502,16 @@ export const carolinaDieckmannRio: ReferenceItinerary = {
           duration: '2h',
           source: 'partner',
           time: '13:00',
-          editorial: 'Omakase for lunch. The chef decides, you eat. Small restaurant, precise cooking, memorable meal.',
+          editorial: 'Omakase no almoço. O chef decide, você come. Restaurante pequeno, cozinha precisa, refeição memorável.',
         },
         {
           id: 'carolina-d7-4',
-          name: 'Rest and pack',
+          name: 'Descanso e arrumação das malas',
           category: 'experience',
           duration: '3h',
           source: 'partner',
           time: '15:00',
-          editorial: 'Back to the hotel. Pack slowly. Maybe sit by the pool one last time.',
+          editorial: 'De volta ao hotel. Arruma as malas devagar. Talvez sente na piscina uma última vez.',
         },
         {
           id: 'carolina-d7-5',
@@ -520,16 +520,16 @@ export const carolinaDieckmannRio: ReferenceItinerary = {
           duration: '2h30',
           source: 'partner',
           time: '19:30',
-          editorial: 'Last dinner in Rio. Seafood at Satyricon is a classic. Fresh fish, proper service, no surprises. The right way to close the trip.',
+          editorial: 'Último jantar no Rio. Frutos do mar no Satyricon é um clássico. Peixe fresco, serviço adequado, sem surpresas. A forma certa de encerrar a viagem.',
         },
         {
           id: 'carolina-d7-6',
-          name: 'Return to hotel',
+          name: 'Volta para o hotel',
           category: 'experience',
           duration: '15min',
           source: 'partner',
           time: '22:00',
-          editorial: 'Early flight tomorrow. Rest well.',
+          editorial: 'Voo cedo amanhã. Descanse bem.',
         },
       ],
     },
@@ -537,61 +537,61 @@ export const carolinaDieckmannRio: ReferenceItinerary = {
 };
 
 /**
- * ESTIMATED COSTS — CAROLINA DIECKMANN ITINERARY
+ * CUSTOS ESTIMADOS — ROTEIRO DA CAROLINA DIECKMANN
  * 
- * All prices in Brazilian Reais (BRL)
+ * Todos os preços em Reais (BRL)
  * 
- * DAY 1
- * - Food: R$ 650 (Nido lunch + Zaza dinner)
- * - Activities: R$ 0
- * - Transportation: R$ 80 (airport transfer)
+ * DIA 1
+ * - Alimentação: R$ 650 (almoço Nido + jantar Zazá)
+ * - Atividades: R$ 0
+ * - Transporte: R$ 80 (traslado aeroporto)
  * Total: R$ 730
  * 
- * DAY 2
- * - Food: R$ 900 (Fasano breakfast + Bar do Mineiro + Aprazivel + Cipriani)
- * - Activities: R$ 0
- * - Transportation: R$ 150 (transfers to/from Santa Teresa)
- * Total: R$ 1,050
+ * DIA 2
+ * - Alimentação: R$ 900 (café Fasano + Bar do Mineiro + Aprazível + Cipriani)
+ * - Atividades: R$ 0
+ * - Transporte: R$ 150 (traslados para/de Santa Teresa)
+ * Total: R$ 1.050
  * 
- * DAY 3
- * - Food: R$ 550 (Fasano breakfast + Emporio Jardim + Elena)
- * - Activities: R$ 75 (Jardim Botanico entrance)
- * - Transportation: R$ 100
+ * DIA 3
+ * - Alimentação: R$ 550 (café Fasano + Empório Jardim + Elena)
+ * - Atividades: R$ 75 (entrada Jardim Botânico)
+ * - Transporte: R$ 100
  * Total: R$ 725
  * 
- * DAY 4
- * - Food: R$ 1,200 (Fasano breakfast + Capricciosa + Oteque)
- * - Activities: R$ 0
- * - Transportation: R$ 80
- * Total: R$ 1,280
+ * DIA 4
+ * - Alimentação: R$ 1.200 (café Fasano + Capricciosa + Oteque)
+ * - Atividades: R$ 0
+ * - Transporte: R$ 80
+ * Total: R$ 1.280
  * 
- * DAY 5
- * - Food: R$ 950 (Fasano breakfast + downtown lunch + Lasai)
- * - Activities: R$ 0
- * - Transportation: R$ 180
- * Total: R$ 1,130
+ * DIA 5
+ * - Alimentação: R$ 950 (café Fasano + almoço Centro + Lasai)
+ * - Atividades: R$ 0
+ * - Transporte: R$ 180
+ * Total: R$ 1.130
  * 
- * DAY 6
- * - Food: R$ 600 (Fasano breakfast + Golden Sucos + Mocellin Mar + Gurume)
- * - Activities: R$ 0
- * - Transportation: R$ 200
+ * DIA 6
+ * - Alimentação: R$ 600 (café Fasano + Golden Sucos + Mocellin Mar + Gurumê)
+ * - Atividades: R$ 0
+ * - Transporte: R$ 200
  * Total: R$ 800
  * 
- * DAY 7
- * - Food: R$ 1,100 (Fasano breakfast + San Omakase + Satyricon)
- * - Activities: R$ 0
- * - Transportation: R$ 60
- * Total: R$ 1,160
+ * DIA 7
+ * - Alimentação: R$ 1.100 (café Fasano + San Omakase + Satyricon)
+ * - Atividades: R$ 0
+ * - Transporte: R$ 60
+ * Total: R$ 1.160
  * 
  * ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- * TOTAL ESTIMATED COST — 7 DAYS
+ * CUSTO TOTAL ESTIMADO — 7 DIAS
  * 
- * Food: R$ 5,950
- * Activities: R$ 75
- * Transportation: R$ 850
+ * Alimentação: R$ 5.950
+ * Atividades: R$ 75
+ * Transporte: R$ 850
  * 
- * GRAND TOTAL: R$ 6,875
+ * TOTAL GERAL: R$ 6.875
  * ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  * 
- * Prices are approximate. Accommodation and flights are not included.
+ * Preços são aproximados. Hospedagem e voos não estão incluídos.
  */
