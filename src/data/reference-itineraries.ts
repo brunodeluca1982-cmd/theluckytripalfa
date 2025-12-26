@@ -1,4 +1,5 @@
 import { ItineraryItem } from "@/components/roteiro/ItineraryCard";
+import { carolinaDieckmannRio } from "./carolina-dieckmann-itinerary";
 
 /**
  * REFERENCE ITINERARIES
@@ -475,6 +476,7 @@ export const brunoDeLucaRio: ReferenceItinerary = {
 // Registry of all reference itineraries
 export const referenceItineraries: Record<string, ReferenceItinerary> = {
   'bruno-de-luca-rio': brunoDeLucaRio,
+  'carolina-dieckmann-rio': carolinaDieckmannRio,
 };
 
 // Get reference itineraries for a destination
