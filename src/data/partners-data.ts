@@ -86,7 +86,13 @@ export const partners: Partner[] = [
     initials: "CD",
     bio: "Atriz e exploradora",
     imageUrl: carolinaDieckmannImg,
-    destinations: [],
+    destinations: [
+      {
+        destinationId: "rio-de-janeiro",
+        destinationName: "Rio de Janeiro",
+        referenceItineraryId: "carolina-dieckmann-rio",
+      },
+    ],
   },
   {
     id: "celina-locks",
