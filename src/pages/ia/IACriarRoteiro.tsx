@@ -141,11 +141,22 @@ const IACriarRoteiro = () => {
       itinerary[day] = dayItems;
     }
     
+    // Group days into blocks for longer trips
+    const getBlocks = (totalDays: number): number[][] => {
+      if (totalDays <= 3) return [Array.from({ length: totalDays }, (_, i) => i + 1)];
+      if (totalDays === 5) return [[1, 2], [3, 4], [5]]; // 2+2+1
+      if (totalDays === 7) return [[1, 2, 3], [4, 5], [6, 7]]; // 3+2+2
+      return [Array.from({ length: totalDays }, (_, i) => i + 1)];
+    };
+
+    const blocks = getBlocks(days);
+    
     // Save to localStorage
     const draft = {
       destinationId: 'rio-de-janeiro',
       totalDays: days,
       items: itinerary,
+      blocks,
       status: 'rascunho',
       preferences: { style, company, neighborhood, priority },
       createdAt: new Date().toISOString(),
@@ -162,7 +173,7 @@ const IACriarRoteiro = () => {
 
   const canProceed = () => {
     switch (step) {
-      case 'days': return days >= 2 && days <= 8;
+      case 'days': return [2, 3, 5, 7].includes(days);
       case 'style': return style !== null;
       case 'company': return company !== null;
       case 'neighborhood': return neighborhood !== null;
@@ -226,25 +237,32 @@ const IACriarRoteiro = () => {
               <p className="text-lg text-foreground/80 font-light">
                 Quantos dias?
               </p>
+              <p className="text-sm text-muted-foreground mt-2">
+                Viagens mais longas são organizadas em partes para facilitar ajustes.
+              </p>
             </div>
 
-            <div className="flex items-center justify-center gap-4 py-8">
-              <button
-                onClick={() => setDays(Math.max(2, days - 1))}
-                className="w-14 h-14 rounded-full bg-muted border border-border text-foreground text-xl font-medium hover:bg-accent transition-colors"
-              >
-                -
-              </button>
-              <div className="w-24 text-center">
-                <span className="text-5xl font-serif font-medium text-foreground">{days}</span>
-                <p className="text-sm text-muted-foreground mt-1">{days === 1 ? "dia" : "dias"}</p>
-              </div>
-              <button
-                onClick={() => setDays(Math.min(8, days + 1))}
-                className="w-14 h-14 rounded-full bg-muted border border-border text-foreground text-xl font-medium hover:bg-accent transition-colors"
-              >
-                +
-              </button>
+            <div className="grid grid-cols-2 gap-3">
+              {[2, 3, 5, 7].map((dayOption) => (
+                <button
+                  key={dayOption}
+                  onClick={() => setDays(dayOption)}
+                  className={`
+                    flex flex-col items-center gap-2 p-5 rounded-xl border transition-all
+                    ${days === dayOption 
+                      ? "bg-primary/10 border-primary" 
+                      : "bg-card border-border hover:bg-muted"
+                    }
+                  `}
+                >
+                  <span className={`text-3xl font-serif font-medium ${days === dayOption ? "text-primary" : "text-foreground"}`}>
+                    {dayOption}
+                  </span>
+                  <span className="text-sm text-muted-foreground">
+                    {dayOption === 2 ? "dias" : dayOption === 3 ? "dias" : dayOption === 5 ? "dias" : "dias"}
+                  </span>
+                </button>
+              ))}
             </div>
           </div>
         )}
