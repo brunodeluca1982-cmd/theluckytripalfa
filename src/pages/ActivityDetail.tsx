@@ -3,7 +3,7 @@ import { ChevronLeft, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import RoteiroAccessLink from "@/components/RoteiroAccessLink";
 import { useItemSave } from "@/hooks/use-item-save";
-import { activitiesByNeighborhood, Activity } from "@/data/what-to-do-data";
+import { activitiesByNeighborhood, cityLevelActivities, Activity } from "@/data/what-to-do-data";
 
 /**
  * ACTIVITY DETAIL PAGE
@@ -14,11 +14,16 @@ import { activitiesByNeighborhood, Activity } from "@/data/what-to-do-data";
  * SAVING SCOPE: Only this individual activity can be saved (item level).
  */
 
-// Helper to find activity by ID across all neighborhoods
+// Helper to find activity by ID across all neighborhoods AND city-level activities
 const findActivityById = (id: string): { activity: Activity; neighborhoodName: string; neighborhoodId: string } | null => {
+  // Debug log to verify which ID is being searched
+  console.log('[ActivityDetail] Searching for activity with id:', id);
+  
+  // First, search in neighborhood activities
   for (const [neighborhoodId, data] of Object.entries(activitiesByNeighborhood)) {
     const activity = data.activities.find(a => a.id === id);
     if (activity) {
+      console.log('[ActivityDetail] Found activity in neighborhood:', neighborhoodId, activity.title);
       return {
         activity,
         neighborhoodName: data.neighborhoodName,
@@ -26,6 +31,26 @@ const findActivityById = (id: string): { activity: Activity; neighborhoodName: s
       };
     }
   }
+  
+  // Second, search in city-level activities
+  const cityActivity = cityLevelActivities.find(a => a.id === id);
+  if (cityActivity) {
+    console.log('[ActivityDetail] Found city-level activity:', cityActivity.title);
+    // Convert city-level activity to full Activity format
+    const fullActivity: Activity = {
+      id: cityActivity.id,
+      title: cityActivity.title,
+      category: "Experiência Icônica",
+      description: cityActivity.description,
+    };
+    return {
+      activity: fullActivity,
+      neighborhoodName: "Rio de Janeiro",
+      neighborhoodId: "city",
+    };
+  }
+  
+  console.log('[ActivityDetail] Activity not found for id:', id);
   return null;
 };
 
@@ -36,16 +61,34 @@ const ActivityDetail = () => {
   
   const result = findActivityById(id || "");
   const from = searchParams.get("from");
-  const backPath = from ? `/o-que-fazer/${from}` : "/o-que-fazer";
+  const backPath = from === "city" ? "/o-que-fazer" : from ? `/o-que-fazer/${from}` : "/o-que-fazer";
 
   if (!result) {
+    console.log('[ActivityDetail] Rendering not-found state for id:', id);
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-muted-foreground mb-4">Atividade não encontrada</p>
-          <Link to="/o-que-fazer" className="text-foreground underline">
+      <div className="min-h-screen bg-background">
+        {/* Header */}
+        <header className="px-6 py-4 border-b border-border">
+          <Link
+            to="/o-que-fazer"
+            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ChevronLeft className="w-4 h-4" />
             Voltar
           </Link>
+        </header>
+        
+        {/* Error State */}
+        <div className="flex flex-col items-center justify-center px-6 py-16">
+          <p className="text-lg text-foreground font-medium mb-2">Atividade não encontrada</p>
+          <p className="text-sm text-muted-foreground mb-6 text-center">
+            Esta atividade pode ter sido removida ou o link está incorreto.
+          </p>
+          <Button asChild variant="outline">
+            <Link to="/o-que-fazer">
+              Voltar para O Que Fazer
+            </Link>
+          </Button>
         </div>
       </div>
     );
