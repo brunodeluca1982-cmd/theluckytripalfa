@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronLeft, MapPin, Calendar, Users, Plus, GripVertical, Trash2, Clock, Sun, Sunset, Moon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -8,10 +8,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { toast } from "sonner";
+import { useTripDraft } from "@/hooks/use-trip-draft";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 /**
  * MANUAL ITINERARY BUILDER
- * Full manual control for creating itineraries from scratch.
+ * Uses trip draft data (destination, dates, travelers) - no redundant questions.
+ * All text in Portuguese (pt-BR).
  */
 
 interface Experience {
@@ -25,24 +29,33 @@ interface Experience {
 interface Day {
   id: string;
   dayNumber: number;
+  date: Date | null;
   experiences: Experience[];
 }
 
 const ManualItinerary = () => {
   const navigate = useNavigate();
+  const { draft, tripDays } = useTripDraft();
   
-  // Basic info state
-  const [destination, setDestination] = useState("");
-  const [numberOfDays, setNumberOfDays] = useState(3);
-  const [travelGroup, setTravelGroup] = useState<string>("couple");
+  // Redirect if no destination selected
+  if (!draft.destinationId) {
+    navigate('/meu-roteiro', { replace: true });
+    return null;
+  }
   
-  // Days and experiences state
+  const actualTripDays = Math.max(1, tripDays);
+  
+  // Initialize days based on trip dates
   const [days, setDays] = useState<Day[]>(() => 
-    Array.from({ length: 3 }, (_, i) => ({
-      id: `day-${i + 1}`,
-      dayNumber: i + 1,
-      experiences: []
-    }))
+    Array.from({ length: actualTripDays }, (_, i) => {
+      const dayDate = draft.arrivalAt ? new Date(draft.arrivalAt.getTime() + i * 24 * 60 * 60 * 1000) : null;
+      return {
+        id: `day-${i + 1}`,
+        dayNumber: i + 1,
+        date: dayDate,
+        experiences: []
+      };
+    })
   );
   
   // Modal state
@@ -55,31 +68,6 @@ const ManualItinerary = () => {
     note: ""
   });
 
-  // Update days when numberOfDays changes
-  const handleDaysChange = (newCount: number) => {
-    const count = Math.max(1, Math.min(14, newCount));
-    setNumberOfDays(count);
-    
-    setDays(prevDays => {
-      if (count > prevDays.length) {
-        // Add new days
-        const newDays = [...prevDays];
-        for (let i = prevDays.length; i < count; i++) {
-          newDays.push({
-            id: `day-${i + 1}-${Date.now()}`,
-            dayNumber: i + 1,
-            experiences: []
-          });
-        }
-        return newDays;
-      } else if (count < prevDays.length) {
-        // Remove days from the end
-        return prevDays.slice(0, count);
-      }
-      return prevDays;
-    });
-  };
-
   // Open add experience modal
   const openAddExperience = (dayId: string) => {
     setCurrentDayId(dayId);
@@ -90,7 +78,7 @@ const ManualItinerary = () => {
   // Add experience to day
   const handleAddExperience = () => {
     if (!newExperience.name.trim()) {
-      toast.error("Please enter an experience name");
+      toast.error("Digite o nome da experiência");
       return;
     }
 
@@ -110,7 +98,7 @@ const ManualItinerary = () => {
     );
 
     setIsAddExperienceOpen(false);
-    toast.success("Experience added");
+    toast.success("Experiência adicionada");
   };
 
   // Remove experience
@@ -128,30 +116,31 @@ const ManualItinerary = () => {
     );
   };
 
-  // Add new day
+  // Add new day at the end
   const addDay = () => {
     const newDayNumber = days.length + 1;
+    const lastDayDate = days.length > 0 && days[days.length - 1].date 
+      ? new Date(days[days.length - 1].date!.getTime() + 24 * 60 * 60 * 1000) 
+      : null;
     setDays([...days, {
       id: `day-${newDayNumber}-${Date.now()}`,
       dayNumber: newDayNumber,
+      date: lastDayDate,
       experiences: []
     }]);
-    setNumberOfDays(days.length + 1);
   };
 
   // Remove day
   const removeDay = (dayId: string) => {
     if (days.length <= 1) {
-      toast.error("You need at least one day");
+      toast.error("Você precisa de pelo menos um dia");
       return;
     }
     
     setDays(prevDays => {
       const filtered = prevDays.filter(d => d.id !== dayId);
-      // Renumber days
       return filtered.map((day, idx) => ({ ...day, dayNumber: idx + 1 }));
     });
-    setNumberOfDays(prev => Math.max(1, prev - 1));
   };
 
   // Move day up
@@ -176,16 +165,14 @@ const ManualItinerary = () => {
 
   // Save itinerary
   const handleSave = () => {
-    if (!destination.trim()) {
-      toast.error("Please enter a destination");
-      return;
-    }
-
     // Convert to the format used by the app
     const itineraryData = {
-      destination,
-      numberOfDays,
-      travelGroup,
+      destination: draft.destinationName,
+      destinationId: draft.destinationId,
+      numberOfDays: days.length,
+      adults: draft.adults,
+      children: draft.children,
+      tripStyles: draft.tripStyles,
       days: days.reduce((acc, day) => {
         acc[day.dayNumber] = day.experiences.map(exp => ({
           id: exp.id,
@@ -206,7 +193,7 @@ const ManualItinerary = () => {
     // Save to localStorage
     localStorage.setItem('meuRoteiro', JSON.stringify(itineraryData));
     
-    toast.success("Itinerary saved");
+    toast.success("Roteiro salvo");
     navigate('/meu-roteiro');
   };
 
@@ -221,11 +208,17 @@ const ManualItinerary = () => {
 
   const getTimeLabel = (time: string) => {
     switch (time) {
-      case 'morning': return 'Morning';
-      case 'afternoon': return 'Afternoon';
-      case 'evening': return 'Evening';
+      case 'morning': return 'Manhã';
+      case 'afternoon': return 'Tarde';
+      case 'evening': return 'Noite';
       default: return time;
     }
+  };
+
+  // Format date for display
+  const formatDayDate = (date: Date | null) => {
+    if (!date) return '';
+    return format(date, "EEE, d MMM", { locale: ptBR });
   };
 
   return (
@@ -240,110 +233,42 @@ const ManualItinerary = () => {
             <ChevronLeft className="w-5 h-5" />
           </button>
           <div>
-            <h1 className="text-lg font-semibold text-foreground">Create manual itinerary</h1>
-            <p className="text-xs text-muted-foreground">Build your itinerary from scratch</p>
+            <h1 className="text-lg font-semibold text-foreground">Criar roteiro manual</h1>
+            <p className="text-xs text-muted-foreground">Monte seu roteiro do zero</p>
           </div>
         </div>
       </header>
 
       <main className="px-4 py-6 space-y-8">
+        {/* Trip Summary (read-only) */}
+        <div className="bg-primary/10 rounded-xl p-4 space-y-2">
+          <div className="flex items-center gap-2 text-primary">
+            <MapPin className="w-4 h-4" />
+            <span className="font-medium">{draft.destinationName}</span>
+          </div>
+          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+            <span className="flex items-center gap-1">
+              <Calendar className="w-3 h-3" />
+              {days.length} {days.length === 1 ? 'dia' : 'dias'}
+            </span>
+            <span className="flex items-center gap-1">
+              <Users className="w-3 h-3" />
+              {draft.adults} {draft.adults === 1 ? 'adulto' : 'adultos'}
+              {draft.children > 0 && `, ${draft.children} ${draft.children === 1 ? 'criança' : 'crianças'}`}
+            </span>
+          </div>
+        </div>
+
         {/* Intro */}
         <div className="text-center pb-2">
           <p className="text-muted-foreground text-sm">
-            Build your itinerary from scratch, choosing each experience at your own pace.
+            Monte seu roteiro do zero, escolhendo cada experiência no seu ritmo.
           </p>
         </div>
 
-        {/* Block 1: Basic Information */}
+        {/* Itinerary Structure */}
         <section className="space-y-4">
-          <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Basic information</h2>
-          
-          <div className="space-y-4 bg-card rounded-xl p-4 border border-border">
-            {/* Destination */}
-            <div className="space-y-2">
-              <Label htmlFor="destination" className="flex items-center gap-2 text-foreground">
-                <MapPin className="w-4 h-4 text-primary" />
-                Destination
-              </Label>
-              <Input
-                id="destination"
-                placeholder="e.g. Rio de Janeiro"
-                value={destination}
-                onChange={(e) => setDestination(e.target.value)}
-                className="h-12"
-              />
-            </div>
-
-            {/* Number of days */}
-            <div className="space-y-2">
-              <Label htmlFor="days" className="flex items-center gap-2 text-foreground">
-                <Calendar className="w-4 h-4 text-primary" />
-                How many days?
-              </Label>
-              <div className="flex items-center gap-3">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => handleDaysChange(numberOfDays - 1)}
-                  disabled={numberOfDays <= 1}
-                  className="h-12 w-12"
-                >
-                  -
-                </Button>
-                <span className="text-xl font-semibold text-foreground w-12 text-center">
-                  {numberOfDays}
-                </span>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => handleDaysChange(numberOfDays + 1)}
-                  disabled={numberOfDays >= 14}
-                  className="h-12 w-12"
-                >
-                  +
-                </Button>
-              </div>
-            </div>
-
-            {/* Travel group */}
-            <div className="space-y-3">
-              <Label className="flex items-center gap-2 text-foreground">
-                <Users className="w-4 h-4 text-primary" />
-                Who are you traveling with?
-              </Label>
-              <RadioGroup
-                value={travelGroup}
-                onValueChange={setTravelGroup}
-                className="grid grid-cols-2 gap-2"
-              >
-                {[
-                  { value: 'solo', label: 'Solo' },
-                  { value: 'couple', label: 'Couple' },
-                  { value: 'family', label: 'Family' },
-                  { value: 'friends', label: 'Friends' }
-                ].map(option => (
-                  <div key={option.value} className="flex items-center">
-                    <RadioGroupItem
-                      value={option.value}
-                      id={option.value}
-                      className="peer sr-only"
-                    />
-                    <Label
-                      htmlFor={option.value}
-                      className="flex-1 cursor-pointer rounded-lg border border-border p-3 text-center text-sm font-medium transition-colors peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5 peer-data-[state=checked]:text-primary hover:bg-muted/50"
-                    >
-                      {option.label}
-                    </Label>
-                  </div>
-                ))}
-              </RadioGroup>
-            </div>
-          </div>
-        </section>
-
-        {/* Block 2: Itinerary Structure */}
-        <section className="space-y-4">
-          <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Itinerary days</h2>
+          <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Dias do roteiro</h2>
           
           <div className="space-y-3">
             {days.map((day, index) => (
@@ -360,7 +285,10 @@ const ManualItinerary = () => {
                         <GripVertical className="w-4 h-4" />
                       </button>
                     </div>
-                    <span className="font-semibold text-foreground">Day {day.dayNumber}</span>
+                    <span className="font-semibold text-foreground">
+                      Dia {day.dayNumber}
+                      {day.date && <span className="font-normal text-muted-foreground ml-2 text-sm">{formatDayDate(day.date)}</span>}
+                    </span>
                   </div>
                   <button
                     onClick={() => removeDay(day.id)}
@@ -374,7 +302,7 @@ const ManualItinerary = () => {
                 <div className="p-4 space-y-2">
                   {day.experiences.length === 0 ? (
                     <p className="text-sm text-muted-foreground text-center py-2">
-                      No experiences yet
+                      Nenhuma experiência ainda
                     </p>
                   ) : (
                     day.experiences.map(exp => (

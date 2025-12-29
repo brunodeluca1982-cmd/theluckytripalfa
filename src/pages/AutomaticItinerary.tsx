@@ -17,7 +17,7 @@ import { getValidatedLocation, hasValidatedLocation } from "@/data/validated-loc
  * Includes accommodation anchoring, transport segments, and cost estimates.
  */
 
-type DayOption = 2 | 3;
+// No longer constrained to specific day options - uses actual trip dates
 
 interface TransportSegment {
   from: string;
@@ -69,12 +69,16 @@ const getTransportMode = (distanceKm: number): { mode: 'walking' | 'uber'; durat
 const AutomaticItinerary = () => {
   const navigate = useNavigate();
   const { draft, tripDays } = useTripDraft();
-  const [selectedDays, setSelectedDays] = useState<DayOption>(tripDays >= 3 ? 3 : 2);
+  // Use the actual trip days from dates (minimum 1 day)
+  const actualTripDays = Math.max(1, tripDays);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isGenerated, setIsGenerated] = useState(false);
   const [itinerary, setItinerary] = useState<Record<number, ItinerarySlot[]>>({});
   const [dayCosts, setDayCosts] = useState<Record<number, DayCosts>>({});
   const [selectedHotel, setSelectedHotel] = useState<typeof guideHotels[0] | null>(null);
+  
+  // Auto-generate on mount if trip dates are valid
+  const [hasStartedGeneration, setHasStartedGeneration] = useState(false);
 
   if (!draft.destinationId) {
     navigate('/meu-roteiro', { replace: true });
@@ -162,7 +166,7 @@ const AutomaticItinerary = () => {
     let currentPlaceId = hotel.id;
     let currentNeighborhood = hotel.neighborhood;
 
-    for (let day = 1; day <= selectedDays; day++) {
+    for (let day = 1; day <= actualTripDays; day++) {
       const daySlots: ItinerarySlot[] = [];
       let dayCost: DayCosts = { food: 0, activities: 0, transport: 0, total: 0 };
       
@@ -439,7 +443,7 @@ const AutomaticItinerary = () => {
   const handleConfirm = () => {
     localStorage.setItem('generatedItinerary', JSON.stringify({
       destination: draft.destinationId,
-      days: selectedDays,
+      days: actualTripDays,
       itinerary,
       dayCosts,
       hotel: selectedHotel,
@@ -475,6 +479,22 @@ const AutomaticItinerary = () => {
     if (slot.type === 'meal') return 'bg-orange-500/20';
     if (slot.type === 'sunset') return 'bg-amber-500/20';
     return 'bg-primary/20';
+  };
+
+  // Get detail route for an item based on type
+  const getItemRoute = (slot: ItinerarySlot): string | null => {
+    if (slot.type === 'transport') return null;
+    if (slot.type === 'departure') return `/hotel/${slot.item.id}`;
+    if (slot.type === 'meal') return `/restaurante/${slot.item.id}`;
+    if (slot.type === 'activity' || slot.type === 'sunset') return `/atividade/${slot.item.id}`;
+    return null;
+  };
+
+  const handleSlotClick = (slot: ItinerarySlot) => {
+    const route = getItemRoute(slot);
+    if (route) {
+      navigate(route);
+    }
   };
 
   return (
@@ -517,34 +537,21 @@ const AutomaticItinerary = () => {
           </div>
         )}
 
-        {/* Day Selection (before generation) */}
+        {/* Auto-generation info (before generation) */}
         {!isGenerated && !isGenerating && (
           <>
             <div className="text-center mb-8">
               <h2 className="text-2xl font-serif font-semibold text-foreground mb-2">
-                Quantos dias?
+                Seu roteiro de {actualTripDays} {actualTripDays === 1 ? 'dia' : 'dias'}
               </h2>
               <p className="text-muted-foreground text-sm">
-                Escolha a duração do seu roteiro curado.
+                Baseado nas suas datas de viagem.
               </p>
-            </div>
-
-            <div className="flex gap-3 justify-center mb-8">
-              {([2, 3] as DayOption[]).map((days) => (
-                <button
-                  key={days}
-                  onClick={() => setSelectedDays(days)}
-                  className={cn(
-                    "w-24 h-24 rounded-2xl flex flex-col items-center justify-center transition-all",
-                    selectedDays === days
-                      ? "bg-primary text-primary-foreground ring-2 ring-primary ring-offset-2"
-                      : "bg-card border border-border"
-                  )}
-                >
-                  <span className="text-3xl font-bold">{days}</span>
-                  <span className="text-sm">dias</span>
-                </button>
-              ))}
+              {actualTripDays > 3 && (
+                <p className="text-muted-foreground text-xs mt-2">
+                  Viagens mais longas são organizadas em partes para facilitar ajustes.
+                </p>
+              )}
             </div>
 
             <Button onClick={generateItinerary} className="w-full h-14 text-lg font-semibold rounded-2xl">
@@ -558,7 +565,7 @@ const AutomaticItinerary = () => {
           <>
             <div className="text-center mb-6">
               <h2 className="text-xl font-semibold text-foreground mb-1">
-                Seu roteiro de {selectedDays} dias
+                Seu roteiro de {actualTripDays} {actualTripDays === 1 ? 'dia' : 'dias'}
               </h2>
               <p className="text-sm text-muted-foreground">Curado pelo The Lucky Trip</p>
               {selectedHotel && (
@@ -598,9 +605,11 @@ const AutomaticItinerary = () => {
                               initial={{ opacity: 0, x: -10 }}
                               animate={{ opacity: 1, x: 0 }}
                               transition={{ delay: idx * 0.05 }}
+                              onClick={() => handleSlotClick(slot)}
                               className={cn(
                                 "flex gap-3 items-start py-2",
-                                slot.type === 'transport' && "opacity-70"
+                                slot.type === 'transport' && "opacity-70",
+                                getItemRoute(slot) && "cursor-pointer hover:bg-muted/50 rounded-lg -mx-2 px-2 transition-colors"
                               )}
                             >
                               <div className="w-12 text-xs text-muted-foreground pt-1">{slot.time}</div>
@@ -617,7 +626,10 @@ const AutomaticItinerary = () => {
                                   </p>
                                 ) : (
                                   <>
-                                    <p className="font-medium text-foreground text-sm truncate">{slot.item.name}</p>
+                                    <p className={cn(
+                                      "font-medium text-foreground text-sm truncate",
+                                      getItemRoute(slot) && "underline decoration-dotted underline-offset-2"
+                                    )}>{slot.item.name}</p>
                                     {slot.item.neighborhood && (
                                       <p className="text-xs text-muted-foreground">{slot.item.neighborhood}</p>
                                     )}
