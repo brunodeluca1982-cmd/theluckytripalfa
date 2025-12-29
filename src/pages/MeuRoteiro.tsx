@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef } from "react";
+import { useState, useMemo, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { 
@@ -15,6 +15,93 @@ import { cn } from "@/lib/utils";
 import { curatedDestinations, searchDestinations, Destination } from "@/data/destinations-database";
 import { useTripDraft } from "@/hooks/use-trip-draft";
 import { toast } from "@/hooks/use-toast";
+
+/**
+ * Controlled numeric input for child ages
+ * Prevents keyboard flicker, strips leading zeros, validates 1-17 range
+ */
+interface ChildAgeInputProps {
+  childIndex: number;
+  value: number;
+  onChange: (index: number, age: number) => void;
+}
+
+const ChildAgeInput = ({ childIndex, value, onChange }: ChildAgeInputProps) => {
+  // Local string state for controlled input without flicker
+  const [localValue, setLocalValue] = useState(String(value));
+  const [hasError, setHasError] = useState(false);
+
+  // Sync local value when external value changes (e.g., from another source)
+  const handleFocus = useCallback((e: React.FocusEvent<HTMLInputElement>) => {
+    // Select all text on focus for easy replacement
+    e.target.select();
+  }, []);
+
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const rawValue = e.target.value;
+    
+    // Allow empty for typing
+    if (rawValue === '') {
+      setLocalValue('');
+      setHasError(false);
+      return;
+    }
+    
+    // Only allow digits
+    if (!/^\d*$/.test(rawValue)) {
+      return;
+    }
+    
+    // Strip leading zeros: "07" -> "7", "010" -> "10"
+    const stripped = rawValue.replace(/^0+/, '') || '0';
+    const numValue = parseInt(stripped, 10);
+    
+    // Validate range 1-17
+    if (numValue < 1 || numValue > 17) {
+      setLocalValue(stripped);
+      setHasError(true);
+      return;
+    }
+    
+    setLocalValue(stripped);
+    setHasError(false);
+    onChange(childIndex, numValue);
+  }, [childIndex, onChange]);
+
+  const handleBlur = useCallback(() => {
+    // On blur, ensure valid value
+    const numValue = parseInt(localValue, 10);
+    if (isNaN(numValue) || numValue < 1) {
+      setLocalValue('1');
+      setHasError(false);
+      onChange(childIndex, 1);
+    } else if (numValue > 17) {
+      setLocalValue('17');
+      setHasError(false);
+      onChange(childIndex, 17);
+    } else {
+      setLocalValue(String(numValue));
+      setHasError(false);
+    }
+  }, [localValue, childIndex, onChange]);
+
+  return (
+    <Input
+      type="text"
+      inputMode="numeric"
+      pattern="[0-9]*"
+      value={localValue}
+      onChange={handleChange}
+      onFocus={handleFocus}
+      onBlur={handleBlur}
+      className={cn(
+        "w-16 h-10 rounded-xl text-center",
+        hasError && "border-destructive focus-visible:ring-destructive"
+      )}
+      aria-label={`Idade da criança ${childIndex + 1}`}
+    />
+  );
+};
 
 /**
  * MONTE SEU ROTEIRO — Entry Screen (Step 1)
@@ -456,14 +543,11 @@ const MeuRoteiro = () => {
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {draft.childrenAges.map((age, index) => (
-                    <div key={index} className="flex items-center gap-2">
-                      <Input
-                        type="number"
-                        min={0}
-                        max={12}
+                    <div key={`child-age-${index}`} className="flex items-center gap-2">
+                      <ChildAgeInput
+                        childIndex={index}
                         value={age}
-                        onChange={(e) => setChildAge(index, parseInt(e.target.value) || 0)}
-                        className="w-16 h-10 rounded-xl text-center"
+                        onChange={setChildAge}
                       />
                       <span className="text-sm text-muted-foreground">anos</span>
                     </div>
