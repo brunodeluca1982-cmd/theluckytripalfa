@@ -68,7 +68,7 @@ const TripPreferences = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <div className="min-h-screen bg-background pb-32">
       {/* Header */}
       <header className="sticky top-0 z-50 px-4 py-4 bg-background/95 backdrop-blur-sm border-b border-border">
         <div className="flex items-center gap-4">
@@ -161,8 +161,8 @@ const TripPreferences = () => {
         </div>
       </main>
 
-      {/* Fixed CTA */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/95 backdrop-blur-sm border-t border-border">
+      {/* Fixed CTA - positioned above bottom nav */}
+      <div className="fixed bottom-20 left-0 right-0 p-4 bg-background/95 backdrop-blur-sm border-t border-border z-40">
         <Button
           onClick={handleContinue}
           className="w-full h-14 text-lg font-semibold rounded-2xl"

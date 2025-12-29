@@ -119,7 +119,7 @@ const RoteiroFinal = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <div className="min-h-screen bg-background pb-32">
       {/* Hero Image Placeholder */}
       <div className="relative w-full h-48 bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center">
         <div className="text-center text-muted-foreground">
@@ -127,8 +127,9 @@ const RoteiroFinal = () => {
           <span className="text-sm">Imagem do destino</span>
         </div>
         <button
-          onClick={() => navigate(-1)}
+          onClick={() => navigate('/')}
           className="absolute top-4 left-4 p-2 bg-background/80 backdrop-blur-sm rounded-full"
+          aria-label="Voltar ao app"
         >
           <ChevronLeft className="w-5 h-5 text-foreground" />
         </button>
@@ -247,8 +248,8 @@ const RoteiroFinal = () => {
         </div>
       </main>
 
-      {/* Bottom Button */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/95 backdrop-blur-sm border-t border-border">
+      {/* Bottom Button - positioned above bottom nav */}
+      <div className="fixed bottom-20 left-0 right-0 p-4 bg-background/95 backdrop-blur-sm border-t border-border z-40">
         <Button 
           onClick={() => navigate('/')} 
           variant="outline"

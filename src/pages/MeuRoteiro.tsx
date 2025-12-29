@@ -165,12 +165,9 @@ const MeuRoteiro = () => {
     navigate('/meu-roteiro/preferencias');
   };
 
+  // Fixed back navigation - always go to home to avoid getting stuck in setup forms
   const handleBack = () => {
-    if (window.history.length > 2) {
-      navigate(-1);
-    } else {
-      navigate('/');
-    }
+    navigate('/');
   };
 
   // Selected destination object
@@ -216,22 +213,36 @@ const MeuRoteiro = () => {
           >
             {curatedDestinations.map((destination, index) => {
               const isSelected = draft.destinationId === destination.id;
+              const isDisabled = !destination.available;
               
               return (
-                <motion.button
+                <motion.div
                   key={destination.id}
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: index * 0.05 }}
-                  onClick={() => handleSelectDestination(destination)}
+                  onClick={() => {
+                    if (isDisabled) {
+                      toast({ 
+                        title: "Em breve!", 
+                        description: `${destination.name} estará disponível em breve.` 
+                      });
+                      return;
+                    }
+                    handleSelectDestination(destination);
+                  }}
                   className={cn(
                     "relative flex-shrink-0 w-40 aspect-[3/4] rounded-2xl overflow-hidden transition-all",
                     isSelected 
                       ? "ring-2 ring-primary ring-offset-2 ring-offset-background scale-[1.02]" 
                       : "ring-0",
-                    !destination.available && "opacity-60"
+                    isDisabled && "opacity-50 cursor-not-allowed grayscale-[30%]",
+                    !isDisabled && "cursor-pointer"
                   )}
                   style={{ scrollSnapAlign: 'start' }}
+                  role="button"
+                  aria-disabled={isDisabled}
+                  tabIndex={isDisabled ? -1 : 0}
                 >
                   {destination.imageUrl ? (
                     <img
@@ -259,14 +270,14 @@ const MeuRoteiro = () => {
                   </div>
 
                   {/* Coming soon badge */}
-                  {!destination.available && (
+                  {isDisabled && (
                     <div className="absolute top-2 left-2 px-2 py-1 bg-black/60 rounded-full">
                       <span className="text-[10px] text-white font-medium">Em breve</span>
                     </div>
                   )}
 
                   {/* Selected indicator */}
-                  {isSelected && (
+                  {isSelected && !isDisabled && (
                     <motion.div
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
@@ -287,7 +298,7 @@ const MeuRoteiro = () => {
                       </svg>
                     </motion.div>
                   )}
-                </motion.button>
+                </motion.div>
               );
             })}
           </div>
@@ -559,8 +570,8 @@ const MeuRoteiro = () => {
         </section>
       </main>
 
-      {/* Fixed CTA */}
-      <div className="fixed bottom-16 left-0 right-0 p-4 bg-background/95 backdrop-blur-sm border-t border-border">
+      {/* Fixed CTA - positioned above bottom nav (h-16) with safe spacing */}
+      <div className="fixed bottom-20 left-0 right-0 p-4 bg-background/95 backdrop-blur-sm border-t border-border z-40">
         <Button
           onClick={handleContinue}
           disabled={!isStep1Valid}
