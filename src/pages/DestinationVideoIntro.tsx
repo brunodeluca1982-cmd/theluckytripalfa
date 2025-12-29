@@ -156,10 +156,10 @@ const DestinationVideoIntro = () => {
         </h1>
       </div>
 
-      {/* Skip button */}
+      {/* Skip button - positioned with safe area for iOS */}
       <button
         onClick={handleSkip}
-        className="absolute bottom-12 right-6 px-6 py-3 bg-white/20 backdrop-blur-sm text-white text-sm font-medium rounded-full border border-white/30 hover:bg-white/30 transition-colors"
+        className="absolute bottom-safe-nav right-6 px-6 py-3 bg-white/20 backdrop-blur-sm text-white text-sm font-medium rounded-full border border-white/30 hover:bg-white/30 transition-colors"
       >
         Pular
       </button>

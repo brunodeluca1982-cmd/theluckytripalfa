@@ -661,9 +661,9 @@ const AutomaticItinerary = () => {
         )}
       </main>
 
-      {/* Fixed CTA - positioned above bottom nav */}
+      {/* Fixed CTA - positioned above bottom nav with safe area */}
       {isGenerated && (
-        <div className="fixed bottom-20 left-0 right-0 p-4 bg-background/95 backdrop-blur-sm border-t border-border z-40">
+        <div className="fixed bottom-safe-cta left-0 right-0 p-4 bg-background/95 backdrop-blur-sm border-t border-border z-40">
           <Button onClick={handleConfirm} className="w-full h-14 text-lg font-semibold rounded-2xl">
             <Check className="w-5 h-5 mr-2" />
             Confirmar roteiro

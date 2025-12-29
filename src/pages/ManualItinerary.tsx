@@ -434,8 +434,8 @@ const ManualItinerary = () => {
         </section>
       </main>
 
-      {/* Fixed save button */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/95 backdrop-blur-sm border-t border-border">
+      {/* Fixed save button - positioned above bottom nav with safe area */}
+      <div className="fixed bottom-safe-cta left-0 right-0 p-4 bg-background/95 backdrop-blur-sm border-t border-border z-40">
         <Button
           onClick={handleSave}
           className="w-full h-14 text-base font-medium rounded-xl"

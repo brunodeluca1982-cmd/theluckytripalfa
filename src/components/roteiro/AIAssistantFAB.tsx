@@ -45,7 +45,7 @@ export const AIAssistantFAB = ({
   ];
 
   return (
-    <div className="fixed bottom-24 right-4 z-40 flex flex-col items-end gap-3">
+    <div className="fixed bottom-safe-nav right-4 z-40 flex flex-col items-end gap-3">
       {/* Action Menu */}
       {isOpen && (
         <div className="flex flex-col gap-2 animate-fade-in">

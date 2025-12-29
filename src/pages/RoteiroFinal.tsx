@@ -248,8 +248,8 @@ const RoteiroFinal = () => {
         </div>
       </main>
 
-      {/* Bottom Button - positioned above bottom nav */}
-      <div className="fixed bottom-20 left-0 right-0 p-4 bg-background/95 backdrop-blur-sm border-t border-border z-40">
+      {/* Bottom Button - positioned above bottom nav with safe area */}
+      <div className="fixed bottom-safe-cta left-0 right-0 p-4 bg-background/95 backdrop-blur-sm border-t border-border z-40">
         <Button 
           onClick={() => navigate('/')} 
           variant="outline"

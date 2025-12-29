@@ -124,3 +124,20 @@
     @apply font-serif;
   }
 }
+
+/* Safe area utilities for iOS devices with notch/Dynamic Island */
+@layer utilities {
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  
+  .bottom-safe-nav {
+    /* Bottom nav height (64px/4rem) + safe area + extra padding (16px) */
+    bottom: calc(4rem + env(safe-area-inset-bottom, 0px) + 1rem);
+  }
+  
+  .bottom-safe-cta {
+    /* For CTA containers above bottom nav: nav height + safe area */
+    bottom: calc(4rem + env(safe-area-inset-bottom, 0px));
+  }
+}

@@ -87,7 +87,7 @@ export const AddPlaceSheet = ({
         <SheetTrigger asChild>
           <Button
             size="lg"
-            className="fixed bottom-24 right-4 z-40 w-14 h-14 rounded-full shadow-lg bg-primary text-primary-foreground hover:bg-primary/90"
+            className="fixed bottom-safe-nav right-4 z-40 w-14 h-14 rounded-full shadow-lg bg-primary text-primary-foreground hover:bg-primary/90"
             aria-label="Adicionar lugar"
           >
             <Plus className="w-6 h-6" />
