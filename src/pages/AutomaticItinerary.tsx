@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ChevronLeft, Check, MapPin, Utensils, Sun, Moon, Car, Footprints, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useTripDraft } from "@/hooks/use-trip-draft";
 import { guideRestaurants, guideActivities, guideHotels } from "@/data/rio-guide-data";
 import { cn } from "@/lib/utils";
@@ -69,6 +70,7 @@ const AutomaticItinerary = () => {
   const navigate = useNavigate();
   const { draft, tripDays } = useTripDraft();
   const [selectedDays, setSelectedDays] = useState<DayOption>(tripDays >= 3 ? 3 : 2);
+  const [isGenerating, setIsGenerating] = useState(false);
   const [isGenerated, setIsGenerated] = useState(false);
   const [itinerary, setItinerary] = useState<Record<number, ItinerarySlot[]>>({});
   const [dayCosts, setDayCosts] = useState<Record<number, DayCosts>>({});
@@ -84,7 +86,12 @@ const AutomaticItinerary = () => {
   const isFamily = tripStyles.includes('familia') || draft.children > 0;
   const isAdventure = tripStyles.includes('aventura');
 
-  const generateItinerary = () => {
+  const generateItinerary = async () => {
+    setIsGenerating(true);
+    
+    // Small delay to show loading state
+    await new Promise(resolve => setTimeout(resolve, 800));
+    
     const generated: Record<number, ItinerarySlot[]> = {};
     const costs: Record<number, DayCosts> = {};
     
@@ -425,6 +432,7 @@ const AutomaticItinerary = () => {
 
     setDayCosts(costs);
     setItinerary(generated);
+    setIsGenerating(false);
     setIsGenerated(true);
   };
 
@@ -483,8 +491,34 @@ const AutomaticItinerary = () => {
         </div>
       </header>
 
-      <main className="px-4 py-6">
-        {!isGenerated ? (
+      <main className="px-4 py-6 pb-32">
+        {/* Skeleton Loading State */}
+        {isGenerating && (
+          <div className="space-y-6">
+            <div className="text-center mb-6">
+              <Skeleton className="h-6 w-48 mx-auto mb-2" />
+              <Skeleton className="h-4 w-32 mx-auto" />
+            </div>
+            {[1, 2].map((day) => (
+              <div key={day} className="bg-card rounded-2xl p-4 space-y-4">
+                <Skeleton className="h-5 w-20" />
+                {[1, 2, 3, 4, 5].map((slot) => (
+                  <div key={slot} className="flex gap-3 items-center">
+                    <Skeleton className="w-12 h-4" />
+                    <Skeleton className="w-7 h-7 rounded-lg" />
+                    <div className="flex-1 space-y-1">
+                      <Skeleton className="h-4 w-3/4" />
+                      <Skeleton className="h-3 w-1/2" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Day Selection (before generation) */}
+        {!isGenerated && !isGenerating && (
           <>
             <div className="text-center mb-8">
               <h2 className="text-2xl font-serif font-semibold text-foreground mb-2">
@@ -517,7 +551,10 @@ const AutomaticItinerary = () => {
               Gerar meu roteiro
             </Button>
           </>
-        ) : (
+        )}
+        
+        {/* Generated Itinerary */}
+        {isGenerated && (
           <>
             <div className="text-center mb-6">
               <h2 className="text-xl font-semibold text-foreground mb-1">
@@ -624,8 +661,9 @@ const AutomaticItinerary = () => {
         )}
       </main>
 
+      {/* Fixed CTA - positioned above bottom nav */}
       {isGenerated && (
-        <div className="fixed bottom-16 left-0 right-0 p-4 bg-background/95 backdrop-blur-sm border-t border-border">
+        <div className="fixed bottom-20 left-0 right-0 p-4 bg-background/95 backdrop-blur-sm border-t border-border z-40">
           <Button onClick={handleConfirm} className="w-full h-14 text-lg font-semibold rounded-2xl">
             <Check className="w-5 h-5 mr-2" />
             Confirmar roteiro
