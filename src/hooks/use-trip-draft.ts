@@ -139,6 +139,8 @@ export const useTripDraft = () => {
   }, []);
 
   // Validation
+  const isDestinationSelected = draft.destinationId !== '';
+  
   const isStep1Valid = 
     draft.destinationId !== '' &&
     draft.arrivalAt !== null &&
@@ -151,6 +153,7 @@ export const useTripDraft = () => {
   return {
     draft,
     tripDays,
+    isDestinationSelected,
     isStep1Valid,
     // Actions
     updateDraft,
