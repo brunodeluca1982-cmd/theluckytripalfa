@@ -52,12 +52,10 @@ const MeuRoteiro = () => {
       destination.imageUrl || ''
     );
     
-    // Clear search and navigate to next step
+    // Clear search and navigate to next step (group composition)
     setSearchQuery('');
     setIsSearchFocused(false);
-    
-    // Navigate to group composition (dates + travelers)
-    navigate('/meu-roteiro/preferencias');
+    navigate('/meu-roteiro/viajantes');
   };
 
   // Fixed back navigation - always go to home
