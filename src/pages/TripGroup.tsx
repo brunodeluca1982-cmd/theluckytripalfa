@@ -8,9 +8,9 @@ import { useTripDraft } from "@/hooks/use-trip-draft";
 import { cn } from "@/lib/utils";
 
 /**
- * TRIP TRAVELERS (Step 2: Group Composition)
+ * TRIP GROUP (Step 2: Group Composition)
  * 
- * Route: /meu-roteiro/viajantes
+ * Route: /meu-roteiro/grupo
  * 
  * Shows ONLY:
  * - Adults counter (min 1, default 1)
@@ -102,7 +102,7 @@ const ChildAgeInput = ({ childIndex, value, onChange }: ChildAgeInputProps) => {
   );
 };
 
-const TripTravelers = () => {
+const TripGroup = () => {
   const navigate = useNavigate();
   const { draft, setAdults, setChildren, setChildAge, isDestinationSelected } = useTripDraft();
 
@@ -141,6 +141,12 @@ const TripTravelers = () => {
 
       {/* Content */}
       <main className="px-4 py-6">
+        {/* Destination summary */}
+        <div className="mb-6 p-3 bg-muted/50 rounded-xl">
+          <p className="text-xs text-muted-foreground">Destino</p>
+          <p className="font-semibold text-foreground">{draft.destinationName}</p>
+        </div>
+
         {/* Title */}
         <div className="mb-8">
           <h2 className="text-2xl font-serif font-semibold text-foreground mb-2">
@@ -263,4 +269,4 @@ const TripTravelers = () => {
   );
 };
 
-export default TripTravelers;
+export default TripGroup;
