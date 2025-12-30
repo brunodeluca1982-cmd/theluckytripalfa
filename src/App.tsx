@@ -21,7 +21,8 @@ import HowToGetThere from "./pages/HowToGetThere";
 import WhatToDo from "./pages/WhatToDo";
 import WhatToDoDetail from "./pages/WhatToDoDetail";
 import MeuRoteiro from "./pages/MeuRoteiro";
-import TripTravelers from "./pages/TripTravelers";
+import TripGroup from "./pages/TripGroup";
+import TripDates from "./pages/TripDates";
 import TripPreferences from "./pages/TripPreferences";
 import ItineraryDecision from "./pages/ItineraryDecision";
 import AutomaticItinerary from "./pages/AutomaticItinerary";
@@ -115,7 +116,8 @@ const App = () => {
                   
                   {/* Meu Roteiro */}
                   <Route path="/meu-roteiro" element={<MeuRoteiro />} />
-                  <Route path="/meu-roteiro/viajantes" element={<TripTravelers />} />
+                  <Route path="/meu-roteiro/grupo" element={<TripGroup />} />
+                  <Route path="/meu-roteiro/datas" element={<TripDates />} />
                   <Route path="/meu-roteiro/preferencias" element={<TripPreferences />} />
                   <Route path="/meu-roteiro/decisao" element={<ItineraryDecision />} />
                   <Route path="/meu-roteiro/automatico" element={<AutomaticItinerary />} />

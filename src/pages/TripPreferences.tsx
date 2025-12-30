@@ -1,12 +1,14 @@
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTripDraft } from "@/hooks/use-trip-draft";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 
 /**
- * TRIP PREFERENCES (Step 2)
+ * TRIP PREFERENCES (Step 4: Travel Style)
  * 
  * Route: /meu-roteiro/preferencias
  * 
@@ -54,11 +56,17 @@ const tripStyleOptions: TripStyleOption[] = [
 
 const TripPreferences = () => {
   const navigate = useNavigate();
-  const { draft, toggleTripStyle } = useTripDraft();
+  const { draft, toggleTripStyle, tripDays, isDestinationSelected } = useTripDraft();
 
   // If no destination selected, go back to step 1
-  if (!draft.destinationId) {
+  if (!isDestinationSelected) {
     navigate('/meu-roteiro', { replace: true });
+    return null;
+  }
+
+  // If no dates selected, go back to step 3
+  if (!draft.arrivalAt || !draft.departureAt) {
+    navigate('/meu-roteiro/datas', { replace: true });
     return null;
   }
 
@@ -67,23 +75,62 @@ const TripPreferences = () => {
     navigate('/meu-roteiro/decisao');
   };
 
+  const handleBack = () => {
+    navigate('/meu-roteiro/datas');
+  };
+
+  // Format date for display
+  const formatDate = (date: Date | null) => {
+    if (!date) return '';
+    return format(date, "dd/MM", { locale: ptBR });
+  };
+
   return (
     <div className="min-h-screen bg-background pb-32">
       {/* Header */}
       <header className="sticky top-0 z-50 px-4 py-4 bg-background/95 backdrop-blur-sm border-b border-border">
         <div className="flex items-center gap-4">
           <button
-            onClick={() => navigate('/meu-roteiro')}
+            onClick={handleBack}
             className="p-2 -m-2 text-muted-foreground hover:text-foreground transition-colors"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
-          <h1 className="text-lg font-semibold text-foreground">Preferências</h1>
+          <h1 className="text-lg font-semibold text-foreground">Monte seu roteiro</h1>
         </div>
       </header>
 
       {/* Content */}
       <main className="px-4 py-6">
+        {/* Trip summary */}
+        <div className="mb-6 p-3 bg-muted/50 rounded-xl space-y-1">
+          <div className="flex justify-between items-start">
+            <div>
+              <p className="text-xs text-muted-foreground">Destino</p>
+              <p className="font-semibold text-foreground">{draft.destinationName}</p>
+            </div>
+            <div className="text-right">
+              <p className="text-xs text-muted-foreground">Duração</p>
+              <p className="font-semibold text-primary">{tripDays} dias</p>
+            </div>
+          </div>
+          <div className="flex justify-between items-start pt-2 border-t border-border/50">
+            <div>
+              <p className="text-xs text-muted-foreground">Viajantes</p>
+              <p className="text-sm text-foreground">
+                {draft.adults} {draft.adults === 1 ? 'adulto' : 'adultos'}
+                {draft.children > 0 && `, ${draft.children} ${draft.children === 1 ? 'criança' : 'crianças'}`}
+              </p>
+            </div>
+            <div className="text-right">
+              <p className="text-xs text-muted-foreground">Datas</p>
+              <p className="text-sm text-foreground">
+                {formatDate(draft.arrivalAt)} - {formatDate(draft.departureAt)}
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* Title */}
         <div className="text-center mb-8">
           <h2 className="text-2xl font-serif font-semibold text-foreground mb-2">
@@ -167,7 +214,8 @@ const TripPreferences = () => {
           onClick={handleContinue}
           className="w-full h-14 text-lg font-semibold rounded-2xl"
         >
-          Começar jornada
+          Continuar
+          <ChevronRight className="w-5 h-5 ml-2" />
         </Button>
       </div>
     </div>
