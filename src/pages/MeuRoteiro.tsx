@@ -1,135 +1,34 @@
-import { useState, useMemo, useRef, useCallback } from "react";
+import { useState, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { 
-  ChevronLeft, Heart, Search, X, MapPin, Calendar, Clock, 
-  Users, Baby, Plus, Minus, ChevronRight 
-} from "lucide-react";
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
+import { ChevronLeft, Heart, Search, X, MapPin } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Calendar as CalendarComponent } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { curatedDestinations, searchDestinations, Destination } from "@/data/destinations-database";
 import { useTripDraft } from "@/hooks/use-trip-draft";
 import { toast } from "@/hooks/use-toast";
 
 /**
- * Controlled numeric input for child ages
- * Prevents keyboard flicker, strips leading zeros, validates 1-17 range
- */
-interface ChildAgeInputProps {
-  childIndex: number;
-  value: number;
-  onChange: (index: number, age: number) => void;
-}
-
-const ChildAgeInput = ({ childIndex, value, onChange }: ChildAgeInputProps) => {
-  // Local string state for controlled input without flicker
-  const [localValue, setLocalValue] = useState(String(value));
-  const [hasError, setHasError] = useState(false);
-
-  // Sync local value when external value changes (e.g., from another source)
-  const handleFocus = useCallback((e: React.FocusEvent<HTMLInputElement>) => {
-    // Select all text on focus for easy replacement
-    e.target.select();
-  }, []);
-
-  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const rawValue = e.target.value;
-    
-    // Allow empty for typing
-    if (rawValue === '') {
-      setLocalValue('');
-      setHasError(false);
-      return;
-    }
-    
-    // Only allow digits
-    if (!/^\d*$/.test(rawValue)) {
-      return;
-    }
-    
-    // Strip leading zeros: "07" -> "7", "010" -> "10"
-    const stripped = rawValue.replace(/^0+/, '') || '0';
-    const numValue = parseInt(stripped, 10);
-    
-    // Validate range 1-17
-    if (numValue < 1 || numValue > 17) {
-      setLocalValue(stripped);
-      setHasError(true);
-      return;
-    }
-    
-    setLocalValue(stripped);
-    setHasError(false);
-    onChange(childIndex, numValue);
-  }, [childIndex, onChange]);
-
-  const handleBlur = useCallback(() => {
-    // On blur, ensure valid value
-    const numValue = parseInt(localValue, 10);
-    if (isNaN(numValue) || numValue < 1) {
-      setLocalValue('1');
-      setHasError(false);
-      onChange(childIndex, 1);
-    } else if (numValue > 17) {
-      setLocalValue('17');
-      setHasError(false);
-      onChange(childIndex, 17);
-    } else {
-      setLocalValue(String(numValue));
-      setHasError(false);
-    }
-  }, [localValue, childIndex, onChange]);
-
-  return (
-    <Input
-      type="text"
-      inputMode="numeric"
-      pattern="[0-9]*"
-      value={localValue}
-      onChange={handleChange}
-      onFocus={handleFocus}
-      onBlur={handleBlur}
-      className={cn(
-        "w-16 h-10 rounded-xl text-center",
-        hasError && "border-destructive focus-visible:ring-destructive"
-      )}
-      aria-label={`Idade da criança ${childIndex + 1}`}
-    />
-  );
-};
-
-/**
- * MONTE SEU ROTEIRO — Entry Screen (Step 1)
+ * MONTE SEU ROTEIRO — Entry Screen (Step 1a: Destination Only)
  * 
  * Route: /meu-roteiro
  * 
- * Netflix-style destination carousel + search + trip parameters.
- * CTA navigates to preferences (Step 2).
+ * Shows ONLY:
+ * - Netflix-style destination carousel
+ * - Search input with "Vai pra onde?" placeholder
+ * 
+ * After destination selection, navigates to the next step (group composition).
  */
 
 const MeuRoteiro = () => {
   const navigate = useNavigate();
   const carouselRef = useRef<HTMLDivElement>(null);
-  const { 
-    draft, 
-    isStep1Valid,
-    setDestination, 
-    setArrival, 
-    setDeparture, 
-    setAdults, 
-    setChildren, 
-    setChildAge 
-  } = useTripDraft();
+  const { setDestination } = useTripDraft();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchFocused, setIsSearchFocused] = useState(false);
 
-  // Search results
+  // Search results - ONLY from internal database
   const searchResults = useMemo(() => {
     if (!searchQuery.trim()) return [];
     return searchDestinations(searchQuery);
@@ -144,39 +43,30 @@ const MeuRoteiro = () => {
       });
       return;
     }
+    
+    // Set destination in draft
     setDestination(
       destination.id, 
       destination.name, 
       destination.id, 
       destination.imageUrl || ''
     );
+    
+    // Clear search and navigate to next step
     setSearchQuery('');
     setIsSearchFocused(false);
-  };
-
-  const handleContinue = () => {
-    if (!isStep1Valid) {
-      toast({ 
-        title: "Complete os campos", 
-        description: "Selecione destino e datas para continuar." 
-      });
-      return;
-    }
+    
+    // Navigate to group composition (dates + travelers)
     navigate('/meu-roteiro/preferencias');
   };
 
-  // Fixed back navigation - always go to home to avoid getting stuck in setup forms
+  // Fixed back navigation - always go to home
   const handleBack = () => {
     navigate('/');
   };
 
-  // Selected destination object
-  const selectedDestination = useMemo(() => {
-    return curatedDestinations.find(d => d.id === draft.destinationId) || null;
-  }, [draft.destinationId]);
-
   return (
-    <div className="min-h-screen bg-background pb-32">
+    <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="sticky top-0 z-50 px-4 py-4 bg-background/95 backdrop-blur-sm border-b border-border">
         <div className="flex items-center justify-between">
@@ -212,7 +102,6 @@ const MeuRoteiro = () => {
             style={{ scrollSnapType: 'x mandatory' }}
           >
             {curatedDestinations.map((destination, index) => {
-              const isSelected = draft.destinationId === destination.id;
               const isDisabled = !destination.available;
               
               return (
@@ -221,23 +110,11 @@ const MeuRoteiro = () => {
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: index * 0.05 }}
-                  onClick={() => {
-                    if (isDisabled) {
-                      toast({ 
-                        title: "Em breve!", 
-                        description: `${destination.name} estará disponível em breve.` 
-                      });
-                      return;
-                    }
-                    handleSelectDestination(destination);
-                  }}
+                  onClick={() => handleSelectDestination(destination)}
                   className={cn(
                     "relative flex-shrink-0 w-40 aspect-[3/4] rounded-2xl overflow-hidden transition-all",
-                    isSelected 
-                      ? "ring-2 ring-primary ring-offset-2 ring-offset-background scale-[1.02]" 
-                      : "ring-0",
                     isDisabled && "opacity-50 cursor-not-allowed grayscale-[30%]",
-                    !isDisabled && "cursor-pointer"
+                    !isDisabled && "cursor-pointer hover:scale-[1.02]"
                   )}
                   style={{ scrollSnapAlign: 'start' }}
                   role="button"
@@ -275,29 +152,6 @@ const MeuRoteiro = () => {
                       <span className="text-[10px] text-white font-medium">Em breve</span>
                     </div>
                   )}
-
-                  {/* Selected indicator */}
-                  {isSelected && !isDisabled && (
-                    <motion.div
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      className="absolute top-2 right-2 w-6 h-6 rounded-full bg-primary flex items-center justify-center"
-                    >
-                      <svg 
-                        className="w-4 h-4 text-primary-foreground" 
-                        fill="none" 
-                        viewBox="0 0 24 24" 
-                        stroke="currentColor"
-                      >
-                        <path 
-                          strokeLinecap="round" 
-                          strokeLinejoin="round" 
-                          strokeWidth={3} 
-                          d="M5 13l4 4L19 7" 
-                        />
-                      </svg>
-                    </motion.div>
-                  )}
                 </motion.div>
               );
             })}
@@ -327,7 +181,7 @@ const MeuRoteiro = () => {
             )}
           </div>
 
-          {/* Search results dropdown */}
+          {/* Search results dropdown - ONLY from internal database */}
           {isSearchFocused && searchResults.length > 0 && (
             <motion.div
               initial={{ opacity: 0, y: -10 }}
@@ -368,219 +222,7 @@ const MeuRoteiro = () => {
             </motion.div>
           )}
         </section>
-
-        {/* Selected destination indicator */}
-        {selectedDestination && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex items-center gap-3 p-3 bg-primary/10 rounded-xl"
-          >
-            <MapPin className="w-5 h-5 text-primary" />
-            <span className="font-medium text-foreground">
-              {selectedDestination.name}, {selectedDestination.country}
-            </span>
-          </motion.div>
-        )}
-
-        {/* Trip dates */}
-        <section className="space-y-4">
-          <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
-            <Calendar className="w-5 h-5 text-primary" />
-            Data e horário
-          </h2>
-
-          {/* Arrival */}
-          <div className="bg-card rounded-2xl p-4 space-y-3">
-            <p className="text-sm font-medium text-muted-foreground">Chegada</p>
-            <div className="grid grid-cols-2 gap-3">
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "h-12 justify-start text-left font-normal rounded-xl",
-                      !draft.arrivalAt && "text-muted-foreground"
-                    )}
-                  >
-                    {draft.arrivalAt 
-                      ? format(draft.arrivalAt, "dd MMM yyyy", { locale: ptBR })
-                      : "Data"
-                    }
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <CalendarComponent
-                    mode="single"
-                    selected={draft.arrivalAt || undefined}
-                    onSelect={(date) => setArrival(date || null, draft.arrivalTime)}
-                    disabled={(date) => date < new Date()}
-                    initialFocus
-                    className="pointer-events-auto"
-                  />
-                </PopoverContent>
-              </Popover>
-              
-              <Input
-                type="time"
-                value={draft.arrivalTime}
-                onChange={(e) => setArrival(draft.arrivalAt, e.target.value)}
-                className="h-12 rounded-xl"
-                placeholder="Horário"
-              />
-            </div>
-          </div>
-
-          {/* Departure */}
-          <div className="bg-card rounded-2xl p-4 space-y-3">
-            <p className="text-sm font-medium text-muted-foreground">Partida</p>
-            <div className="grid grid-cols-2 gap-3">
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "h-12 justify-start text-left font-normal rounded-xl",
-                      !draft.departureAt && "text-muted-foreground"
-                    )}
-                  >
-                    {draft.departureAt 
-                      ? format(draft.departureAt, "dd MMM yyyy", { locale: ptBR })
-                      : "Data"
-                    }
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <CalendarComponent
-                    mode="single"
-                    selected={draft.departureAt || undefined}
-                    onSelect={(date) => setDeparture(date || null, draft.departureTime)}
-                    disabled={(date) => date < (draft.arrivalAt || new Date())}
-                    initialFocus
-                    className="pointer-events-auto"
-                  />
-                </PopoverContent>
-              </Popover>
-              
-              <Input
-                type="time"
-                value={draft.departureTime}
-                onChange={(e) => setDeparture(draft.departureAt, e.target.value)}
-                className="h-12 rounded-xl"
-                placeholder="Horário"
-              />
-            </div>
-          </div>
-        </section>
-
-        {/* Travelers */}
-        <section className="space-y-4">
-          <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
-            <Users className="w-5 h-5 text-primary" />
-            Viajantes
-          </h2>
-
-          <div className="bg-card rounded-2xl p-4 space-y-4">
-            {/* Adults counter */}
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium text-foreground">Adultos</p>
-                <p className="text-sm text-muted-foreground">13+ anos</p>
-              </div>
-              <div className="flex items-center gap-3">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="h-10 w-10 rounded-full"
-                  onClick={() => setAdults(draft.adults - 1)}
-                  disabled={draft.adults <= 1}
-                >
-                  <Minus className="w-4 h-4" />
-                </Button>
-                <span className="w-8 text-center font-semibold text-lg">
-                  {draft.adults}
-                </span>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="h-10 w-10 rounded-full"
-                  onClick={() => setAdults(draft.adults + 1)}
-                >
-                  <Plus className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
-
-            {/* Children counter */}
-            <div className="flex items-center justify-between pt-4 border-t border-border">
-              <div>
-                <p className="font-medium text-foreground">Crianças</p>
-                <p className="text-sm text-muted-foreground">0-12 anos</p>
-              </div>
-              <div className="flex items-center gap-3">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="h-10 w-10 rounded-full"
-                  onClick={() => setChildren(draft.children - 1)}
-                  disabled={draft.children <= 0}
-                >
-                  <Minus className="w-4 h-4" />
-                </Button>
-                <span className="w-8 text-center font-semibold text-lg">
-                  {draft.children}
-                </span>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="h-10 w-10 rounded-full"
-                  onClick={() => setChildren(draft.children + 1)}
-                >
-                  <Plus className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
-
-            {/* Children ages */}
-            {draft.children > 0 && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                className="pt-4 border-t border-border space-y-3"
-              >
-                <p className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                  <Baby className="w-4 h-4" />
-                  Idades das crianças
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {draft.childrenAges.map((age, index) => (
-                    <div key={`child-age-${index}`} className="flex items-center gap-2">
-                      <ChildAgeInput
-                        childIndex={index}
-                        value={age}
-                        onChange={setChildAge}
-                      />
-                      <span className="text-sm text-muted-foreground">anos</span>
-                    </div>
-                  ))}
-                </div>
-              </motion.div>
-            )}
-          </div>
-        </section>
       </main>
-
-      {/* Fixed CTA - positioned above bottom nav with safe area */}
-      <div className="fixed bottom-safe-cta left-0 right-0 p-4 bg-background/95 backdrop-blur-sm border-t border-border z-40">
-        <Button
-          onClick={handleContinue}
-          disabled={!isStep1Valid}
-          className="w-full h-14 text-lg font-semibold rounded-2xl"
-        >
-          Continuar
-          <ChevronRight className="w-5 h-5 ml-2" />
-        </Button>
-      </div>
     </div>
   );
 };
