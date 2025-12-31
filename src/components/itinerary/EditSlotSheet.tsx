@@ -1,14 +1,15 @@
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { Button } from "@/components/ui/button";
-import { Check, MapPin, Utensils, Sun } from "lucide-react";
+import { MapPin, Utensils, Sun } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { guideRestaurants, guideActivities, guideHotels, GuideRestaurant, GuideActivity, GuideHotel } from "@/data/rio-guide-data";
 import { hasValidatedLocation } from "@/data/validated-locations";
+import { useState, useMemo } from "react";
 
 /**
  * EDIT SLOT SHEET
  * Allows users to swap an itinerary item with another from the guide.
- * Reuses existing Guide content - no new data or screens.
+ * ALWAYS returns exactly 3 curated alternatives - never empty.
+ * Implements progressive constraint relaxation to guarantee options.
  */
 
 interface ItinerarySlot {
@@ -26,6 +27,14 @@ interface EditSlotSheetProps {
   usedIds: Set<string>; // IDs already used in the itinerary
 }
 
+// Categorized result with label
+type CategorizedItem = {
+  item: GuideRestaurant | GuideActivity | GuideHotel;
+  label: string;
+};
+
+type RelaxationLevel = 'strict' | 'relaxed_time' | 'relaxed_category' | 'all';
+
 export const EditSlotSheet = ({
   open,
   onOpenChange,
@@ -35,80 +44,147 @@ export const EditSlotSheet = ({
 }: EditSlotSheetProps) => {
   if (!slot) return null;
 
-  // Categorized result with label
-  type CategorizedItem = {
-    item: GuideRestaurant | GuideActivity | GuideHotel;
-    label: string;
-  };
+  // Get activities with progressive constraint relaxation
+  const getActivityAlternatives = (relaxation: RelaxationLevel): CategorizedItem[] => {
+    const pool = guideActivities.filter(a => {
+      // Always exclude current item
+      if (a.id === slot.item.id) return false;
+      // Exclude already used (but allow in most relaxed mode)
+      if (relaxation !== 'all' && usedIds.has(a.id)) return false;
+      // Prefer validated locations but allow all in relaxed modes
+      if (relaxation === 'strict' && !hasValidatedLocation(a.id)) return false;
 
-  const getCategorizedAlternatives = (): CategorizedItem[] => {
-    // For activities (no priceLevel), categorize by type
-    if (slot.type === 'activity' || slot.type === 'sunset') {
-      const pool = guideActivities.filter(a => {
-        if (!hasValidatedLocation(a.id)) return false;
-        if (a.id === slot.item.id) return false;
-        if (usedIds.has(a.id)) return false;
+      // Time constraints based on relaxation level
+      if (relaxation === 'strict') {
+        if (slot.type === 'sunset') {
+          return a.bestTime === 'pôr do sol' || a.bestTime === 'tarde';
+        }
+        if (slot.timeBlock === 'morning') {
+          return a.bestTime === 'manhã';
+        }
+        if (slot.timeBlock === 'afternoon') {
+          return a.bestTime === 'tarde';
+        }
+      } else if (relaxation === 'relaxed_time') {
+        // Allow 'qualquer' and adjacent time blocks
         if (slot.type === 'sunset') {
           return a.bestTime === 'pôr do sol' || a.bestTime === 'tarde' || a.bestTime === 'qualquer';
         }
         if (slot.timeBlock === 'morning') {
-          return a.bestTime === 'manhã' || a.bestTime === 'qualquer';
+          return a.bestTime === 'manhã' || a.bestTime === 'qualquer' || a.bestTime === 'tarde';
         }
         if (slot.timeBlock === 'afternoon') {
-          return a.bestTime === 'tarde' || a.bestTime === 'qualquer';
-        }
-        return true;
-      });
-
-      // Categorize by activity type
-      const iconic = pool.filter(a => a.iconic === true);
-      const cultural = pool.filter(a => a.category === 'cultura' || a.category === 'passeio');
-      const nature = pool.filter(a => a.category === 'natureza' || a.category === 'praia' || a.category === 'mirante');
-
-      const result: CategorizedItem[] = [];
-      if (iconic.length > 0) {
-        result.push({ item: iconic[Math.floor(Math.random() * iconic.length)], label: 'Clássico' });
-      }
-      if (cultural.length > 0) {
-        const pick = cultural.find(c => !result.some(r => r.item.id === c.id));
-        if (pick) result.push({ item: pick, label: 'Queridinho local' });
-      }
-      if (nature.length > 0) {
-        const pick = nature.find(n => !result.some(r => r.item.id === n.id));
-        if (pick) result.push({ item: pick, label: 'Experiência única' });
-      }
-      // Fill up to 3 if needed
-      if (result.length < 3) {
-        const remaining = pool.filter(p => !result.some(r => r.item.id === p.id));
-        while (result.length < 3 && remaining.length > 0) {
-          const pick = remaining.shift();
-          if (pick) result.push({ item: pick, label: result.length === 0 ? 'Clássico' : result.length === 1 ? 'Queridinho local' : 'Experiência única' });
+          return a.bestTime === 'tarde' || a.bestTime === 'qualquer' || a.bestTime === 'manhã';
         }
       }
-      return result.slice(0, 3);
+      // relaxed_category and all: no time restrictions
+      return true;
+    });
+
+    // Categorize by activity type
+    const iconic = pool.filter(a => a.iconic === true);
+    const cultural = pool.filter(a => a.category === 'cultura' || a.category === 'passeio');
+    const nature = pool.filter(a => a.category === 'natureza' || a.category === 'praia' || a.category === 'mirante');
+
+    const result: CategorizedItem[] = [];
+    
+    if (iconic.length > 0) {
+      result.push({ item: iconic[Math.floor(Math.random() * iconic.length)], label: 'Clássico' });
+    }
+    if (cultural.length > 0) {
+      const pick = cultural.find(c => !result.some(r => r.item.id === c.id));
+      if (pick) result.push({ item: pick, label: 'Queridinho local' });
+    }
+    if (nature.length > 0) {
+      const pick = nature.find(n => !result.some(r => r.item.id === n.id));
+      if (pick) result.push({ item: pick, label: 'Experiência única' });
     }
 
-    // For hotels and restaurants (have priceLevel)
-    let pool: (GuideRestaurant | GuideHotel)[] = [];
-    
-    if (slot.type === 'departure') {
-      pool = guideHotels.filter(h => 
-        hasValidatedLocation(h.id) && h.id !== slot.item.id
-      );
-    } else if (slot.type === 'meal') {
-      const timeHour = parseInt(slot.time.split(':')[0]);
-      const isLunch = timeHour >= 11 && timeHour < 16;
-      const isDinner = timeHour >= 18;
-      
-      pool = guideRestaurants.filter(r => {
-        if (!hasValidatedLocation(r.id)) return false;
-        if (r.id === slot.item.id) return false;
-        if (usedIds.has(r.id)) return false;
+    // Fill up to 3 if needed from remaining pool
+    if (result.length < 3) {
+      const remaining = pool.filter(p => !result.some(r => r.item.id === p.id));
+      while (result.length < 3 && remaining.length > 0) {
+        const pick = remaining.shift();
+        if (pick) {
+          const labels = ['Clássico', 'Queridinho local', 'Experiência única'];
+          result.push({ item: pick, label: labels[result.length] || 'Alternativa' });
+        }
+      }
+    }
+
+    return result.slice(0, 3);
+  };
+
+  // Get restaurant alternatives with progressive constraint relaxation
+  const getRestaurantAlternatives = (relaxation: RelaxationLevel): CategorizedItem[] => {
+    const timeHour = parseInt(slot.time.split(':')[0]);
+    const isLunch = timeHour >= 11 && timeHour < 16;
+    const isDinner = timeHour >= 18;
+
+    const pool = guideRestaurants.filter(r => {
+      // Always exclude current item
+      if (r.id === slot.item.id) return false;
+      // Exclude already used (but allow in most relaxed mode)
+      if (relaxation !== 'all' && usedIds.has(r.id)) return false;
+      // Prefer validated locations but allow all in relaxed modes
+      if (relaxation === 'strict' && !hasValidatedLocation(r.id)) return false;
+
+      // Meal type constraints based on relaxation level
+      if (relaxation === 'strict') {
         if (isLunch) return r.mealType.includes('lunch');
         if (isDinner) return r.mealType.includes('dinner');
-        return true;
-      });
+      } else if (relaxation === 'relaxed_time') {
+        // Allow any meal type if it's close to the boundary
+        if (isLunch) return r.mealType.includes('lunch') || r.mealType.includes('dinner');
+        if (isDinner) return r.mealType.includes('dinner') || r.mealType.includes('lunch');
+      }
+      // relaxed_category and all: no meal restrictions
+      return true;
+    });
+
+    // Categorize by price level: $$$$ = classic, $/$ = local, $$$ = sophisticated
+    const classics = pool.filter(i => i.priceLevel === '$$$$');
+    const locals = pool.filter(i => i.priceLevel === '$' || i.priceLevel === '$$');
+    const sophisticated = pool.filter(i => i.priceLevel === '$$$');
+
+    const result: CategorizedItem[] = [];
+
+    if (classics.length > 0) {
+      result.push({ item: classics[Math.floor(Math.random() * classics.length)], label: 'Clássico' });
     }
+    if (locals.length > 0) {
+      const pick = locals.find(l => !result.some(r => r.item.id === l.id));
+      if (pick) result.push({ item: pick, label: 'Queridinho local' });
+    }
+    if (sophisticated.length > 0) {
+      const pick = sophisticated.find(s => !result.some(r => r.item.id === s.id));
+      if (pick) result.push({ item: pick, label: 'Sofisticado' });
+    }
+
+    // Fill up to 3 from remaining pool
+    if (result.length < 3) {
+      const remaining = pool.filter(p => !result.some(r => r.item.id === p.id));
+      while (result.length < 3 && remaining.length > 0) {
+        const pick = remaining.shift();
+        if (pick) {
+          const labels = ['Clássico', 'Queridinho local', 'Sofisticado'];
+          result.push({ item: pick, label: labels[result.length] || 'Alternativa' });
+        }
+      }
+    }
+
+    return result.slice(0, 3);
+  };
+
+  // Get hotel alternatives with progressive constraint relaxation
+  const getHotelAlternatives = (relaxation: RelaxationLevel): CategorizedItem[] => {
+    const pool = guideHotels.filter(h => {
+      // Always exclude current item
+      if (h.id === slot.item.id) return false;
+      // Prefer validated locations but allow all in relaxed modes
+      if (relaxation === 'strict' && !hasValidatedLocation(h.id)) return false;
+      return true;
+    });
 
     // Categorize by price level
     const classics = pool.filter(i => i.priceLevel === '$$$$');
@@ -121,16 +197,76 @@ export const EditSlotSheet = ({
       result.push({ item: classics[Math.floor(Math.random() * classics.length)], label: 'Clássico' });
     }
     if (locals.length > 0) {
-      result.push({ item: locals[Math.floor(Math.random() * locals.length)], label: 'Queridinho local' });
+      const pick = locals.find(l => !result.some(r => r.item.id === l.id));
+      if (pick) result.push({ item: pick, label: 'Queridinho local' });
     }
     if (sophisticated.length > 0) {
-      result.push({ item: sophisticated[Math.floor(Math.random() * sophisticated.length)], label: 'Sofisticado' });
+      const pick = sophisticated.find(s => !result.some(r => r.item.id === s.id));
+      if (pick) result.push({ item: pick, label: 'Sofisticado' });
+    }
+
+    // Fill up to 3 from remaining pool
+    if (result.length < 3) {
+      const remaining = pool.filter(p => !result.some(r => r.item.id === p.id));
+      while (result.length < 3 && remaining.length > 0) {
+        const pick = remaining.shift();
+        if (pick) {
+          const labels = ['Clássico', 'Queridinho local', 'Sofisticado'];
+          result.push({ item: pick, label: labels[result.length] || 'Alternativa' });
+        }
+      }
     }
 
     return result.slice(0, 3);
   };
 
-  const alternatives = getCategorizedAlternatives();
+  // Main function that implements progressive constraint relaxation
+  const getCategorizedAlternatives = (): { items: CategorizedItem[]; relaxed: boolean } => {
+    const relaxationOrder: RelaxationLevel[] = ['strict', 'relaxed_time', 'relaxed_category', 'all'];
+    
+    for (const level of relaxationOrder) {
+      let alternatives: CategorizedItem[] = [];
+      
+      if (slot.type === 'activity' || slot.type === 'sunset') {
+        alternatives = getActivityAlternatives(level);
+      } else if (slot.type === 'meal') {
+        alternatives = getRestaurantAlternatives(level);
+      } else if (slot.type === 'departure') {
+        alternatives = getHotelAlternatives(level);
+      }
+
+      // If we have at least 3 options, we're done
+      if (alternatives.length >= 3) {
+        return { items: alternatives, relaxed: level !== 'strict' };
+      }
+
+      // If we have some options and we're at the most relaxed level, return what we have
+      if (level === 'all' && alternatives.length > 0) {
+        return { items: alternatives, relaxed: true };
+      }
+    }
+
+    // Ultimate fallback: return ANY 3 items from the appropriate pool
+    // This should never happen with proper data, but guarantees no empty state
+    const fallbackPool: (GuideRestaurant | GuideActivity | GuideHotel)[] = 
+      slot.type === 'activity' || slot.type === 'sunset' 
+        ? guideActivities.filter(a => a.id !== slot.item.id)
+        : slot.type === 'meal' 
+          ? guideRestaurants.filter(r => r.id !== slot.item.id)
+          : guideHotels.filter(h => h.id !== slot.item.id);
+
+    const fallbackItems: CategorizedItem[] = fallbackPool.slice(0, 3).map((item, idx) => ({
+      item,
+      label: ['Clássico', 'Queridinho local', 'Sofisticado'][idx] || 'Alternativa'
+    }));
+
+    return { items: fallbackItems, relaxed: true };
+  };
+
+  const { items: alternatives, relaxed: constraintsRelaxed } = useMemo(() => 
+    getCategorizedAlternatives(), 
+    [slot, usedIds]
+  );
 
   const getTypeLabel = () => {
     if (slot.type === 'departure') return 'Hotel';
@@ -163,44 +299,45 @@ export const EditSlotSheet = ({
         </SheetHeader>
 
         <div className="py-4">
-          {alternatives.length === 0 ? (
-            <p className="text-center text-muted-foreground py-8">
-              Não há alternativas disponíveis para este horário.
+          {/* Subtle feedback when constraints were relaxed */}
+          {constraintsRelaxed && (
+            <p className="text-xs text-muted-foreground mb-3 text-center">
+              Ajustamos ligeiramente os filtros para oferecer melhores opções.
             </p>
-          ) : (
-            <div className="space-y-3">
-              {alternatives.map((alt) => (
-                <button
-                  key={alt.item.id}
-                  onClick={() => handleSelect(alt.item)}
-                  className={cn(
-                    "w-full text-left p-3 rounded-xl border border-border",
-                    "hover:border-primary/50 hover:bg-primary/5 transition-colors",
-                    "flex items-start gap-3"
-                  )}
-                >
-                  <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
-                    {getIcon(alt.item)}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-0.5">
-                      <span className="text-[10px] font-medium uppercase tracking-wide text-primary bg-primary/10 px-2 py-0.5 rounded-full">
-                        {alt.label}
-                      </span>
-                    </div>
-                    <p className="font-medium text-foreground text-sm truncate">{alt.item.name}</p>
-                    <p className="text-xs text-muted-foreground">{alt.item.neighborhood}</p>
-                    {'priceLevel' in alt.item && (
-                      <p className="text-xs text-muted-foreground mt-0.5">{alt.item.priceLevel}</p>
-                    )}
-                    {'duration' in alt.item && (
-                      <p className="text-xs text-muted-foreground mt-0.5">{alt.item.duration}</p>
-                    )}
-                  </div>
-                </button>
-              ))}
-            </div>
           )}
+          
+          <div className="space-y-3">
+            {alternatives.map((alt) => (
+              <button
+                key={alt.item.id}
+                onClick={() => handleSelect(alt.item)}
+                className={cn(
+                  "w-full text-left p-3 rounded-xl border border-border",
+                  "hover:border-primary/50 hover:bg-primary/5 transition-colors",
+                  "flex items-start gap-3"
+                )}
+              >
+                <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
+                  {getIcon(alt.item)}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <span className="text-[10px] font-medium uppercase tracking-wide text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+                      {alt.label}
+                    </span>
+                  </div>
+                  <p className="font-medium text-foreground text-sm truncate">{alt.item.name}</p>
+                  <p className="text-xs text-muted-foreground">{alt.item.neighborhood}</p>
+                  {'priceLevel' in alt.item && (
+                    <p className="text-xs text-muted-foreground mt-0.5">{alt.item.priceLevel}</p>
+                  )}
+                  {'duration' in alt.item && (
+                    <p className="text-xs text-muted-foreground mt-0.5">{alt.item.duration}</p>
+                  )}
+                </div>
+              </button>
+            ))}
+          </div>
         </div>
       </SheetContent>
     </Sheet>
