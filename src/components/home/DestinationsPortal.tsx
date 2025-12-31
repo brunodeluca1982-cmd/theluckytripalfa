@@ -1,4 +1,6 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
+import { Skeleton } from "@/components/ui/skeleton";
 
 /**
  * DESTINATIONS PORTAL
@@ -45,6 +47,25 @@ const destinations: Destination[] = [
   },
 ];
 
+const DestinationImage = ({ src, alt }: { src: string; alt: string }) => {
+  const [loaded, setLoaded] = useState(false);
+  
+  return (
+    <>
+      {!loaded && (
+        <Skeleton className="absolute inset-0 w-full h-full rounded-none" />
+      )}
+      <img 
+        src={src}
+        alt={alt}
+        className={`absolute inset-0 w-full h-full object-cover destination-card-image transition-opacity duration-300 ${loaded ? 'opacity-100' : 'opacity-0'}`}
+        loading="lazy"
+        onLoad={() => setLoaded(true)}
+      />
+    </>
+  );
+};
+
 const DestinationsPortal = () => {
   return (
     <section className="py-6 px-6">
@@ -66,12 +87,7 @@ const DestinationsPortal = () => {
           >
             {/* Hero Image */}
             {destination.imageUrl ? (
-              <img 
-                src={destination.imageUrl}
-                alt={destination.name}
-                className="absolute inset-0 w-full h-full object-cover destination-card-image"
-                loading="lazy"
-              />
+              <DestinationImage src={destination.imageUrl} alt={destination.name} />
             ) : (
               <div className="absolute inset-0 bg-muted" />
             )}
