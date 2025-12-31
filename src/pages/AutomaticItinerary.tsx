@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { ChevronLeft, Check, MapPin, Utensils, Sun, Moon, Car, Footprints, Clock, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useTripDraft } from "@/hooks/use-trip-draft";
+import { useTripDraft, PriceStyle } from "@/hooks/use-trip-draft";
 import { guideRestaurants, guideActivities, guideHotels, GuideRestaurant, GuideActivity, GuideHotel } from "@/data/rio-guide-data";
 import { cn } from "@/lib/utils";
 import { calculateDistance, getTransportDetails } from "@/lib/location-validation";
@@ -91,9 +91,33 @@ const AutomaticItinerary = () => {
   }
 
   const tripStyles = draft.tripStyles || [];
+  const priceStyle = draft.priceStyle || '$$';
   const isGastronomy = tripStyles.includes('gastronomia');
   const isFamily = tripStyles.includes('familia') || draft.children > 0;
   const isAdventure = tripStyles.includes('aventura');
+
+  /**
+   * Price matching helpers
+   * Maps user's $ / $$ / $$$ preference to matching price levels
+   * Allows one "upgrade" item per day for variety
+   */
+  const getMatchingPriceLevels = (style: PriceStyle): string[] => {
+    switch (style) {
+      case '$': return ['$', '$$'];           // Essential: prefer $ and $$
+      case '$$': return ['$$', '$$$'];        // Comfort: prefer $$ and $$$
+      case '$$$': return ['$$$', '$$$$'];     // Sophisticated: prefer $$$ and $$$$
+      default: return ['$$', '$$$'];
+    }
+  };
+
+  const matchingPriceLevels = getMatchingPriceLevels(priceStyle);
+
+  // Score a place by how well it matches the price preference (lower = better match)
+  const getPriceMatchScore = (priceLevel: string): number => {
+    if (matchingPriceLevels[0] === priceLevel) return 0;  // Perfect match
+    if (matchingPriceLevels[1] === priceLevel) return 1;  // Good match
+    return 2;  // Outside preferred range
+  };
 
   const generateItinerary = async () => {
     setIsGenerating(true);
@@ -105,9 +129,11 @@ const AutomaticItinerary = () => {
     const costs: Record<number, DayCosts> = {};
     
     // Filter to only hotels with validated locations
-    let hotels = guideHotels.filter(h => hasValidatedLocation(h.id));
-    if (isFamily) hotels = hotels.filter(h => h.kidFriendly !== false);
-    if (isGastronomy) hotels = hotels.filter(h => h.priceLevel === '$$$' || h.priceLevel === '$$$$');
+    // Prioritize by price preference
+    let hotels = guideHotels
+      .filter(h => hasValidatedLocation(h.id))
+      .filter(h => !isFamily || h.kidFriendly !== false)
+      .sort((a, b) => getPriceMatchScore(a.priceLevel) - getPriceMatchScore(b.priceLevel));
     
     if (hotels.length === 0) {
       console.error('[LocationValidation] No hotels with validated locations available');
@@ -128,9 +154,11 @@ const AutomaticItinerary = () => {
     const regular = activities.filter(a => !a.iconic);
     
     // Filter restaurants to only those with validated locations
-    let restaurants = guideRestaurants.filter(r => hasValidatedLocation(r.id));
-    if (isFamily) restaurants = restaurants.filter(r => r.kidFriendly !== false);
-    if (isGastronomy) restaurants = restaurants.filter(r => r.priceLevel === '$$$' || r.priceLevel === '$$$$');
+    // Sort by price match score to prioritize matching places
+    let restaurants = guideRestaurants
+      .filter(r => hasValidatedLocation(r.id))
+      .filter(r => !isFamily || r.kidFriendly !== false)
+      .sort((a, b) => getPriceMatchScore(a.priceLevel) - getPriceMatchScore(b.priceLevel));
 
     const usedActivities = new Set<string>();
     const usedRestaurants = new Set<string>();
@@ -235,7 +263,11 @@ const AutomaticItinerary = () => {
         dayCost.activities += 50;
       }
 
-      // Lunch - prefer nearby (sort by proximity)
+      // Lunch - prioritize price match, then proximity
+      // Track upgrades per day (allow max 1 outside preferred range)
+      let upgradesUsedToday = 0;
+      const maxUpgradesPerDay = 1;
+      
       const currentLocation = getValidatedLocation(currentPlaceId);
       let sortedRestaurants = restaurants
         .filter(r => !usedRestaurants.has(r.id) && r.mealType.includes('lunch'))
@@ -244,11 +276,24 @@ const AutomaticItinerary = () => {
           const dist = currentLocation && loc 
             ? calculateDistance(currentLocation.lat, currentLocation.lng, loc.lat, loc.lng)
             : 999;
-          return { ...r, distance: dist };
+          const priceScore = getPriceMatchScore(r.priceLevel);
+          return { ...r, distance: dist, priceScore };
         })
-        .sort((a, b) => a.distance - b.distance);
+        // Sort by price match first, then distance
+        .sort((a, b) => {
+          if (a.priceScore !== b.priceScore) return a.priceScore - b.priceScore;
+          return a.distance - b.distance;
+        });
       
-      const lunch = sortedRestaurants[0];
+      // Pick first option, checking upgrade limit
+      let lunch = sortedRestaurants.find(r => {
+        if (r.priceScore <= 1) return true; // Within preferred range
+        if (upgradesUsedToday < maxUpgradesPerDay) {
+          upgradesUsedToday++;
+          return true;
+        }
+        return false;
+      });
       
       if (lunch) {
         usedRestaurants.add(lunch.id);
@@ -367,7 +412,7 @@ const AutomaticItinerary = () => {
         });
       }
 
-      // Dinner - sort by proximity
+      // Dinner - prioritize price match, then proximity
       const dinnerLocation = getValidatedLocation(currentPlaceId);
       let sortedDinnerRestaurants = restaurants
         .filter(r => !usedRestaurants.has(r.id) && r.mealType.includes('dinner'))
@@ -376,11 +421,24 @@ const AutomaticItinerary = () => {
           const dist = dinnerLocation && loc
             ? calculateDistance(dinnerLocation.lat, dinnerLocation.lng, loc.lat, loc.lng)
             : 999;
-          return { ...r, distance: dist };
+          const priceScore = getPriceMatchScore(r.priceLevel);
+          return { ...r, distance: dist, priceScore };
         })
-        .sort((a, b) => a.distance - b.distance);
+        // Sort by price match first, then distance
+        .sort((a, b) => {
+          if (a.priceScore !== b.priceScore) return a.priceScore - b.priceScore;
+          return a.distance - b.distance;
+        });
       
-      const dinner = sortedDinnerRestaurants[0];
+      // Pick first option, checking upgrade limit
+      let dinner = sortedDinnerRestaurants.find(r => {
+        if (r.priceScore <= 1) return true; // Within preferred range
+        if (upgradesUsedToday < maxUpgradesPerDay) {
+          upgradesUsedToday++;
+          return true;
+        }
+        return false;
+      });
       
       if (dinner) {
         usedRestaurants.add(dinner.id);
