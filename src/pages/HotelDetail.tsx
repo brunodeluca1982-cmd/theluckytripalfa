@@ -233,6 +233,30 @@ const hotelData: Record<string, {
   },
 };
 
+// Mapping from guide data IDs to detail page slugs
+const guideIdToSlug: Record<string, string> = {
+  "fasano": "hotel-fasano-rio-de-janeiro",
+  "janeiro": "janeiro-hotel",
+  "ritz-leblon": "ritz-leblon",
+  "ipanema-inn": "ipanema-inn",
+  "mar-ipanema": "mar-ipanema-hotel",
+  "promenade-palladium": "promenade-palladium",
+  "copa-palace": "copacabana-palace",
+  "emiliano": "emiliano-rio",
+  "fairmont": "fairmont-rio",
+  "hilton-copa": "hilton-copacabana",
+  "windsor-leme": "windsor-leme",
+  "arena-leme": "arena-leme",
+  "nacional": "hotel-nacional",
+  "hyatt-barra": "hyatt-regency-barra",
+  "windsor-barra": "windsor-barra",
+  "lsh-barra": "lsh-hotel",
+  "laghetto-barra": "laghetto-stilo-barra",
+  "c-design": "c-design-hotel",
+  "santa-teresa-mgallery": "santa-teresa-hotel-rj-mgallery",
+  "mama-shelter": "mama-shelter-rio",
+};
+
 // Helper to generate slug from hotel name
 export const generateHotelSlug = (name: string): string => {
   return name
@@ -250,7 +274,9 @@ const HotelDetail = () => {
   const [searchParams] = useSearchParams();
   const { saveItem } = useItemSave();
   
-  const hotel = hotelData[id || ""];
+  // Try direct lookup first, then try guide ID mapping
+  const resolvedSlug = guideIdToSlug[id || ""] || id || "";
+  const hotel = hotelData[resolvedSlug];
   const from = searchParams.get("from");
   // Back navigation: list → onde-ficar-rio, map → city-view, neighborhood → neighborhood detail
   const getBackPath = () => {
@@ -275,7 +301,7 @@ const HotelDetail = () => {
   }
 
   const handleSave = () => {
-    saveItem(id || "", "hotel", hotel.name, false);
+    saveItem(resolvedSlug, "hotel", hotel.name, false);
   };
 
   return (

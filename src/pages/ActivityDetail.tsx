@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import RoteiroAccessLink from "@/components/RoteiroAccessLink";
 import { useItemSave } from "@/hooks/use-item-save";
 import { activitiesByNeighborhood, cityLevelActivities, Activity } from "@/data/what-to-do-data";
+import { guideActivities } from "@/data/rio-guide-data";
 
 /**
  * ACTIVITY DETAIL PAGE
@@ -14,14 +15,43 @@ import { activitiesByNeighborhood, cityLevelActivities, Activity } from "@/data/
  * SAVING SCOPE: Only this individual activity can be saved (item level).
  */
 
-// Helper to find activity by ID across all neighborhoods AND city-level activities
+// Mapping from guide data IDs to what-to-do-data IDs (for items with different IDs)
+const guideIdToWhatToDoId: Record<string, string> = {
+  "praia-ipanema": "praia-ipanema",
+  "por-sol-arpoador": "por-do-sol-arpoador",
+  "sup-arpoador": "sup-arpoador",
+  "pista-coutinho": "pista-coutinho",
+  "trilha-urca": "trilha-urca",
+  "mureta-urca": "mureta-urca",
+  "pao-acucar": "pao-de-acucar",
+  "jardim-botanico": "jardim-botanico-parque",
+  "parque-lage": "parque-lage",
+  "voo-livre": "voo-asa-delta",
+  "pedra-bonita": "pedra-bonita",
+  "pedra-gavea": "pedra-gavea",
+  "cristo-redentor": "cristo-redentor",
+  "ciclovia-barra": "ciclovia-barra",
+  "por-sol-pier": "por-do-sol-pier-barra",
+  "prainha": "prainha",
+  "grumari": "grumari",
+  "ccbb": "ccbb-rio",
+  "museu-amanha": "museu-amanha",
+  "aquario": "aquario",
+  "rua-mercado": "rua-do-mercado",
+  "bondinho-st": "bondinho-st",
+};
+
+// Helper to find activity by ID across all neighborhoods, city-level activities, AND guide data
 const findActivityById = (id: string): { activity: Activity; neighborhoodName: string; neighborhoodId: string } | null => {
+  // Try guide ID mapping first
+  const mappedId = guideIdToWhatToDoId[id] || id;
+  
   // Debug log to verify which ID is being searched
-  console.log('[ActivityDetail] Searching for activity with id:', id);
+  console.log('[ActivityDetail] Searching for activity with id:', id, '-> mapped to:', mappedId);
   
   // First, search in neighborhood activities
   for (const [neighborhoodId, data] of Object.entries(activitiesByNeighborhood)) {
-    const activity = data.activities.find(a => a.id === id);
+    const activity = data.activities.find(a => a.id === mappedId);
     if (activity) {
       console.log('[ActivityDetail] Found activity in neighborhood:', neighborhoodId, activity.title);
       return {
@@ -33,7 +63,7 @@ const findActivityById = (id: string): { activity: Activity; neighborhoodName: s
   }
   
   // Second, search in city-level activities
-  const cityActivity = cityLevelActivities.find(a => a.id === id);
+  const cityActivity = cityLevelActivities.find(a => a.id === mappedId);
   if (cityActivity) {
     console.log('[ActivityDetail] Found city-level activity:', cityActivity.title);
     // Convert city-level activity to full Activity format
@@ -50,7 +80,25 @@ const findActivityById = (id: string): { activity: Activity; neighborhoodName: s
     };
   }
   
-  console.log('[ActivityDetail] Activity not found for id:', id);
+  // Third, search in guide activities (fallback for items not in what-to-do-data)
+  const guideActivity = guideActivities.find(a => a.id === id || a.id === mappedId);
+  if (guideActivity) {
+    console.log('[ActivityDetail] Found guide activity:', guideActivity.name);
+    // Convert guide activity to full Activity format
+    const fullActivity: Activity = {
+      id: guideActivity.id,
+      title: guideActivity.name,
+      category: guideActivity.category,
+      description: guideActivity.description,
+    };
+    return {
+      activity: fullActivity,
+      neighborhoodName: guideActivity.neighborhood,
+      neighborhoodId: guideActivity.neighborhood.toLowerCase().replace(/\s+/g, '-'),
+    };
+  }
+  
+  console.log('[ActivityDetail] Activity not found for id:', id, '(mapped:', mappedId, ')');
   return null;
 };
 

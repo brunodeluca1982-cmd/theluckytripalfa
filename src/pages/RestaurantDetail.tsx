@@ -75,6 +75,16 @@ const restaurantData: Record<string, {
     neighborhood: "ipanema",
     neighborhoodName: "Ipanema",
   },
+  "zaza-bistro": {
+    name: "Zazá Bistrô Café",
+    description: "Delicinhas a qualquer hora do dia. Funciona para almoço leve, café demorado ou jantar sem cerimônia. É aquele lugar que você entra sem planejar e acaba ficando.",
+    price: "$$$",
+    address: "https://maps.google.com/?q=Zazá+Bistrô+Ipanema",
+    instagram: "@zazabistro",
+    cuisineType: "Café/Bistrô",
+    neighborhood: "ipanema",
+    neighborhoodName: "Ipanema",
+  },
   "teva": {
     name: "Teva",
     description: "Vegetariano sofisticado, técnica apurada e apresentação cuidadosa.",
@@ -451,6 +461,177 @@ const restaurantData: Record<string, {
     neighborhood: "barra-da-tijuca",
     neighborhoodName: "Barra da Tijuca",
   },
+  "gurume-barra": {
+    name: "Gurumê",
+    description: "Japonês moderno, constante e confiável. Bom pra almoço ou jantar sem erro.",
+    price: "$$$",
+    address: "https://maps.google.com/?q=Gurumê+Barra",
+    instagram: "@gurume_oficial",
+    cuisineType: "Japonesa",
+    neighborhood: "barra-da-tijuca",
+    neighborhoodName: "Barra da Tijuca",
+  },
+  "pobre-juan-villagemall": {
+    name: "Pobre Juan – VillageMall",
+    description: "Carne premium, ambiente animado e Jazz ao vivo.",
+    price: "$$$$",
+    address: "https://maps.google.com/?q=Pobre+Juan+VillageMall+Rio+de+Janeiro",
+    instagram: "@restaurantepobrejuan",
+    cuisineType: "Carnes",
+    neighborhood: "barra-da-tijuca",
+    neighborhoodName: "Barra da Tijuca",
+  },
+  "tt-burger": {
+    name: "TT Burger",
+    description: "Hambúrguer bem feito, direto ao ponto.",
+    price: "$$",
+    address: "https://maps.google.com/?q=TT+Burger+Barra+Rio+de+Janeiro",
+    instagram: "@ttburger",
+    cuisineType: "Lanches",
+    neighborhood: "barra-da-tijuca",
+    neighborhoodName: "Barra da Tijuca",
+  },
+  "golden-sucos": {
+    name: "Golden Sucos – Posto 7",
+    description: "Clássico absoluto do pós-praia. Açaí forte.",
+    price: "$",
+    address: "https://maps.google.com/?q=Golden+Sucos+Posto+7+Barra",
+    instagram: "@goldensucos",
+    cuisineType: "Lanches",
+    neighborhood: "barra-da-tijuca",
+    neighborhoodName: "Barra da Tijuca",
+  },
+  "joao-padeiro": {
+    name: "João Padeiro",
+    description: "Padaria moderna com alma de bairro.",
+    price: "$",
+    address: "https://maps.google.com/?q=João+Padeiro+Barra+Rio+de+Janeiro",
+    instagram: "@joaopadeiro",
+    cuisineType: "Padaria",
+    neighborhood: "barra-da-tijuca",
+    neighborhoodName: "Barra da Tijuca",
+  },
+  // Santa Teresa restaurants
+  "aprazivel": {
+    name: "Aprazível",
+    description: "Vista absurda, cozinha brasileira refinada e clima especial. Ideal para ocasiões importantes ou jantares longos.",
+    price: "$$$$",
+    address: "https://maps.google.com/?q=Aprazível+Santa+Teresa",
+    instagram: "@aprazivel",
+    cuisineType: "Brasileiro",
+    neighborhood: "santa-teresa",
+    neighborhoodName: "Santa Teresa",
+  },
+  "bar-do-mineiro": {
+    name: "Bar do Mineiro",
+    description: "Feijoada famosa, ambiente simples e honesto.",
+    price: "$$",
+    address: "https://maps.google.com/?q=Bar+do+Mineiro+Santa+Teresa",
+    instagram: "@bardomineiro",
+    cuisineType: "Brasileiro",
+    neighborhood: "santa-teresa",
+    neighborhoodName: "Santa Teresa",
+  },
+  // Guaratiba restaurants
+  "bira": {
+    name: "Bira de Guaratiba",
+    description: "Talvez uma das vistas mais bonitas do Rio. Mar, mangue, pôr do sol.",
+    price: "$$$",
+    address: "https://maps.google.com/?q=Bira+de+Guaratiba",
+    instagram: "@bira.deguaratiba",
+    cuisineType: "Peixes e Frutos do Mar",
+    neighborhood: "guaratiba",
+    neighborhoodName: "Guaratiba",
+  },
+  "casa-do-remo": {
+    name: "Casa do Remo",
+    description: "Charmosa, intimista e com vista espetacular.",
+    price: "$$$",
+    address: "https://maps.google.com/?q=Casa+do+Remo+Guaratiba",
+    instagram: "@casadoremo.guaratiba",
+    cuisineType: "Peixes e Frutos do Mar",
+    neighborhood: "guaratiba",
+    neighborhoodName: "Guaratiba",
+  },
+  // Lagoa restaurants
+  "capricciosa": {
+    name: "Capricciosa",
+    description: "Italiano contemporâneo com vista privilegiada da Lagoa. Ambiente bonito, cardápio variado e clima que funciona tanto de dia quanto à noite.",
+    price: "$$$",
+    address: "https://maps.google.com/?q=Capricciosa+Lagoa",
+    instagram: "@capricciosaoficial",
+    cuisineType: "Italiana",
+    neighborhood: "lagoa",
+    neighborhoodName: "Lagoa",
+  },
+  "ct-boucherie": {
+    name: "CT Boucherie – Claude Troisgros",
+    description: "Cozinha autoral com técnica francesa e produto brasileiro.",
+    price: "$$$$",
+    address: "https://maps.google.com/?q=CT+Boucherie+Lagoa",
+    instagram: "@ctboucherie",
+    cuisineType: "Alta Gastronomia",
+    neighborhood: "lagoa",
+    neighborhoodName: "Lagoa",
+  },
+  // São Conrado restaurants
+  "gurume-fashion-mall": {
+    name: "Gurumê – Fashion Mall",
+    description: "Japonês moderno, constante e confiável. A localização no mall facilita a logística num bairro com poucas opções gastronômicas.",
+    price: "$$$",
+    address: "https://maps.google.com/?q=Gurumê+Fashion+Mall+São+Conrado",
+    instagram: "@gurume_oficial",
+    cuisineType: "Japonesa",
+    neighborhood: "sao-conrado",
+    neighborhoodName: "São Conrado",
+  },
+  "qui-qui": {
+    name: "Qui Qui",
+    description: "Quiosque de praia no Pepino. Casual e conectado ao surf.",
+    price: "$$",
+    address: "https://maps.google.com/?q=Qui+Qui+São+Conrado",
+    instagram: "",
+    cuisineType: "Praia",
+    neighborhood: "sao-conrado",
+    neighborhoodName: "São Conrado",
+  },
+};
+
+// Mapping from guide data IDs to detail page slugs
+const guideIdToSlug: Record<string, string> = {
+  "lasai": "lasai",
+  "oteque": "oteque",
+  "nido": "nido-ristorante",
+  "zaza": "zaza-bistro",
+  "jobi": "jobi",
+  "barzin": "barzin",
+  "satyricon": "satyricon",
+  "boteco-rainha": "boteco-rainha",
+  "gula-gula-leblon": "gula-gula",
+  "casa-tua": "casa-tua-leblon",
+  "belmonte": "belmonte-praia",
+  "mee": "mee",
+  "cipriani": "cipriani",
+  "elena": "elena",
+  "ella": "ella-pizzaria",
+  "emporio-jardim": "emporio-jardim",
+  "capricciosa": "capricciosa",
+  "ct-boucherie": "ct-boucherie",
+  "gurume-fashion": "gurume-fashion-mall",
+  "qui-qui": "qui-qui",
+  "mocellin": "mocellin",
+  "barra-grill": "barra-grill-steakhouse",
+  "mocellin-mar": "mocellin-mar",
+  "gurume-barra": "gurume-barra",
+  "pobre-juan": "pobre-juan-villagemall",
+  "tt-burger": "tt-burger",
+  "golden-sucos": "golden-sucos",
+  "joao-padeiro": "joao-padeiro",
+  "braseiro-gavea": "braseiro-da-gavea",
+  "aprazivel": "aprazivel",
+  "bar-mineiro": "bar-do-mineiro",
+  "bira": "bira",
+  "casa-remo": "casa-do-remo",
 };
 
 // Helper to generate slug from restaurant name
@@ -470,7 +651,9 @@ const RestaurantDetail = () => {
   const [searchParams] = useSearchParams();
   const { saveItem } = useItemSave();
   
-  const restaurant = restaurantData[id || ""];
+  // Try direct lookup first, then try guide ID mapping
+  const resolvedSlug = guideIdToSlug[id || ""] || id || "";
+  const restaurant = restaurantData[resolvedSlug];
   const from = searchParams.get("from");
   const backPath = from ? `/onde-comer/${from}` : "/eat-map-view";
 
@@ -488,7 +671,7 @@ const RestaurantDetail = () => {
   }
 
   const handleSave = () => {
-    saveItem(id || "", "restaurant", restaurant.name, false);
+    saveItem(resolvedSlug, "restaurant", restaurant.name, false);
   };
 
   return (
