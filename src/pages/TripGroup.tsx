@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ChevronLeft, ChevronRight, Users, Baby, Plus, Minus } from "lucide-react";
@@ -30,13 +30,15 @@ const ChildAgeInput = ({ childIndex, value, onChange }: ChildAgeInputProps) => {
   const [localValue, setLocalValue] = useState(String(value));
   const [hasError, setHasError] = useState(false);
 
-  // Clear field on focus to avoid leading zeros or concatenation bugs
-  const handleFocus = useCallback((e: React.FocusEvent<HTMLInputElement>) => {
-    setLocalValue('');
-    e.target.select();
-  }, []);
+  // Select all text on focus so user can type to replace
+  const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+    // Use setTimeout to ensure selection happens after focus
+    setTimeout(() => {
+      e.target.select();
+    }, 0);
+  };
 
-  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const rawValue = e.target.value;
     
     // Allow empty for typing
@@ -65,9 +67,9 @@ const ChildAgeInput = ({ childIndex, value, onChange }: ChildAgeInputProps) => {
     setLocalValue(stripped);
     setHasError(false);
     onChange(childIndex, numValue);
-  }, [childIndex, onChange]);
+  };
 
-  const handleBlur = useCallback(() => {
+  const handleBlur = () => {
     // On blur, ensure valid value
     const numValue = parseInt(localValue, 10);
     if (isNaN(numValue) || numValue < 0) {
@@ -82,7 +84,7 @@ const ChildAgeInput = ({ childIndex, value, onChange }: ChildAgeInputProps) => {
       setLocalValue(String(numValue));
       setHasError(false);
     }
-  }, [localValue, childIndex, onChange]);
+  };
 
   return (
     <Input

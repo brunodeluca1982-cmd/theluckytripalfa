@@ -140,4 +140,15 @@
     /* For CTA containers above bottom nav: nav height + safe area */
     bottom: calc(4rem + env(safe-area-inset-bottom, 0px));
   }
+  
+  /* Minimum touch target for accessibility (48px minimum) */
+  .touch-target {
+    min-height: 48px;
+    min-width: 48px;
+  }
+  
+  /* Select all text on focus for numeric inputs */
+  .select-on-focus:focus {
+    user-select: all;
+  }
 }
