@@ -672,7 +672,7 @@ const AutomaticItinerary = () => {
               )}
             </div>
 
-            <Button onClick={generateItinerary} className="w-full h-14 text-lg font-semibold rounded-2xl">
+            <Button onClick={generateItinerary} className="w-full h-14 text-lg font-semibold rounded-2xl shadow-sm active:scale-[0.98] transition-transform">
               Gerar meu roteiro
             </Button>
           </>
@@ -726,11 +726,11 @@ const AutomaticItinerary = () => {
                               onClick={() => handleSlotClick(slot)}
                               className={cn(
                                 "flex gap-3 items-start py-2 group",
-                                slot.type === 'transport' && "opacity-70",
+                                slot.type === 'transport' && "opacity-60",
                                 getItemRoute(slot) && "cursor-pointer hover:bg-muted/50 rounded-lg -mx-2 px-2 transition-colors"
                               )}
                             >
-                              <div className="w-12 text-xs text-muted-foreground pt-1">{slot.time}</div>
+                              <div className="w-12 text-xs text-muted-foreground pt-1 tabular-nums">{slot.time}</div>
                               <div className={cn(
                                 "w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0",
                                 getSlotBg(slot)
@@ -746,7 +746,7 @@ const AutomaticItinerary = () => {
                                   <>
                                     <p className={cn(
                                       "font-medium text-foreground text-sm truncate",
-                                      getItemRoute(slot) && "underline decoration-dotted underline-offset-2"
+                                      getItemRoute(slot) && "underline decoration-dotted underline-offset-2 decoration-muted-foreground/50"
                                     )}>{slot.item.name}</p>
                                     {slot.item.neighborhood && (
                                       <p className="text-xs text-muted-foreground">{slot.item.neighborhood}</p>
@@ -758,7 +758,7 @@ const AutomaticItinerary = () => {
                               {slot.type !== 'transport' && (
                                 <button
                                   onClick={(e) => handleEditClick(dayNumber, idx, slot, e)}
-                                  className="p-1.5 rounded-lg bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors sm:opacity-0 sm:group-hover:opacity-100 sm:focus:opacity-100"
+                                  className="p-1.5 rounded-lg bg-muted/30 hover:bg-muted text-muted-foreground hover:text-foreground transition-all active:scale-95"
                                   aria-label="Trocar"
                                 >
                                   <Pencil className="w-3.5 h-3.5" />
@@ -804,7 +804,7 @@ const AutomaticItinerary = () => {
       {/* Fixed CTA - positioned above bottom nav with safe area */}
       {isGenerated && (
         <div className="fixed bottom-safe-cta left-0 right-0 p-4 bg-background/95 backdrop-blur-sm border-t border-border z-40">
-          <Button onClick={handleConfirm} className="w-full h-14 text-lg font-semibold rounded-2xl">
+          <Button onClick={handleConfirm} className="w-full h-14 text-lg font-semibold rounded-2xl shadow-sm active:scale-[0.98] transition-transform">
             <Check className="w-5 h-5 mr-2" />
             Confirmar roteiro
           </Button>
