@@ -1,14 +1,15 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ChevronLeft, Check, MapPin, Utensils, Sun, Moon, Car, Footprints, Clock } from "lucide-react";
+import { ChevronLeft, Check, MapPin, Utensils, Sun, Moon, Car, Footprints, Clock, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTripDraft } from "@/hooks/use-trip-draft";
-import { guideRestaurants, guideActivities, guideHotels } from "@/data/rio-guide-data";
+import { guideRestaurants, guideActivities, guideHotels, GuideRestaurant, GuideActivity, GuideHotel } from "@/data/rio-guide-data";
 import { cn } from "@/lib/utils";
 import { calculateDistance, getTransportDetails } from "@/lib/location-validation";
 import { getValidatedLocation, hasValidatedLocation } from "@/data/validated-locations";
+import { EditSlotSheet } from "@/components/itinerary/EditSlotSheet";
 
 /**
  * AUTOMATIC ITINERARY GENERATOR
@@ -76,6 +77,10 @@ const AutomaticItinerary = () => {
   const [itinerary, setItinerary] = useState<Record<number, ItinerarySlot[]>>({});
   const [dayCosts, setDayCosts] = useState<Record<number, DayCosts>>({});
   const [selectedHotel, setSelectedHotel] = useState<typeof guideHotels[0] | null>(null);
+  
+  // Edit state
+  const [editSheetOpen, setEditSheetOpen] = useState(false);
+  const [editingSlot, setEditingSlot] = useState<{ day: number; index: number; slot: ItinerarySlot } | null>(null);
   
   // Auto-generate on mount if trip dates are valid
   const [hasStartedGeneration, setHasStartedGeneration] = useState(false);
@@ -497,6 +502,61 @@ const AutomaticItinerary = () => {
     }
   };
 
+  // Handle edit button click
+  const handleEditClick = (day: number, index: number, slot: ItinerarySlot, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (slot.type === 'transport') return;
+    setEditingSlot({ day, index, slot });
+    setEditSheetOpen(true);
+  };
+
+  // Handle selecting an alternative
+  const handleSelectAlternative = (newItem: GuideRestaurant | GuideActivity | GuideHotel) => {
+    if (!editingSlot) return;
+    
+    const { day, index, slot } = editingSlot;
+    const newLocation = getValidatedLocation(newItem.id);
+    
+    // Update the slot with new item data
+    const updatedSlot: ItinerarySlot = {
+      ...slot,
+      item: {
+        id: newItem.id,
+        name: newItem.name,
+        neighborhood: newItem.neighborhood,
+        description: newItem.description,
+        address: newLocation?.fullAddress,
+      }
+    };
+    
+    // Update itinerary state
+    setItinerary(prev => {
+      const daySlots = [...prev[day]];
+      daySlots[index] = updatedSlot;
+      return { ...prev, [day]: daySlots };
+    });
+    
+    // If changing hotel, update selectedHotel
+    if (slot.type === 'departure' && 'priceLevel' in newItem) {
+      setSelectedHotel(newItem as typeof guideHotels[0]);
+    }
+    
+    setEditingSlot(null);
+  };
+
+  // Get all used IDs in the itinerary (for filtering alternatives)
+  const getUsedIds = (): Set<string> => {
+    const ids = new Set<string>();
+    Object.values(itinerary).forEach(slots => {
+      slots.forEach(slot => {
+        if (slot.type !== 'transport') {
+          ids.add(slot.item.id);
+        }
+      });
+    });
+    return ids;
+  };
+
   return (
     <div className="min-h-screen bg-background pb-32">
       <header className="sticky top-0 z-50 px-4 py-4 bg-background/95 backdrop-blur-sm border-b border-border">
@@ -607,7 +667,7 @@ const AutomaticItinerary = () => {
                               transition={{ delay: idx * 0.05 }}
                               onClick={() => handleSlotClick(slot)}
                               className={cn(
-                                "flex gap-3 items-start py-2",
+                                "flex gap-3 items-start py-2 group",
                                 slot.type === 'transport' && "opacity-70",
                                 getItemRoute(slot) && "cursor-pointer hover:bg-muted/50 rounded-lg -mx-2 px-2 transition-colors"
                               )}
@@ -636,6 +696,16 @@ const AutomaticItinerary = () => {
                                   </>
                                 )}
                               </div>
+                              {/* Edit button - only for non-transport slots */}
+                              {slot.type !== 'transport' && (
+                                <button
+                                  onClick={(e) => handleEditClick(dayNumber, idx, slot, e)}
+                                  className="p-1.5 rounded-lg bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors sm:opacity-0 sm:group-hover:opacity-100 sm:focus:opacity-100"
+                                  aria-label="Trocar"
+                                >
+                                  <Pencil className="w-3.5 h-3.5" />
+                                </button>
+                              )}
                             </motion.div>
                           </div>
                         );
@@ -682,6 +752,15 @@ const AutomaticItinerary = () => {
           </Button>
         </div>
       )}
+
+      {/* Edit Slot Sheet */}
+      <EditSlotSheet
+        open={editSheetOpen}
+        onOpenChange={setEditSheetOpen}
+        slot={editingSlot?.slot || null}
+        onSelectAlternative={handleSelectAlternative}
+        usedIds={getUsedIds()}
+      />
     </div>
   );
 };
