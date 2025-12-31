@@ -2,10 +2,16 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useTripDraft } from "@/hooks/use-trip-draft";
+import { useTripDraft, PriceStyle } from "@/hooks/use-trip-draft";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
+
+const priceStyleOptions: { value: PriceStyle; label: string; description: string }[] = [
+  { value: '$', label: '$', description: 'Essencial' },
+  { value: '$$', label: '$$', description: 'Conforto' },
+  { value: '$$$', label: '$$$', description: 'Sofisticado' },
+];
 
 /**
  * TRIP PREFERENCES (Step 4: Travel Style)
@@ -56,7 +62,7 @@ const tripStyleOptions: TripStyleOption[] = [
 
 const TripPreferences = () => {
   const navigate = useNavigate();
-  const { draft, toggleTripStyle, tripDays, isDestinationSelected } = useTripDraft();
+  const { draft, toggleTripStyle, setPriceStyle, tripDays, isDestinationSelected } = useTripDraft();
 
   // If no destination selected, go back to step 1
   if (!isDestinationSelected) {
@@ -205,6 +211,33 @@ const TripPreferences = () => {
               </motion.button>
             );
           })}
+        </div>
+
+        {/* Price style selector (optional) */}
+        <div className="mb-8">
+          <p className="text-sm text-muted-foreground mb-3 text-center">
+            Estilo de viagem <span className="text-xs">(opcional)</span>
+          </p>
+          <div className="flex gap-2 justify-center">
+            {priceStyleOptions.map((option) => {
+              const isSelected = draft.priceStyle === option.value;
+              return (
+                <button
+                  key={option.value}
+                  onClick={() => setPriceStyle(option.value)}
+                  className={cn(
+                    "flex-1 max-w-[100px] py-3 px-2 rounded-xl border transition-all text-center",
+                    isSelected
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-border bg-background text-muted-foreground hover:border-primary/50"
+                  )}
+                >
+                  <span className="block text-lg font-semibold">{option.label}</span>
+                  <span className="block text-xs mt-0.5">{option.description}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
       </main>
 

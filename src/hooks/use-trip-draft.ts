@@ -12,6 +12,8 @@ import { useState, useCallback, useEffect } from "react";
  * Persists to localStorage for session continuity.
  */
 
+export type PriceStyle = '$' | '$$' | '$$$';
+
 export interface TripDraft {
   destinationId: string;
   destinationName: string;
@@ -25,6 +27,7 @@ export interface TripDraft {
   children: number;
   childrenAges: number[];
   tripStyles: string[];
+  priceStyle: PriceStyle;
   createdAt: string;
 }
 
@@ -43,6 +46,7 @@ const createEmptyDraft = (): TripDraft => ({
   children: 0,
   childrenAges: [],
   tripStyles: [],
+  priceStyle: '$$', // Default to Comfort
   createdAt: new Date().toISOString(),
 });
 
@@ -132,6 +136,10 @@ export const useTripDraft = () => {
     updateDraft({ tripStyles: newStyles });
   }, [updateDraft, draft.tripStyles]);
 
+  const setPriceStyle = useCallback((style: PriceStyle) => {
+    updateDraft({ priceStyle: style });
+  }, [updateDraft]);
+
   const clearDraft = useCallback(() => {
     const empty = createEmptyDraft();
     setDraft(empty);
@@ -165,6 +173,7 @@ export const useTripDraft = () => {
     setChildAge,
     setTripStyles,
     toggleTripStyle,
+    setPriceStyle,
     clearDraft,
   };
 };
