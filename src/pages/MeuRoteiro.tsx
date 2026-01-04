@@ -1,12 +1,13 @@
 import { useState, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
-import { ChevronLeft, Heart, Search, X, MapPin, ChevronRight, Check } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ChevronLeft, Heart, Search, X, MapPin, ChevronRight, Check, Trash2, Utensils, BedDouble, Camera, Star, PartyPopper, Leaf } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { curatedDestinations, searchDestinations, Destination } from "@/data/destinations-database";
 import { useTripDraft } from "@/hooks/use-trip-draft";
+import { useDestinationDrafts, DestinationDraft } from "@/hooks/use-destination-drafts";
 import { toast } from "@/hooks/use-toast";
 
 /**
@@ -14,18 +15,126 @@ import { toast } from "@/hooks/use-toast";
  * 
  * Route: /meu-roteiro
  * 
- * Shows ONLY:
+ * Shows:
  * - Netflix-style destination carousel
  * - Search input with "Vai pra onde?" placeholder
  * - "Continuar" CTA (disabled until destination selected)
+ * - Destination-based draft itineraries (grouped saved items)
  * 
  * After pressing Continuar, navigates to /meu-roteiro/grupo.
  */
+
+// Type badge icons
+const typeIcons: Record<string, React.ReactNode> = {
+  'restaurant': <Utensils className="w-3 h-3" />,
+  'hotel': <BedDouble className="w-3 h-3" />,
+  'activity': <Camera className="w-3 h-3" />,
+  'lucky-list': <Star className="w-3 h-3" />,
+  'nightlife': <PartyPopper className="w-3 h-3" />,
+  'local-flavor': <Leaf className="w-3 h-3" />,
+};
+
+const typeLabels: Record<string, string> = {
+  'restaurant': 'Restaurante',
+  'hotel': 'Hotel',
+  'activity': 'Atividade',
+  'lucky-list': 'Lucky List',
+  'nightlife': 'Vida Noturna',
+  'local-flavor': 'Sabor Local',
+};
+
+// Draft item card component
+const DraftItemCard = ({ 
+  item, 
+  onRemove 
+}: { 
+  item: { id: string; type: string; title: string; isPremium: boolean };
+  onRemove: () => void;
+}) => (
+  <motion.div
+    initial={{ opacity: 0, y: 10 }}
+    animate={{ opacity: 1, y: 0 }}
+    exit={{ opacity: 0, x: -20 }}
+    className="flex items-center gap-3 p-3 bg-card rounded-xl border border-border"
+  >
+    <div className={cn(
+      "flex items-center justify-center w-8 h-8 rounded-lg",
+      item.isPremium ? "bg-amber-500/10 text-amber-600" : "bg-primary/10 text-primary"
+    )}>
+      {typeIcons[item.type] || <MapPin className="w-3 h-3" />}
+    </div>
+    <div className="flex-1 min-w-0">
+      <p className="text-sm font-medium text-foreground truncate">{item.title}</p>
+      <p className="text-xs text-muted-foreground">{typeLabels[item.type] || item.type}</p>
+    </div>
+    <button
+      onClick={onRemove}
+      className="p-2 -m-1 text-muted-foreground hover:text-destructive transition-colors"
+      aria-label="Remover item"
+    >
+      <Trash2 className="w-4 h-4" />
+    </button>
+  </motion.div>
+);
+
+// Destination draft section component
+const DestinationDraftSection = ({ 
+  draft, 
+  onRemoveItem,
+  onSelectDestination,
+}: { 
+  draft: DestinationDraft;
+  onRemoveItem: (itemId: string, itemType: string) => void;
+  onSelectDestination: (destId: string) => void;
+}) => {
+  const destination = curatedDestinations.find(d => d.id === draft.destinationId);
+  
+  return (
+    <section className="space-y-3">
+      <button
+        onClick={() => onSelectDestination(draft.destinationId)}
+        className="flex items-center gap-3 w-full text-left hover:opacity-80 transition-opacity"
+      >
+        {destination?.imageUrl ? (
+          <img 
+            src={destination.imageUrl} 
+            alt={draft.destinationName}
+            className="w-10 h-10 rounded-lg object-cover"
+          />
+        ) : (
+          <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center">
+            <MapPin className="w-5 h-5 text-muted-foreground" />
+          </div>
+        )}
+        <div className="flex-1">
+          <h3 className="font-semibold text-foreground">{draft.destinationName}</h3>
+          <p className="text-xs text-muted-foreground">
+            {draft.items.length} {draft.items.length === 1 ? 'item salvo' : 'itens salvos'}
+          </p>
+        </div>
+        <ChevronRight className="w-4 h-4 text-muted-foreground" />
+      </button>
+      
+      <div className="space-y-2 pl-13">
+        <AnimatePresence>
+          {draft.items.map((item) => (
+            <DraftItemCard
+              key={`${item.type}-${item.id}`}
+              item={item}
+              onRemove={() => onRemoveItem(item.id, item.type)}
+            />
+          ))}
+        </AnimatePresence>
+      </div>
+    </section>
+  );
+};
 
 const MeuRoteiro = () => {
   const navigate = useNavigate();
   const carouselRef = useRef<HTMLDivElement>(null);
   const { draft, setDestination, isDestinationSelected } = useTripDraft();
+  const { drafts, removeItem } = useDestinationDrafts();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchFocused, setIsSearchFocused] = useState(false);
@@ -59,6 +168,23 @@ const MeuRoteiro = () => {
     setSearchQuery('');
     setIsSearchFocused(false);
     setShowError(false);
+  };
+
+  // Handle destination selection from draft section
+  const handleSelectDestinationById = (destId: string) => {
+    const destination = curatedDestinations.find(d => d.id === destId);
+    if (destination && destination.available) {
+      handleSelectDestination(destination);
+    }
+  };
+
+  // Handle remove item from draft
+  const handleRemoveItem = (itemId: string, itemType: string) => {
+    removeItem(itemId, itemType);
+    toast({
+      title: "Item removido",
+      description: "O item foi removido do seu roteiro.",
+    });
   };
 
   // Handle continue button
@@ -290,6 +416,26 @@ const MeuRoteiro = () => {
           >
             Escolha um destino para continuar.
           </motion.p>
+        )}
+
+        {/* Destination-based draft itineraries */}
+        {drafts.length > 0 && (
+          <section className="space-y-6 pt-4 border-t border-border">
+            <h2 className="text-lg font-semibold text-foreground">
+              Ideias salvas
+            </h2>
+            
+            <div className="space-y-6">
+              {drafts.map((draft) => (
+                <DestinationDraftSection
+                  key={draft.destinationId}
+                  draft={draft}
+                  onRemoveItem={handleRemoveItem}
+                  onSelectDestination={handleSelectDestinationById}
+                />
+              ))}
+            </div>
+          </section>
         )}
       </main>
 
