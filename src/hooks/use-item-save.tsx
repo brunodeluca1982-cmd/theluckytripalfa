@@ -15,6 +15,7 @@ import { ToastAction } from "@/components/ui/toast";
  * 3. NO authentication check before save
  * 4. NO forced redirects to login
  * 5. Toast feedback always includes "Ver roteiro" action
+ * 6. Items are automatically grouped by destinationId
  * 
  * ═══════════════════════════════════════════════════════════════════════════
  * ALLOWED ITEM TYPES (ATOMIC CONTENT ONLY):
@@ -38,13 +39,49 @@ import { ToastAction } from "@/components/ui/toast";
  * ═══════════════════════════════════════════════════════════════════════════
  */
 
-interface SavedItem {
+export interface SavedItem {
   id: string;
   type: 'activity' | 'restaurant' | 'hotel' | 'lucky-list' | 'nightlife' | 'local-flavor';
   title: string;
   savedAt: string;
   isPremium: boolean;
+  destinationId: string;
+  destinationName: string;
 }
+
+const STORAGE_KEY = 'draft-roteiro';
+
+// Extract destination context from current path
+const extractDestinationFromPath = (pathname: string): { id: string; name: string } => {
+  // Default to Rio de Janeiro as it's the only available destination
+  const defaultDest = { id: 'rio-de-janeiro', name: 'Rio de Janeiro' };
+  
+  // Check for destination in URL patterns
+  if (pathname.includes('/destino/rio-de-janeiro') || 
+      pathname.includes('/onde-ficar-rio') ||
+      pathname.includes('/o-que-fazer') ||
+      pathname.includes('/lucky-list') ||
+      pathname.includes('/onde-comer') ||
+      pathname.includes('/eat-map-view')) {
+    return defaultDest;
+  }
+  
+  // Try to extract from generic destination pattern
+  const destMatch = pathname.match(/\/destino\/([^/]+)/);
+  if (destMatch) {
+    const destId = destMatch[1];
+    // Map known destinations
+    const destNames: Record<string, string> = {
+      'rio-de-janeiro': 'Rio de Janeiro',
+      'sao-paulo': 'São Paulo',
+      'salvador': 'Salvador',
+      'florianopolis': 'Florianópolis',
+    };
+    return { id: destId, name: destNames[destId] || destId };
+  }
+  
+  return defaultDest;
+};
 
 export const useItemSave = () => {
   const navigate = useNavigate();
@@ -69,7 +106,7 @@ export const useItemSave = () => {
     itemTitle: string,
     isPremium: boolean = false
   ) => {
-    const draftRoteiro: SavedItem[] = JSON.parse(localStorage.getItem('draft-roteiro') || '[]');
+    const draftRoteiro: SavedItem[] = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
     
     // Check if already saved
     const alreadySaved = draftRoteiro.some(
@@ -89,16 +126,21 @@ export const useItemSave = () => {
       return false;
     }
     
-    // Save item
+    // Get destination context from current path
+    const destination = extractDestinationFromPath(location.pathname);
+    
+    // Save item with destination info
     draftRoteiro.push({
       id: itemId,
       type: itemType,
       title: itemTitle,
       savedAt: new Date().toISOString(),
       isPremium,
+      destinationId: destination.id,
+      destinationName: destination.name,
     });
     
-    localStorage.setItem('draft-roteiro', JSON.stringify(draftRoteiro));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(draftRoteiro));
     
     // Dispatch event for bottom navigation to update badge
     window.dispatchEvent(new CustomEvent('roteiro-updated'));
@@ -119,7 +161,16 @@ export const useItemSave = () => {
     });
     
     return true;
-  }, [goToRoteiro]);
+  }, [goToRoteiro, location.pathname]);
 
-  return { saveItem, goToRoteiro };
+  const removeItem = useCallback((itemId: string, itemType: SavedItem['type']) => {
+    const draftRoteiro: SavedItem[] = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    const updated = draftRoteiro.filter(
+      (item) => !(item.id === itemId && item.type === itemType)
+    );
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    window.dispatchEvent(new CustomEvent('roteiro-updated'));
+  }, []);
+
+  return { saveItem, removeItem, goToRoteiro };
 };
