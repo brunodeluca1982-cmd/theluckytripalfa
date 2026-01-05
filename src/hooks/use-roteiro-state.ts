@@ -181,6 +181,32 @@ export const useRoteiroState = (destinationId: string, totalDays: number = 3) =>
     }));
   }, []);
 
+  // Update a specific item's properties (e.g., time, replacement)
+  const updateItem = useCallback((day: number, itemId: string, updates: Partial<ItineraryItem>) => {
+    setRoteiro(prev => ({
+      ...prev,
+      items: {
+        ...prev.items,
+        [day]: prev.items[day].map(item =>
+          item.id === itemId ? { ...item, ...updates } : item
+        ),
+      },
+    }));
+  }, []);
+
+  // Replace an item entirely with a new one (keeps same position)
+  const replaceItem = useCallback((day: number, itemId: string, newItem: ItineraryItem) => {
+    setRoteiro(prev => ({
+      ...prev,
+      items: {
+        ...prev.items,
+        [day]: prev.items[day].map(item =>
+          item.id === itemId ? { ...newItem, id: `user-${newItem.id || Date.now()}-${Date.now()}` } : item
+        ),
+      },
+    }));
+  }, []);
+
   const clearRoteiro = useCallback(() => {
     setRoteiro(createEmptyRoteiro(destinationId, totalDays));
   }, [destinationId, totalDays]);
@@ -228,6 +254,8 @@ export const useRoteiroState = (destinationId: string, totalDays: number = 3) =>
     reorderItems,
     moveItemBetweenDays,
     setDayItems,
+    updateItem,
+    replaceItem,
     clearRoteiro,
     // Status transitions
     finalize,
