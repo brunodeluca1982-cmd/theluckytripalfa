@@ -39,6 +39,11 @@ export interface ItineraryItem {
   placeId?: string;
   lat?: number;
   lng?: number;
+  // Editable time slots
+  startTime?: string;
+  endTime?: string;
+  // External place flag (from Google, not curated)
+  isExternal?: boolean;
 }
 
 interface ItineraryCardProps {

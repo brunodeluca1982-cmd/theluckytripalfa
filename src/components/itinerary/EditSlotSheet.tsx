@@ -1,15 +1,18 @@
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { MapPin, Utensils, Sun } from "lucide-react";
+import { MapPin, Utensils, Sun, Plus, Globe } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { guideRestaurants, guideActivities, guideHotels, GuideRestaurant, GuideActivity, GuideHotel } from "@/data/rio-guide-data";
 import { hasValidatedLocation } from "@/data/validated-locations";
 import { useState, useMemo } from "react";
+import { Button } from "@/components/ui/button";
+import { HybridPlaceSearch, HybridPlaceResult } from "@/components/roteiro/HybridPlaceSearch";
 
 /**
  * EDIT SLOT SHEET
  * Allows users to swap an itinerary item with another from the guide.
  * ALWAYS returns exactly 3 curated alternatives - never empty.
  * Implements progressive constraint relaxation to guarantee options.
+ * Includes "Add another place" option for Google Places search.
  */
 
 interface ItinerarySlot {
@@ -24,6 +27,7 @@ interface EditSlotSheetProps {
   onOpenChange: (open: boolean) => void;
   slot: ItinerarySlot | null;
   onSelectAlternative: (newItem: GuideRestaurant | GuideActivity | GuideHotel) => void;
+  onSelectExternalPlace?: (place: HybridPlaceResult) => void;
   usedIds: Set<string>; // IDs already used in the itinerary
 }
 
@@ -40,8 +44,11 @@ export const EditSlotSheet = ({
   onOpenChange,
   slot,
   onSelectAlternative,
+  onSelectExternalPlace,
   usedIds,
 }: EditSlotSheetProps) => {
+  const [showAddPlace, setShowAddPlace] = useState(false);
+
   if (!slot) return null;
 
   // Get activities with progressive constraint relaxation
@@ -284,11 +291,27 @@ export const EditSlotSheet = ({
   const handleSelect = (item: GuideRestaurant | GuideActivity | GuideHotel) => {
     onSelectAlternative(item);
     onOpenChange(false);
+    setShowAddPlace(false);
+  };
+
+  const handleSelectExternalPlace = (place: HybridPlaceResult) => {
+    if (onSelectExternalPlace) {
+      onSelectExternalPlace(place);
+    }
+    onOpenChange(false);
+    setShowAddPlace(false);
+  };
+
+  const handleClose = (isOpen: boolean) => {
+    if (!isOpen) {
+      setShowAddPlace(false);
+    }
+    onOpenChange(isOpen);
   };
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="bottom" className="h-auto max-h-[60vh] rounded-t-3xl">
+    <Sheet open={open} onOpenChange={handleClose}>
+      <SheetContent side="bottom" className="h-auto max-h-[70vh] rounded-t-3xl overflow-y-auto">
         <SheetHeader className="text-left pb-4 border-b border-border">
           <SheetTitle className="text-lg font-semibold">
             Trocar {getTypeLabel().toLowerCase()}
@@ -299,45 +322,87 @@ export const EditSlotSheet = ({
         </SheetHeader>
 
         <div className="py-4">
-          {/* Subtle feedback when constraints were relaxed */}
-          {constraintsRelaxed && (
-            <p className="text-xs text-muted-foreground mb-3 text-center">
-              Ajustamos ligeiramente os filtros para oferecer melhores opções.
-            </p>
+          {/* Show add place search when toggled */}
+          {showAddPlace ? (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-medium text-foreground">Buscar outro lugar</p>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowAddPlace(false)}
+                  className="text-xs"
+                >
+                  Ver sugestões
+                </Button>
+              </div>
+              
+              <HybridPlaceSearch
+                onPlaceSelect={handleSelectExternalPlace}
+                placeholder="Buscar no Google Maps..."
+              />
+              
+              <p className="text-xs text-muted-foreground text-center px-4">
+                Lugares adicionados por você são marcados como "Adicionado por você" e 
+                usados apenas para cálculos de distância.
+              </p>
+            </div>
+          ) : (
+            <>
+              {/* Subtle feedback when constraints were relaxed */}
+              {constraintsRelaxed && (
+                <p className="text-xs text-muted-foreground mb-3 text-center">
+                  Ajustamos ligeiramente os filtros para oferecer melhores opções.
+                </p>
+              )}
+              
+              <div className="space-y-3">
+                {alternatives.map((alt) => (
+                  <button
+                    key={alt.item.id}
+                    onClick={() => handleSelect(alt.item)}
+                    className={cn(
+                      "w-full text-left p-3 rounded-xl border border-border",
+                      "hover:border-primary/50 hover:bg-primary/5 transition-colors",
+                      "flex items-start gap-3"
+                    )}
+                  >
+                    <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
+                      {getIcon(alt.item)}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <span className="text-[10px] font-medium uppercase tracking-wide text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+                          {alt.label}
+                        </span>
+                      </div>
+                      <p className="font-medium text-foreground text-sm truncate">{alt.item.name}</p>
+                      <p className="text-xs text-muted-foreground">{alt.item.neighborhood}</p>
+                      {'priceLevel' in alt.item && (
+                        <p className="text-xs text-muted-foreground mt-0.5">{alt.item.priceLevel}</p>
+                      )}
+                      {'duration' in alt.item && (
+                        <p className="text-xs text-muted-foreground mt-0.5">{alt.item.duration}</p>
+                      )}
+                    </div>
+                  </button>
+                ))}
+              </div>
+
+              {/* Add another place option - always visible */}
+              <div className="mt-4 pt-4 border-t border-border">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowAddPlace(true)}
+                  className="w-full h-12 rounded-xl border-dashed"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Adicionar outro lugar
+                  <Globe className="w-3 h-3 ml-2 text-muted-foreground" />
+                </Button>
+              </div>
+            </>
           )}
-          
-          <div className="space-y-3">
-            {alternatives.map((alt) => (
-              <button
-                key={alt.item.id}
-                onClick={() => handleSelect(alt.item)}
-                className={cn(
-                  "w-full text-left p-3 rounded-xl border border-border",
-                  "hover:border-primary/50 hover:bg-primary/5 transition-colors",
-                  "flex items-start gap-3"
-                )}
-              >
-                <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
-                  {getIcon(alt.item)}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-0.5">
-                    <span className="text-[10px] font-medium uppercase tracking-wide text-primary bg-primary/10 px-2 py-0.5 rounded-full">
-                      {alt.label}
-                    </span>
-                  </div>
-                  <p className="font-medium text-foreground text-sm truncate">{alt.item.name}</p>
-                  <p className="text-xs text-muted-foreground">{alt.item.neighborhood}</p>
-                  {'priceLevel' in alt.item && (
-                    <p className="text-xs text-muted-foreground mt-0.5">{alt.item.priceLevel}</p>
-                  )}
-                  {'duration' in alt.item && (
-                    <p className="text-xs text-muted-foreground mt-0.5">{alt.item.duration}</p>
-                  )}
-                </div>
-              </button>
-            ))}
-          </div>
         </div>
       </SheetContent>
     </Sheet>
