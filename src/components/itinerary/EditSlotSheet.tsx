@@ -49,13 +49,11 @@ export const EditSlotSheet = ({
 }: EditSlotSheetProps) => {
   const [showAddPlace, setShowAddPlace] = useState(false);
 
-  if (!slot) return null;
-
   // Get activities with progressive constraint relaxation
-  const getActivityAlternatives = (relaxation: RelaxationLevel): CategorizedItem[] => {
+  const getActivityAlternatives = (relaxation: RelaxationLevel, currentSlot: ItinerarySlot): CategorizedItem[] => {
     const pool = guideActivities.filter(a => {
       // Always exclude current item
-      if (a.id === slot.item.id) return false;
+      if (a.id === currentSlot.item.id) return false;
       // Exclude already used (but allow in most relaxed mode)
       if (relaxation !== 'all' && usedIds.has(a.id)) return false;
       // Prefer validated locations but allow all in relaxed modes
@@ -63,24 +61,24 @@ export const EditSlotSheet = ({
 
       // Time constraints based on relaxation level
       if (relaxation === 'strict') {
-        if (slot.type === 'sunset') {
+        if (currentSlot.type === 'sunset') {
           return a.bestTime === 'pôr do sol' || a.bestTime === 'tarde';
         }
-        if (slot.timeBlock === 'morning') {
+        if (currentSlot.timeBlock === 'morning') {
           return a.bestTime === 'manhã';
         }
-        if (slot.timeBlock === 'afternoon') {
+        if (currentSlot.timeBlock === 'afternoon') {
           return a.bestTime === 'tarde';
         }
       } else if (relaxation === 'relaxed_time') {
         // Allow 'qualquer' and adjacent time blocks
-        if (slot.type === 'sunset') {
+        if (currentSlot.type === 'sunset') {
           return a.bestTime === 'pôr do sol' || a.bestTime === 'tarde' || a.bestTime === 'qualquer';
         }
-        if (slot.timeBlock === 'morning') {
+        if (currentSlot.timeBlock === 'morning') {
           return a.bestTime === 'manhã' || a.bestTime === 'qualquer' || a.bestTime === 'tarde';
         }
-        if (slot.timeBlock === 'afternoon') {
+        if (currentSlot.timeBlock === 'afternoon') {
           return a.bestTime === 'tarde' || a.bestTime === 'qualquer' || a.bestTime === 'manhã';
         }
       }
@@ -123,14 +121,14 @@ export const EditSlotSheet = ({
   };
 
   // Get restaurant alternatives with progressive constraint relaxation
-  const getRestaurantAlternatives = (relaxation: RelaxationLevel): CategorizedItem[] => {
-    const timeHour = parseInt(slot.time.split(':')[0]);
+  const getRestaurantAlternatives = (relaxation: RelaxationLevel, currentSlot: ItinerarySlot): CategorizedItem[] => {
+    const timeHour = parseInt(currentSlot.time.split(':')[0]);
     const isLunch = timeHour >= 11 && timeHour < 16;
     const isDinner = timeHour >= 18;
 
     const pool = guideRestaurants.filter(r => {
       // Always exclude current item
-      if (r.id === slot.item.id) return false;
+      if (r.id === currentSlot.item.id) return false;
       // Exclude already used (but allow in most relaxed mode)
       if (relaxation !== 'all' && usedIds.has(r.id)) return false;
       // Prefer validated locations but allow all in relaxed modes
@@ -184,10 +182,10 @@ export const EditSlotSheet = ({
   };
 
   // Get hotel alternatives with progressive constraint relaxation
-  const getHotelAlternatives = (relaxation: RelaxationLevel): CategorizedItem[] => {
+  const getHotelAlternatives = (relaxation: RelaxationLevel, currentSlot: ItinerarySlot): CategorizedItem[] => {
     const pool = guideHotels.filter(h => {
       // Always exclude current item
-      if (h.id === slot.item.id) return false;
+      if (h.id === currentSlot.item.id) return false;
       // Prefer validated locations but allow all in relaxed modes
       if (relaxation === 'strict' && !hasValidatedLocation(h.id)) return false;
       return true;
@@ -228,18 +226,18 @@ export const EditSlotSheet = ({
   };
 
   // Main function that implements progressive constraint relaxation
-  const getCategorizedAlternatives = (): { items: CategorizedItem[]; relaxed: boolean } => {
+  const getCategorizedAlternatives = (currentSlot: ItinerarySlot): { items: CategorizedItem[]; relaxed: boolean } => {
     const relaxationOrder: RelaxationLevel[] = ['strict', 'relaxed_time', 'relaxed_category', 'all'];
     
     for (const level of relaxationOrder) {
       let alternatives: CategorizedItem[] = [];
       
-      if (slot.type === 'activity' || slot.type === 'sunset') {
-        alternatives = getActivityAlternatives(level);
-      } else if (slot.type === 'meal') {
-        alternatives = getRestaurantAlternatives(level);
-      } else if (slot.type === 'departure') {
-        alternatives = getHotelAlternatives(level);
+      if (currentSlot.type === 'activity' || currentSlot.type === 'sunset') {
+        alternatives = getActivityAlternatives(level, currentSlot);
+      } else if (currentSlot.type === 'meal') {
+        alternatives = getRestaurantAlternatives(level, currentSlot);
+      } else if (currentSlot.type === 'departure') {
+        alternatives = getHotelAlternatives(level, currentSlot);
       }
 
       // If we have at least 3 options, we're done
@@ -256,11 +254,11 @@ export const EditSlotSheet = ({
     // Ultimate fallback: return ANY 3 items from the appropriate pool
     // This should never happen with proper data, but guarantees no empty state
     const fallbackPool: (GuideRestaurant | GuideActivity | GuideHotel)[] = 
-      slot.type === 'activity' || slot.type === 'sunset' 
-        ? guideActivities.filter(a => a.id !== slot.item.id)
-        : slot.type === 'meal' 
-          ? guideRestaurants.filter(r => r.id !== slot.item.id)
-          : guideHotels.filter(h => h.id !== slot.item.id);
+      currentSlot.type === 'activity' || currentSlot.type === 'sunset' 
+        ? guideActivities.filter(a => a.id !== currentSlot.item.id)
+        : currentSlot.type === 'meal' 
+          ? guideRestaurants.filter(r => r.id !== currentSlot.item.id)
+          : guideHotels.filter(h => h.id !== currentSlot.item.id);
 
     const fallbackItems: CategorizedItem[] = fallbackPool.slice(0, 3).map((item, idx) => ({
       item,
@@ -270,10 +268,14 @@ export const EditSlotSheet = ({
     return { items: fallbackItems, relaxed: true };
   };
 
-  const { items: alternatives, relaxed: constraintsRelaxed } = useMemo(() => 
-    getCategorizedAlternatives(), 
-    [slot, usedIds]
-  );
+  // Memoize alternatives - now always called (before any early return)
+  const { items: alternatives, relaxed: constraintsRelaxed } = useMemo(() => {
+    if (!slot) return { items: [], relaxed: false };
+    return getCategorizedAlternatives(slot);
+  }, [slot, usedIds]);
+
+  // Early return AFTER all hooks
+  if (!slot) return null;
 
   const getTypeLabel = () => {
     if (slot.type === 'departure') return 'Hotel';

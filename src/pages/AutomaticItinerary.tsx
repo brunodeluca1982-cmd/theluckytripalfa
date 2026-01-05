@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ChevronLeft, Check, MapPin, Utensils, Sun, Moon, Car, Footprints, Clock, Pencil } from "lucide-react";
@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { calculateDistance, getTransportDetails } from "@/lib/location-validation";
 import { getValidatedLocation, hasValidatedLocation } from "@/data/validated-locations";
 import { EditSlotSheet } from "@/components/itinerary/EditSlotSheet";
+import { HybridPlaceResult } from "@/components/roteiro/HybridPlaceSearch";
 
 /**
  * AUTOMATIC ITINERARY GENERATOR
@@ -67,6 +68,8 @@ const getTransportMode = (distanceKm: number): { mode: 'walking' | 'uber'; durat
   return { mode: details.mode, duration: details.durationText };
 };
 
+const STORAGE_KEY = 'automaticItinerary';
+
 const AutomaticItinerary = () => {
   const navigate = useNavigate();
   const { draft, tripDays } = useTripDraft();
@@ -84,6 +87,38 @@ const AutomaticItinerary = () => {
   
   // Auto-generate on mount if trip dates are valid
   const [hasStartedGeneration, setHasStartedGeneration] = useState(false);
+
+  // Load saved itinerary from localStorage on mount
+  useEffect(() => {
+    const saved = localStorage.getItem(`${STORAGE_KEY}-${draft.destinationId}`);
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (parsed.itinerary && Object.keys(parsed.itinerary).length > 0) {
+          setItinerary(parsed.itinerary);
+          setDayCosts(parsed.dayCosts || {});
+          setSelectedHotel(parsed.hotel || null);
+          setIsGenerated(true);
+        }
+      } catch (e) {
+        console.error('Failed to load saved itinerary:', e);
+      }
+    }
+  }, [draft.destinationId]);
+
+  // Save itinerary to localStorage whenever it changes
+  useEffect(() => {
+    if (isGenerated && Object.keys(itinerary).length > 0) {
+      localStorage.setItem(`${STORAGE_KEY}-${draft.destinationId}`, JSON.stringify({
+        destination: draft.destinationId,
+        days: actualTripDays,
+        itinerary,
+        dayCosts,
+        hotel: selectedHotel,
+        updatedAt: new Date().toISOString()
+      }));
+    }
+  }, [itinerary, dayCosts, selectedHotel, isGenerated, draft.destinationId, actualTripDays]);
 
   if (!draft.destinationId) {
     navigate('/meu-roteiro', { replace: true });
@@ -544,20 +579,18 @@ const AutomaticItinerary = () => {
     return 'bg-primary/20';
   };
 
-  // Get detail route for an item based on type
+  // Get detail route for an item based on type - DISABLED: we use inline editing now
+  // Kept for reference only
   const getItemRoute = (slot: ItinerarySlot): string | null => {
-    if (slot.type === 'transport') return null;
-    if (slot.type === 'departure') return `/hotel/${slot.item.id}`;
-    if (slot.type === 'meal') return `/restaurante/${slot.item.id}`;
-    if (slot.type === 'activity' || slot.type === 'sunset') return `/atividade/${slot.item.id}`;
+    // Disabled navigation - all editing happens in-place via EditSlotSheet
     return null;
   };
 
-  const handleSlotClick = (slot: ItinerarySlot) => {
-    const route = getItemRoute(slot);
-    if (route) {
-      navigate(route);
-    }
+  // Handle slot click - open edit sheet instead of navigating
+  const handleSlotClick = (day: number, index: number, slot: ItinerarySlot) => {
+    if (slot.type === 'transport') return;
+    setEditingSlot({ day, index, slot });
+    setEditSheetOpen(true);
   };
 
   // Handle edit button click
@@ -598,6 +631,34 @@ const AutomaticItinerary = () => {
     if (slot.type === 'departure' && 'priceLevel' in newItem) {
       setSelectedHotel(newItem as typeof guideHotels[0]);
     }
+    
+    setEditingSlot(null);
+  };
+
+  // Handle selecting an external place (from Google)
+  const handleSelectExternalPlace = (place: HybridPlaceResult) => {
+    if (!editingSlot) return;
+    
+    const { day, index, slot } = editingSlot;
+    
+    // Update the slot with external place data
+    const updatedSlot: ItinerarySlot = {
+      ...slot,
+      item: {
+        id: `external-${place.placeId || place.id}`,
+        name: place.name,
+        neighborhood: place.neighborhood || 'Local adicionado',
+        description: place.description || 'Adicionado por você',
+        address: place.address,
+      }
+    };
+    
+    // Update itinerary state
+    setItinerary(prev => {
+      const daySlots = [...prev[day]];
+      daySlots[index] = updatedSlot;
+      return { ...prev, [day]: daySlots };
+    });
     
     setEditingSlot(null);
   };
@@ -723,11 +784,11 @@ const AutomaticItinerary = () => {
                               initial={{ opacity: 0, x: -10 }}
                               animate={{ opacity: 1, x: 0 }}
                               transition={{ delay: idx * 0.05 }}
-                              onClick={() => handleSlotClick(slot)}
+                              onClick={() => handleSlotClick(dayNumber, idx, slot)}
                               className={cn(
                                 "flex gap-3 items-start py-2 group",
                                 slot.type === 'transport' && "opacity-60",
-                                getItemRoute(slot) && "cursor-pointer hover:bg-muted/50 rounded-lg -mx-2 px-2 transition-colors"
+                                slot.type !== 'transport' && "cursor-pointer hover:bg-muted/50 rounded-lg -mx-2 px-2 transition-colors"
                               )}
                             >
                               <div className="w-12 text-xs text-muted-foreground pt-1 tabular-nums">{slot.time}</div>
@@ -744,10 +805,7 @@ const AutomaticItinerary = () => {
                                   </p>
                                 ) : (
                                   <>
-                                    <p className={cn(
-                                      "font-medium text-foreground text-sm truncate",
-                                      getItemRoute(slot) && "underline decoration-dotted underline-offset-2 decoration-muted-foreground/50"
-                                    )}>{slot.item.name}</p>
+                                    <p className="font-medium text-foreground text-sm truncate">{slot.item.name}</p>
                                     {slot.item.neighborhood && (
                                       <p className="text-xs text-muted-foreground">{slot.item.neighborhood}</p>
                                     )}
@@ -817,6 +875,7 @@ const AutomaticItinerary = () => {
         onOpenChange={setEditSheetOpen}
         slot={editingSlot?.slot || null}
         onSelectAlternative={handleSelectAlternative}
+        onSelectExternalPlace={handleSelectExternalPlace}
         usedIds={getUsedIds()}
       />
     </div>
