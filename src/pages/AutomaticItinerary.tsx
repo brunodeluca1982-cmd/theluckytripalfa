@@ -615,6 +615,29 @@ const AutomaticItinerary = () => {
     }
   };
 
+  // Handle saving time changes
+  const handleSaveTime = (newTime: string, duration: number) => {
+    if (!viewingSlot) return;
+    
+    const { day, index, slot } = viewingSlot;
+    
+    // Update the slot with new time
+    const updatedSlot: ItinerarySlot = {
+      ...slot,
+      time: newTime,
+    };
+    
+    // Update itinerary state
+    setItinerary(prev => {
+      const daySlots = [...prev[day]];
+      daySlots[index] = updatedSlot;
+      return { ...prev, [day]: daySlots };
+    });
+    
+    // Update the viewing slot to reflect changes
+    setViewingSlot({ day, index, slot: updatedSlot });
+  };
+
   // Remove item from itinerary
   const handleRemoveItem = () => {
     if (!viewingSlot) return;
@@ -898,12 +921,14 @@ const AutomaticItinerary = () => {
         </div>
       )}
 
-      {/* Item Detail Sheet - shows curated details */}
+      {/* Item Detail Sheet - shows curated details and time editing */}
       <ItineraryItemDetailSheet
         open={detailSheetOpen}
         onOpenChange={setDetailSheetOpen}
         item={viewingSlot?.slot.item || null}
         itemType={viewingSlot?.slot.type || 'activity'}
+        currentTime={viewingSlot?.slot.time}
+        onSaveTime={handleSaveTime}
         onReplace={handleOpenReplaceFromDetail}
         onRemove={handleRemoveItem}
       />

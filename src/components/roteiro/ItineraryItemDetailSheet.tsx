@@ -5,9 +5,10 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { Clock, MapPin, Lightbulb, Star, Globe, Pencil, RefreshCw, X, ExternalLink } from "lucide-react";
+import { Clock, MapPin, Lightbulb, Star, Globe, RefreshCw, X, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 import { guideHotels, guideRestaurants, guideActivities, GuideHotel, GuideRestaurant, GuideActivity } from "@/data/rio-guide-data";
 
 /**
@@ -31,10 +32,32 @@ interface ItineraryItemDetailSheetProps {
   onOpenChange: (open: boolean) => void;
   item: ItinerarySlotItem | null;
   itemType: 'activity' | 'meal' | 'sunset' | 'departure' | 'transport';
-  onEditTime?: () => void;
+  currentTime?: string;
+  onSaveTime?: (time: string, duration: number) => void;
   onReplace?: () => void;
   onRemove?: () => void;
 }
+
+// Duration options in minutes
+const DURATION_OPTIONS = [
+  { label: '30m', value: 30 },
+  { label: '1h', value: 60 },
+  { label: '1h30', value: 90 },
+  { label: '2h', value: 120 },
+];
+
+// Generate time options in 15-minute intervals
+const generateTimeOptions = (): string[] => {
+  const options: string[] = [];
+  for (let h = 6; h < 24; h++) {
+    for (let m = 0; m < 60; m += 15) {
+      options.push(`${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`);
+    }
+  }
+  return options;
+};
+
+const TIME_OPTIONS = generateTimeOptions();
 
 // Try to find curated data for an item by ID
 const findCuratedItem = (id: string, type: string): GuideHotel | GuideRestaurant | GuideActivity | null => {
@@ -70,10 +93,33 @@ export const ItineraryItemDetailSheet = ({
   onOpenChange,
   item,
   itemType,
-  onEditTime,
+  currentTime,
+  onSaveTime,
   onReplace,
   onRemove,
 }: ItineraryItemDetailSheetProps) => {
+  const [isEditingTime, setIsEditingTime] = useState(false);
+  const [selectedTime, setSelectedTime] = useState(currentTime || '09:00');
+  const [selectedDuration, setSelectedDuration] = useState(60);
+
+  // Reset state when opening
+  const handleOpenChange = (isOpen: boolean) => {
+    if (!isOpen) {
+      setIsEditingTime(false);
+    } else if (currentTime) {
+      setSelectedTime(currentTime);
+    }
+    onOpenChange(isOpen);
+  };
+
+  const handleSaveTime = () => {
+    if (onSaveTime) {
+      onSaveTime(selectedTime, selectedDuration);
+    }
+    setIsEditingTime(false);
+  };
+
+  // Early return after all hooks
   if (!item) return null;
 
   const isExternal = isExternalItem(item.id);
@@ -87,12 +133,17 @@ export const ItineraryItemDetailSheet = ({
   const displayInstagram = curatedData && 'instagram' in curatedData ? curatedData.instagram : null;
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
+    <Sheet open={open} onOpenChange={handleOpenChange}>
       <SheetContent side="bottom" className="rounded-t-3xl max-h-[85vh] overflow-y-auto">
         <SheetHeader className="pb-4">
           <div className="flex items-start justify-between">
             <SheetTitle className="text-left pr-8">{displayName}</SheetTitle>
           </div>
+          {currentTime && !isEditingTime && (
+            <p className="text-sm text-muted-foreground text-left">
+              Horário: <span className="font-medium text-foreground">{currentTime}</span>
+            </p>
+          )}
         </SheetHeader>
 
         {/* Meta Info */}
@@ -209,35 +260,100 @@ export const ItineraryItemDetailSheet = ({
           </div>
         )}
 
-        {/* Edit Actions */}
-        <div className="flex gap-2 mb-4">
-          {onEditTime && (
-            <Button
-              variant="outline"
-              onClick={() => {
-                onEditTime();
-                onOpenChange(false);
-              }}
-              className="flex-1"
-            >
-              <Clock className="w-4 h-4 mr-2" />
-              Editar horário
-            </Button>
-          )}
-          {onReplace && (
-            <Button
-              variant="outline"
-              onClick={() => {
-                onReplace();
-                onOpenChange(false);
-              }}
-              className="flex-1"
-            >
-              <RefreshCw className="w-4 h-4 mr-2" />
-              Trocar
-            </Button>
-          )}
-        </div>
+        {/* Time Edit Section - inline */}
+        {isEditingTime ? (
+          <div className="mb-4 p-4 rounded-xl bg-muted/50 border border-border space-y-4">
+            <div className="flex items-center justify-between">
+              <h4 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                <Clock className="w-4 h-4 text-primary" />
+                Editar horário
+              </h4>
+            </div>
+            
+            {/* Time selector */}
+            <div className="space-y-2">
+              <label className="text-xs font-medium text-muted-foreground">Início</label>
+              <select
+                value={selectedTime}
+                onChange={(e) => setSelectedTime(e.target.value)}
+                className="w-full h-10 px-3 rounded-lg border border-border bg-background text-foreground text-sm focus:ring-2 focus:ring-primary focus:border-primary"
+              >
+                {TIME_OPTIONS.map((time) => (
+                  <option key={time} value={time}>
+                    {time}
+                  </option>
+                ))}
+              </select>
+            </div>
+            
+            {/* Duration quick choices */}
+            <div className="space-y-2">
+              <label className="text-xs font-medium text-muted-foreground">Duração</label>
+              <div className="flex gap-2">
+                {DURATION_OPTIONS.map((opt) => (
+                  <button
+                    key={opt.value}
+                    onClick={() => setSelectedDuration(opt.value)}
+                    className={cn(
+                      "flex-1 py-2 px-3 text-sm rounded-lg border transition-colors",
+                      selectedDuration === opt.value
+                        ? "border-primary bg-primary/10 text-primary font-medium"
+                        : "border-border text-muted-foreground hover:border-primary/50"
+                    )}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            
+            {/* Save/Cancel */}
+            <div className="flex gap-2 pt-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsEditingTime(false)}
+                className="flex-1"
+              >
+                Cancelar
+              </Button>
+              <Button
+                size="sm"
+                onClick={handleSaveTime}
+                className="flex-1"
+              >
+                Salvar
+              </Button>
+            </div>
+          </div>
+        ) : (
+          /* Edit Actions */
+          <div className="flex gap-2 mb-4">
+            {onSaveTime && (
+              <Button
+                variant="outline"
+                onClick={() => setIsEditingTime(true)}
+                className="flex-1"
+              >
+                <Clock className="w-4 h-4 mr-2" />
+                Editar horário
+              </Button>
+            )}
+            {onReplace && (
+              <Button
+                variant="outline"
+                onClick={() => {
+                  onReplace();
+                  handleOpenChange(false);
+                }}
+                className="flex-1"
+              >
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Trocar
+              </Button>
+            )}
+          </div>
+        )}
 
         {/* Main Actions */}
         <div className="flex gap-2 pb-4">
