@@ -11,6 +11,7 @@ import { calculateDistance, getTransportDetails } from "@/lib/location-validatio
 import { getValidatedLocation, hasValidatedLocation } from "@/data/validated-locations";
 import { EditSlotSheet } from "@/components/itinerary/EditSlotSheet";
 import { HybridPlaceResult } from "@/components/roteiro/HybridPlaceSearch";
+import { ItineraryItemDetailSheet } from "@/components/roteiro/ItineraryItemDetailSheet";
 
 /**
  * AUTOMATIC ITINERARY GENERATOR
@@ -84,6 +85,10 @@ const AutomaticItinerary = () => {
   // Edit state
   const [editSheetOpen, setEditSheetOpen] = useState(false);
   const [editingSlot, setEditingSlot] = useState<{ day: number; index: number; slot: ItinerarySlot } | null>(null);
+  
+  // Detail view state
+  const [detailSheetOpen, setDetailSheetOpen] = useState(false);
+  const [viewingSlot, setViewingSlot] = useState<{ day: number; index: number; slot: ItinerarySlot } | null>(null);
   
   // Auto-generate on mount if trip dates are valid
   const [hasStartedGeneration, setHasStartedGeneration] = useState(false);
@@ -586,19 +591,43 @@ const AutomaticItinerary = () => {
     return null;
   };
 
-  // Handle slot click - open edit sheet instead of navigating
+  // Handle slot click - open detail sheet to view item
   const handleSlotClick = (day: number, index: number, slot: ItinerarySlot) => {
     if (slot.type === 'transport') return;
-    setEditingSlot({ day, index, slot });
-    setEditSheetOpen(true);
+    setViewingSlot({ day, index, slot });
+    setDetailSheetOpen(true);
   };
 
-  // Handle edit button click
+  // Handle edit button click - go directly to edit/replace sheet
   const handleEditClick = (day: number, index: number, slot: ItinerarySlot, e: React.MouseEvent) => {
     e.stopPropagation();
     if (slot.type === 'transport') return;
     setEditingSlot({ day, index, slot });
     setEditSheetOpen(true);
+  };
+
+  // Open edit sheet from detail view
+  const handleOpenReplaceFromDetail = () => {
+    if (viewingSlot) {
+      setEditingSlot(viewingSlot);
+      setDetailSheetOpen(false);
+      setEditSheetOpen(true);
+    }
+  };
+
+  // Remove item from itinerary
+  const handleRemoveItem = () => {
+    if (!viewingSlot) return;
+    
+    const { day, index } = viewingSlot;
+    setItinerary(prev => {
+      const daySlots = [...prev[day]];
+      daySlots.splice(index, 1);
+      return { ...prev, [day]: daySlots };
+    });
+    
+    setViewingSlot(null);
+    setDetailSheetOpen(false);
   };
 
   // Handle selecting an alternative
@@ -869,7 +898,17 @@ const AutomaticItinerary = () => {
         </div>
       )}
 
-      {/* Edit Slot Sheet */}
+      {/* Item Detail Sheet - shows curated details */}
+      <ItineraryItemDetailSheet
+        open={detailSheetOpen}
+        onOpenChange={setDetailSheetOpen}
+        item={viewingSlot?.slot.item || null}
+        itemType={viewingSlot?.slot.type || 'activity'}
+        onReplace={handleOpenReplaceFromDetail}
+        onRemove={handleRemoveItem}
+      />
+
+      {/* Edit Slot Sheet - for replacing items */}
       <EditSlotSheet
         open={editSheetOpen}
         onOpenChange={setEditSheetOpen}

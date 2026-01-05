@@ -1,0 +1,269 @@
+import { useState } from "react";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
+import { Clock, MapPin, Lightbulb, Star, Globe, Pencil, RefreshCw, X, ExternalLink } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { guideHotels, guideRestaurants, guideActivities, GuideHotel, GuideRestaurant, GuideActivity } from "@/data/rio-guide-data";
+
+/**
+ * ITINERARY ITEM DETAIL SHEET
+ * 
+ * Opens when tapping an item in the generated itinerary.
+ * Shows curated details for Lucky Trip items, or basic info for external places.
+ * Never shows "not found" - always displays available information.
+ */
+
+interface ItinerarySlotItem {
+  id: string;
+  name: string;
+  neighborhood: string;
+  description: string;
+  address?: string;
+}
+
+interface ItineraryItemDetailSheetProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  item: ItinerarySlotItem | null;
+  itemType: 'activity' | 'meal' | 'sunset' | 'departure' | 'transport';
+  onEditTime?: () => void;
+  onReplace?: () => void;
+  onRemove?: () => void;
+}
+
+// Try to find curated data for an item by ID
+const findCuratedItem = (id: string, type: string): GuideHotel | GuideRestaurant | GuideActivity | null => {
+  if (type === 'departure') {
+    return guideHotels.find(h => h.id === id) || null;
+  }
+  if (type === 'meal') {
+    return guideRestaurants.find(r => r.id === id) || null;
+  }
+  if (type === 'activity' || type === 'sunset') {
+    return guideActivities.find(a => a.id === id) || null;
+  }
+  return null;
+};
+
+// Check if item is external (not from curated database)
+const isExternalItem = (id: string): boolean => {
+  return id.startsWith('external-') || id.startsWith('google-');
+};
+
+const getTypeLabel = (type: string): string => {
+  switch (type) {
+    case 'departure': return 'Hotel';
+    case 'meal': return 'Restaurante';
+    case 'sunset': return 'Atividade';
+    case 'activity': return 'Atividade';
+    default: return 'Local';
+  }
+};
+
+export const ItineraryItemDetailSheet = ({
+  open,
+  onOpenChange,
+  item,
+  itemType,
+  onEditTime,
+  onReplace,
+  onRemove,
+}: ItineraryItemDetailSheetProps) => {
+  if (!item) return null;
+
+  const isExternal = isExternalItem(item.id);
+  const curatedData = !isExternal ? findCuratedItem(item.id, itemType) : null;
+
+  // Get additional details from curated data if available
+  const displayName = curatedData?.name || item.name;
+  const displayDescription = curatedData?.description || item.description;
+  const displayNeighborhood = curatedData?.neighborhood || item.neighborhood;
+  const displayPriceLevel = curatedData && 'priceLevel' in curatedData ? curatedData.priceLevel : null;
+  const displayInstagram = curatedData && 'instagram' in curatedData ? curatedData.instagram : null;
+
+  return (
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent side="bottom" className="rounded-t-3xl max-h-[85vh] overflow-y-auto">
+        <SheetHeader className="pb-4">
+          <div className="flex items-start justify-between">
+            <SheetTitle className="text-left pr-8">{displayName}</SheetTitle>
+          </div>
+        </SheetHeader>
+
+        {/* Meta Info */}
+        <div className="flex flex-wrap gap-2 mb-4">
+          <Badge variant="secondary" className="text-xs">
+            <MapPin className="w-3 h-3 mr-1" />
+            {getTypeLabel(itemType)}
+          </Badge>
+          
+          {displayNeighborhood && (
+            <Badge variant="outline" className="text-xs">
+              {displayNeighborhood}
+            </Badge>
+          )}
+
+          {displayPriceLevel && (
+            <Badge variant="outline" className="text-xs">
+              {displayPriceLevel}
+            </Badge>
+          )}
+
+          {/* External place indicator */}
+          {isExternal && (
+            <Badge variant="outline" className="text-xs text-muted-foreground">
+              <Globe className="w-3 h-3 mr-1" />
+              Adicionado por você
+            </Badge>
+          )}
+          
+          {/* Curated badge */}
+          {!isExternal && curatedData && (
+            <Badge className="text-xs bg-primary/10 text-primary border-0">
+              <Star className="w-3 h-3 mr-1" />
+              Dica The Lucky Trip
+            </Badge>
+          )}
+        </div>
+
+        {/* Description */}
+        {displayDescription && displayDescription !== 'Adicionado por você' && (
+          <div className="mb-4">
+            <h4 className="text-sm font-semibold text-foreground mb-2">Sobre</h4>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              {displayDescription}
+            </p>
+          </div>
+        )}
+
+        {/* Address / Location */}
+        {item.address && (
+          <div className="mb-4">
+            <h4 className="text-sm font-semibold text-foreground mb-2">Localização</h4>
+            <a 
+              href={item.address.startsWith('http') ? item.address : `https://maps.google.com/?q=${encodeURIComponent(item.address)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm text-primary hover:underline flex items-center gap-1"
+            >
+              <ExternalLink className="w-3 h-3" />
+              Ver no Google Maps
+            </a>
+          </div>
+        )}
+
+        {/* Instagram */}
+        {displayInstagram && (
+          <div className="mb-4">
+            <a 
+              href={`https://instagram.com/${displayInstagram.replace('@', '')}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm text-primary hover:underline"
+            >
+              {displayInstagram}
+            </a>
+          </div>
+        )}
+
+        {/* Tips Section (only for curated items) */}
+        {!isExternal && curatedData && (
+          <div className="mb-4 p-4 rounded-xl bg-accent/50 border border-accent">
+            <div className="flex items-center gap-2 mb-2">
+              <Lightbulb className="w-4 h-4 text-primary" />
+              <h4 className="text-sm font-semibold text-foreground">Dica</h4>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              {itemType === 'activity' || itemType === 'sunset'
+                ? 'Chegue cedo para aproveitar melhor a experiência e evitar filas.'
+                : itemType === 'meal'
+                ? 'Faça reserva com antecedência, especialmente nos finais de semana.'
+                : itemType === 'departure'
+                ? 'Confira as políticas de cancelamento antes de reservar.'
+                : 'Aproveite ao máximo!'}
+            </p>
+          </div>
+        )}
+
+        {/* External place notice */}
+        {isExternal && (
+          <div className="mb-4 p-4 rounded-xl bg-muted/50 border border-border">
+            <p className="text-sm text-muted-foreground">
+              Este local foi adicionado por você e não faz parte da curadoria The Lucky Trip. 
+              É utilizado para cálculo de distâncias e organização do roteiro.
+            </p>
+          </div>
+        )}
+
+        {/* Fallback notice if no curated data found and not external */}
+        {!isExternal && !curatedData && (
+          <div className="mb-4 p-4 rounded-xl bg-amber-500/10 border border-amber-500/20">
+            <p className="text-sm text-muted-foreground">
+              Conteúdo indisponível no momento. Você pode editar ou remover este item.
+            </p>
+          </div>
+        )}
+
+        {/* Edit Actions */}
+        <div className="flex gap-2 mb-4">
+          {onEditTime && (
+            <Button
+              variant="outline"
+              onClick={() => {
+                onEditTime();
+                onOpenChange(false);
+              }}
+              className="flex-1"
+            >
+              <Clock className="w-4 h-4 mr-2" />
+              Editar horário
+            </Button>
+          )}
+          {onReplace && (
+            <Button
+              variant="outline"
+              onClick={() => {
+                onReplace();
+                onOpenChange(false);
+              }}
+              className="flex-1"
+            >
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Trocar
+            </Button>
+          )}
+        </div>
+
+        {/* Main Actions */}
+        <div className="flex gap-2 pb-4">
+          <Button
+            variant="outline"
+            className="flex-1"
+            onClick={() => onOpenChange(false)}
+          >
+            Fechar
+          </Button>
+          {onRemove && (
+            <Button
+              variant="destructive"
+              onClick={() => {
+                onRemove();
+                onOpenChange(false);
+              }}
+            >
+              <X className="w-4 h-4 mr-1" />
+              Remover
+            </Button>
+          )}
+        </div>
+      </SheetContent>
+    </Sheet>
+  );
+};
+
+export default ItineraryItemDetailSheet;
