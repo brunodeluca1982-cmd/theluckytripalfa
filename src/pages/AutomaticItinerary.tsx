@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ChevronLeft, Check, MapPin, Utensils, Sun, Moon, Car, Footprints, Clock, Pencil } from "lucide-react";
+import { ChevronLeft, Check, MapPin, Utensils, Sun, Moon, Car, Footprints, Clock, Pencil, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTripDraft, PriceStyle } from "@/hooks/use-trip-draft";
@@ -12,6 +12,9 @@ import { getValidatedLocation, hasValidatedLocation } from "@/data/validated-loc
 import { EditSlotSheet } from "@/components/itinerary/EditSlotSheet";
 import { HybridPlaceResult } from "@/components/roteiro/HybridPlaceSearch";
 import { ItineraryItemDetailSheet } from "@/components/roteiro/ItineraryItemDetailSheet";
+import { useItineraryCoherence, getTravelBetweenSlots, TravelSegment } from "@/hooks/use-itinerary-coherence";
+import { TravelIndicator } from "@/components/roteiro/TravelIndicator";
+import { DayCoherenceWarning } from "@/components/roteiro/DayCoherenceWarning";
 
 /**
  * AUTOMATIC ITINERARY GENERATOR
@@ -728,6 +731,27 @@ const AutomaticItinerary = () => {
     return ids;
   };
 
+  // Coherence analysis for distance/time warnings
+  const coherenceAnalysis = useItineraryCoherence(itinerary);
+
+  // Handle day optimization (simple proximity-based reordering)
+  const handleOptimizeDay = (dayNumber: number) => {
+    // For now, just show a toast or feedback
+    // Full optimization would reorder by proximity
+    console.log('Optimize day:', dayNumber);
+    // This is a placeholder - full implementation would:
+    // 1. Reorder items by proximity
+    // 2. Show confirmation dialog
+    // 3. Apply changes only if user confirms
+  };
+
+  // Get travel segment between two slots
+  const getSegmentWarning = (dayNumber: number, segmentIndex: number) => {
+    const dayCoherence = coherenceAnalysis[dayNumber];
+    if (!dayCoherence) return undefined;
+    return dayCoherence.warnings.find(w => w.segmentIndex === segmentIndex);
+  };
+
   return (
     <div className="min-h-screen bg-background pb-32">
       <header className="sticky top-0 z-50 px-4 py-4 bg-background/95 backdrop-blur-sm border-b border-border">
@@ -810,15 +834,42 @@ const AutomaticItinerary = () => {
               {Object.entries(itinerary).map(([day, slots]) => {
                 const dayNumber = parseInt(day);
                 const costs = dayCosts[dayNumber];
+                const dayCoherence = coherenceAnalysis[dayNumber];
                 let currentBlock = '';
+                
+                // Filter place slots for travel segment calculation
+                const placeSlots = slots.filter(s => s.type !== 'transport');
+                let placeSlotIndex = 0;
                 
                 return (
                   <div key={day} className="bg-card rounded-2xl p-4">
-                    <h3 className="font-semibold text-foreground mb-4">Dia {day}</h3>
-                    <div className="space-y-2">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="font-semibold text-foreground">Dia {day}</h3>
+                      {dayCoherence && dayCoherence.totalTravelKm > 0 && (
+                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                          <Car className="w-3 h-3" />
+                          <span>{dayCoherence.totalTravelKm} km</span>
+                          <span className="text-muted-foreground/50">•</span>
+                          <span>~{dayCoherence.totalTravelMin} min</span>
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="space-y-1">
                       {slots.map((slot, idx) => {
                         const showBlockHeader = slot.timeBlock && slot.timeBlock !== currentBlock && slot.type !== 'transport';
                         if (slot.timeBlock && slot.type !== 'transport') currentBlock = slot.timeBlock;
+                        
+                        // Track place slot index for travel segments
+                        const currentPlaceIndex = slot.type !== 'transport' ? placeSlotIndex++ : -1;
+                        
+                        // Get travel segment AFTER this slot (if it's a place slot)
+                        const showTravelAfter = slot.type !== 'transport' && 
+                          currentPlaceIndex < placeSlots.length - 1 &&
+                          dayCoherence?.segments[currentPlaceIndex];
+                        
+                        const travelSegment = showTravelAfter ? dayCoherence.segments[currentPlaceIndex] : null;
+                        const segmentWarning = showTravelAfter ? getSegmentWarning(dayNumber, currentPlaceIndex) : undefined;
                         
                         return (
                           <div key={idx}>
@@ -832,53 +883,65 @@ const AutomaticItinerary = () => {
                                 </span>
                               </div>
                             )}
-                            <motion.div
-                              initial={{ opacity: 0, x: -10 }}
-                              animate={{ opacity: 1, x: 0 }}
-                              transition={{ delay: idx * 0.05 }}
-                              onClick={() => handleSlotClick(dayNumber, idx, slot)}
-                              className={cn(
-                                "flex gap-3 items-start py-2 group",
-                                slot.type === 'transport' && "opacity-60",
-                                slot.type !== 'transport' && "cursor-pointer hover:bg-muted/50 rounded-lg -mx-2 px-2 transition-colors"
-                              )}
-                            >
-                              <div className="w-12 text-xs text-muted-foreground pt-1 tabular-nums">{slot.time}</div>
-                              <div className={cn(
-                                "w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0",
-                                getSlotBg(slot)
-                              )}>
-                                {renderSlotIcon(slot)}
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                {slot.type === 'transport' ? (
-                                  <p className="text-xs text-muted-foreground">
-                                    {slot.transport?.mode === 'walking' ? '🚶' : '🚗'} {slot.transport?.from} → {slot.transport?.to} ({slot.transport?.duration})
-                                  </p>
-                                ) : (
-                                  <>
+                            
+                            {/* Skip transport slots - we show our own travel indicators */}
+                            {slot.type === 'transport' ? null : (
+                              <>
+                                <motion.div
+                                  initial={{ opacity: 0, x: -10 }}
+                                  animate={{ opacity: 1, x: 0 }}
+                                  transition={{ delay: idx * 0.05 }}
+                                  onClick={() => handleSlotClick(dayNumber, idx, slot)}
+                                  className={cn(
+                                    "flex gap-3 items-start py-2 group cursor-pointer hover:bg-muted/50 rounded-lg -mx-2 px-2 transition-colors"
+                                  )}
+                                >
+                                  <div className="w-12 text-xs text-muted-foreground pt-1 tabular-nums">{slot.time}</div>
+                                  <div className={cn(
+                                    "w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0",
+                                    getSlotBg(slot)
+                                  )}>
+                                    {renderSlotIcon(slot)}
+                                  </div>
+                                  <div className="flex-1 min-w-0">
                                     <p className="font-medium text-foreground text-sm truncate">{slot.item.name}</p>
                                     {slot.item.neighborhood && (
                                       <p className="text-xs text-muted-foreground">{slot.item.neighborhood}</p>
                                     )}
-                                  </>
+                                  </div>
+                                  <button
+                                    onClick={(e) => handleEditClick(dayNumber, idx, slot, e)}
+                                    className="p-1.5 rounded-lg bg-muted/30 hover:bg-muted text-muted-foreground hover:text-foreground transition-all active:scale-95"
+                                    aria-label="Trocar"
+                                  >
+                                    <Pencil className="w-3.5 h-3.5" />
+                                  </button>
+                                </motion.div>
+                                
+                                {/* Travel indicator between items */}
+                                {travelSegment && (
+                                  <div className="ml-12 pl-5 border-l-2 border-dashed border-border">
+                                    <TravelIndicator
+                                      segment={travelSegment}
+                                      warning={segmentWarning}
+                                    />
+                                  </div>
                                 )}
-                              </div>
-                              {/* Edit button - only for non-transport slots */}
-                              {slot.type !== 'transport' && (
-                                <button
-                                  onClick={(e) => handleEditClick(dayNumber, idx, slot, e)}
-                                  className="p-1.5 rounded-lg bg-muted/30 hover:bg-muted text-muted-foreground hover:text-foreground transition-all active:scale-95"
-                                  aria-label="Trocar"
-                                >
-                                  <Pencil className="w-3.5 h-3.5" />
-                                </button>
-                              )}
-                            </motion.div>
+                              </>
+                            )}
                           </div>
                         );
                       })}
                     </div>
+                    
+                    {/* Day Coherence Warning */}
+                    {dayCoherence?.hasIssues && (
+                      <DayCoherenceWarning
+                        warnings={dayCoherence.warnings}
+                        canOptimize={dayCoherence.canOptimize}
+                        onOptimize={() => handleOptimizeDay(dayNumber)}
+                      />
+                    )}
                     
                     {/* Daily Cost Estimate */}
                     {costs && (
