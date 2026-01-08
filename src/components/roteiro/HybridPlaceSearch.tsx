@@ -217,17 +217,19 @@ export const HybridPlaceSearch = ({
 
     setIsSearchingCurated(true);
     
-    debounceRef.current = setTimeout(() => {
+    debounceRef.current = setTimeout(async () => {
       const curated = searchCurated(value);
       setCuratedResults(curated);
       setIsSearchingCurated(false);
       setShowDropdown(true);
       
-      // If no curated results, show option to search Google
-      if (curated.length === 0) {
+      // If no curated results and query is long enough, automatically search Google
+      if (curated.length === 0 && value.length >= 3) {
         setShowGoogleFallback(true);
+        // Automatically trigger Google search
+        await searchGoogle(value);
       }
-    }, 150);
+    }, 200);
   };
 
   // Trigger Google search as fallback
