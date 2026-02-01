@@ -46,11 +46,11 @@ const RIO_BACKGROUND = "https://images.unsplash.com/photo-1483729558449-99ef09a8
  * IDs must match exactly what DestinationHub expects.
  */
 const rioActions = [
-  { id: "chegar", label: "Como Chegar", shortLabel: "Chegar", path: "/como-chegar", icon: MapPin },
   { id: "ficar", label: "Onde Ficar", shortLabel: "Ficar", path: "/city-view", icon: Bed },
   { id: "comer", label: "Onde Comer", shortLabel: "Comer", path: "/eat-map-view", icon: Utensils },
-  { id: "lucky-list", label: "Lucky List", shortLabel: "Lucky List", path: "/lucky-list", icon: Sparkles, isSpecial: true },
   { id: "fazer", label: "O Que Fazer", shortLabel: "Fazer", path: "/o-que-fazer", icon: Compass },
+  { id: "lucky-list", label: "Lucky List", shortLabel: "Lucky List", path: "/lucky-list", icon: Sparkles, isSpecial: true },
+  { id: "chegar", label: "Como Chegar", shortLabel: "Chegar", path: "/como-chegar", icon: MapPin },
 ];
 
 const DestinationRio = () => {
