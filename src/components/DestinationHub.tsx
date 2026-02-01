@@ -1,72 +1,28 @@
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
-import { ChevronLeft, MapPin, Bed, Utensils, Compass, Sparkles, Car, Moon, Coffee, Wallet, Shield, Calendar, Lightbulb, Map, Play } from "lucide-react";
+import { ChevronLeft, MapPin, Bed, Utensils, Compass, Sparkles, Play, Bookmark } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import useEmblaCarousel from "embla-carousel-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback } from "react";
 import { clearVideoSeen } from "@/pages/DestinationVideoIntro";
 
 /**
  * ═══════════════════════════════════════════════════════════════════════════
- * DESTINATION HUB — STRUCTURAL, UX & NAVIGATION LOCK (VALIDATED / FROZEN)
+ * DESTINATION HUB — VERTICAL LIST LAYOUT
  * ═══════════════════════════════════════════════════════════════════════════
  * 
- * ═══════════════════════════════════════════════════════════════════════════
- * NAVIGATION LOCK — LATERAL SWIPE ONLY
- * ═══════════════════════════════════════════════════════════════════════════
- * - ONLY lateral swipe navigation allowed
- * - NO vertical scrolling
- * - NO "explore more" buttons
- * - NO new pages may be introduced
- * - All swipes MUST preserve identical layout and background
+ * Primary destination entry screen with:
+ * - Full-screen hero background at top
+ * - Title and subtitle
+ * - Vertically stacked navigation buttons
+ * - Clear, tappable buttons following iOS usability patterns
  * 
- * ═══════════════════════════════════════════════════════════════════════════
- * SWIPE 1 — PRIMARY (LOCKED)
- * ═══════════════════════════════════════════════════════════════════════════
- * 1. Como Chegar (top-left)
- * 2. Onde Ficar (top-right)
- * 3. Onde Comer (bottom-left)
- * 4. O Que Fazer (bottom-right)
- * 5. Lucky List (CENTER, smaller, emphasized)
+ * BUTTON ORDER (FIXED):
+ * 1. Onde ficar
+ * 2. Onde comer
+ * 3. O que fazer
+ * 4. Lucky List
+ * 5. Como chegar (secondary position at bottom)
  * 
- * ═══════════════════════════════════════════════════════════════════════════
- * SWIPE 2 — SECONDARY (LOCKED)
- * ═══════════════════════════════════════════════════════════════════════════
- * 1. Mover (Como se locomover)
- * 2. Vida Noturna
- * 3. Sabores Locais
- * 4. Dinheiro
- * 
- * ═══════════════════════════════════════════════════════════════════════════
- * SWIPE 3 — SUPPORT (LOCKED)
- * ═══════════════════════════════════════════════════════════════════════════
- * 1. Documentos & Visto
- * 2. Melhor Época
- * 3. O Que Levar
- * 4. Links Úteis + Checklist Final (merged as "Links & Checklist")
- * 
- * ═══════════════════════════════════════════════════════════════════════════
- * IMMUTABILITY RULES — DO NOT MODIFY:
- * ═══════════════════════════════════════════════════════════════════════════
- * - Buttons MUST remain centered on screen
- * - Buttons MUST remain transparent (glass effect)
- * - NO list-based layout allowed
- * - NO additional modules allowed
- * - NO reordering of button positions
- * - NO relabeling of button text
- * - Same hero image across ALL swipes
- * - Same typography, opacity, blur treatment
- * - NO text blocks or explanations
- * - NO additional CTAs or "explore more"
- * - NO auto-reordering
- * - NO new swipes may be added
- * 
- * ═══════════════════════════════════════════════════════════════════════════
- * SCALABILITY:
- * ═══════════════════════════════════════════════════════════════════════════
- * - This structure applies IDENTICALLY to ALL destinations
- * - Future destinations MUST follow this exact layout
- * - No destination-specific variations allowed
  * ═══════════════════════════════════════════════════════════════════════════
  */
 
@@ -87,52 +43,17 @@ interface DestinationHubProps {
   actions: DestinationAction[];
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// SWIPE 2 — MOBILITY & LIFESTYLE (LOCKED)
-// ═══════════════════════════════════════════════════════════════════════════
-const SWIPE_2_MODULES = [
-  { id: 'mover', shortLabel: 'Mover', icon: Car, path: '/destino/rio-de-janeiro/mover' },
-  { id: 'vida-noturna', shortLabel: 'Vida noturna', icon: Moon, path: '/destino/rio-de-janeiro/vida-noturna' },
-  { id: 'sabores-locais', shortLabel: 'Sabores locais', icon: Coffee, path: '/destino/rio-de-janeiro/sabores-locais' },
-  { id: 'dinheiro', shortLabel: 'Dinheiro', icon: Wallet, path: '/destino/rio-de-janeiro/dinheiro' },
-];
-
-// ═══════════════════════════════════════════════════════════════════════════
-// SWIPE 3 — PLANNING & CLOSURE (LOCKED)
-// ═══════════════════════════════════════════════════════════════════════════
-const SWIPE_3_MODULES = [
-  { id: 'documentos-visto', shortLabel: 'Documentos & Visto', icon: Shield, path: '/destino/rio-de-janeiro/documentos-visto' },
-  { id: 'melhor-epoca', shortLabel: 'Melhor época', icon: Calendar, path: '/destino/rio-de-janeiro/melhor-epoca' },
-  { id: 'o-que-levar', shortLabel: 'O que levar', icon: Lightbulb, path: '/destino/rio-de-janeiro/o-que-levar' },
-  { id: 'links-checklist', shortLabel: 'Links & Checklist', icon: Map, path: '/destino/rio-de-janeiro/links-checklist' },
-];
-
 const DestinationHub = ({ destinationId, name, country, backgroundImage, actions }: DestinationHubProps) => {
   const navigate = useNavigate();
-  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: false, dragFree: false });
-  const [selectedIndex, setSelectedIndex] = useState(0);
-  const [scrollSnaps, setScrollSnaps] = useState<number[]>([]);
 
-  // Fixed order for Swipe 0: Chegar, Ficar, Comer, Lucky List (center), Fazer
-  const primaryActions = {
-    chegar: actions.find(a => a.id === 'chegar'),
-    ficar: actions.find(a => a.id === 'ficar'),
-    comer: actions.find(a => a.id === 'comer'),
-    luckyList: actions.find(a => a.id === 'lucky-list'),
-    fazer: actions.find(a => a.id === 'fazer'),
-  };
-
-  const onSelect = useCallback(() => {
-    if (!emblaApi) return;
-    setSelectedIndex(emblaApi.selectedScrollSnap());
-  }, [emblaApi]);
-
-  useEffect(() => {
-    if (!emblaApi) return;
-    setScrollSnaps(emblaApi.scrollSnapList());
-    emblaApi.on('select', onSelect);
-    onSelect();
-  }, [emblaApi, onSelect]);
+  // Fixed order for buttons: Ficar, Comer, Fazer, Lucky List, Chegar
+  const orderedActions = [
+    actions.find(a => a.id === 'ficar'),
+    actions.find(a => a.id === 'comer'),
+    actions.find(a => a.id === 'fazer'),
+    actions.find(a => a.id === 'lucky-list'),
+    actions.find(a => a.id === 'chegar'),
+  ].filter(Boolean) as DestinationAction[];
 
   // Replay intro handler - clears the seen flag and navigates to intro
   const handleReplayIntro = useCallback(() => {
@@ -141,203 +62,69 @@ const DestinationHub = ({ destinationId, name, country, backgroundImage, actions
   }, [destinationId, navigate]);
 
   return (
-    <div className="fixed inset-0 overflow-hidden">
+    <div className="min-h-screen relative overflow-auto pb-24">
       {/* ═══════════════════════════════════════════════════════════════
-          FULL-SCREEN HERO BACKGROUND (LOCKED — SAME ACROSS ALL SWIPES)
+          FULL-SCREEN HERO BACKGROUND
           ═══════════════════════════════════════════════════════════════ */}
       <div 
         className="absolute inset-0 bg-cover bg-center bg-fixed"
         style={{ backgroundImage: `url(${backgroundImage})` }}
       />
-      <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/50" />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/10 to-black/40" />
 
       {/* ═══════════════════════════════════════════════════════════════
-          BACK BUTTON (LOCKED)
+          HEADER BUTTONS (BACK, REPLAY, SAVE)
           ═══════════════════════════════════════════════════════════════ */}
-      <Link 
-        to="/destinos" 
-        className="absolute top-8 left-4 z-30 inline-flex items-center justify-center w-9 h-9 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white/70 hover:bg-white/20 hover:text-white transition-colors"
-      >
-        <ChevronLeft className="w-4 h-4" />
-      </Link>
+      <div className="relative z-30 flex items-center justify-between px-4 pt-8">
+        <Link 
+          to="/destinos" 
+          className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/15 backdrop-blur-sm border border-white/20 text-white/80 hover:bg-white/25 hover:text-white transition-colors"
+        >
+          <ChevronLeft className="w-5 h-5" />
+        </Link>
+        
+        <div className="flex items-center gap-3">
+          <button 
+            onClick={handleReplayIntro}
+            className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/15 backdrop-blur-sm border border-white/20 text-white/80 hover:bg-white/25 hover:text-white transition-colors"
+            aria-label="Replay intro video"
+          >
+            <Play className="w-4 h-4" />
+          </button>
+          <button 
+            className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/15 backdrop-blur-sm border border-white/20 text-white/80 hover:bg-white/25 hover:text-white transition-colors"
+            aria-label="Salvar destino"
+          >
+            <Bookmark className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
 
       {/* ═══════════════════════════════════════════════════════════════
-          REPLAY INTRO BUTTON (small, top-right)
+          DESTINATION TITLE
           ═══════════════════════════════════════════════════════════════ */}
-      <button 
-        onClick={handleReplayIntro}
-        className="absolute top-8 right-4 z-30 inline-flex items-center justify-center w-9 h-9 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white/70 hover:bg-white/20 hover:text-white transition-colors"
-        aria-label="Replay intro video"
-      >
-        <Play className="w-3.5 h-3.5" />
-      </button>
-
-      {/* ═══════════════════════════════════════════════════════════════
-          EDITORIAL TITLE (LOCKED)
-          ═══════════════════════════════════════════════════════════════ */}
-      <div className="absolute top-[18vh] left-0 right-0 z-10 flex flex-col items-center">
-        <h1 className="text-[3.25rem] font-serif font-medium text-white leading-none text-center drop-shadow-lg tracking-tight">
+      <div className="relative z-10 flex flex-col items-center mt-16 mb-8 px-6">
+        <h1 className="text-[3rem] font-serif font-medium text-white leading-none text-center drop-shadow-lg tracking-tight">
           {name}
         </h1>
-        <p className="text-[10px] tracking-[0.35em] text-white/70 uppercase mt-2.5">
+        <p className="text-xs tracking-[0.35em] text-white/70 uppercase mt-3">
           {country}
         </p>
       </div>
 
       {/* ═══════════════════════════════════════════════════════════════
-          HORIZONTAL SWIPE CAROUSEL (4 PAGES)
+          VERTICAL BUTTON LIST
           ═══════════════════════════════════════════════════════════════ */}
-      <div className="absolute inset-0 z-20 overflow-hidden" ref={emblaRef}>
-        <div className="flex h-full transition-transform duration-200 ease-out">
-          
-          {/* ═══════════════════════════════════════════════════════════
-              SWIPE 0 — PRIMARY HUB (ENTRY POINT)
-              Purpose: immediate decision, zero cognitive load
-              ═══════════════════════════════════════════════════════════ */}
-          <div className="flex-none w-full h-full flex items-center justify-center" style={{ paddingTop: '8vh' }}>
-            <div className="relative w-[300px] h-[300px]">
-              {/* CENTER — Lucky List (slightly smaller, curiosity trigger) */}
-              {primaryActions.luckyList && (
-                <RadialButton 
-                  icon={primaryActions.luckyList.icon}
-                  label={primaryActions.luckyList.shortLabel}
-                  path={primaryActions.luckyList.path}
-                  isCenter
-                  position="center"
-                />
-              )}
-              {/* TOP LEFT — Chegar */}
-              {primaryActions.chegar && (
-                <RadialButton 
-                  icon={primaryActions.chegar.icon}
-                  label={primaryActions.chegar.shortLabel}
-                  path={primaryActions.chegar.path}
-                  position="top-left"
-                />
-              )}
-              {/* TOP RIGHT — Ficar */}
-              {primaryActions.ficar && (
-                <RadialButton 
-                  icon={primaryActions.ficar.icon}
-                  label={primaryActions.ficar.shortLabel}
-                  path={primaryActions.ficar.path}
-                  position="top-right"
-                />
-              )}
-              {/* BOTTOM LEFT — Comer */}
-              {primaryActions.comer && (
-                <RadialButton 
-                  icon={primaryActions.comer.icon}
-                  label={primaryActions.comer.shortLabel}
-                  path={primaryActions.comer.path}
-                  position="bottom-left"
-                />
-              )}
-              {/* BOTTOM RIGHT — Fazer */}
-              {primaryActions.fazer && (
-                <RadialButton 
-                  icon={primaryActions.fazer.icon}
-                  label={primaryActions.fazer.shortLabel}
-                  path={primaryActions.fazer.path}
-                  position="bottom-right"
-                />
-              )}
-            </div>
-          </div>
-
-          {/* ═══════════════════════════════════════════════════════════
-              SWIPE 2 — MOBILITY & LIFESTYLE (LOCKED)
-              Purpose: day-to-day movement and local experience
-              ═══════════════════════════════════════════════════════════ */}
-          <div className="flex-none w-full h-full flex items-center justify-center" style={{ paddingTop: '8vh' }}>
-            <div className="relative w-[300px] h-[300px]">
-              {/* TOP LEFT — Mover */}
-              <RadialButton 
-                icon={SWIPE_2_MODULES[0].icon}
-                label={SWIPE_2_MODULES[0].shortLabel}
-                path={SWIPE_2_MODULES[0].path}
-                position="top-left"
-              />
-              {/* TOP RIGHT — Vida noturna */}
-              <RadialButton 
-                icon={SWIPE_2_MODULES[1].icon}
-                label={SWIPE_2_MODULES[1].shortLabel}
-                path={SWIPE_2_MODULES[1].path}
-                position="top-right"
-              />
-              {/* BOTTOM LEFT — Sabores locais */}
-              <RadialButton 
-                icon={SWIPE_2_MODULES[2].icon}
-                label={SWIPE_2_MODULES[2].shortLabel}
-                path={SWIPE_2_MODULES[2].path}
-                position="bottom-left"
-              />
-              {/* BOTTOM RIGHT — Dinheiro */}
-              <RadialButton 
-                icon={SWIPE_2_MODULES[3].icon}
-                label={SWIPE_2_MODULES[3].shortLabel}
-                path={SWIPE_2_MODULES[3].path}
-                position="bottom-right"
-              />
-            </div>
-          </div>
-
-          {/* ═══════════════════════════════════════════════════════════
-              SWIPE 3 — PLANNING & CLOSURE (LOCKED)
-              Purpose: preparation, final checks, and travel readiness
-              ═══════════════════════════════════════════════════════════ */}
-          <div className="flex-none w-full h-full flex items-center justify-center" style={{ paddingTop: '8vh' }}>
-            <div className="relative w-[300px] h-[300px]">
-              {/* TOP LEFT — Documentos & Visto */}
-              <RadialButton 
-                icon={SWIPE_3_MODULES[0].icon}
-                label={SWIPE_3_MODULES[0].shortLabel}
-                path={SWIPE_3_MODULES[0].path}
-                position="top-left"
-              />
-              {/* TOP RIGHT — Melhor época */}
-              <RadialButton 
-                icon={SWIPE_3_MODULES[1].icon}
-                label={SWIPE_3_MODULES[1].shortLabel}
-                path={SWIPE_3_MODULES[1].path}
-                position="top-right"
-              />
-              {/* BOTTOM LEFT — O que levar */}
-              <RadialButton 
-                icon={SWIPE_3_MODULES[2].icon}
-                label={SWIPE_3_MODULES[2].shortLabel}
-                path={SWIPE_3_MODULES[2].path}
-                position="bottom-left"
-              />
-              {/* BOTTOM RIGHT — Links & Checklist */}
-              <RadialButton 
-                icon={SWIPE_3_MODULES[3].icon}
-                label={SWIPE_3_MODULES[3].shortLabel}
-                path={SWIPE_3_MODULES[3].path}
-                position="bottom-right"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ═══════════════════════════════════════════════════════════════
-          PAGE INDICATORS (SUBTLE)
-          ═══════════════════════════════════════════════════════════════ */}
-      <div className="absolute bottom-28 left-0 right-0 z-30 flex flex-col items-center gap-2">
-        <div className="flex gap-2">
-          {scrollSnaps.map((_, index) => (
-            <button
-              key={index}
-              className={`w-2 h-2 rounded-full transition-all duration-200 ${
-                index === selectedIndex 
-                  ? 'bg-white w-6' 
-                  : 'bg-white/40 hover:bg-white/60'
-              }`}
-              onClick={() => emblaApi?.scrollTo(index)}
-            />
-          ))}
-        </div>
+      <div className="relative z-20 px-6 flex flex-col gap-3 mt-4">
+        {orderedActions.map((action) => (
+          <ListButton 
+            key={action.id}
+            icon={action.icon}
+            label={action.label}
+            path={action.path}
+            isSpecial={action.isSpecial}
+          />
+        ))}
       </div>
     </div>
   );
@@ -345,44 +132,32 @@ const DestinationHub = ({ destinationId, name, country, backgroundImage, actions
 
 /**
  * ═══════════════════════════════════════════════════════════════════════════
- * RADIAL BUTTON — LOCKED GLASS STYLE
+ * LIST BUTTON — HORIZONTAL STACKED STYLE
  * ═══════════════════════════════════════════════════════════════════════════
  */
-interface RadialButtonProps {
+interface ListButtonProps {
   icon: LucideIcon;
   label: string;
   path: string;
-  isCenter?: boolean;
-  position: 'center' | 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
+  isSpecial?: boolean;
 }
 
-const RadialButton = ({ icon: Icon, label, path, isCenter, position }: RadialButtonProps) => {
-  const size = isCenter ? 'w-[70px] h-[70px]' : 'w-[78px] h-[78px]';
-  
-  const positionStyles: Record<string, string> = {
-    'center': 'top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2',
-    'top-left': 'top-[15px] left-[15px]',
-    'top-right': 'top-[15px] right-[15px]',
-    'bottom-left': 'bottom-[15px] left-[15px]',
-    'bottom-right': 'bottom-[15px] right-[15px]',
-  };
-  
+const ListButton = ({ icon: Icon, label, path, isSpecial }: ListButtonProps) => {
   return (
     <Link
       to={path}
       className={`
-        absolute flex flex-col items-center justify-center
-        ${size} rounded-full
+        flex items-center gap-4 w-full
+        py-4 px-5 rounded-2xl
         backdrop-blur-md transition-all duration-200
-        ${positionStyles[position]}
-        ${isCenter 
-          ? "bg-white/15 border border-white/40 hover:bg-white/25 hover:scale-105 shadow-md shadow-black/15" 
-          : "bg-white/20 border border-white/40 hover:bg-white/30 hover:scale-105 shadow-md shadow-black/15"
+        ${isSpecial 
+          ? "bg-white/25 border border-white/40 hover:bg-white/35" 
+          : "bg-white/20 border border-white/30 hover:bg-white/30"
         }
       `}
     >
-      <Icon className="w-5 h-5 text-white mb-1 drop-shadow-sm" />
-      <span className="text-white text-[9px] font-medium tracking-wide text-center px-1 leading-tight">
+      <Icon className="w-5 h-5 text-white/90 flex-shrink-0" />
+      <span className="text-white text-base font-medium tracking-wide">
         {label}
       </span>
     </Link>
