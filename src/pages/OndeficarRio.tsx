@@ -105,12 +105,19 @@ const OndeficarRio = () => {
       </header>
 
       {/* Title */}
-      <div className="px-6 pt-6 pb-4">
+      <div className="px-6 pt-6 pb-2">
         <h1 className="text-3xl font-serif font-medium text-foreground">
           Onde Ficar
         </h1>
         <p className="text-lg text-muted-foreground mt-1">
           Rio de Janeiro
+        </p>
+      </div>
+
+      {/* Explanatory microcopy */}
+      <div className="px-6 pb-4">
+        <p className="text-base text-muted-foreground">
+          Escolha um bairro. A gente te ajuda a decidir onde ficar.
         </p>
       </div>
 
