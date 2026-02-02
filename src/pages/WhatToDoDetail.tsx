@@ -45,9 +45,13 @@ const WhatToDoDetail = () => {
           </h1>
         </div>
 
-        {/* Media Placeholder - Full Width (reserved field) */}
-        <div className="w-full aspect-[16/9] bg-muted flex items-center justify-center">
-          <p className="text-sm text-muted-foreground">Espaço para imagem ou vídeo</p>
+        {/* Hero Image - Full Width */}
+        <div className="w-full aspect-[16/9] bg-muted overflow-hidden">
+          <img 
+            src={getAttractionImage(neighborhood || "")} 
+            alt={`O que fazer em ${name}`}
+            className="w-full h-full object-cover"
+          />
         </div>
 
         {/* Activities */}

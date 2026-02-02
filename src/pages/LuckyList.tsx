@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { ChevronLeft } from "lucide-react";
 import { luckyListIntro, getLuckyListByNeighborhood } from "@/data/lucky-list-data";
+import luckyListHero from "@/assets/highlights/lucky-list-hero.jpg";
 
 /**
  * LUCKY LIST — RIO DE JANEIRO
@@ -43,9 +44,13 @@ const LuckyList = () => {
           </p>
         </div>
 
-        {/* Media Placeholder - Full Width (reserved field) */}
-        <div className="w-full aspect-[16/9] bg-muted flex items-center justify-center">
-          <p className="text-sm text-muted-foreground">Espaço para imagem ou vídeo</p>
+        {/* Hero Image - Full Width */}
+        <div className="w-full aspect-[16/9] bg-muted overflow-hidden">
+          <img 
+            src={luckyListHero} 
+            alt="Lucky List - Rio de Janeiro"
+            className="w-full h-full object-cover"
+          />
         </div>
 
         {/* Description */}

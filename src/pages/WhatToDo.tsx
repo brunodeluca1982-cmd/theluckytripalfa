@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { ChevronLeft } from "lucide-react";
 import { RIO_NEIGHBORHOODS } from "@/data/rio-neighborhoods";
 import { whatToDoIntro, cityLevelActivities, activitiesByNeighborhood } from "@/data/what-to-do-data";
+import rioHero from "@/assets/highlights/rio-de-janeiro-hero.jpg";
 
 /**
  * O QUE FAZER — RIO DE JANEIRO
@@ -41,9 +42,13 @@ const WhatToDo = () => {
           </p>
         </div>
 
-        {/* Media Placeholder - Full Width */}
-        <div className="w-full aspect-[16/9] bg-muted flex items-center justify-center">
-          <p className="text-sm text-muted-foreground">Espaço para imagem ou vídeo</p>
+        {/* Hero Image - Full Width */}
+        <div className="w-full aspect-[16/9] bg-muted overflow-hidden">
+          <img 
+            src={rioHero} 
+            alt="O Que Fazer no Rio de Janeiro"
+            className="w-full h-full object-cover"
+          />
         </div>
 
         {/* Description */}
