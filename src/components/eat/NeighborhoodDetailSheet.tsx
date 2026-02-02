@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { ChevronLeft, ChevronRight, ExternalLink, Instagram } from "lucide-react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { getNeighborhoodById } from "@/data/rio-neighborhoods";
+import { getRestaurantImage } from "@/data/place-images";
 
 interface Restaurant {
   id: string;
@@ -69,11 +70,13 @@ const NeighborhoodDetailSheet = ({
 
           {/* Content */}
           <div className="flex-1 overflow-y-auto">
-            {/* Media Placeholder */}
-            <div className="w-full h-48 bg-muted/30 flex items-center justify-center border-b border-border">
-              <p className="text-sm text-muted-foreground text-center px-4">
-                Espaço para imagem ou vídeo do bairro
-              </p>
+            {/* Hero Image */}
+            <div className="w-full h-48 bg-muted overflow-hidden border-b border-border">
+              <img 
+                src={getRestaurantImage(neighborhoodId || "")} 
+                alt={`Onde comer em ${neighborhood?.name || neighborhoodId}`}
+                className="w-full h-full object-cover"
+              />
             </div>
 
             <div className="px-6 py-6">

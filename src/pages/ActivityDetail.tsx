@@ -5,6 +5,7 @@ import RoteiroAccessLink from "@/components/RoteiroAccessLink";
 import { useItemSave } from "@/hooks/use-item-save";
 import { activitiesByNeighborhood, cityLevelActivities, Activity } from "@/data/what-to-do-data";
 import { guideActivities } from "@/data/rio-guide-data";
+import { getAttractionImage } from "@/data/place-images";
 
 /**
  * ACTIVITY DETAIL PAGE
@@ -164,9 +165,13 @@ const ActivityDetail = () => {
 
       {/* Content */}
       <main className="pb-12">
-        {/* Media Placeholder */}
-        <div className="w-full aspect-[16/9] bg-muted flex items-center justify-center">
-          <p className="text-sm text-muted-foreground">Espaço para imagem ou vídeo</p>
+        {/* Hero Image */}
+        <div className="w-full aspect-[16/9] bg-muted overflow-hidden">
+          <img 
+            src={getAttractionImage(from || "")} 
+            alt={activity.title}
+            className="w-full h-full object-cover"
+          />
         </div>
 
         {/* Activity Info */}

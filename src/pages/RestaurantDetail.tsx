@@ -3,6 +3,7 @@ import { ChevronLeft, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import RoteiroAccessLink from "@/components/RoteiroAccessLink";
 import { useItemSave } from "@/hooks/use-item-save";
+import { getRestaurantImage } from "@/data/place-images";
 
 /**
  * RESTAURANT DETAIL PAGE
@@ -690,9 +691,13 @@ const RestaurantDetail = () => {
 
       {/* Content */}
       <main className="pb-12">
-        {/* Media Placeholder */}
-        <div className="w-full aspect-[16/9] bg-muted flex items-center justify-center">
-          <p className="text-sm text-muted-foreground">Espaço para imagem ou vídeo</p>
+        {/* Hero Image */}
+        <div className="w-full aspect-[16/9] bg-muted overflow-hidden">
+          <img 
+            src={getRestaurantImage(restaurant.neighborhood)} 
+            alt={restaurant.name}
+            className="w-full h-full object-cover"
+          />
         </div>
 
         {/* Restaurant Info */}
