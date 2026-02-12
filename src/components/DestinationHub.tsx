@@ -1,11 +1,12 @@
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
-import { ChevronLeft, MapPin, Bed, Utensils, Compass, Sparkles, Play, Bookmark } from "lucide-react";
+import { ChevronLeft, MapPin, Bed, Utensils, Compass, Sparkles, Play, Music } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { clearVideoSeen } from "@/pages/DestinationVideoIntro";
 import { Switch } from "@/components/ui/switch";
 import { useCarnavalMode } from "@/contexts/CarnavalModeContext";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 
 /**
  * ═══════════════════════════════════════════════════════════════════════════
@@ -48,6 +49,7 @@ interface DestinationHubProps {
 const DestinationHub = ({ destinationId, name, country, backgroundImage, actions }: DestinationHubProps) => {
   const navigate = useNavigate();
   const { isCarnavalMode, toggleCarnavalMode } = useCarnavalMode();
+  const [playerOpen, setPlayerOpen] = useState(false);
 
   const handleToggle = useCallback(() => {
     toggleCarnavalMode();
@@ -104,10 +106,12 @@ const DestinationHub = ({ destinationId, name, country, backgroundImage, actions
             <Play className="w-4 h-4" />
           </button>
           <button 
-            className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/15 backdrop-blur-sm border border-white/20 text-white/80 hover:bg-white/25 hover:text-white transition-colors"
-            aria-label="Salvar destino"
+            onClick={() => setPlayerOpen(true)}
+            className="inline-flex items-center justify-center w-10 h-10 rounded-full backdrop-blur-sm border border-white/20 hover:bg-white/25 transition-colors"
+            style={{ backgroundColor: "hsla(141, 73%, 42%, 0.25)", color: "hsla(141, 73%, 72%, 1)" }}
+            aria-label="Abrir player de música"
           >
-            <Bookmark className="w-4 h-4" />
+            <Music className="w-4 h-4" />
           </button>
         </div>
       </div>
@@ -148,6 +152,32 @@ const DestinationHub = ({ destinationId, name, country, backgroundImage, actions
           />
         ))}
       </div>
+
+      {/* Spotify Mini-Player Bottom Sheet */}
+      <Drawer open={playerOpen} onOpenChange={setPlayerOpen}>
+        <DrawerContent className="rounded-t-2xl">
+          <DrawerHeader className="text-left pb-2">
+            <DrawerTitle className="text-lg font-serif font-semibold text-foreground">
+              🎵 Playlist — Rio de Janeiro
+            </DrawerTitle>
+          </DrawerHeader>
+          <div className="px-4 pb-6">
+            <iframe
+              style={{ borderRadius: "12px" }}
+              src="https://open.spotify.com/embed/playlist/242Q0AaUu4kqsANYUaEufj?utm_source=generator&theme=0"
+              width="100%"
+              height="352"
+              frameBorder="0"
+              allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+              loading="lazy"
+              title="Spotify Playlist"
+            />
+            <p className="text-xs text-muted-foreground text-center mt-3">
+              Toque ▶ para ouvir
+            </p>
+          </div>
+        </DrawerContent>
+      </Drawer>
     </div>
   );
 };
