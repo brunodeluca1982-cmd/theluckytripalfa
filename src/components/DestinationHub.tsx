@@ -65,7 +65,7 @@ const DestinationHub = ({ destinationId, name, country, backgroundImage, actions
   }, [destinationId, navigate]);
 
   return (
-    <div className="min-h-screen relative overflow-auto pb-24">
+    <div className="h-screen relative overflow-hidden pb-20">
       {/* ═══════════════════════════════════════════════════════════════
           FULL-SCREEN HERO BACKGROUND
           ═══════════════════════════════════════════════════════════════ */}
@@ -106,16 +106,16 @@ const DestinationHub = ({ destinationId, name, country, backgroundImage, actions
       {/* ═══════════════════════════════════════════════════════════════
           DESTINATION TITLE
           ═══════════════════════════════════════════════════════════════ */}
-      <div className="relative z-10 flex flex-col items-center mt-16 mb-8 px-6">
-        <h1 className="text-[3rem] font-serif font-medium text-white leading-none text-center drop-shadow-lg tracking-tight">
+      <div className="relative z-10 flex flex-col items-center mt-10 mb-4 px-6">
+        <h1 className="text-[2.75rem] font-serif font-medium text-white leading-none text-center drop-shadow-lg tracking-tight">
           {name}
         </h1>
-        <p className="text-xs tracking-[0.35em] text-white/70 uppercase mt-3">
+        <p className="text-xs tracking-[0.35em] text-white/70 uppercase mt-2">
           {country}
         </p>
 
         {/* Modo Carnaval Toggle */}
-        <div className="flex items-center gap-3 mt-4">
+        <div className="flex items-center gap-3 mt-3">
           <span className="text-sm text-white/80 font-medium">Modo Carnaval</span>
           <Switch
             checked={isCarnavalMode}
@@ -128,7 +128,7 @@ const DestinationHub = ({ destinationId, name, country, backgroundImage, actions
       {/* ═══════════════════════════════════════════════════════════════
           VERTICAL BUTTON LIST
           ═══════════════════════════════════════════════════════════════ */}
-      <div className="relative z-20 px-6 flex flex-col gap-3 mt-4">
+      <div className="relative z-20 px-6 flex flex-col gap-2 mt-2">
         {orderedActions.map((action) => (
           <ListButton 
             key={action.id}
@@ -161,7 +161,7 @@ const ListButton = ({ icon: Icon, label, path, isSpecial }: ListButtonProps) => 
       to={path}
       className={`
         flex items-center gap-4 w-full
-        py-4 px-5 rounded-2xl
+        py-3 px-5 rounded-2xl
         backdrop-blur-md transition-all duration-200
         ${isSpecial 
           ? "bg-white/25 border border-white/40 hover:bg-white/35" 
