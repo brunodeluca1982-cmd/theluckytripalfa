@@ -46,7 +46,7 @@ interface DestinationHubProps {
   actions: DestinationAction[];
 }
 
-/** Play a subtle samba hit using Web Audio API */
+/** Play a subtle samba drum hit using Web Audio API */
 const playSambaDrum = () => {
   try {
     const ctx = new AudioContext();
