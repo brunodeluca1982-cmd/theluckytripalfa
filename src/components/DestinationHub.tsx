@@ -2,11 +2,10 @@ import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { ChevronLeft, MapPin, Bed, Utensils, Compass, Sparkles, Play, Bookmark } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import { useCallback, useState, useRef, useMemo } from "react";
+import { useCallback } from "react";
 import { clearVideoSeen } from "@/pages/DestinationVideoIntro";
 import { Switch } from "@/components/ui/switch";
 import { useCarnavalMode } from "@/contexts/CarnavalModeContext";
-import { AnimatePresence, motion } from "framer-motion";
 
 /**
  * ═══════════════════════════════════════════════════════════════════════════
@@ -46,38 +45,13 @@ interface DestinationHubProps {
   actions: DestinationAction[];
 }
 
-/** Generate confetti particle initial positions */
-const generateConfetti = (count: number) =>
-  Array.from({ length: count }, (_, i) => ({
-    id: i,
-    x: Math.random() * 100,
-    delay: Math.random() * 0.3,
-    size: 3 + Math.random() * 4,
-    color: [`hsla(42,85%,60%,0.8)`, `hsla(350,70%,55%,0.7)`, `hsla(160,60%,50%,0.7)`, `hsla(30,90%,55%,0.8)`][i % 4],
-  }));
-
 const DestinationHub = ({ destinationId, name, country, backgroundImage, actions }: DestinationHubProps) => {
   const navigate = useNavigate();
   const { isCarnavalMode, toggleCarnavalMode } = useCarnavalMode();
-  const [showActivation, setShowActivation] = useState(false);
-  const [warmOverlay, setWarmOverlay] = useState(isCarnavalMode);
-  const activationTimeout = useRef<ReturnType<typeof setTimeout>>();
-
-  const confettiParticles = useMemo(() => generateConfetti(12), []);
 
   const handleToggle = useCallback(() => {
-    const willBeOn = !isCarnavalMode;
     toggleCarnavalMode();
-    if (willBeOn) {
-      setShowActivation(true);
-      setWarmOverlay(true);
-      if (activationTimeout.current) clearTimeout(activationTimeout.current);
-      activationTimeout.current = setTimeout(() => setShowActivation(false), 700);
-    } else {
-      setShowActivation(false);
-      setWarmOverlay(false);
-    }
-  }, [isCarnavalMode, toggleCarnavalMode]);
+  }, [toggleCarnavalMode]);
 
   // Fixed order for buttons: Ficar, Fazer, Comer, Lucky List, Chegar
   const orderedActions = [
@@ -105,52 +79,15 @@ const DestinationHub = ({ destinationId, name, country, backgroundImage, actions
       />
       <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/10 to-black/40" />
 
-      {/* Saturation & contrast boost when Carnaval is active */}
+      {/* Sepia editorial overlay — visible when Carnaval OFF, hidden when ON */}
       <div
-        className="absolute inset-0 pointer-events-none transition-all duration-700"
+        className="absolute inset-0 pointer-events-none transition-opacity duration-300"
         style={{
-          backdropFilter: warmOverlay ? "saturate(1.08) contrast(1.05)" : "saturate(1) contrast(1)",
-          WebkitBackdropFilter: warmOverlay ? "saturate(1.08) contrast(1.05)" : "saturate(1) contrast(1)",
+          backgroundColor: "hsla(35, 30%, 20%, 0.35)",
+          mixBlendMode: "color",
+          opacity: isCarnavalMode ? 0 : 1,
         }}
       />
-
-      {/* Subtle confetti on activation */}
-      <AnimatePresence>
-        {showActivation && (
-          <motion.div
-            className="absolute inset-0 pointer-events-none z-40 overflow-hidden"
-            initial={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-          >
-            {confettiParticles.map((p) => (
-              <motion.div
-                key={p.id}
-                className="absolute rounded-full"
-                style={{
-                  width: p.size,
-                  height: p.size,
-                  backgroundColor: p.color,
-                  left: `${p.x}%`,
-                  top: "40%",
-                }}
-                initial={{ opacity: 1, y: 0, scale: 1 }}
-                animate={{
-                  y: [0, -60 - Math.random() * 40, 120 + Math.random() * 80],
-                  x: [0, (Math.random() - 0.5) * 60],
-                  opacity: [1, 1, 0],
-                  scale: [1, 1.2, 0.6],
-                }}
-                transition={{
-                  duration: 0.7,
-                  delay: p.delay,
-                  ease: "easeOut",
-                }}
-              />
-            ))}
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* ═══════════════════════════════════════════════════════════════
           HEADER BUTTONS (BACK, REPLAY, SAVE)
