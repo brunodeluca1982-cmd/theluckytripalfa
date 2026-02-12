@@ -79,22 +79,13 @@ const DestinationHub = ({ destinationId, name, country, backgroundImage, actions
       />
       <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/10 to-black/40" />
 
-      {/* Sepia editorial overlay — visible when Carnaval OFF, hidden when ON */}
+      {/* Sepia editorial overlay — visible when Carnaval OFF, removed when ON */}
       <div
         className="absolute inset-0 pointer-events-none transition-opacity duration-[400ms]"
         style={{
           backgroundColor: "hsla(35, 30%, 20%, 0.35)",
           mixBlendMode: "color",
           opacity: isCarnavalMode ? 0 : 1,
-        }}
-      />
-
-      {/* Vibrance + brightness boost when Carnaval ON */}
-      <div
-        className="absolute inset-0 pointer-events-none transition-all duration-[400ms]"
-        style={{
-          backdropFilter: isCarnavalMode ? "saturate(1.15) brightness(1.04)" : "saturate(1) brightness(1)",
-          WebkitBackdropFilter: isCarnavalMode ? "saturate(1.15) brightness(1.04)" : "saturate(1) brightness(1)",
         }}
       />
 
