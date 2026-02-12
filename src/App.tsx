@@ -53,6 +53,8 @@ import IAMelhorarRoteiro from "./pages/ia/IAMelhorarRoteiro";
 import RoteiroFinal from "./pages/RoteiroFinal";
 import NotFound from "./pages/NotFound";
 import { CarnavalModeProvider } from "@/contexts/CarnavalModeContext";
+import { SpotifyPlayerProvider } from "@/contexts/SpotifyPlayerContext";
+import PersistentSpotifyPlayer from "@/components/PersistentSpotifyPlayer";
 import HeroVideo from "@/components/HeroVideo";
 
 
@@ -95,6 +97,7 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <CarnavalModeProvider>
+      <SpotifyPlayerProvider>
       <TooltipProvider>
         <Toaster />
         <Sonner />
@@ -193,7 +196,9 @@ const App = () => {
             } />
           </Routes>
         </BrowserRouter>
+        <PersistentSpotifyPlayer />
       </TooltipProvider>
+      </SpotifyPlayerProvider>
       </CarnavalModeProvider>
     </QueryClientProvider>
   );
