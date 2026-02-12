@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -53,36 +53,44 @@ import IAMelhorarRoteiro from "./pages/ia/IAMelhorarRoteiro";
 import RoteiroFinal from "./pages/RoteiroFinal";
 import NotFound from "./pages/NotFound";
 import { CarnavalModeProvider } from "@/contexts/CarnavalModeContext";
+import HeroVideo from "@/components/HeroVideo";
+
 
 const queryClient = new QueryClient();
+
+const hasSeenHero = (): boolean => {
+  try { return localStorage.getItem("heroSeen") === "true"; } catch { return false; }
+};
+const markHeroSeen = (): void => {
+  try { localStorage.setItem("heroSeen", "true"); } catch {}
+};
 
 type AppPhase = "splash" | "video" | "ready";
 
 const App = () => {
+  const skipVideo = hasSeenHero();
   const [phase, setPhase] = useState<AppPhase>("splash");
   const [videoFading, setVideoFading] = useState(false);
-  const videoRef = useRef<HTMLVideoElement>(null);
 
   const handleSplashComplete = useCallback(() => {
-    setPhase("video");
-  }, []);
-
-  // Auto-play video when phase becomes "video"
-  useEffect(() => {
-    if (phase === "video" && videoRef.current) {
-      videoRef.current.play().catch(() => {
-        // If autoplay blocked, skip to ready
-        setPhase("ready");
-      });
+    if (skipVideo) {
+      setPhase("ready");
+    } else {
+      setPhase("video");
     }
-  }, [phase]);
+  }, [skipVideo]);
 
   const handleVideoEnd = useCallback(() => {
+    markHeroSeen();
     setVideoFading(true);
     setTimeout(() => {
       setPhase("ready");
     }, 500);
   }, []);
+
+  const handleVideoSkip = useCallback(() => {
+    handleVideoEnd();
+  }, [handleVideoEnd]);
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -94,23 +102,9 @@ const App = () => {
         {/* Phase 1: Splash Screen */}
         {phase === "splash" && <SplashScreen onComplete={handleSplashComplete} />}
 
-        {/* Phase 2: Hero Video — fullscreen, no UI */}
+        {/* Phase 2: Hero Video — fullscreen with controls */}
         {phase === "video" && (
-          <div
-            className={`fixed inset-0 z-[99] bg-black transition-opacity duration-500 ${
-              videoFading ? "opacity-0" : "opacity-100"
-            }`}
-          >
-            <video
-              ref={videoRef}
-              src="/videos/rio-hero.mp4"
-              className="w-full h-full object-cover"
-              muted
-              playsInline
-              autoPlay
-              onEnded={handleVideoEnd}
-            />
-          </div>
+          <HeroVideo onEnd={handleVideoEnd} onSkip={handleVideoSkip} fading={videoFading} />
         )}
 
         {/* Phase 3: App — starts on Rio destination */}
