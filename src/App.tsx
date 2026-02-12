@@ -52,6 +52,7 @@ import IACriarRoteiro from "./pages/ia/IACriarRoteiro";
 import IAMelhorarRoteiro from "./pages/ia/IAMelhorarRoteiro";
 import RoteiroFinal from "./pages/RoteiroFinal";
 import NotFound from "./pages/NotFound";
+import { CarnavalModeProvider } from "@/contexts/CarnavalModeContext";
 
 const queryClient = new QueryClient();
 
@@ -64,6 +65,7 @@ const App = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <CarnavalModeProvider>
       <TooltipProvider>
         <Toaster />
         <Sonner />
@@ -157,6 +159,7 @@ const App = () => {
           </Routes>
         </BrowserRouter>
       </TooltipProvider>
+      </CarnavalModeProvider>
     </QueryClientProvider>
   );
 };

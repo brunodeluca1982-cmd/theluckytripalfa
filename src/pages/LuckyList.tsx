@@ -1,7 +1,8 @@
 import { Link } from "react-router-dom";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, X } from "lucide-react";
 import { luckyListIntro, getLuckyListByNeighborhood } from "@/data/lucky-list-data";
 import luckyListHero from "@/assets/highlights/lucky-list-hero.jpg";
+import { useCarnavalMode } from "@/contexts/CarnavalModeContext";
 
 /**
  * LUCKY LIST — RIO DE JANEIRO
@@ -18,6 +19,7 @@ import luckyListHero from "@/assets/highlights/lucky-list-hero.jpg";
 const LuckyList = () => {
   const groupedItems = getLuckyListByNeighborhood();
   const neighborhoods = Object.keys(groupedItems);
+  const { isCarnavalMode, carnavalSuggestions, removeCarnavalSuggestion } = useCarnavalMode();
 
   return (
     <div className="min-h-screen bg-background">
@@ -64,6 +66,38 @@ const LuckyList = () => {
 
         {/* Divider */}
         <div className="mx-6 border-t border-border" />
+
+        {/* Sugestões do Carnaval — shown only when toggle ON */}
+        {isCarnavalMode && carnavalSuggestions.length > 0 && (
+          <section className="px-6 pt-8">
+            <div className="mb-4">
+              <h2 className="text-xs tracking-widest text-muted-foreground uppercase mb-1">
+                Sugestões do Carnaval
+              </h2>
+              <p className="text-xs text-muted-foreground/60 italic">
+                Modo Carnaval ativo
+              </p>
+            </div>
+            <div className="space-y-3">
+              {carnavalSuggestions.map((item) => (
+                <div
+                  key={item}
+                  className="flex items-center justify-between p-4 bg-card border border-border rounded-lg"
+                >
+                  <span className="text-base text-foreground">{item}</span>
+                  <button
+                    onClick={() => removeCarnavalSuggestion(item)}
+                    className="p-1 text-muted-foreground hover:text-foreground transition-colors"
+                    aria-label={`Remover ${item}`}
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+            <div className="mt-8 border-t border-border" />
+          </section>
+        )}
 
         {/* Lucky List Items by Neighborhood */}
         {neighborhoods.map((neighborhoodName) => (
