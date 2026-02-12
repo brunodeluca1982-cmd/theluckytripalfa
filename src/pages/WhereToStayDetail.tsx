@@ -243,8 +243,7 @@ const WhereToStayDetail = () => {
   const description = neighborhoodDescriptions[neighborhood || ""] || `Placeholder description for ${name}.`;
   const hotels = hotelsByNeighborhood[neighborhood || ""] || [];
   
-  const from = searchParams.get("from");
-  const backPath = from === "map" ? "/city-view" : "/onde-ficar-rio";
+  const backPath = "/onde-ficar-rio";
 
   return (
     <div className="min-h-screen bg-background">

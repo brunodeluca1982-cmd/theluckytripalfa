@@ -97,12 +97,28 @@ const OndeficarRio = () => {
     [hotelsWithDist]
   );
 
+  // Persist and restore map scroll position across navigations
   useEffect(() => {
     if (mapContainerRef.current) {
       const container = mapContainerRef.current;
-      const initialScroll = (MAP_WIDTH - container.clientWidth) / 2;
-      container.scrollLeft = Math.max(0, initialScroll);
+      const saved = sessionStorage.getItem("ondeficar-map-scroll");
+      if (saved !== null) {
+        container.scrollLeft = Number(saved);
+      } else {
+        const initialScroll = (MAP_WIDTH - container.clientWidth) / 2;
+        container.scrollLeft = Math.max(0, initialScroll);
+      }
     }
+  }, []);
+
+  // Save scroll position on unmount
+  useEffect(() => {
+    const container = mapContainerRef.current;
+    return () => {
+      if (container) {
+        sessionStorage.setItem("ondeficar-map-scroll", String(container.scrollLeft));
+      }
+    };
   }, []);
 
   const handleMouseDown = (e: React.MouseEvent) => {
