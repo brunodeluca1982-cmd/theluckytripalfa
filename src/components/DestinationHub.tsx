@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { ChevronLeft, MapPin, Bed, Utensils, Compass, Sparkles, Play, Bookmark } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import { useCallback, useState, useRef } from "react";
+import { useCallback, useState, useRef, useMemo } from "react";
 import { clearVideoSeen } from "@/pages/DestinationVideoIntro";
 import { Switch } from "@/components/ui/switch";
 import { useCarnavalMode } from "@/contexts/CarnavalModeContext";
@@ -46,35 +46,15 @@ interface DestinationHubProps {
   actions: DestinationAction[];
 }
 
-/** Play a subtle samba drum hit using Web Audio API */
-const playSambaDrum = () => {
-  try {
-    const ctx = new AudioContext();
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.type = "triangle";
-    osc.frequency.setValueAtTime(120, ctx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(40, ctx.currentTime + 0.15);
-    gain.gain.setValueAtTime(0.25, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
-    osc.connect(gain).connect(ctx.destination);
-    osc.start();
-    osc.stop(ctx.currentTime + 0.3);
-
-    const osc2 = ctx.createOscillator();
-    const gain2 = ctx.createGain();
-    osc2.type = "square";
-    osc2.frequency.setValueAtTime(800, ctx.currentTime + 0.08);
-    osc2.frequency.exponentialRampToValueAtTime(200, ctx.currentTime + 0.2);
-    gain2.gain.setValueAtTime(0.08, ctx.currentTime + 0.08);
-    gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
-    osc2.connect(gain2).connect(ctx.destination);
-    osc2.start(ctx.currentTime + 0.08);
-    osc2.stop(ctx.currentTime + 0.25);
-
-    setTimeout(() => ctx.close(), 500);
-  } catch { /* audio not available */ }
-};
+/** Generate confetti particle initial positions */
+const generateConfetti = (count: number) =>
+  Array.from({ length: count }, (_, i) => ({
+    id: i,
+    x: Math.random() * 100,
+    delay: Math.random() * 0.3,
+    size: 3 + Math.random() * 4,
+    color: [`hsla(42,85%,60%,0.8)`, `hsla(350,70%,55%,0.7)`, `hsla(160,60%,50%,0.7)`, `hsla(30,90%,55%,0.8)`][i % 4],
+  }));
 
 const DestinationHub = ({ destinationId, name, country, backgroundImage, actions }: DestinationHubProps) => {
   const navigate = useNavigate();
@@ -83,15 +63,16 @@ const DestinationHub = ({ destinationId, name, country, backgroundImage, actions
   const [warmOverlay, setWarmOverlay] = useState(isCarnavalMode);
   const activationTimeout = useRef<ReturnType<typeof setTimeout>>();
 
+  const confettiParticles = useMemo(() => generateConfetti(12), []);
+
   const handleToggle = useCallback(() => {
     const willBeOn = !isCarnavalMode;
     toggleCarnavalMode();
     if (willBeOn) {
-      playSambaDrum();
       setShowActivation(true);
       setWarmOverlay(true);
       if (activationTimeout.current) clearTimeout(activationTimeout.current);
-      activationTimeout.current = setTimeout(() => setShowActivation(false), 1800);
+      activationTimeout.current = setTimeout(() => setShowActivation(false), 700);
     } else {
       setShowActivation(false);
       setWarmOverlay(false);
@@ -124,62 +105,49 @@ const DestinationHub = ({ destinationId, name, country, backgroundImage, actions
       />
       <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/10 to-black/40" />
 
-      {/* Subtle warm overlay when Carnaval is active */}
+      {/* Saturation & contrast boost when Carnaval is active */}
       <div
-        className="absolute inset-0 pointer-events-none transition-opacity duration-700"
+        className="absolute inset-0 pointer-events-none transition-all duration-700"
         style={{
-          background: "linear-gradient(135deg, hsla(35,80%,50%,0.08) 0%, hsla(20,90%,45%,0.06) 100%)",
-          opacity: warmOverlay ? 1 : 0,
+          backdropFilter: warmOverlay ? "saturate(1.08) contrast(1.05)" : "saturate(1) contrast(1)",
+          WebkitBackdropFilter: warmOverlay ? "saturate(1.08) contrast(1.05)" : "saturate(1) contrast(1)",
         }}
       />
 
-      {/* Golden light sweep on activation */}
+      {/* Subtle confetti on activation */}
       <AnimatePresence>
         {showActivation && (
           <motion.div
-            className="absolute inset-0 pointer-events-none z-40"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
+            className="absolute inset-0 pointer-events-none z-40 overflow-hidden"
+            initial={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.2 }}
           >
-            {/* Sweep */}
-            <motion.div
-              className="absolute inset-0"
-              style={{
-                background: "linear-gradient(105deg, transparent 0%, hsla(42,90%,65%,0.18) 40%, hsla(38,85%,55%,0.12) 60%, transparent 100%)",
-              }}
-              initial={{ x: "-100%" }}
-              animate={{ x: "100%" }}
-              transition={{ duration: 0.8, ease: "easeInOut" }}
-            />
-            {/* Centered text */}
-            <motion.div
-              className="absolute inset-0 flex flex-col items-center justify-center"
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              transition={{ duration: 0.4, delay: 0.2 }}
-            >
-              <motion.p
-                className="text-lg font-serif font-medium text-white drop-shadow-lg"
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.4, delay: 0.3 }}
-              >
-                Modo Carnaval ativado
-              </motion.p>
-              <motion.p
-                className="text-sm text-white/70 mt-1 tracking-wide"
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.4, delay: 0.5 }}
-              >
-                O Rio no seu auge
-              </motion.p>
-            </motion.div>
+            {confettiParticles.map((p) => (
+              <motion.div
+                key={p.id}
+                className="absolute rounded-full"
+                style={{
+                  width: p.size,
+                  height: p.size,
+                  backgroundColor: p.color,
+                  left: `${p.x}%`,
+                  top: "40%",
+                }}
+                initial={{ opacity: 1, y: 0, scale: 1 }}
+                animate={{
+                  y: [0, -60 - Math.random() * 40, 120 + Math.random() * 80],
+                  x: [0, (Math.random() - 0.5) * 60],
+                  opacity: [1, 1, 0],
+                  scale: [1, 1.2, 0.6],
+                }}
+                transition={{
+                  duration: 0.7,
+                  delay: p.delay,
+                  ease: "easeOut",
+                }}
+              />
+            ))}
           </motion.div>
         )}
       </AnimatePresence>
