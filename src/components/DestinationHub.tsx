@@ -4,6 +4,8 @@ import { ChevronLeft, MapPin, Bed, Utensils, Compass, Sparkles, Play, Bookmark }
 import type { LucideIcon } from "lucide-react";
 import { useCallback } from "react";
 import { clearVideoSeen } from "@/pages/DestinationVideoIntro";
+import { Switch } from "@/components/ui/switch";
+import { useCarnavalMode } from "@/contexts/CarnavalModeContext";
 
 /**
  * ═══════════════════════════════════════════════════════════════════════════
@@ -45,6 +47,7 @@ interface DestinationHubProps {
 
 const DestinationHub = ({ destinationId, name, country, backgroundImage, actions }: DestinationHubProps) => {
   const navigate = useNavigate();
+  const { isCarnavalMode, toggleCarnavalMode } = useCarnavalMode();
 
   // Fixed order for buttons: Ficar, Comer, Fazer, Lucky List, Chegar
   const orderedActions = [
@@ -110,6 +113,16 @@ const DestinationHub = ({ destinationId, name, country, backgroundImage, actions
         <p className="text-xs tracking-[0.35em] text-white/70 uppercase mt-3">
           {country}
         </p>
+
+        {/* Modo Carnaval Toggle */}
+        <div className="flex items-center gap-3 mt-4">
+          <span className="text-sm text-white/80 font-medium">Modo Carnaval</span>
+          <Switch
+            checked={isCarnavalMode}
+            onCheckedChange={toggleCarnavalMode}
+            className="data-[state=checked]:bg-primary"
+          />
+        </div>
       </div>
 
       {/* ═══════════════════════════════════════════════════════════════

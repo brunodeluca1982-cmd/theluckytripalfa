@@ -3,6 +3,7 @@ import { ChevronLeft } from "lucide-react";
 import { RIO_NEIGHBORHOODS } from "@/data/rio-neighborhoods";
 import { whatToDoIntro, cityLevelActivities, activitiesByNeighborhood } from "@/data/what-to-do-data";
 import rioHero from "@/assets/highlights/rio-de-janeiro-hero.jpg";
+import { useCarnavalMode } from "@/contexts/CarnavalModeContext";
 
 /**
  * O QUE FAZER — RIO DE JANEIRO
@@ -17,6 +18,8 @@ import rioHero from "@/assets/highlights/rio-de-janeiro-hero.jpg";
  */
 
 const WhatToDo = () => {
+  const { isCarnavalMode } = useCarnavalMode();
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -62,6 +65,39 @@ const WhatToDo = () => {
 
         {/* Divider */}
         <div className="mx-6 border-t border-border" />
+
+        {/* Carnaval Section — Priority when toggle ON */}
+        {isCarnavalMode && (
+          <section className="px-6 pt-8">
+            <h2 className="text-xs tracking-widest text-muted-foreground uppercase mb-4">
+              Carnaval
+            </h2>
+            <div className="space-y-4">
+              <Link
+                to="/atividade/blocos-de-rua?from=city"
+                className="block p-4 bg-card border border-border rounded-lg hover:bg-accent/50 transition-colors"
+              >
+                <h3 className="text-lg font-serif font-medium text-foreground mb-1">Blocos de Rua</h3>
+                <p className="text-sm text-muted-foreground">O coração do Carnaval carioca. Desfiles de rua por toda a cidade.</p>
+              </Link>
+              <Link
+                to="/atividade/sambodromo?from=city"
+                className="block p-4 bg-card border border-border rounded-lg hover:bg-accent/50 transition-colors"
+              >
+                <h3 className="text-lg font-serif font-medium text-foreground mb-1">Desfiles na Sapucaí</h3>
+                <p className="text-sm text-muted-foreground">O espetáculo das escolas de samba no Sambódromo.</p>
+              </Link>
+              <Link
+                to="/atividade/festas-carnaval?from=city"
+                className="block p-4 bg-card border border-border rounded-lg hover:bg-accent/50 transition-colors"
+              >
+                <h3 className="text-lg font-serif font-medium text-foreground mb-1">Festas e Camarotes</h3>
+                <p className="text-sm text-muted-foreground">Festas privadas e camarotes durante o Carnaval.</p>
+              </Link>
+            </div>
+            <div className="mt-8 border-t border-border" />
+          </section>
+        )}
 
         {/* City-Level Activities */}
         <section className="px-6 pt-8">
