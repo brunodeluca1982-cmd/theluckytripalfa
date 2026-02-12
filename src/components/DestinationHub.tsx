@@ -49,7 +49,15 @@ interface DestinationHubProps {
 const DestinationHub = ({ destinationId, name, country, backgroundImage, actions }: DestinationHubProps) => {
   const navigate = useNavigate();
   const { isCarnavalMode, toggleCarnavalMode } = useCarnavalMode();
-  const { openSheet } = useSpotifyPlayer();
+  const { active, activate, openSheet } = useSpotifyPlayer();
+
+  const handleMusicTap = useCallback(() => {
+    if (!active) {
+      activate();
+    } else {
+      openSheet();
+    }
+  }, [active, activate, openSheet]);
 
   const handleToggle = useCallback(() => {
     toggleCarnavalMode();
@@ -106,7 +114,7 @@ const DestinationHub = ({ destinationId, name, country, backgroundImage, actions
             <Play className="w-4 h-4" />
           </button>
           <button 
-            onClick={openSheet}
+            onClick={handleMusicTap}
             className="inline-flex items-center justify-center w-10 h-10 rounded-full backdrop-blur-sm border border-white/20 hover:bg-white/25 transition-colors"
             style={{ backgroundColor: "hsla(141, 73%, 42%, 0.25)", color: "hsla(141, 73%, 72%, 1)" }}
             aria-label="Abrir player de música"
