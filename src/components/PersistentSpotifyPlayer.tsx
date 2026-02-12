@@ -1,8 +1,7 @@
 import { useSpotifyPlayer } from "@/contexts/SpotifyPlayerContext";
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
-import { Play, Pause, ChevronUp, X } from "lucide-react";
+import { ChevronUp, X } from "lucide-react";
 
-const PLAYLIST_URL = "https://open.spotify.com/embed/playlist/242Q0AaUu4kqsANYUaEufj?utm_source=generator&theme=0";
+const PLAYLIST_URL = "https://open.spotify.com/embed/playlist/242Q0AaUu4kqsANYUaEufj?utm_source=generator&theme=0&autoplay=1";
 
 const PersistentSpotifyPlayer = () => {
   const { active, sheetOpen, openSheet, closeSheet, dismiss } = useSpotifyPlayer();
@@ -11,22 +10,45 @@ const PersistentSpotifyPlayer = () => {
 
   return (
     <>
-      {/* Always-mounted iframe (hidden when sheet closed, visible when open) */}
+      {/* 
+        PERSISTENT IFRAME — always mounted once active, never unmounted.
+        When sheet is open: visible in the bottom sheet area.
+        When sheet is closed: moved off-screen but stays alive (audio continues).
+      */}
       <div
-        className="fixed inset-0 z-[9999] pointer-events-none"
-        style={{ visibility: sheetOpen ? "visible" : "hidden", opacity: sheetOpen ? 1 : 0 }}
+        className="fixed z-[60] transition-all duration-300 ease-in-out"
+        style={
+          sheetOpen
+            ? { bottom: 0, left: 0, right: 0 }
+            : { position: "fixed", left: "-9999px", top: "-9999px", width: "1px", height: "1px", overflow: "hidden" }
+        }
       >
-        {/* We use the Drawer for the sheet UI but keep iframe always mounted */}
-      </div>
+        {sheetOpen && (
+          <>
+            {/* Backdrop */}
+            <div
+              className="fixed inset-0 z-[59] bg-black/60 animate-fade-in"
+              onClick={closeSheet}
+            />
+          </>
+        )}
 
-      {/* Drawer — controls visibility only, iframe stays mounted */}
-      <Drawer open={sheetOpen} onOpenChange={(open) => { if (!open) closeSheet(); }}>
-        <DrawerContent className="rounded-t-2xl">
-          <DrawerHeader className="text-left pb-2">
-            <DrawerTitle className="text-lg font-serif font-semibold text-foreground">
+        <div
+          className={`relative z-[61] bg-background border-t rounded-t-2xl transition-transform duration-300 ${
+            sheetOpen ? "translate-y-0" : "translate-y-full"
+          }`}
+        >
+          {/* Drag handle */}
+          <div className="flex justify-center pt-3 pb-1">
+            <div className="w-[100px] h-2 rounded-full bg-muted" />
+          </div>
+
+          <div className="px-4 pb-2">
+            <p className="text-lg font-serif font-semibold text-foreground">
               🎵 Playlist — Rio de Janeiro
-            </DrawerTitle>
-          </DrawerHeader>
+            </p>
+          </div>
+
           <div className="px-4 pb-6">
             <iframe
               style={{ borderRadius: "12px" }}
@@ -42,8 +64,8 @@ const PersistentSpotifyPlayer = () => {
               Toque ▶ para ouvir
             </p>
           </div>
-        </DrawerContent>
-      </Drawer>
+        </div>
+      </div>
 
       {/* Mini-player bar — shown when sheet is closed but player is active */}
       {!sheetOpen && (
@@ -57,7 +79,7 @@ const PersistentSpotifyPlayer = () => {
               className="flex items-center gap-3 flex-1 min-w-0"
             >
               <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ backgroundColor: "hsla(141, 73%, 42%, 0.3)" }}>
-                <Play className="w-4 h-4" style={{ color: "hsla(141, 73%, 72%, 1)" }} />
+                <span className="text-sm" style={{ color: "hsla(141, 73%, 72%, 1)" }}>♫</span>
               </div>
               <div className="text-left min-w-0">
                 <p className="text-sm font-medium text-white truncate">Playlist Rio</p>
