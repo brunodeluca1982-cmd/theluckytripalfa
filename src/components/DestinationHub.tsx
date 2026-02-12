@@ -52,8 +52,8 @@ const DestinationHub = ({ destinationId, name, country, backgroundImage, actions
   // Fixed order for buttons: Ficar, Comer, Fazer, Lucky List, Chegar
   const orderedActions = [
     actions.find(a => a.id === 'ficar'),
-    actions.find(a => a.id === 'comer'),
     actions.find(a => a.id === 'fazer'),
+    actions.find(a => a.id === 'comer'),
     actions.find(a => a.id === 'lucky-list'),
     actions.find(a => a.id === 'chegar'),
   ].filter(Boolean) as DestinationAction[];
