@@ -92,13 +92,8 @@ const DestinationHub = ({ destinationId, name, country, backgroundImage, actions
       {/* ═══════════════════════════════════════════════════════════════
           HEADER BUTTONS (BACK, REPLAY, SAVE)
           ═══════════════════════════════════════════════════════════════ */}
-      <div className="relative z-30 flex items-center justify-between px-4 pt-8">
-        <Link 
-          to="/destinos" 
-          className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/15 backdrop-blur-sm border border-white/20 text-white/80 hover:bg-white/25 hover:text-white transition-colors"
-        >
-          <ChevronLeft className="w-5 h-5" />
-        </Link>
+      <div className="relative z-30 flex items-center justify-end px-4 pt-8">
+        <div className="w-10" />
         
         <div className="flex items-center gap-3">
           <button 
