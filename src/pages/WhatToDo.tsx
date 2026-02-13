@@ -42,10 +42,13 @@ const WhatToDo = () => {
         className="absolute inset-0 bg-cover bg-fixed"
         style={{
           backgroundImage: `url(${blocoBackground})`,
-          backgroundPosition: "center 15%",
+          backgroundPosition: "center 20%",
         }}
       />
-      <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/25 to-black/45" />
+      {/* Intensity reducer — softens image without blur or color filter */}
+      <div className="absolute inset-0 bg-black/15" />
+      {/* Directional gradient — darkens top for mountains + bottom for buttons */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/20 to-black/45" />
 
       {/* Sepia editorial overlay — visible when Carnaval OFF */}
       <div
