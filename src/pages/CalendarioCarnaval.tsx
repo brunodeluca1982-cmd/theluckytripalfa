@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { ChevronLeft, Clock, MapPin, Music, Users, Sparkles } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import SaveToRoteiroButton from "@/components/SaveToRoteiroButton";
-import calendarBg from "@/assets/highlights/calendario-carnaval-bg.png";
+import blocoBackground from "@/assets/highlights/bloco2.jpg";
 import { carnavalBlocos, type BlocoEvent } from "@/data/carnaval-blocos-data";
 
 /**
@@ -46,12 +46,12 @@ const CalendarioCarnaval = () => {
 
   return (
     <div className="h-screen relative overflow-hidden">
-      {/* Background image — locked framing */}
+      {/* Blurred carnival photo background */}
       <div
         className="absolute inset-0 bg-cover bg-center bg-fixed"
-        style={{ backgroundImage: `url(${calendarBg})` }}
+        style={{ backgroundImage: `url(${blocoBackground})`, filter: "blur(10px)", transform: "scale(1.05)" }}
       />
-      <div className="absolute inset-0 bg-black/30" />
+      <div className="absolute inset-0 bg-black/[0.12]" />
 
       {/* Scrollable content */}
       <div className="relative z-10 h-full overflow-y-auto pb-24">
