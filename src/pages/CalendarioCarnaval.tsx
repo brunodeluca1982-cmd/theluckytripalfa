@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ChevronLeft, Clock, MapPin, Music, Users, Sparkles } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import SaveToRoteiroButton from "@/components/SaveToRoteiroButton";
@@ -24,6 +24,7 @@ const getBlocosForDay = (day: number) => {
 };
 
 const CalendarioCarnaval = () => {
+  const navigate = useNavigate();
   const [selectedBloco, setSelectedBloco] = useState<BlocoEvent | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
 
@@ -101,9 +102,11 @@ const CalendarioCarnaval = () => {
                 return (
                   <div
                     key={di}
+                    onClick={() => hasBlocos && navigate(`/blocos-dia?date=${day}`)}
                     className={`
                       aspect-square rounded-xl flex flex-col items-start justify-start p-1 overflow-hidden
                       border transition-all
+                      ${hasBlocos ? "cursor-pointer active:scale-95" : ""}
                       ${isCarnavalHighlight
                         ? "border-white/40 bg-white/15 shadow-lg shadow-white/5"
                         : "border-white/10 bg-white/5"
