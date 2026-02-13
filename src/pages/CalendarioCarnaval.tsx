@@ -6,9 +6,7 @@ import { Switch } from "@/components/ui/switch";
 import { useCarnavalMode } from "@/contexts/CarnavalModeContext";
 import { useSpotifyPlayer } from "@/contexts/SpotifyPlayerContext";
 import { clearVideoSeen } from "@/pages/DestinationVideoIntro";
-
-const RIO_BACKGROUND =
-  "https://images.unsplash.com/photo-1483729558449-99ef09a8c325?q=80&w=2070&auto=format&fit=crop";
+import carnavalBlocoBg from "@/assets/highlights/carnaval-bloco-bg.jpeg";
 
 const days = [
   { date: 14, label: "14 de fevereiro — sábado" },
@@ -42,12 +40,12 @@ const CalendarioCarnaval = () => {
 
   return (
     <div className="h-screen relative overflow-hidden pb-20">
-      {/* Background — same as Rio home */}
+      {/* Background — carnival bloco photo */}
       <div
         className="absolute inset-0 bg-cover bg-center bg-fixed"
-        style={{ backgroundImage: `url(${RIO_BACKGROUND})` }}
+        style={{ backgroundImage: `url(${carnavalBlocoBg})`, filter: "blur(4px) contrast(0.9)", transform: "scale(1.05)" }}
       />
-      <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/10 to-black/40" />
+      <div className="absolute inset-0 bg-black/50" />
 
       {/* Sepia overlay — synced with Modo Carnaval */}
       <div
