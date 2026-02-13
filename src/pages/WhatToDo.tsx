@@ -9,7 +9,7 @@ import { clearVideoSeen } from "@/pages/DestinationVideoIntro";
 import blocoBackground from "@/assets/highlights/bloco2.jpg";
 
 const actions = [
-  { id: "blocos", label: "Blocos de Rua", subtitle: "só os melhores", path: "/atividade/blocos-de-rua?from=city" },
+  { id: "blocos", label: "Blocos de Rua", subtitle: "só os melhores", path: "/calendario-carnaval" },
   { id: "sapucai", label: "Desfiles na Sapucaí", subtitle: "o que não te contam", path: "/atividade/sambodromo?from=city" },
   { id: "camarotes", label: "Camarotes", subtitle: "ache sua vibe", path: "/atividade/festas-carnaval?from=city" },
   { id: "festas", label: "Festas e Bailes", subtitle: "só os hypes", path: "/atividade/festas-carnaval?from=city" },
