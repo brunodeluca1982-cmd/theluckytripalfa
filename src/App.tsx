@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import SplashScreen from "@/components/SplashScreen";
 import MainLayout from "@/components/MainLayout";
 import Index from "./pages/Index";
@@ -11,7 +11,7 @@ import Destinos from "./pages/Destinos";
 import DestinationRio from "./pages/DestinationRio";
 import DestinationVideoIntro from "./pages/DestinationVideoIntro";
 import OndeficarRio from "./pages/OndeficarRio";
-import CityView from "./pages/CityView";
+
 import EatMapView from "./pages/EatMapView";
 import WhereToStayDetail from "./pages/WhereToStayDetail";
 import WhereToEatDetail from "./pages/WhereToEatDetail";
@@ -132,7 +132,7 @@ const App = () => {
                   <Route path="/destino/:destinationId/modulo/:moduleId" element={<SecondaryModuleDetail />} />
                   
                   {/* Where to Stay */}
-                  <Route path="/city-view" element={<CityView />} />
+                  <Route path="/city-view" element={<Navigate to="/onde-ficar-rio" replace />} />
                   <Route path="/onde-ficar-rio" element={<OndeficarRio />} />
                   <Route path="/onde-ficar/:neighborhood" element={<WhereToStayDetail />} />
                   <Route path="/hotel/:id" element={<HotelDetail />} />
