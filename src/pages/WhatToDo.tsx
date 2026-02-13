@@ -6,7 +6,7 @@ import { Switch } from "@/components/ui/switch";
 import { useCarnavalMode } from "@/contexts/CarnavalModeContext";
 import { useSpotifyPlayer } from "@/contexts/SpotifyPlayerContext";
 import { clearVideoSeen } from "@/pages/DestinationVideoIntro";
-import blocoBackground from "@/assets/highlights/bloco1.png";
+import blocoBackground from "@/assets/highlights/bloco2.jpg";
 
 const actions = [
   { id: "blocos", label: "Blocos de Rua", subtitle: "só os melhores", path: "/atividade/blocos-de-rua?from=city" },
@@ -39,16 +39,13 @@ const WhatToDo = () => {
     <div className="h-screen relative overflow-hidden pb-20">
       {/* Full-screen background */}
       <div
-        className="absolute inset-0 bg-cover bg-fixed"
+        className="absolute inset-0 bg-cover bg-fixed bg-center"
         style={{
           backgroundImage: `url(${blocoBackground})`,
-          backgroundPosition: "center 20%",
         }}
       />
-      {/* Intensity reducer — softens image without blur or color filter */}
-      <div className="absolute inset-0 bg-black/15" />
-      {/* Directional gradient — darkens top for mountains + bottom for buttons */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/20 to-black/45" />
+      {/* Dark overlay for readability (25–30%) */}
+      <div className="absolute inset-0 bg-black/[0.27]" />
 
       {/* Sepia editorial overlay — visible when Carnaval OFF */}
       <div
