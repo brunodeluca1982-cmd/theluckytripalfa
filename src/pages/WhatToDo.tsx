@@ -1,168 +1,126 @@
 import { Link } from "react-router-dom";
-import { ChevronLeft } from "lucide-react";
-import { RIO_NEIGHBORHOODS } from "@/data/rio-neighborhoods";
-import { whatToDoIntro, cityLevelActivities, activitiesByNeighborhood } from "@/data/what-to-do-data";
-import rioHero from "@/assets/highlights/rio-de-janeiro-hero.jpg";
+import { useNavigate } from "react-router-dom";
+import { Play, Music, Sparkles } from "lucide-react";
+import { useCallback } from "react";
+import { Switch } from "@/components/ui/switch";
 import { useCarnavalMode } from "@/contexts/CarnavalModeContext";
+import { useSpotifyPlayer } from "@/contexts/SpotifyPlayerContext";
+import { clearVideoSeen } from "@/pages/DestinationVideoIntro";
+import blocoBackground from "@/assets/highlights/bloco1.png";
 
-/**
- * O QUE FAZER — RIO DE JANEIRO
- * 
- * PUBLIC LAYER - Accessible to all users
- * 
- * Rules:
- * - Organized strictly by neighborhood
- * - Each item belongs to ONE neighborhood only
- * - Uses consistent Activity Detail template
- * - Only BASE MAP neighborhoods appear here
- */
+const actions = [
+  { id: "blocos", label: "Blocos de Rua", subtitle: "só os melhores", path: "/atividade/blocos-de-rua?from=city" },
+  { id: "sapucai", label: "Desfiles na Sapucaí", subtitle: "o que não te contam", path: "/atividade/sambodromo?from=city" },
+  { id: "camarotes", label: "Camarotes", subtitle: "ache sua vibe", path: "/atividade/festas-carnaval?from=city" },
+  { id: "festas", label: "Festas e Bailes", subtitle: "só os hypes", path: "/atividade/festas-carnaval?from=city" },
+  { id: "lucky-list", label: "Lucky List", subtitle: "com esquema", path: "/lucky-list", isSpecial: true },
+];
 
 const WhatToDo = () => {
-  const { isCarnavalMode } = useCarnavalMode();
+  const navigate = useNavigate();
+  const { isCarnavalMode, toggleCarnavalMode } = useCarnavalMode();
+  const { active, activate, openSheet } = useSpotifyPlayer();
+
+  const handleMusicTap = useCallback(() => {
+    if (!active) activate();
+    else openSheet();
+  }, [active, activate, openSheet]);
+
+  const handleToggle = useCallback(() => {
+    toggleCarnavalMode();
+  }, [toggleCarnavalMode]);
+
+  const handleReplayIntro = useCallback(() => {
+    clearVideoSeen("rio-de-janeiro");
+    navigate("/destino/rio-de-janeiro/intro", { replace: true });
+  }, [navigate]);
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="px-6 py-4 border-b border-border">
-        <Link
-          to="/destino/rio-de-janeiro"
-          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <ChevronLeft className="w-4 h-4" />
-          Voltar
-        </Link>
-      </header>
+    <div className="h-screen relative overflow-hidden pb-20">
+      {/* Full-screen background */}
+      <div
+        className="absolute inset-0 bg-cover bg-center bg-fixed"
+        style={{ backgroundImage: `url(${blocoBackground})` }}
+      />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/10 to-black/40" />
 
-      {/* Content */}
-      <main className="pb-12">
-        {/* Title */}
-        <div className="px-6 pt-8 pb-6">
-          <h1 className="text-4xl font-serif font-semibold text-foreground leading-tight">
-            O Que Fazer
-          </h1>
-          <p className="text-lg text-muted-foreground mt-2">
-            Rio de Janeiro
-          </p>
+      {/* Sepia editorial overlay — visible when Carnaval OFF */}
+      <div
+        className="absolute inset-0 pointer-events-none transition-opacity duration-[400ms]"
+        style={{
+          backgroundColor: "hsla(35, 30%, 20%, 0.35)",
+          mixBlendMode: "color",
+          opacity: isCarnavalMode ? 0 : 1,
+        }}
+      />
+
+      {/* Header buttons */}
+      <div className="relative z-30 flex items-center justify-end px-4 pt-8">
+        <div className="w-10" />
+        <div className="flex items-center gap-3">
+          <button
+            onClick={handleReplayIntro}
+            className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/15 backdrop-blur-sm border border-white/20 text-white/80 hover:bg-white/25 hover:text-white transition-colors"
+            aria-label="Replay intro video"
+          >
+            <Play className="w-4 h-4" />
+          </button>
+          <button
+            onClick={handleMusicTap}
+            className="inline-flex items-center justify-center w-10 h-10 rounded-full backdrop-blur-sm border border-white/20 hover:bg-white/25 transition-colors"
+            style={{ backgroundColor: "hsla(141, 73%, 42%, 0.25)", color: "hsla(141, 73%, 72%, 1)" }}
+            aria-label="Abrir player de música"
+          >
+            <Music className="w-4 h-4" />
+          </button>
         </div>
+      </div>
 
-        {/* Hero Image - Full Width */}
-        <div className="w-full aspect-[16/9] bg-muted overflow-hidden">
-          <img 
-            src={rioHero} 
-            alt="O Que Fazer no Rio de Janeiro"
-            className="w-full h-full object-cover"
+      {/* Title */}
+      <div className="relative z-10 flex flex-col items-center mt-10 mb-4 px-6">
+        <h1 className="text-[2.75rem] font-serif font-medium text-white leading-none text-center drop-shadow-lg tracking-tight">
+          O Que Fazer
+        </h1>
+        <p className="text-xs tracking-[0.35em] text-white/70 uppercase mt-2">
+          no rio
+        </p>
+
+        {/* Modo Carnaval Toggle */}
+        <div className="flex items-center gap-3 mt-3">
+          <span className="text-sm text-white/80 font-medium">Modo Carnaval</span>
+          <Switch
+            checked={isCarnavalMode}
+            onCheckedChange={handleToggle}
+            className="data-[state=checked]:bg-primary"
           />
         </div>
+      </div>
 
-        {/* Description */}
-        <div className="px-6 pt-8 pb-10">
-          {whatToDoIntro.split('\n').map((paragraph, index) => (
-            <p key={index} className="text-base text-muted-foreground leading-relaxed mb-2 last:mb-0">
-              {paragraph}
-            </p>
-          ))}
-        </div>
-
-        {/* Divider */}
-        <div className="mx-6 border-t border-border" />
-
-        {/* Carnaval Section — Priority when toggle ON */}
-        {isCarnavalMode && (
-          <section className="px-6 pt-8">
-            <h2 className="text-xs tracking-widest text-muted-foreground uppercase mb-4">
-              Carnaval
-            </h2>
-            <div className="space-y-4">
-              <Link
-                to="/atividade/blocos-de-rua?from=city"
-                className="block p-4 bg-card border border-border rounded-lg hover:bg-accent/50 transition-colors"
-              >
-                <h3 className="text-lg font-serif font-medium text-foreground mb-1">Blocos de Rua</h3>
-                <p className="text-sm text-muted-foreground">O coração do Carnaval carioca. Desfiles de rua por toda a cidade.</p>
-              </Link>
-              <Link
-                to="/atividade/sambodromo?from=city"
-                className="block p-4 bg-card border border-border rounded-lg hover:bg-accent/50 transition-colors"
-              >
-                <h3 className="text-lg font-serif font-medium text-foreground mb-1">Desfiles na Sapucaí</h3>
-                <p className="text-sm text-muted-foreground">O espetáculo das escolas de samba no Sambódromo.</p>
-              </Link>
-              <Link
-                to="/atividade/festas-carnaval?from=city"
-                className="block p-4 bg-card border border-border rounded-lg hover:bg-accent/50 transition-colors"
-              >
-                <h3 className="text-lg font-serif font-medium text-foreground mb-1">Festas e Camarotes</h3>
-                <p className="text-sm text-muted-foreground">Festas privadas e camarotes durante o Carnaval.</p>
-              </Link>
-            </div>
-            <div className="mt-8 border-t border-border" />
-          </section>
-        )}
-
-        {/* City-Level Activities */}
-        <section className="px-6 pt-8">
-          <h2 className="text-xs tracking-widest text-muted-foreground uppercase mb-4">
-            Experiências Icônicas
-          </h2>
-          <div className="space-y-4">
-            {cityLevelActivities.map((activity) => (
-              <Link
-                key={activity.id}
-                to={`/atividade/${activity.id}?from=city`}
-                className="block p-4 bg-card border border-border rounded-lg hover:bg-accent/50 transition-colors"
-              >
-                <h3 className="text-lg font-serif font-medium text-foreground mb-1">
-                  {activity.title}
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  {activity.description}
-                </p>
-              </Link>
-            ))}
-          </div>
-        </section>
-
-        {/* Divider */}
-        <div className="mx-6 mt-8 border-t border-border" />
-
-        {/* Neighborhood-Based Activities */}
-        <section className="px-6 pt-8">
-          <h2 className="text-xs tracking-widest text-muted-foreground uppercase mb-4">
-            Explorar por Bairro
-          </h2>
-          <div className="space-y-3">
-            {RIO_NEIGHBORHOODS.map((neighborhood) => {
-              const data = activitiesByNeighborhood[neighborhood.id];
-              const activityCount = data?.activities?.length || 0;
-              
-              return (
-                <Link
-                  key={neighborhood.id}
-                  to={`/o-que-fazer/${neighborhood.id}`}
-                  className="block p-4 bg-card border border-border rounded-lg hover:bg-accent/50 transition-colors"
-                >
-                  <h3 className="text-lg font-serif font-medium text-foreground">
-                    {neighborhood.name}
-                  </h3>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    {activityCount > 0 
-                      ? `${activityCount} ${activityCount === 1 ? 'atividade' : 'atividades'}`
-                      : 'Atividades em breve'
-                    }
-                  </p>
-                </Link>
-              );
-            })}
-          </div>
-        </section>
-      </main>
-
-      {/* Footer */}
-      <footer className="px-6 py-8 border-t border-border">
-        <p className="text-xs text-muted-foreground">
-          The Lucky Trip — Rio de Janeiro
-        </p>
-      </footer>
+      {/* Buttons */}
+      <div className="relative z-20 px-6 flex flex-col gap-2 mt-2">
+        {actions.map((action) => (
+          <Link
+            key={action.id}
+            to={action.path}
+            className={`
+              flex items-center justify-between w-full
+              py-3 px-5 rounded-2xl
+              backdrop-blur-md transition-all duration-200
+              ${action.isSpecial
+                ? "bg-white/25 border border-white/40 hover:bg-white/35"
+                : "bg-white/20 border border-white/30 hover:bg-white/30"
+              }
+            `}
+          >
+            <span className="text-white text-base font-medium tracking-wide">
+              {action.label}
+            </span>
+            <span className="text-white/50 text-sm font-normal lowercase">
+              {action.subtitle}
+            </span>
+          </Link>
+        ))}
+      </div>
     </div>
   );
 };
