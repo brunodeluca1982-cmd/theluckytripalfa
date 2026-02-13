@@ -52,6 +52,8 @@ import IACriarRoteiro from "./pages/ia/IACriarRoteiro";
 import IAMelhorarRoteiro from "./pages/ia/IAMelhorarRoteiro";
 import RoteiroFinal from "./pages/RoteiroFinal";
 import CalendarioCarnaval from "./pages/CalendarioCarnaval";
+import BlocosDia from "./pages/BlocosDia";
+import BlocoDetalhe from "./pages/BlocoDetalhe";
 import NotFound from "./pages/NotFound";
 import { CarnavalModeProvider } from "@/contexts/CarnavalModeContext";
 import { SpotifyPlayerProvider } from "@/contexts/SpotifyPlayerContext";
@@ -148,6 +150,8 @@ const App = () => {
                   <Route path="/o-que-fazer/:neighborhood" element={<WhatToDoDetail />} />
                   <Route path="/atividade/:id" element={<ActivityDetail />} />
                   <Route path="/calendario-carnaval" element={<CalendarioCarnaval />} />
+                  <Route path="/blocos-dia" element={<BlocosDia />} />
+                  <Route path="/bloco-detalhe/:id" element={<BlocoDetalhe />} />
                   
                   {/* Lucky List */}
                   <Route path="/lucky-list" element={<LuckyList />} />
