@@ -17,6 +17,7 @@ import { carnavalBlocos, type BlocoEvent } from "@/data/carnaval-blocos-data";
 const DAYS_IN_FEB = 28;
 const FIRST_DAY_OFFSET = 0; // Feb 1 2026 = Sunday
 const WEEKDAY_LABELS = ["D", "S", "T", "Q", "Q", "S", "S"];
+const FEATURED_DAYS = new Set([14, 15, 16, 17, 18, 19, 21, 22]);
 
 const getBlocosForDay = (day: number) => {
   const found = carnavalBlocos.find((d) => d.date === day);
@@ -77,73 +78,82 @@ const CalendarioCarnaval = () => {
         </div>
 
         {/* Calendar grid — glass card */}
-        <div className="mx-4 rounded-2xl backdrop-blur-xl bg-white/10 border border-white/20 p-3 shadow-2xl">
+        <div className="mx-4 rounded-2xl backdrop-blur-xl bg-white/10 border border-white/20 p-4 shadow-2xl">
           {/* Weekday headers */}
-          <div className="grid grid-cols-7 mb-2">
+          <div className="grid grid-cols-7 mb-3">
             {WEEKDAY_LABELS.map((label, i) => (
-              <div key={i} className="text-center text-xs font-medium text-white/70 py-1">
+              <div key={i} className="text-center text-[11px] font-semibold text-white/60 py-1 tracking-wide">
                 {label}
               </div>
             ))}
           </div>
 
-          {/* Weeks */}
-          {weeks.map((week, wi) => (
-            <div key={wi} className="grid grid-cols-7 gap-1 mb-1">
-              {week.map((day, di) => {
-                if (!day) {
-                  return <div key={di} className="aspect-square" />;
-                }
+          {/* Weeks — featured days get more height */}
+          {weeks.map((week, wi) => {
+            const weekHasEvents = week.some((d) => d && FEATURED_DAYS.has(d));
+            return (
+              <div
+                key={wi}
+                className="grid grid-cols-7 gap-1.5 mb-1.5"
+                style={{ minHeight: weekHasEvents ? 88 : 36 }}
+              >
+                {week.map((day, di) => {
+                  if (!day) {
+                    return <div key={di} />;
+                  }
 
-                const blocos = getBlocosForDay(day);
-                const hasBlocos = blocos.length > 0;
-                const isCarnavalHighlight = [14, 15, 16, 17, 18].includes(day);
+                  const isFeatured = FEATURED_DAYS.has(day);
+                  const blocos = getBlocosForDay(day);
 
-                return (
-                  <div
-                    key={di}
-                    onClick={() => hasBlocos && navigate(`/blocos-dia?date=${day}`)}
-                    className={`
-                      aspect-square rounded-xl flex flex-col items-start justify-start p-1 overflow-hidden
-                      border transition-all
-                      ${hasBlocos ? "cursor-pointer active:scale-95" : ""}
-                      ${isCarnavalHighlight
-                        ? "border-white/40 bg-white/15 shadow-lg shadow-white/5"
-                        : "border-white/10 bg-white/5"
-                      }
-                    `}
-                  >
-                    {/* Day number */}
-                    <span className={`text-[10px] font-semibold leading-none mb-0.5 ${
-                      isCarnavalHighlight ? "text-white" : "text-white/50"
-                    }`}>
-                      {day}
-                    </span>
-
-                    {/* Bloco chips */}
-                    {hasBlocos && (
-                      <div className="flex flex-col gap-[1px] w-full overflow-hidden flex-1">
-                        {blocos.slice(0, 3).map((bloco) => (
-                          <button
-                            key={bloco.id}
-                            onClick={() => handleBlocoClick(bloco)}
-                            className="w-full text-left text-[5px] leading-[7px] text-white/90 bg-white/15 rounded px-0.5 py-[1px] truncate hover:bg-white/25 transition-colors active:scale-95"
-                          >
-                            {bloco.startHour}h {bloco.name}
-                          </button>
-                        ))}
-                        {blocos.length > 3 && (
-                          <span className="text-[5px] text-white/50 pl-0.5">
-                            +{blocos.length - 3}
-                          </span>
-                        )}
+                  if (!isFeatured) {
+                    return (
+                      <div
+                        key={di}
+                        className="rounded-lg flex items-start justify-center pt-1.5 border border-white/5 bg-white/[0.03]"
+                      >
+                        <span className="text-[10px] font-medium text-white/30">{day}</span>
                       </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          ))}
+                    );
+                  }
+
+                  return (
+                    <div
+                      key={di}
+                      onClick={() => navigate(`/blocos-dia?date=${day}`)}
+                      className="rounded-xl flex flex-col items-start p-1.5 overflow-hidden border cursor-pointer active:scale-[0.97] transition-transform border-white/30 bg-white/10 backdrop-blur-sm shadow-lg shadow-black/10 relative"
+                    >
+                      {/* Inner dark overlay for contrast */}
+                      <div className="absolute inset-0 rounded-xl bg-black/20 pointer-events-none" />
+                      <div className="relative z-10 flex flex-col w-full h-full">
+                        {/* Day number */}
+                        <span className="text-xs font-bold text-white leading-none mb-1">
+                          {day}
+                        </span>
+
+                        {/* Bloco chips */}
+                        <div className="flex flex-col gap-[2px] w-full overflow-hidden flex-1">
+                          {blocos.slice(0, 3).map((bloco) => (
+                            <button
+                              key={bloco.id}
+                              onClick={(e) => { e.stopPropagation(); handleBlocoClick(bloco); }}
+                              className="w-full text-left text-[7px] leading-[10px] font-medium text-white/95 bg-white/20 rounded px-1 py-[2px] truncate hover:bg-white/30 transition-colors active:scale-95"
+                            >
+                              {bloco.startHour}h {bloco.name}
+                            </button>
+                          ))}
+                          {blocos.length > 3 && (
+                            <span className="text-[7px] font-medium text-white/60 pl-0.5">
+                              +{blocos.length - 3}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          })}
         </div>
 
         {/* Legend */}
