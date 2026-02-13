@@ -39,10 +39,13 @@ const WhatToDo = () => {
     <div className="h-screen relative overflow-hidden pb-20">
       {/* Full-screen background */}
       <div
-        className="absolute inset-0 bg-cover bg-center bg-fixed"
-        style={{ backgroundImage: `url(${blocoBackground})` }}
+        className="absolute inset-0 bg-cover bg-fixed"
+        style={{
+          backgroundImage: `url(${blocoBackground})`,
+          backgroundPosition: "center 15%",
+        }}
       />
-      <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/10 to-black/40" />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/25 to-black/45" />
 
       {/* Sepia editorial overlay — visible when Carnaval OFF */}
       <div
