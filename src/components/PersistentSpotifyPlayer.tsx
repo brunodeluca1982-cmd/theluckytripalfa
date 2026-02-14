@@ -1,7 +1,7 @@
 import { useSpotifyPlayer } from "@/contexts/SpotifyPlayerContext";
 import { ChevronUp, X } from "lucide-react";
 
-const playlistId = '29a9JisauRbV4eRkjyFAkW';
+const playlistId = '242Q0AaUu4kqsANYUaEufj';
 
 const PersistentSpotifyPlayer = () => {
   const { active, sheetOpen, openSheet, closeSheet, dismiss } = useSpotifyPlayer();
@@ -51,7 +51,7 @@ const PersistentSpotifyPlayer = () => {
 
           <div className="px-4 pb-6" style={{ minHeight: '360px' }}>
             <iframe
-              title="Spotify Embed: Recommendation Playlist"
+              title="Spotify Embed: Carnival Playlist"
               src={`https://open.spotify.com/embed/playlist/${playlistId}?utm_source=generator&theme=0`}
               width="100%"
               height="100%"
