@@ -50,6 +50,7 @@ import IARevisarRoteiro from "./pages/ia/IARevisarRoteiro";
 import IAPerguntar from "./pages/ia/IAPerguntar";
 import IACriarRoteiro from "./pages/ia/IACriarRoteiro";
 import IAMelhorarRoteiro from "./pages/ia/IAMelhorarRoteiro";
+import IALuckyTrip from "./pages/ia/IALuckyTrip";
 import RoteiroFinal from "./pages/RoteiroFinal";
 import CalendarioCarnaval from "./pages/CalendarioCarnaval";
 import BlocosDia from "./pages/BlocosDia";
@@ -200,6 +201,7 @@ const App = () => {
                   <Route path="/ia/perguntar" element={<IAPerguntar />} />
                   <Route path="/ia/criar-roteiro" element={<IACriarRoteiro />} />
                   <Route path="/ia/melhorar-roteiro" element={<IAMelhorarRoteiro />} />
+                  <Route path="/ia/lucky-trip" element={<IALuckyTrip />} />
 
                   {/* Fallback */}
                   <Route path="*" element={<NotFound />} />

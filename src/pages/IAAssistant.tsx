@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
-import { ChevronLeft, MessageCircle, CalendarPlus, Sparkles } from "lucide-react";
+import { ChevronLeft, MessageCircle, CalendarPlus, Sparkles, Bot } from "lucide-react";
 
 /**
  * ═══════════════════════════════════════════════════════════════════════════
@@ -141,6 +141,26 @@ const IAAssistant = () => {
               <span className="text-base font-medium text-foreground text-left">
                 Melhorar meu roteiro
               </span>
+            </div>
+          </button>
+
+          {/* CARD 4 — IA LUCKY TRIP (chat com curador) */}
+          <button
+            onClick={() => navigate("/ia/lucky-trip")}
+            className="w-full p-5 rounded-2xl bg-primary/5 border border-primary/20 hover:bg-primary/10 hover:border-primary/30 transition-all duration-200 shadow-sm"
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                <Bot className="w-5 h-5 text-primary" />
+              </div>
+              <div className="text-left">
+                <span className="text-base font-medium text-foreground block">
+                  IA – Lucky Trip
+                </span>
+                <span className="text-xs text-muted-foreground">
+                  Seu curador inteligente
+                </span>
+              </div>
             </div>
           </button>
         </div>
