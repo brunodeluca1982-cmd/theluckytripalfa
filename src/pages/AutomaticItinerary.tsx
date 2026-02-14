@@ -258,6 +258,9 @@ const AutomaticItinerary = () => {
       return (h || 0) * 60 + (m || 0);
     };
 
+    // Track pending items (saved but unschedulable)
+    const pendingItems: { item: SavedItemRecord; reason: string; missing: string[] }[] = [];
+
     for (let day = 1; day <= actualTripDays; day++) {
       const daySlots: ItinerarySlot[] = [];
       let dayCost: DayCosts = { food: 0, activities: 0, transport: 0, total: 0 };
@@ -282,7 +285,7 @@ const AutomaticItinerary = () => {
         savedForDay = allSaved.filter(i => i.date_iso === dayISO);
       }
 
-      // Strategy 2: For blocks without a matching day, map by offset within trip range
+      // Strategy 2: For items without a matching day, map by offset within trip range
       if (tripStartDate && dayISO) {
         const tripStartISO = `${tripStartDate.getFullYear()}-${String(tripStartDate.getMonth() + 1).padStart(2, '0')}-${String(tripStartDate.getDate()).padStart(2, '0')}`;
         const tripEnd = new Date(tripStartDate);
@@ -298,9 +301,7 @@ const AutomaticItinerary = () => {
         }
       }
 
-      // Strategy 3: If this is Day 1, also include any saved blocks that didn't match
-      // any trip day (e.g., block date is before trip start). This ensures saved blocks
-      // are NEVER silently dropped.
+      // Strategy 3: If this is Day 1, include orphan items
       if (day === 1) {
         const allDayISOs = new Set<string>();
         if (tripStartDate) {
@@ -312,66 +313,141 @@ const AutomaticItinerary = () => {
         }
         for (const item of allSaved) {
           if (savedForDay.some(s => s.id === item.id)) continue;
-          // Block has a date_iso that doesn't fall in ANY trip day
-          if (item.type === "block" && item.date_iso && !allDayISOs.has(item.date_iso)) {
+          // Fixed-time items with date outside trip range → force into Day 1
+          if ((item.type === "block" || item.type === "festa") && item.date_iso && !allDayISOs.has(item.date_iso)) {
             savedForDay.push(item);
-            console.log(`[AutoItinerary] Orphan block "${item.title}" (date=${item.date_iso}) forced into Day 1`);
+            console.log(`[AutoItinerary] Orphan fixed item "${item.title}" (date=${item.date_iso}) forced into Day 1`);
           }
-          // Item with no date_iso at all
+          // Items with no date_iso at all
           if (!item.date_iso && !savedForDay.some(s => s.id === item.id)) {
             savedForDay.push(item);
           }
         }
       }
 
-      // Separate fixed blocos vs flexible saved items
-      const fixedBlocos = savedForDay
-        .filter(i => i.type === "block" && i.start_time_24h)
+      // ── Classify items by scheduling priority ──
+      const isFixedTime = (i: SavedItemRecord) =>
+        (i.type === "block" || i.type === "festa" || i.priority === "fixed") && i.start_time_24h;
+
+      const fixedItems = savedForDay
+        .filter(i => isFixedTime(i))
         .sort((a, b) => (a.start_time_24h || "").localeCompare(b.start_time_24h || ""));
-      const flexibleSaved = savedForDay.filter(i => i.type !== "block");
+
+      const hotelItems = savedForDay.filter(i => i.type === "hotel");
+      const flexibleItems = savedForDay.filter(i => !isFixedTime(i) && i.type !== "hotel");
 
       // Debug
-      console.log(`[AutoItinerary] Day ${day} (${dayISO || 'no-date'}): saved_total=${allSaved.length}, matched=${savedForDay.length}, fixed_blocos=${fixedBlocos.length}, flexible=${flexibleSaved.length}`);
-      if (fixedBlocos.length > 0) console.log(`[AutoItinerary] Blocos:`, fixedBlocos.map(b => ({ id: b.id, time: b.start_time_24h, date: b.date_iso })));
+      console.log(`[AutoItinerary] Day ${day} (${dayISO || 'no-date'}): saved_total=${allSaved.length}, matched=${savedForDay.length}, fixed=${fixedItems.length}, hotels=${hotelItems.length}, flexible=${flexibleItems.length}`);
 
-      // Build locked time ranges from blocos (each ~2h)
-      const lockedRanges: { start: number; end: number }[] = [];
-      for (const bloco of fixedBlocos) {
-        const startMin = parseTimeToMinutes(bloco.start_time_24h || "12:00");
-        lockedRanges.push({ start: startMin, end: startMin + 120 });
+      // Build locked time ranges from fixed items (each ~2h)
+      const lockedRanges: { start: number; end: number; id: string }[] = [];
+      for (const item of fixedItems) {
+        const startMin = parseTimeToMinutes(item.start_time_24h || "12:00");
+        const duration = item.duration_minutes || 120;
+        lockedRanges.push({ start: startMin, end: startMin + duration, id: item.id });
       }
+
+      // Detect conflicts between fixed items
+      const conflictIds = new Set<string>();
+      for (let i = 0; i < lockedRanges.length; i++) {
+        for (let j = i + 1; j < lockedRanges.length; j++) {
+          if (lockedRanges[i].start < lockedRanges[j].end && lockedRanges[j].start < lockedRanges[i].end) {
+            conflictIds.add(lockedRanges[j].id);
+          }
+        }
+      }
+
       const overlapsLocked = (startMin: number, endMin: number): boolean =>
         lockedRanges.some(r => startMin < r.end && endMin > r.start);
 
-      // ── 2) Insert fixed blocos ──
-      for (const bloco of fixedBlocos) {
-        const timeStr = (bloco.start_time_24h || "12:00").slice(0, 5);
+      // ── 2) Insert hotel as "Base do dia" ──
+      for (const hotelItem of hotelItems) {
+        daySlots.push({
+          time: '00:00',
+          type: 'departure',
+          item: {
+            id: hotelItem.id,
+            name: `🏨 ${hotelItem.title}`,
+            neighborhood: hotelItem.neighborhood_short || hotelItem.neighborhood_full || '',
+            description: 'Base do dia',
+            address: hotelItem.location_label,
+          },
+          timeBlock: 'morning',
+        });
+      }
+
+      // ── 3) Insert fixed items (blocos + festas) ──
+      for (const item of fixedItems) {
+        const timeStr = (item.start_time_24h || "12:00").slice(0, 5);
         const hourNum = parseInt(timeStr);
         const timeBlock: 'morning' | 'afternoon' | 'evening' =
           hourNum < 12 ? 'morning' : hourNum < 18 ? 'afternoon' : 'evening';
+        
+        const hasConflict = conflictIds.has(item.id);
+        
         daySlots.push({
           time: timeStr,
           type: 'activity',
           item: {
-            id: bloco.id,
-            name: bloco.title,
-            neighborhood: bloco.neighborhood_short || bloco.neighborhood_full || '',
-            description: `📍 ${bloco.neighborhood_short || bloco.neighborhood_full || ''}  ✨ ${bloco.vibe_one_word || ''}`.trim(),
-            address: bloco.location_label,
+            id: item.id,
+            name: item.title,
+            neighborhood: item.neighborhood_short || item.neighborhood_full || '',
+            description: hasConflict 
+              ? `⚠️ Conflito de horário | 📍 ${item.neighborhood_short || item.neighborhood_full || ''}  ✨ ${item.vibe_one_word || ''}`.trim()
+              : `📍 ${item.neighborhood_short || item.neighborhood_full || ''}  ✨ ${item.vibe_one_word || ''}`.trim(),
+            address: item.location_label,
           },
           timeBlock,
         });
       }
 
-      // ── 3) Insert flexible saved items ──
-      for (const savedItem of flexibleSaved) {
+      // ── 4) Insert flexible saved items (restaurants, attractions, activities) ──
+      for (const savedItem of flexibleItems) {
+        // If no time at all, add to pending
+        if (!savedItem.start_time_24h && !savedItem.date_iso) {
+          const missing: string[] = [];
+          if (!savedItem.date_iso) missing.push("data");
+          if (!savedItem.start_time_24h) missing.push("horário");
+          pendingItems.push({
+            item: savedItem,
+            reason: missing.includes("data") ? "Sem data" : "Sem horário ou janela de horário",
+            missing,
+          });
+          continue;
+        }
+
+        // If has time but no date and this isn't day 1, skip (already added on day 1)
         const timeStr = savedItem.start_time_24h || "12:00";
         const hourNum = parseInt(timeStr);
         const timeBlock: 'morning' | 'afternoon' | 'evening' =
           hourNum < 12 ? 'morning' : hourNum < 18 ? 'afternoon' : 'evening';
+        
+        // Check for overlap with fixed items
+        const startMin = parseTimeToMinutes(timeStr);
+        if (overlapsLocked(startMin, startMin + 60)) {
+          // Try to shift ±1h
+          const shifted = startMin + 60;
+          if (!overlapsLocked(shifted, shifted + 60)) {
+            const shiftedTime = `${String(Math.floor(shifted / 60)).padStart(2, '0')}:${String(shifted % 60).padStart(2, '0')}`;
+            daySlots.push({
+              time: shiftedTime,
+              type: savedItem.type === 'restaurant' ? 'meal' : 'activity',
+              item: {
+                id: savedItem.id,
+                name: savedItem.title,
+                neighborhood: savedItem.neighborhood_full || savedItem.neighborhood_short || '',
+                description: savedItem.notes_full || '',
+                address: savedItem.location_label,
+              },
+              timeBlock,
+            });
+            continue;
+          }
+        }
+        
         daySlots.push({
           time: timeStr.slice(0, 5),
-          type: 'activity',
+          type: savedItem.type === 'restaurant' ? 'meal' : 'activity',
           item: {
             id: savedItem.id,
             name: savedItem.title,
@@ -383,19 +459,22 @@ const AutomaticItinerary = () => {
         });
       }
 
-      // ── 4) NO random filling — only use saved items ──
-      // Hotel departure (8:30) only if no bloco at that time and user has saved items for this day
-      if (!overlapsLocked(510, 570) && (fixedBlocos.length > 0 || flexibleSaved.length > 0)) {
-        const hotelAddr = getValidatedLocation(hotel.id);
-        daySlots.push({
-          time: '08:30', type: 'departure',
-          item: { id: hotel.id, name: hotel.name, neighborhood: hotel.neighborhood, description: 'Saída do hotel', address: hotelAddr?.fullAddress },
-          timeBlock: 'morning'
-        });
+      // ── 5) NO random filling — only use saved items ──
+
+      // ── 6) If saved hotel anchor exists, show departure from it ──
+      if (hotelItems.length === 0 && selectedHotel && (fixedItems.length > 0 || flexibleItems.length > 0)) {
+        if (!overlapsLocked(510, 570)) {
+          const hotelAddr = getValidatedLocation(hotel.id);
+          daySlots.push({
+            time: '08:30', type: 'departure',
+            item: { id: hotel.id, name: hotel.name, neighborhood: hotel.neighborhood, description: 'Saída do hotel', address: hotelAddr?.fullAddress },
+            timeBlock: 'morning'
+          });
+        }
       }
 
       // Return to hotel only if we have items
-      if (daySlots.length > 0) {
+      if (daySlots.length > 0 && selectedHotel) {
         const retTr = createTransportSegment(currentPlaceId, hotel.id, currentNeighborhood, hotel.neighborhood);
         if (retTr) {
           daySlots.push({ time: '22:00', type: 'transport', item: { id: 'transport', name: `${retTr.segment.mode === 'walking' ? 'A pé' : 'Uber'} — retorno ao hotel`, neighborhood: '', description: '' }, transport: retTr.segment, timeBlock: 'evening' });
@@ -406,15 +485,34 @@ const AutomaticItinerary = () => {
       dayCost.total = dayCost.food + dayCost.activities + dayCost.transport;
       costs[day] = dayCost;
 
-      // Sort all slots by time
-      daySlots.sort((a, b) => a.time.localeCompare(b.time));
+      // Sort all slots by time (but keep hotel "Base do dia" at top)
+      daySlots.sort((a, b) => {
+        // Hotel base always first
+        if (a.item.description === 'Base do dia') return -1;
+        if (b.item.description === 'Base do dia') return 1;
+        return a.time.localeCompare(b.time);
+      });
 
       // Debug summary
-      const scheduledFixed = daySlots.filter(s => fixedBlocos.some(b => b.id === s.item.id)).length;
-      const scheduledFlex = daySlots.filter(s => s.type !== 'transport' && !fixedBlocos.some(b => b.id === s.item.id)).length;
-      console.log(`[AutoItinerary] Day ${day} summary: scheduled_fixed=${scheduledFixed}, scheduled_flexible=${scheduledFlex}, total_slots=${daySlots.length}`);
+      console.log(`[AutoItinerary] Day ${day} summary: total_slots=${daySlots.length}, pending=${pendingItems.length}`);
 
       generated[day] = daySlots;
+    }
+
+    // Store pending items in a special "day 0" key for UI rendering
+    if (pendingItems.length > 0) {
+      generated[0] = pendingItems.map(p => ({
+        time: '--:--',
+        type: 'activity' as const,
+        item: {
+          id: p.item.id,
+          name: p.item.title,
+          neighborhood: p.item.neighborhood_full || '',
+          description: `⚠️ ${p.reason} (${p.missing.join(', ')})`,
+          address: p.item.location_label,
+        },
+        timeBlock: 'morning' as const,
+      }));
     }
 
     setDayCosts(costs);
@@ -453,9 +551,9 @@ const AutomaticItinerary = () => {
     if (slot.type === 'departure') return <Clock className="w-4 h-4 text-primary" />;
     if (slot.type === 'meal') return <Utensils className="w-4 h-4 text-orange-500" />;
     if (slot.type === 'sunset') return <Sun className="w-4 h-4 text-amber-500" />;
-    // Check if this is a saved carnival block
+    // Check if this is a saved carnival block or festa
     const savedItems = getAllSavedItems();
-    if (savedItems.some(i => i.id === slot.item.id && i.type === 'block')) {
+    if (savedItems.some(i => i.id === slot.item.id && (i.type === 'block' || i.type === 'festa'))) {
       return <PartyPopper className="w-4 h-4 text-pink-500" />;
     }
     return <MapPin className="w-4 h-4 text-primary" />;
@@ -713,7 +811,7 @@ const AutomaticItinerary = () => {
             </div>
 
             <div className="space-y-6">
-              {Object.entries(itinerary).map(([day, slots]) => {
+              {Object.entries(itinerary).filter(([day]) => parseInt(day) > 0).map(([day, slots]) => {
                 const dayNumber = parseInt(day);
                 const costs = dayCosts[dayNumber];
                 const dayCoherence = coherenceAnalysis[dayNumber];
@@ -779,11 +877,12 @@ const AutomaticItinerary = () => {
                                   )}
                                 >
                                   <div className="w-12 text-xs text-muted-foreground pt-1 tabular-nums">
-                                    {/* Blocks show hour only (e.g. "8"), others show HH:MM */}
+                                    {/* Blocks/festas show hour only (e.g. "8h"), others show HH:MM */}
                                     {(() => {
                                       const savedItems = getAllSavedItems();
-                                      const isBlock = savedItems.some(i => i.id === slot.item.id && i.type === 'block');
-                                      return isBlock ? String(parseInt(slot.time)) + 'h' : slot.time;
+                                      const isFixedEvent = savedItems.some(i => i.id === slot.item.id && (i.type === 'block' || i.type === 'festa'));
+                                      if (slot.item.description === 'Base do dia') return '🏨';
+                                      return isFixedEvent ? String(parseInt(slot.time)) + 'h' : slot.time;
                                     })()}
                                   </div>
                                   <div className={cn(
@@ -861,6 +960,38 @@ const AutomaticItinerary = () => {
                 );
               })}
             </div>
+
+            {/* Pendentes Section */}
+            {itinerary[0] && itinerary[0].length > 0 && (
+              <div className="bg-card rounded-2xl p-4 mt-6 border border-dashed border-border">
+                <div className="flex items-center gap-2 mb-4">
+                  <AlertTriangle className="w-4 h-4 text-amber-500" />
+                  <h3 className="font-semibold text-foreground">Pendentes</h3>
+                  <span className="text-xs text-muted-foreground">
+                    ({itinerary[0].length} {itinerary[0].length === 1 ? 'item' : 'itens'})
+                  </span>
+                </div>
+                <p className="text-xs text-muted-foreground mb-3">
+                  Itens salvos que não puderam ser agendados automaticamente.
+                </p>
+                <div className="space-y-2">
+                  {itinerary[0].map((slot, idx) => (
+                    <div key={idx} className="flex gap-3 items-start py-2 bg-muted/30 rounded-lg px-3">
+                      <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 bg-amber-500/20">
+                        <AlertTriangle className="w-4 h-4 text-amber-500" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-foreground text-sm truncate">{slot.item.name}</p>
+                        <p className="text-xs text-muted-foreground">{slot.item.description}</p>
+                        {slot.item.neighborhood && (
+                          <p className="text-xs text-muted-foreground mt-0.5">📍 {slot.item.neighborhood}</p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </>
         )}
       </main>

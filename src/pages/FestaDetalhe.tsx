@@ -9,9 +9,11 @@ import carnavalBlocoBg from "@/assets/highlights/carnaval-bloco-bg.jpeg";
 
 function festaToSavedItem(festa: ReturnType<typeof getFestaById>, rsvp: boolean) {
   if (!festa) return null;
+  // Determine if this festa has a fixed time
+  const hasFixedTime = festa.time !== "TBD" && /^\d{2}:\d{2}$/.test(festa.time);
   return {
     id: festa.id,
-    type: "block" as const,
+    type: "festa" as const,
     title: festa.name,
     date_iso: festa.dateISO,
     start_time_24h: festa.time,
@@ -21,9 +23,11 @@ function festaToSavedItem(festa: ReturnType<typeof getFestaById>, rsvp: boolean)
     vibe_one_word: festa.tag,
     location_label: festa.location,
     gmaps_url: festa.gmapsUrl || null,
+    gmaps_urls: festa.gmapsUrl ? [festa.gmapsUrl] : [],
     notes_full: [festa.description, festa.music].filter(Boolean).join(" | "),
     created_at: new Date().toISOString(),
     rsvp,
+    priority: hasFixedTime ? "fixed" as const : "preferred" as const,
   };
 }
 
@@ -37,13 +41,13 @@ const FestaDetalhe = () => {
 
   useEffect(() => {
     if (!festa) return;
-    setIsSaved(isItemSaved(festa.id, "block"));
+    setIsSaved(isItemSaved(festa.id, "festa"));
   }, [festa]);
 
   const handleToggleSave = () => {
     if (!festa) return;
     if (isSaved) {
-      removeSavedItem(festa.id, "block");
+      removeSavedItem(festa.id, "festa");
       try {
         const draft = JSON.parse(localStorage.getItem("draft-roteiro") || "[]");
         localStorage.setItem("draft-roteiro", JSON.stringify(draft.filter((i: { id: string }) => i.id !== festa.id)));
