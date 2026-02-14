@@ -12,6 +12,7 @@ const TAB_KEYS = [
   { key: "2026-02-14", label: "Sáb 14/02" },
   { key: "2026-02-15", label: "Dom 15/02" },
   { key: "2026-02-16", label: "Seg 16/02" },
+  { key: "2026-02-17", label: "Ter 17/02" },
 ];
 
 /* ─── School Card ─── */
@@ -180,7 +181,7 @@ const TimelineSection = () => (
     <h3 className="text-sm font-medium text-white/60 uppercase tracking-wider">
       Linha do tempo
     </h3>
-    <p className="text-white/40 text-xs">Sapucaí — janelas de entrada (14–16/02/2026)</p>
+    <p className="text-white/40 text-xs">Sapucaí — janelas de entrada (14–17/02/2026)</p>
     {sapucaiTimeline.map((day) => (
       <div key={day.dateISO}>
         <p className="text-white/70 text-sm font-medium mb-1">{day.label}</p>
@@ -256,7 +257,7 @@ const DesfilesSapucai = () => {
             Desfiles na Sapucaí
           </h1>
           <p className="text-xs text-white/50 mt-1 tracking-widest uppercase">
-            Janelas de entrada (14–16/02/2026)
+            Janelas de entrada (14–17/02/2026)
           </p>
         </div>
 
