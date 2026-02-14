@@ -22,8 +22,47 @@ serve(async (req) => {
       );
     }
 
-    const { action, input, placeId, sessionToken } = await req.json();
-    console.log(`Google Places API request: action=${action}, input=${input}, placeId=${placeId}`);
+    const body = await req.json();
+    const { action, input, placeId, sessionToken } = body;
+
+    // Validate action
+    const validActions = ['autocomplete', 'details'];
+    if (!action || typeof action !== 'string' || !validActions.includes(action)) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid action' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Validate input for autocomplete
+    if (action === 'autocomplete') {
+      if (!input || typeof input !== 'string' || input.length < 2 || input.length > 200) {
+        return new Response(
+          JSON.stringify({ error: 'Invalid input parameter' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+    }
+
+    // Validate placeId for details
+    if (action === 'details') {
+      if (!placeId || typeof placeId !== 'string' || placeId.length > 300) {
+        return new Response(
+          JSON.stringify({ error: 'Invalid place ID' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+    }
+
+    // Validate sessionToken if provided
+    if (sessionToken !== undefined && (typeof sessionToken !== 'string' || sessionToken.length > 100)) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid session token' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    console.log(`Google Places API request: action=${action}`);
 
     if (action === 'autocomplete') {
       // Places Autocomplete API
@@ -44,7 +83,7 @@ serve(async (req) => {
       if (data.status !== 'OK' && data.status !== 'ZERO_RESULTS') {
         console.error('Google Places API error:', data.status, data.error_message);
         return new Response(
-          JSON.stringify({ error: data.error_message || data.status }),
+          JSON.stringify({ error: 'Places search failed' }),
           { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
@@ -75,7 +114,7 @@ serve(async (req) => {
       if (data.status !== 'OK') {
         console.error('Google Places API error:', data.status, data.error_message);
         return new Response(
-          JSON.stringify({ error: data.error_message || data.status }),
+          JSON.stringify({ error: 'Place details lookup failed' }),
           { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
@@ -107,7 +146,7 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error in google-places function:', error);
     return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }),
+      JSON.stringify({ error: 'Internal server error' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
