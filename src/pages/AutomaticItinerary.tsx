@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ChevronLeft, Check, MapPin, Utensils, Sun, Moon, Car, Footprints, Clock, Pencil, AlertTriangle, PartyPopper } from "lucide-react";
-import { getAllSavedItems, SavedItemRecord, buildItineraryForDate } from "@/hooks/use-saved-items";
+import { getAllSavedItems, SavedItemRecord } from "@/hooks/use-saved-items";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTripDraft, PriceStyle } from "@/hooks/use-trip-draft";
@@ -97,23 +97,31 @@ const AutomaticItinerary = () => {
   // Auto-generate on mount if trip dates are valid
   const [hasStartedGeneration, setHasStartedGeneration] = useState(false);
 
+  // Track saved items count to detect changes and invalidate cache
+  const savedItemsCount = getAllSavedItems().length;
+
   // Load saved itinerary from localStorage on mount
   useEffect(() => {
     const saved = localStorage.getItem(`${STORAGE_KEY}-${draft.destinationId}`);
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        if (parsed.itinerary && Object.keys(parsed.itinerary).length > 0) {
+        // Invalidate cache if saved items count changed since last build
+        const cachedSavedCount = parsed.savedItemsCount ?? -1;
+        if (parsed.itinerary && Object.keys(parsed.itinerary).length > 0 && cachedSavedCount === savedItemsCount) {
           setItinerary(parsed.itinerary);
           setDayCosts(parsed.dayCosts || {});
           setSelectedHotel(parsed.hotel || null);
           setIsGenerated(true);
+        } else {
+          // Saved items changed - clear cache so itinerary regenerates
+          console.log(`[AutoItinerary] Cache invalidated: saved items changed (${cachedSavedCount} → ${savedItemsCount})`);
         }
       } catch (e) {
         console.error('Failed to load saved itinerary:', e);
       }
     }
-  }, [draft.destinationId]);
+  }, [draft.destinationId, savedItemsCount]);
 
   // Save itinerary to localStorage whenever it changes
   useEffect(() => {
@@ -124,10 +132,11 @@ const AutomaticItinerary = () => {
         itinerary,
         dayCosts,
         hotel: selectedHotel,
+        savedItemsCount,
         updatedAt: new Date().toISOString()
       }));
     }
-  }, [itinerary, dayCosts, selectedHotel, isGenerated, draft.destinationId, actualTripDays]);
+  }, [itinerary, dayCosts, selectedHotel, isGenerated, draft.destinationId, actualTripDays, savedItemsCount]);
 
   if (!draft.destinationId) {
     navigate('/meu-roteiro', { replace: true });
@@ -539,7 +548,7 @@ const AutomaticItinerary = () => {
       dayCost.total = dayCost.food + dayCost.activities + dayCost.transport;
       costs[day] = dayCost;
 
-      // ── Inject saved blocks from SavedItems for this day ──
+      // ── Inject saved items from SavedItems for this day ──
       const tripStartDate = draft.arrivalAt ? new Date(draft.arrivalAt) : null;
       let dayISO: string | null = null;
       if (tripStartDate) {
@@ -548,19 +557,69 @@ const AutomaticItinerary = () => {
         dayISO = dayDate.toISOString().slice(0, 10);
       }
 
-      // Get saved items: by date if available, otherwise get ALL saved blocks
       const allSaved = getAllSavedItems();
-      const savedForDay = dayISO
-        ? buildItineraryForDate(dayISO).items
-        : (day === 1 ? allSaved.filter(i => i.type === "block") : []);
+
+      // Debug: log saved items summary
+      const savedBlocks = allSaved.filter(i => i.type === "block");
+      if (day === 1) {
+        console.log(`[AutoItinerary] Total saved items: ${allSaved.length}, blocks: ${savedBlocks.length}`);
+        console.log(`[AutoItinerary] First 3 saved:`, allSaved.slice(0, 3).map(i => ({ id: i.id, type: i.type, date: i.date_iso, time: i.start_time_24h })));
+        console.log(`[AutoItinerary] Trip start: ${dayISO}, days: ${actualTripDays}`);
+      }
+
+      // Strategy: match saved items to trip days
+      // 1. If dayISO matches a saved item's date_iso → include it
+      // 2. If no trip dates set (dayISO null), put ALL saved blocks on day 1
+      // 3. Also check: if saved block date falls within trip range but doesn't match
+      //    a specific day number, map it by computing the day offset
+      let savedForDay: SavedItemRecord[] = [];
+
+      if (dayISO) {
+        // Direct date match
+        savedForDay = allSaved.filter(i => i.date_iso === dayISO);
+      } else {
+        // No trip dates → all saved blocks go to day 1
+        if (day === 1) {
+          savedForDay = allSaved.filter(i => i.type === "block" || i.type === "attraction" || i.type === "restaurant" || i.type === "hotel");
+        }
+      }
+
+      // Also: catch saved blocks whose date_iso falls within trip range but
+      // maps to THIS day via offset (handles case where user sets dates that
+      // don't start on the block's date)
+      if (tripStartDate && dayISO) {
+        const tripEnd = new Date(tripStartDate);
+        tripEnd.setDate(tripEnd.getDate() + actualTripDays - 1);
+        const tripEndISO = tripEnd.toISOString().slice(0, 10);
+
+        // Find saved items with date_iso that maps to this day number
+        for (const item of allSaved) {
+          if (!item.date_iso) continue;
+          if (savedForDay.some(s => s.id === item.id)) continue;
+          // Check if this item's date is within trip range
+          if (item.date_iso >= (tripStartDate.toISOString().slice(0, 10)) && item.date_iso <= tripEndISO) {
+            // Compute which trip day this belongs to
+            const itemDate = new Date(item.date_iso + "T12:00:00");
+            const diffDays = Math.round((itemDate.getTime() - tripStartDate.getTime()) / (1000 * 60 * 60 * 24));
+            if (diffDays + 1 === day) {
+              savedForDay.push(item);
+            }
+          }
+        }
+      }
+
+      if (day === 1) {
+        console.log(`[AutoItinerary] Saved items for day ${day} (${dayISO}): ${savedForDay.length}`, savedForDay.map(i => i.id));
+      }
 
       for (const savedItem of savedForDay) {
         const alreadyInDay = daySlots.some(s => s.item.id === savedItem.id);
         if (alreadyInDay) continue;
 
         const timeStr = savedItem.start_time_24h || "12:00";
+        const hourNum = parseInt(timeStr);
         const timeBlock: 'morning' | 'afternoon' | 'evening' =
-          parseInt(timeStr) < 12 ? 'morning' : parseInt(timeStr) < 18 ? 'afternoon' : 'evening';
+          hourNum < 12 ? 'morning' : hourNum < 18 ? 'afternoon' : 'evening';
 
         daySlots.push({
           time: timeStr.slice(0, 5),
@@ -568,8 +627,8 @@ const AutomaticItinerary = () => {
           item: {
             id: savedItem.id,
             name: savedItem.title,
-            neighborhood: savedItem.neighborhood_full,
-            description: savedItem.notes_full || '',
+            neighborhood: savedItem.neighborhood_full || savedItem.neighborhood_short || '',
+            description: savedItem.notes_full || `📍 ${savedItem.neighborhood_short || ''}  ✨ ${savedItem.vibe_one_word || ''}`.trim(),
             address: savedItem.location_label,
           },
           timeBlock,
