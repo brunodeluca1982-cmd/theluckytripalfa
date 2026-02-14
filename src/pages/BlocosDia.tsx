@@ -55,14 +55,8 @@ const BlocosDia = () => {
               </div>
               <span className="text-white/40 text-sm">—</span>
               <span className="text-white text-sm font-medium truncate">{bloco.name}</span>
-              <span className="text-white/40 text-sm hidden min-[340px]:inline">—</span>
-              <span className="text-white/60 text-sm hidden min-[340px]:inline truncate">{bloco.neighborhood}</span>
-              {bloco.tag && (
-                <>
-                  <span className="text-white/40 text-sm hidden min-[400px]:inline">—</span>
-                  <span className="text-white/40 text-xs italic hidden min-[400px]:inline shrink-0">{bloco.tag}</span>
-                </>
-              )}
+              <span className="text-white/40 text-sm">–</span>
+              <span className="text-white/60 text-sm truncate">{bloco.neighborhood}</span>
               <ChevronLeft className="w-4 h-4 text-white/40 ml-auto rotate-180 shrink-0" />
             </button>
           ))}
