@@ -160,7 +160,7 @@ const SummaryTable = () => {
             <div key={p.id} className="flex items-center gap-3 px-4 py-2.5 text-sm">
               {i === 0 ? (
                 <span className="text-white/40 w-20 shrink-0 font-medium">
-                  {p.date_iso === "2026-02-14" ? "Sáb 14/02" : p.date_iso === "2026-02-15" ? "Dom 15/02" : "Seg 16/02"}
+                  {p.date_iso === "2026-02-14" ? "Sáb 14/02" : p.date_iso === "2026-02-15" ? "Dom 15/02" : p.date_iso === "2026-02-16" ? "Seg 16/02" : "Ter 17/02"}
                 </span>
               ) : (
                 <span className="w-20 shrink-0" />
