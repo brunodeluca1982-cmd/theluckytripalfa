@@ -97,7 +97,7 @@ const DestinationHub = ({ destinationId, name, country, backgroundImage, actions
         className="absolute inset-0 transition-opacity duration-300"
         style={{
           background: isCarnavalMode
-            ? "linear-gradient(to top, rgba(0,0,0,0.15), transparent 60%)"
+            ? "linear-gradient(to bottom, rgba(0,0,0,0.35), rgba(0,0,0,0.55))"
             : "linear-gradient(to top, rgba(0,0,0,0.35), transparent 60%)",
         }}
       />
@@ -213,7 +213,10 @@ const ListButton = ({ icon: Icon, label, path, isSpecial, badge, badgeShort }: L
         {label}
       </span>
       {badge && (
-        <span className="ml-auto text-[0.65rem] font-normal tracking-wide text-primary/90 flex-shrink-0">
+        <span
+          className="ml-auto text-[0.65rem] font-medium tracking-wide text-white flex-shrink-0"
+          style={{ textShadow: "0 2px 8px rgba(0,0,0,0.4)" }}
+        >
           <span className="hidden min-[380px]:inline">{badge}</span>
           <span className="inline min-[380px]:hidden">{badgeShort || badge}</span>
         </span>
