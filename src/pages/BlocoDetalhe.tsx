@@ -1,13 +1,40 @@
 import { useParams, useSearchParams, Link } from "react-router-dom";
-import { ChevronLeft, Clock, Check, Plus } from "lucide-react";
+import { ChevronLeft, Clock, Check } from "lucide-react";
 import { getBlockById } from "@/data/carnival-blocks";
 import { formatCarnavalDateFull } from "@/lib/carnaval-date-utils";
 import { useItemSave } from "@/hooks/use-item-save";
+import { upsertSavedItem, isItemSaved, markRsvp } from "@/hooks/use-saved-items";
 import { useState, useEffect } from "react";
 import carnavalBlocoBg from "@/assets/highlights/carnaval-bloco-bg.jpeg";
 
 function mapsUrl(address: string) {
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
+}
+
+/** Build a normalized SavedItemRecord from a CarnivalBlock */
+function blockToSavedItem(bloco: ReturnType<typeof getBlockById>, rsvp: boolean) {
+  if (!bloco) return null;
+  const addr = bloco.extraDetails?.concentration || bloco.address || bloco.neighborhood;
+  return {
+    id: bloco.id,
+    type: "block" as const,
+    title: bloco.name,
+    date_iso: bloco.dateISO,
+    start_time_24h: bloco.time,
+    start_hour_display: String(parseInt(bloco.time)),
+    neighborhood_full: bloco.neighborhood,
+    neighborhood_short: bloco.neighborhoodShort,
+    vibe_one_word: bloco.tag,
+    location_label: addr,
+    gmaps_url: mapsUrl(addr + ", Rio de Janeiro"),
+    notes_full: [
+      bloco.shortDescription,
+      bloco.extraDetails?.vibe?.join(" "),
+      bloco.extraDetails?.my_reading?.join(" "),
+    ].filter(Boolean).join(" | "),
+    created_at: new Date().toISOString(),
+    rsvp,
+  };
 }
 
 const BlocoDetalhe = () => {
@@ -22,14 +49,24 @@ const BlocoDetalhe = () => {
 
   useEffect(() => {
     if (!bloco) return;
-    const draft = JSON.parse(localStorage.getItem("draft-roteiro") || "[]");
-    setIsSaved(draft.some((item: { id: string }) => item.id === bloco.id));
+    // Check both legacy draft-roteiro AND new SavedItems
+    const draftSaved = JSON.parse(localStorage.getItem("draft-roteiro") || "[]")
+      .some((item: { id: string }) => item.id === bloco.id);
+    const savedItemsSaved = isItemSaved(bloco.id, "block");
+    setIsSaved(draftSaved || savedItemsSaved);
   }, [bloco]);
 
   const handleSave = () => {
     if (!bloco || isSaved) return;
+
+    // 1) Legacy save (draft-roteiro for MeuRoteiro compatibility)
     const success = saveItem(bloco.id, "activity", bloco.name, false);
-    if (success) {
+
+    // 2) Normalized save to SavedItems (for itinerary generator)
+    const record = blockToSavedItem(bloco, true);
+    if (record) upsertSavedItem(record);
+
+    if (success || record) {
       setIsSaved(true);
       setIsAnimating(true);
       setTimeout(() => setIsAnimating(false), 600);
@@ -105,60 +142,31 @@ const BlocoDetalhe = () => {
           {extra?.concentration && (
             <div>
               <p className="text-xs text-white/50 font-semibold uppercase tracking-wider mb-1">📌 Concentração</p>
-              <a
-                href={mapsUrl(extra.concentration + ", Rio de Janeiro")}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm text-blue-300 underline underline-offset-2"
-              >
-                {extra.concentration}
-              </a>
+              <a href={mapsUrl(extra.concentration + ", Rio de Janeiro")} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-300 underline underline-offset-2">{extra.concentration}</a>
             </div>
           )}
           {extra?.route && (
             <div>
               <p className="text-xs text-white/50 font-semibold uppercase tracking-wider mb-1">📌 Percurso</p>
-              <a
-                href={mapsUrl(extra.route + ", Rio de Janeiro")}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm text-blue-300 underline underline-offset-2"
-              >
-                {extra.route}
-              </a>
+              <a href={mapsUrl(extra.route + ", Rio de Janeiro")} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-300 underline underline-offset-2">{extra.route}</a>
             </div>
           )}
           {extra?.dispersal && (
             <div>
               <p className="text-xs text-white/50 font-semibold uppercase tracking-wider mb-1">📌 Dispersão</p>
-              <a
-                href={mapsUrl(extra.dispersal + ", Rio de Janeiro")}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm text-blue-300 underline underline-offset-2"
-              >
-                {extra.dispersal}
-              </a>
+              <a href={mapsUrl(extra.dispersal + ", Rio de Janeiro")} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-300 underline underline-offset-2">{extra.dispersal}</a>
             </div>
           )}
           {!extra?.concentration && bloco.address && (
             <div>
               <p className="text-xs text-white/50 font-semibold uppercase tracking-wider mb-1">📌 Endereço</p>
-              <a
-                href={mapsUrl(bloco.address + ", Rio de Janeiro")}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm text-blue-300 underline underline-offset-2"
-              >
-                {bloco.address}
-              </a>
+              <a href={mapsUrl(bloco.address + ", Rio de Janeiro")} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-300 underline underline-offset-2">{bloco.address}</a>
             </div>
           )}
         </div>
 
         {/* 4️⃣ Content Sections */}
         <div className="mx-4 rounded-2xl backdrop-blur-xl bg-white/10 border border-white/20 p-5 space-y-5">
-          {/* Como eu chego */}
           {(extra?.how_to_get_full || bloco.howToGetShort) && (
             <Section title="🚇 Como eu chego">
               {extra?.how_to_get_full ? (
@@ -172,8 +180,6 @@ const BlocoDetalhe = () => {
               )}
             </Section>
           )}
-
-          {/* A vibe */}
           {extra?.vibe && (
             <Section title="🔥 A vibe">
               <ul className="space-y-1.5">
@@ -183,8 +189,6 @@ const BlocoDetalhe = () => {
               </ul>
             </Section>
           )}
-
-          {/* Estilo musical */}
           {(extra?.music_style || bloco.musicShort) && (
             <Section title="🎶 Estilo musical">
               {extra?.music_style ? (
@@ -198,8 +202,6 @@ const BlocoDetalhe = () => {
               )}
             </Section>
           )}
-
-          {/* Estrutura */}
           {extra?.structure && (
             <Section title="🏗 Estrutura">
               {Array.isArray(extra.structure) ? (
@@ -213,8 +215,6 @@ const BlocoDetalhe = () => {
               )}
             </Section>
           )}
-
-          {/* Termina por volta de */}
           {extra?.end_time && (
             <Section title="⏰ Termina por volta de">
               <p className="text-sm text-white/80 leading-relaxed">
@@ -222,8 +222,6 @@ const BlocoDetalhe = () => {
               </p>
             </Section>
           )}
-
-          {/* Minha leitura */}
           {extra?.my_reading && (
             <Section title="🎯 Minha leitura">
               <ul className="space-y-1.5">

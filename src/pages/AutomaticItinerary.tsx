@@ -1,7 +1,8 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ChevronLeft, Check, MapPin, Utensils, Sun, Moon, Car, Footprints, Clock, Pencil, AlertTriangle } from "lucide-react";
+import { ChevronLeft, Check, MapPin, Utensils, Sun, Moon, Car, Footprints, Clock, Pencil, AlertTriangle, PartyPopper } from "lucide-react";
+import { getAllSavedItems, SavedItemRecord, buildItineraryForDate } from "@/hooks/use-saved-items";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTripDraft, PriceStyle } from "@/hooks/use-trip-draft";
@@ -537,6 +538,47 @@ const AutomaticItinerary = () => {
 
       dayCost.total = dayCost.food + dayCost.activities + dayCost.transport;
       costs[day] = dayCost;
+
+      // ── Inject saved blocks from SavedItems for this day ──
+      const tripStartDate = draft.arrivalAt ? new Date(draft.arrivalAt) : null;
+      let dayISO: string | null = null;
+      if (tripStartDate) {
+        const dayDate = new Date(tripStartDate);
+        dayDate.setDate(dayDate.getDate() + (day - 1));
+        dayISO = dayDate.toISOString().slice(0, 10);
+      }
+
+      // Get saved items: by date if available, otherwise get ALL saved blocks
+      const allSaved = getAllSavedItems();
+      const savedForDay = dayISO
+        ? buildItineraryForDate(dayISO).items
+        : (day === 1 ? allSaved.filter(i => i.type === "block") : []);
+
+      for (const savedItem of savedForDay) {
+        const alreadyInDay = daySlots.some(s => s.item.id === savedItem.id);
+        if (alreadyInDay) continue;
+
+        const timeStr = savedItem.start_time_24h || "12:00";
+        const timeBlock: 'morning' | 'afternoon' | 'evening' =
+          parseInt(timeStr) < 12 ? 'morning' : parseInt(timeStr) < 18 ? 'afternoon' : 'evening';
+
+        daySlots.push({
+          time: timeStr.slice(0, 5),
+          type: 'activity',
+          item: {
+            id: savedItem.id,
+            name: savedItem.title,
+            neighborhood: savedItem.neighborhood_full,
+            description: savedItem.notes_full || '',
+            address: savedItem.location_label,
+          },
+          timeBlock,
+        });
+      }
+
+      // Re-sort all slots by time
+      daySlots.sort((a, b) => a.time.localeCompare(b.time));
+
       generated[day] = daySlots;
     }
 
@@ -576,6 +618,11 @@ const AutomaticItinerary = () => {
     if (slot.type === 'departure') return <Clock className="w-4 h-4 text-primary" />;
     if (slot.type === 'meal') return <Utensils className="w-4 h-4 text-orange-500" />;
     if (slot.type === 'sunset') return <Sun className="w-4 h-4 text-amber-500" />;
+    // Check if this is a saved carnival block
+    const savedItems = getAllSavedItems();
+    if (savedItems.some(i => i.id === slot.item.id && i.type === 'block')) {
+      return <PartyPopper className="w-4 h-4 text-pink-500" />;
+    }
     return <MapPin className="w-4 h-4 text-primary" />;
   };
 
