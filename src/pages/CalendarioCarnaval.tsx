@@ -6,7 +6,7 @@ import { Switch } from "@/components/ui/switch";
 import { useCarnavalMode } from "@/contexts/CarnavalModeContext";
 import { useSpotifyPlayer } from "@/contexts/SpotifyPlayerContext";
 import { clearVideoSeen } from "@/pages/DestinationVideoIntro";
-import carnavalBlocoBg from "@/assets/highlights/carnaval-bloco-bg.jpeg";
+import calendarioBg from "@/assets/highlights/calendario-carnaval-bg.png";
 
 const days = [
   { date: 14, label: "14 de fevereiro — sábado" },
@@ -43,7 +43,7 @@ const CalendarioCarnaval = () => {
       {/* Background — carnival bloco photo */}
       <div
         className="absolute inset-0 bg-cover bg-center bg-fixed"
-        style={{ backgroundImage: `url(${carnavalBlocoBg})`, filter: "blur(4px) contrast(0.9)", transform: "scale(1.05)" }}
+        style={{ backgroundImage: `url(${calendarioBg})`, filter: "blur(4px) contrast(0.9)", transform: "scale(1.05)" }}
       />
       <div className="absolute inset-0 bg-black/50" />
 
