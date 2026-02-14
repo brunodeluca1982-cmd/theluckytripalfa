@@ -1,12 +1,13 @@
 import { useSearchParams, useNavigate, Link } from "react-router-dom";
 import { ChevronLeft, Clock } from "lucide-react";
 import { carnavalBlocos } from "@/data/carnaval-blocos-data";
+import { formatCarnavalDateTitle } from "@/lib/carnaval-date-utils";
 import carnavalBlocoBg from "@/assets/highlights/carnaval-bloco-bg.jpeg";
 
 const BlocosDia = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const selectedDate = Number(searchParams.get("date") || 0);
+  const selectedDate = searchParams.get("date") || "";
 
   const dayData = carnavalBlocos.find((d) => d.date === selectedDate);
   const blocos = dayData?.blocos || [];
@@ -26,7 +27,7 @@ const BlocosDia = () => {
 
         <div className="px-5 pb-6 text-center">
           <h1 className="text-3xl font-serif font-semibold text-white tracking-tight">
-            {selectedDate} de Fevereiro
+            {selectedDate ? formatCarnavalDateTitle(selectedDate) : ""}
           </h1>
           <p className="text-xs text-white/60 mt-1 tracking-widest uppercase">
             {blocos.length} {blocos.length === 1 ? "bloco" : "blocos"}
