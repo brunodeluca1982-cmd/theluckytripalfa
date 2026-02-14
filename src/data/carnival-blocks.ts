@@ -3,6 +3,15 @@
  * All screens read from this flat array filtered by dateISO.
  */
 
+export type ImageStatus = 'pending' | 'approved' | 'blocked';
+
+export interface ContentImage {
+  image_url?: string | null;
+  image_source_url?: string | null;
+  image_credit?: string | null;
+  image_status?: ImageStatus;
+}
+
 export interface CarnivalBlockExtraDetails {
   schedule_line?: string;
   concentration?: string;
@@ -16,7 +25,7 @@ export interface CarnivalBlockExtraDetails {
   my_reading?: string[];
 }
 
-export interface CarnivalBlock {
+export interface CarnivalBlock extends ContentImage {
   id: string;
   dateISO: string;
   name: string;

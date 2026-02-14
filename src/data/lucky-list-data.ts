@@ -10,6 +10,8 @@
  * - Items outside base map neighborhoods ONLY live here
  */
 
+import type { ImageStatus } from './carnival-blocks';
+
 export interface LuckyListItem {
   id: string;
   title: string;
@@ -23,6 +25,10 @@ export interface LuckyListItem {
   description: string;
   externalLink?: string;
   mediaUrl?: string;
+  image_url?: string | null;
+  image_source_url?: string | null;
+  image_credit?: string | null;
+  image_status?: ImageStatus;
   /** Internal label for premium content */
   premiumLabel: "Lucky List only — premium layer";
 }

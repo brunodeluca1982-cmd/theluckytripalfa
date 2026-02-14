@@ -6,6 +6,8 @@
  * DO NOT modify without explicit permission.
  */
 
+import type { ImageStatus } from './carnival-blocks';
+
 // ============= HOTELS =============
 export interface GuideHotel {
   id: string;
@@ -15,6 +17,10 @@ export interface GuideHotel {
   instagram?: string;
   description: string;
   kidFriendly?: boolean;
+  image_url?: string | null;
+  image_source_url?: string | null;
+  image_credit?: string | null;
+  image_status?: ImageStatus;
 }
 
 export const guideHotels: GuideHotel[] = [
@@ -62,6 +68,10 @@ export interface GuideRestaurant {
   description: string;
   kidFriendly?: boolean;
   mealType: ('breakfast' | 'brunch' | 'lunch' | 'dinner' | 'drinks')[];
+  image_url?: string | null;
+  image_source_url?: string | null;
+  image_credit?: string | null;
+  image_status?: ImageStatus;
 }
 
 export const guideRestaurants: GuideRestaurant[] = [
