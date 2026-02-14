@@ -6,11 +6,17 @@ import carnavalBlocoBg from "@/assets/highlights/carnaval-bloco-bg.jpeg";
 
 // Short display name for list only — never overwrites stored name
 function shortenBlocoName(name: string): string {
+  // Exact phrase replacements first
+  if (name === "Exaltação ao Samba de Enredo") return "Exaltação";
+  if (name === "Enredo do Meu Samba") return "E. do Meu Samba";
+
   let s = name;
+  // Remove generic prefixes
   const prefixes = ["Cordão da ", "Cordão do ", "Banda do ", "Bloco do ", "Bloco da ", "Bloco de "];
   for (const p of prefixes) {
     if (s.startsWith(p)) { s = s.slice(p.length); break; }
   }
+  // Compress "Enredo " if still long
   if (s.length > 20) s = s.replace(/^Enredo /, "E. ");
   return s;
 }
@@ -20,7 +26,9 @@ const NEIGHBORHOOD_SHORT: Record<string, string> = {
   "Copacabana": "Copa",
   "Ipanema": "Ipa",
   "Arpoador": "Arpex",
-  "Santa Teresa": "S. Tereza",
+  "Santa Teresa": "S. Teresa",
+  "Flamengo": "Fla",
+  "Botafogo": "Bota",
   "Jardim Botânico": "J Botânico",
 };
 function shortenNeighborhood(n: string): string {
