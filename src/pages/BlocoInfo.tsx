@@ -1,5 +1,5 @@
 import { useParams, useSearchParams, Link } from "react-router-dom";
-import { ChevronLeft, Clock, MapPin, Music, Users, Sparkles, Navigation, ShieldCheck, Lightbulb } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import { carnavalBlocos } from "@/data/carnaval-blocos-data";
 import { blocoExtendedInfo } from "@/data/bloco-extended-info";
 import SaveToRoteiroButton from "@/components/SaveToRoteiroButton";
@@ -31,9 +31,11 @@ const BlocoInfo = () => {
     ? `${dateNum} de fevereiro de 2026 — ${WEEKDAYS[dateNum] || ""}`
     : "";
 
+  const fullText = extra?.fullText || "Detalhes completos em breve.";
+
   return (
     <div className="min-h-screen relative">
-      {/* Background — blurred Rio carnival */}
+      {/* Background */}
       <div
         className="fixed inset-0 bg-cover bg-center"
         style={{ backgroundImage: `url(${carnavalBlocoBg})`, filter: "blur(6px) contrast(0.9)", transform: "scale(1.05)" }}
@@ -62,40 +64,11 @@ const BlocoInfo = () => {
           )}
         </div>
 
-        {/* Info sections */}
-        <div className="mx-4 space-y-3">
-          {/* Basic info card */}
-          <InfoCard>
-            <InfoRow icon={Clock} label="Horário" value={extra?.horarioCompleto || `${bloco.startHour}h — Concentração`} />
-            <InfoRow icon={MapPin} label="Endereço" value={extra?.endereco || bloco.location} />
-            <InfoRow icon={Sparkles} label="Vibe" value={bloco.vibe} />
-            <InfoRow icon={Users} label="Público" value={extra?.publicoDetalhado || bloco.publico} />
-            <InfoRow icon={Music} label="Música" value={extra?.musicaDetalhada || bloco.musica} />
-          </InfoCard>
-
-          {/* Como chegar */}
-          {extra?.comoChegar && (
-            <InfoCard title="Como chegar">
-              <div className="flex items-start gap-3">
-                <Navigation className="w-4 h-4 text-white/60 shrink-0 mt-0.5" />
-                <p className="text-sm text-white/90 leading-relaxed">{extra.comoChegar}</p>
-              </div>
-            </InfoCard>
-          )}
-
-          {/* Dicas práticas */}
-          {extra?.dicas && extra.dicas.length > 0 && (
-            <InfoCard title="Dicas práticas">
-              <div className="space-y-3">
-                {extra.dicas.map((dica, i) => (
-                  <div key={i} className="flex items-start gap-3">
-                    {i === 0 ? <ShieldCheck className="w-4 h-4 text-white/60 shrink-0 mt-0.5" /> : <Lightbulb className="w-4 h-4 text-white/60 shrink-0 mt-0.5" />}
-                    <p className="text-sm text-white/90 leading-relaxed">{dica}</p>
-                  </div>
-                ))}
-              </div>
-            </InfoCard>
-          )}
+        {/* Full text content */}
+        <div className="mx-4 rounded-2xl backdrop-blur-xl bg-white/10 border border-white/20 p-5">
+          <div className="text-sm text-white/90 leading-relaxed whitespace-pre-line">
+            {fullText}
+          </div>
         </div>
       </div>
 
@@ -111,23 +84,5 @@ const BlocoInfo = () => {
     </div>
   );
 };
-
-/* Reusable glass card */
-const InfoCard = ({ title, children }: { title?: string; children: React.ReactNode }) => (
-  <div className="rounded-2xl backdrop-blur-xl bg-white/10 border border-white/20 p-5 space-y-4">
-    {title && <h2 className="text-sm font-semibold text-white/70 uppercase tracking-wider">{title}</h2>}
-    {children}
-  </div>
-);
-
-const InfoRow = ({ icon: Icon, label, value }: { icon: React.ElementType; label: string; value: string }) => (
-  <div className="flex items-start gap-3">
-    <Icon className="w-4 h-4 text-white/60 shrink-0 mt-0.5" />
-    <div>
-      <span className="text-[11px] text-white/40 uppercase tracking-wider block">{label}</span>
-      <span className="text-sm text-white leading-relaxed">{value}</span>
-    </div>
-  </div>
-);
 
 export default BlocoInfo;
