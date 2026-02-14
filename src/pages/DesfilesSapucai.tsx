@@ -4,7 +4,7 @@ import { ChevronLeft, ChevronDown, ExternalLink, Music, Crown, Sparkles, Clock, 
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import { sapucaiParades, getParadesByDate, sapucaiTimeline, type SapucaiParade } from "@/data/sapucai-parades-data";
+import { sapucaiParades, getParadesByDate, type SapucaiParade } from "@/data/sapucai-parades-data";
 import { useItemSave } from "@/hooks/use-item-save";
 import carnavalBlocoBg from "@/assets/highlights/carnaval-bloco-bg.jpeg";
 
@@ -175,40 +175,8 @@ const SummaryTable = () => {
   );
 };
 
-/* ─── Timeline Section ─── */
-const TimelineSection = () => (
-  <div className="rounded-2xl backdrop-blur-xl bg-white/8 border border-white/15 p-4 space-y-4">
-    <h3 className="text-sm font-medium text-white/60 uppercase tracking-wider">
-      Linha do tempo
-    </h3>
-    <p className="text-white/40 text-xs">Sapucaí — janelas de entrada (14–17/02/2026)</p>
-    {sapucaiTimeline.map((day) => (
-      <div key={day.dateISO}>
-        <p className="text-white/70 text-sm font-medium mb-1">{day.label}</p>
-        <div className="space-y-0.5 pl-3 border-l border-white/10">
-          {day.entries.map((e, i) => (
-            <p key={i} className="text-white/60 text-sm">{e}</p>
-          ))}
-        </div>
-      </div>
-    ))}
-  </div>
-);
 
-/* ─── Stories Layout Guidance ─── */
-const StoriesGuidance = () => (
-  <div className="rounded-2xl backdrop-blur-xl bg-white/8 border border-white/15 p-4">
-    <h3 className="text-sm font-medium text-white/60 uppercase tracking-wider mb-3">
-      Layout para Stories e timeline
-    </h3>
-    <p className="text-white/60 text-sm leading-relaxed">
-      Um carrossel de 4 telas por noite: Tela 1 (Capa da noite) com "Série Ouro / Grupo Especial + data + faixa de horário"; 
-      Tela 2–4 com 2 escolas por tela (nome grande + horário + trecho do refrão + rainha/musas em uma linha). 
-      Se for fazer "1 escola por Story", use este padrão: topo com nome, abaixo horário, depois trecho curto, 
-      e no rodapé rainha + musas (sem texto longo).
-    </p>
-  </div>
-);
+
 
 /* ─── Main Page ─── */
 const DesfilesSapucai = () => {
@@ -287,11 +255,6 @@ const DesfilesSapucai = () => {
             ))}
           </Tabs>
 
-          {/* C: Stories layout */}
-          <StoriesGuidance />
-
-          {/* D: Timeline */}
-          <TimelineSection />
         </div>
       </div>
     </div>
