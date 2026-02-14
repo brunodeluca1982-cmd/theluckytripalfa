@@ -7,19 +7,28 @@ import { useState, useEffect, useCallback } from "react";
 
 export interface SavedItemRecord {
   id: string;
-  type: "block" | "attraction" | "restaurant" | "hotel";
+  type: "block" | "attraction" | "restaurant" | "hotel" | "festa" | "activity";
   title: string;
   date_iso?: string;
   start_time_24h?: string;
+  end_time_24h?: string;
   start_hour_display?: string;
   neighborhood_full: string;
   neighborhood_short: string;
   vibe_one_word?: string;
   location_label: string;
   gmaps_url: string;
+  gmaps_urls?: string[];
   notes_full: string;
   created_at: string;
   rsvp: boolean;
+  // Scheduling metadata
+  priority?: "fixed" | "preferred" | "flexible";
+  duration_minutes?: number;
+  schedule_status?: "scheduled" | "unscheduled";
+  unscheduled_reason?: string;
+  missing_fields?: string[];
+  overnight?: boolean;
   // Internal logging
   last_itinerary_build_at?: string;
   last_itinerary_input_count?: number;
