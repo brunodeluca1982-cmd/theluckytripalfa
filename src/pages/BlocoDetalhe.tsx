@@ -3,7 +3,7 @@ import { ChevronLeft, Clock, Check } from "lucide-react";
 import { getBlockById } from "@/data/carnival-blocks";
 import { formatCarnavalDateFull } from "@/lib/carnaval-date-utils";
 import { useItemSave } from "@/hooks/use-item-save";
-import { upsertSavedItem, isItemSaved, markRsvp } from "@/hooks/use-saved-items";
+import { upsertSavedItem, removeSavedItem, isItemSaved } from "@/hooks/use-saved-items";
 import { useState, useEffect } from "react";
 import carnavalBlocoBg from "@/assets/highlights/carnaval-bloco-bg.jpeg";
 
@@ -49,24 +49,30 @@ const BlocoDetalhe = () => {
 
   useEffect(() => {
     if (!bloco) return;
-    // Check both legacy draft-roteiro AND new SavedItems
-    const draftSaved = JSON.parse(localStorage.getItem("draft-roteiro") || "[]")
-      .some((item: { id: string }) => item.id === bloco.id);
-    const savedItemsSaved = isItemSaved(bloco.id, "block");
-    setIsSaved(draftSaved || savedItemsSaved);
+    setIsSaved(isItemSaved(bloco.id, "block"));
   }, [bloco]);
 
-  const handleSave = () => {
-    if (!bloco || isSaved) return;
+  const handleToggleSave = () => {
+    if (!bloco) return;
 
-    // 1) Legacy save (draft-roteiro for MeuRoteiro compatibility)
-    const success = saveItem(bloco.id, "activity", bloco.name, false);
-
-    // 2) Normalized save to SavedItems (for itinerary generator)
-    const record = blockToSavedItem(bloco, true);
-    if (record) upsertSavedItem(record);
-
-    if (success || record) {
+    if (isSaved) {
+      // Remove from SavedItems
+      removeSavedItem(bloco.id, "block");
+      // Also remove from legacy draft-roteiro
+      try {
+        const draft = JSON.parse(localStorage.getItem("draft-roteiro") || "[]");
+        const filtered = draft.filter((item: { id: string }) => item.id !== bloco.id);
+        localStorage.setItem("draft-roteiro", JSON.stringify(filtered));
+      } catch {}
+      setIsSaved(false);
+      setIsAnimating(true);
+      setTimeout(() => setIsAnimating(false), 600);
+    } else {
+      // Legacy save
+      saveItem(bloco.id, "activity", bloco.name, false);
+      // Normalized save with rsvp=true
+      const record = blockToSavedItem(bloco, true);
+      if (record) upsertSavedItem(record);
       setIsSaved(true);
       setIsAnimating(true);
       setTimeout(() => setIsAnimating(false), 600);
@@ -104,8 +110,8 @@ const BlocoDetalhe = () => {
             Voltar
           </Link>
           <button
-            onClick={handleSave}
-            disabled={isSaved}
+            onClick={handleToggleSave}
+            
             className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-300 ${
               isSaved
                 ? "backdrop-blur-md bg-white/20 text-white/70 border border-white/20"

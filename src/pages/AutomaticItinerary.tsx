@@ -252,303 +252,20 @@ const AutomaticItinerary = () => {
     let currentPlaceId = hotel.id;
     let currentNeighborhood = hotel.neighborhood;
 
+    // Helper: parse "HH:MM" to minutes since midnight
+    const parseTimeToMinutes = (t: string): number => {
+      const [h, m] = t.split(":").map(Number);
+      return (h || 0) * 60 + (m || 0);
+    };
+
     for (let day = 1; day <= actualTripDays; day++) {
       const daySlots: ItinerarySlot[] = [];
       let dayCost: DayCosts = { food: 0, activities: 0, transport: 0, total: 0 };
       
-      // Reset to hotel at start of each day
       currentPlaceId = hotel.id;
       currentNeighborhood = hotel.neighborhood;
 
-      // Departure from hotel
-      const hotelAddr = getValidatedLocation(hotel.id);
-      daySlots.push({
-        time: '08:30',
-        type: 'departure',
-        item: { 
-          id: hotel.id, 
-          name: hotel.name, 
-          neighborhood: hotel.neighborhood, 
-          description: 'Saída do hotel',
-          address: hotelAddr?.fullAddress,
-        },
-        timeBlock: 'morning'
-      });
-
-      // Morning activity (prefer iconic on day 1)
-      const morningPool = day === 1 ? iconic : regular;
-      const morningActivity = morningPool.find(a => 
-        !usedActivities.has(a.id) && 
-        (a.bestTime === 'manhã' || a.bestTime === 'qualquer')
-      ) || regular.find(a => !usedActivities.has(a.id));
-      
-      if (morningActivity) {
-        usedActivities.add(morningActivity.id);
-        const activityLocation = getValidatedLocation(morningActivity.id);
-        
-        // Add transport to activity
-        const transportResult = createTransportSegment(
-          currentPlaceId,
-          morningActivity.id,
-          currentNeighborhood,
-          morningActivity.neighborhood
-        );
-        
-        if (transportResult) {
-          daySlots.push({
-            time: '08:45',
-            type: 'transport',
-            item: { id: 'transport', name: `${transportResult.segment.mode === 'walking' ? 'A pé' : 'Uber'}`, neighborhood: '', description: '' },
-            transport: transportResult.segment,
-            timeBlock: 'morning'
-          });
-          dayCost.transport += transportResult.cost;
-        }
-        
-        currentPlaceId = morningActivity.id;
-        currentNeighborhood = morningActivity.neighborhood;
-        daySlots.push({
-          time: '09:00',
-          type: 'activity',
-          item: { ...morningActivity, address: activityLocation?.fullAddress },
-          timeBlock: 'morning'
-        });
-        dayCost.activities += 50;
-      }
-
-      // Lunch - prioritize price match, then proximity
-      // Track upgrades per day (allow max 1 outside preferred range)
-      let upgradesUsedToday = 0;
-      const maxUpgradesPerDay = 1;
-      
-      const currentLocation = getValidatedLocation(currentPlaceId);
-      let sortedRestaurants = restaurants
-        .filter(r => !usedRestaurants.has(r.id) && r.mealType.includes('lunch'))
-        .map(r => {
-          const loc = getValidatedLocation(r.id);
-          const dist = currentLocation && loc 
-            ? calculateDistance(currentLocation.lat, currentLocation.lng, loc.lat, loc.lng)
-            : 999;
-          const priceScore = getPriceMatchScore(r.priceLevel);
-          return { ...r, distance: dist, priceScore };
-        })
-        // Sort by price match first, then distance
-        .sort((a, b) => {
-          if (a.priceScore !== b.priceScore) return a.priceScore - b.priceScore;
-          return a.distance - b.distance;
-        });
-      
-      // Pick first option, checking upgrade limit
-      let lunch = sortedRestaurants.find(r => {
-        if (r.priceScore <= 1) return true; // Within preferred range
-        if (upgradesUsedToday < maxUpgradesPerDay) {
-          upgradesUsedToday++;
-          return true;
-        }
-        return false;
-      });
-      
-      if (lunch) {
-        usedRestaurants.add(lunch.id);
-        const lunchLocation = getValidatedLocation(lunch.id);
-        
-        const transportResult = createTransportSegment(
-          currentPlaceId,
-          lunch.id,
-          currentNeighborhood,
-          lunch.neighborhood
-        );
-        
-        if (transportResult) {
-          daySlots.push({
-            time: '12:15',
-            type: 'transport',
-            item: { id: 'transport', name: `${transportResult.segment.mode === 'walking' ? 'A pé' : 'Uber'}`, neighborhood: '', description: '' },
-            transport: transportResult.segment,
-            timeBlock: 'afternoon'
-          });
-          dayCost.transport += transportResult.cost;
-        }
-        
-        currentPlaceId = lunch.id;
-        currentNeighborhood = lunch.neighborhood;
-        daySlots.push({
-          time: '12:30',
-          type: 'meal',
-          item: { ...lunch, address: lunchLocation?.fullAddress },
-          timeBlock: 'afternoon'
-        });
-        dayCost.food += getPriceEstimate(lunch.priceLevel);
-      }
-
-      // Afternoon activity - prefer nearby
-      const afternoonLocation = getValidatedLocation(currentPlaceId);
-      let sortedAfternoonActivities = regular
-        .filter(a => !usedActivities.has(a.id) && (a.bestTime === 'tarde' || a.bestTime === 'qualquer'))
-        .map(a => {
-          const loc = getValidatedLocation(a.id);
-          const dist = afternoonLocation && loc
-            ? calculateDistance(afternoonLocation.lat, afternoonLocation.lng, loc.lat, loc.lng)
-            : 999;
-          return { ...a, distance: dist };
-        })
-        .sort((a, b) => a.distance - b.distance);
-      
-      const afternoonActivity = sortedAfternoonActivities[0];
-      
-      if (afternoonActivity) {
-        usedActivities.add(afternoonActivity.id);
-        const activityLocation = getValidatedLocation(afternoonActivity.id);
-        
-        const transportResult = createTransportSegment(
-          currentPlaceId,
-          afternoonActivity.id,
-          currentNeighborhood,
-          afternoonActivity.neighborhood
-        );
-        
-        if (transportResult) {
-          daySlots.push({
-            time: '14:45',
-            type: 'transport',
-            item: { id: 'transport', name: `${transportResult.segment.mode === 'walking' ? 'A pé' : 'Uber'}`, neighborhood: '', description: '' },
-            transport: transportResult.segment,
-            timeBlock: 'afternoon'
-          });
-          dayCost.transport += transportResult.cost;
-        }
-        
-        currentPlaceId = afternoonActivity.id;
-        currentNeighborhood = afternoonActivity.neighborhood;
-        daySlots.push({
-          time: '15:00',
-          type: 'activity',
-          item: { ...afternoonActivity, address: activityLocation?.fullAddress },
-          timeBlock: 'afternoon'
-        });
-        dayCost.activities += 50;
-      }
-
-      // Sunset (if available)
-      const sunsetActivity = activities.find(a => 
-        !usedActivities.has(a.id) && a.bestTime === 'pôr do sol'
-      );
-      if (sunsetActivity) {
-        usedActivities.add(sunsetActivity.id);
-        const sunsetLocation = getValidatedLocation(sunsetActivity.id);
-        
-        const transportResult = createTransportSegment(
-          currentPlaceId,
-          sunsetActivity.id,
-          currentNeighborhood,
-          sunsetActivity.neighborhood
-        );
-        
-        if (transportResult) {
-          daySlots.push({
-            time: '17:00',
-            type: 'transport',
-            item: { id: 'transport', name: `${transportResult.segment.mode === 'walking' ? 'A pé' : 'Uber'}`, neighborhood: '', description: '' },
-            transport: transportResult.segment,
-            timeBlock: 'evening'
-          });
-          dayCost.transport += transportResult.cost;
-        }
-        
-        currentPlaceId = sunsetActivity.id;
-        currentNeighborhood = sunsetActivity.neighborhood;
-        daySlots.push({
-          time: '17:30',
-          type: 'sunset',
-          item: { ...sunsetActivity, address: sunsetLocation?.fullAddress },
-          timeBlock: 'evening'
-        });
-      }
-
-      // Dinner - prioritize price match, then proximity
-      const dinnerLocation = getValidatedLocation(currentPlaceId);
-      let sortedDinnerRestaurants = restaurants
-        .filter(r => !usedRestaurants.has(r.id) && r.mealType.includes('dinner'))
-        .map(r => {
-          const loc = getValidatedLocation(r.id);
-          const dist = dinnerLocation && loc
-            ? calculateDistance(dinnerLocation.lat, dinnerLocation.lng, loc.lat, loc.lng)
-            : 999;
-          const priceScore = getPriceMatchScore(r.priceLevel);
-          return { ...r, distance: dist, priceScore };
-        })
-        // Sort by price match first, then distance
-        .sort((a, b) => {
-          if (a.priceScore !== b.priceScore) return a.priceScore - b.priceScore;
-          return a.distance - b.distance;
-        });
-      
-      // Pick first option, checking upgrade limit
-      let dinner = sortedDinnerRestaurants.find(r => {
-        if (r.priceScore <= 1) return true; // Within preferred range
-        if (upgradesUsedToday < maxUpgradesPerDay) {
-          upgradesUsedToday++;
-          return true;
-        }
-        return false;
-      });
-      
-      if (dinner) {
-        usedRestaurants.add(dinner.id);
-        const dinnerLoc = getValidatedLocation(dinner.id);
-        
-        const transportResult = createTransportSegment(
-          currentPlaceId,
-          dinner.id,
-          currentNeighborhood,
-          dinner.neighborhood
-        );
-        
-        if (transportResult) {
-          daySlots.push({
-            time: '19:30',
-            type: 'transport',
-            item: { id: 'transport', name: `${transportResult.segment.mode === 'walking' ? 'A pé' : 'Uber'}`, neighborhood: '', description: '' },
-            transport: transportResult.segment,
-            timeBlock: 'evening'
-          });
-          dayCost.transport += transportResult.cost;
-        }
-        
-        currentPlaceId = dinner.id;
-        currentNeighborhood = dinner.neighborhood;
-        daySlots.push({
-          time: '20:00',
-          type: 'meal',
-          item: { ...dinner, address: dinnerLoc?.fullAddress },
-          timeBlock: 'evening'
-        });
-        dayCost.food += getPriceEstimate(dinner.priceLevel);
-      }
-
-      // Return to hotel
-      const returnTransport = createTransportSegment(
-        currentPlaceId,
-        hotel.id,
-        currentNeighborhood,
-        hotel.neighborhood
-      );
-      
-      if (returnTransport) {
-        daySlots.push({
-          time: '22:00',
-          type: 'transport',
-          item: { id: 'transport', name: `${returnTransport.segment.mode === 'walking' ? 'A pé' : 'Uber'} — retorno ao hotel`, neighborhood: '', description: '' },
-          transport: returnTransport.segment,
-          timeBlock: 'evening'
-        });
-        dayCost.transport += returnTransport.cost;
-      }
-
-      dayCost.total = dayCost.food + dayCost.activities + dayCost.transport;
-      costs[day] = dayCost;
-
-      // ── Inject saved items from SavedItems for this day ──
+      // ── 1) Compute dayISO and fetch saved items ──
       const tripStartDate = draft.arrivalAt ? new Date(draft.arrivalAt) : null;
       let dayISO: string | null = null;
       if (tripStartDate) {
@@ -558,69 +275,75 @@ const AutomaticItinerary = () => {
       }
 
       const allSaved = getAllSavedItems();
-
-      // Debug: log saved items summary
-      const savedBlocks = allSaved.filter(i => i.type === "block");
-      if (day === 1) {
-        console.log(`[AutoItinerary] Total saved items: ${allSaved.length}, blocks: ${savedBlocks.length}`);
-        console.log(`[AutoItinerary] First 3 saved:`, allSaved.slice(0, 3).map(i => ({ id: i.id, type: i.type, date: i.date_iso, time: i.start_time_24h })));
-        console.log(`[AutoItinerary] Trip start: ${dayISO}, days: ${actualTripDays}`);
-      }
-
-      // Strategy: match saved items to trip days
-      // 1. If dayISO matches a saved item's date_iso → include it
-      // 2. If no trip dates set (dayISO null), put ALL saved blocks on day 1
-      // 3. Also check: if saved block date falls within trip range but doesn't match
-      //    a specific day number, map it by computing the day offset
       let savedForDay: SavedItemRecord[] = [];
 
       if (dayISO) {
-        // Direct date match
         savedForDay = allSaved.filter(i => i.date_iso === dayISO);
-      } else {
-        // No trip dates → all saved blocks go to day 1
-        if (day === 1) {
-          savedForDay = allSaved.filter(i => i.type === "block" || i.type === "attraction" || i.type === "restaurant" || i.type === "hotel");
-        }
+      } else if (day === 1) {
+        savedForDay = [...allSaved];
       }
 
-      // Also: catch saved blocks whose date_iso falls within trip range but
-      // maps to THIS day via offset (handles case where user sets dates that
-      // don't start on the block's date)
+      // Also catch items mapped by date offset within trip range
       if (tripStartDate && dayISO) {
         const tripEnd = new Date(tripStartDate);
         tripEnd.setDate(tripEnd.getDate() + actualTripDays - 1);
         const tripEndISO = tripEnd.toISOString().slice(0, 10);
-
-        // Find saved items with date_iso that maps to this day number
+        const tripStartISO = tripStartDate.toISOString().slice(0, 10);
         for (const item of allSaved) {
-          if (!item.date_iso) continue;
-          if (savedForDay.some(s => s.id === item.id)) continue;
-          // Check if this item's date is within trip range
-          if (item.date_iso >= (tripStartDate.toISOString().slice(0, 10)) && item.date_iso <= tripEndISO) {
-            // Compute which trip day this belongs to
+          if (!item.date_iso || savedForDay.some(s => s.id === item.id)) continue;
+          if (item.date_iso >= tripStartISO && item.date_iso <= tripEndISO) {
             const itemDate = new Date(item.date_iso + "T12:00:00");
             const diffDays = Math.round((itemDate.getTime() - tripStartDate.getTime()) / (1000 * 60 * 60 * 24));
-            if (diffDays + 1 === day) {
-              savedForDay.push(item);
-            }
+            if (diffDays + 1 === day) savedForDay.push(item);
           }
         }
       }
 
-      if (day === 1) {
-        console.log(`[AutoItinerary] Saved items for day ${day} (${dayISO}): ${savedForDay.length}`, savedForDay.map(i => i.id));
+      // Separate fixed blocos vs flexible saved items
+      const fixedBlocos = savedForDay
+        .filter(i => i.type === "block" && i.start_time_24h)
+        .sort((a, b) => (a.start_time_24h || "").localeCompare(b.start_time_24h || ""));
+      const flexibleSaved = savedForDay.filter(i => i.type !== "block");
+
+      // Debug
+      console.log(`[AutoItinerary] Day ${day} (${dayISO}): fixed_blocos=${fixedBlocos.length}, flexible_saved=${flexibleSaved.length}`);
+      if (fixedBlocos.length > 0) console.log(`[AutoItinerary] Blocos:`, fixedBlocos.map(b => ({ id: b.id, time: b.start_time_24h })));
+
+      // Build locked time ranges from blocos (each ~2h)
+      const lockedRanges: { start: number; end: number }[] = [];
+      for (const bloco of fixedBlocos) {
+        const startMin = parseTimeToMinutes(bloco.start_time_24h || "12:00");
+        lockedRanges.push({ start: startMin, end: startMin + 120 });
+      }
+      const overlapsLocked = (startMin: number, endMin: number): boolean =>
+        lockedRanges.some(r => startMin < r.end && endMin > r.start);
+
+      // ── 2) Insert fixed blocos ──
+      for (const bloco of fixedBlocos) {
+        const timeStr = (bloco.start_time_24h || "12:00").slice(0, 5);
+        const hourNum = parseInt(timeStr);
+        const timeBlock: 'morning' | 'afternoon' | 'evening' =
+          hourNum < 12 ? 'morning' : hourNum < 18 ? 'afternoon' : 'evening';
+        daySlots.push({
+          time: timeStr,
+          type: 'activity',
+          item: {
+            id: bloco.id,
+            name: bloco.title,
+            neighborhood: bloco.neighborhood_short || bloco.neighborhood_full || '',
+            description: `📍 ${bloco.neighborhood_short || bloco.neighborhood_full || ''}  ✨ ${bloco.vibe_one_word || ''}`.trim(),
+            address: bloco.location_label,
+          },
+          timeBlock,
+        });
       }
 
-      for (const savedItem of savedForDay) {
-        const alreadyInDay = daySlots.some(s => s.item.id === savedItem.id);
-        if (alreadyInDay) continue;
-
+      // ── 3) Insert flexible saved items ──
+      for (const savedItem of flexibleSaved) {
         const timeStr = savedItem.start_time_24h || "12:00";
         const hourNum = parseInt(timeStr);
         const timeBlock: 'morning' | 'afternoon' | 'evening' =
           hourNum < 12 ? 'morning' : hourNum < 18 ? 'afternoon' : 'evening';
-
         daySlots.push({
           time: timeStr.slice(0, 5),
           type: 'activity',
@@ -628,15 +351,133 @@ const AutomaticItinerary = () => {
             id: savedItem.id,
             name: savedItem.title,
             neighborhood: savedItem.neighborhood_full || savedItem.neighborhood_short || '',
-            description: savedItem.notes_full || `📍 ${savedItem.neighborhood_short || ''}  ✨ ${savedItem.vibe_one_word || ''}`.trim(),
+            description: savedItem.notes_full || '',
             address: savedItem.location_label,
           },
           timeBlock,
         });
       }
 
-      // Re-sort all slots by time
+      // ── 4) Fill gaps with curated content, skipping bloco time slots ──
+
+      // Hotel departure (8:30) only if no bloco at that time
+      if (!overlapsLocked(510, 570)) {
+        const hotelAddr = getValidatedLocation(hotel.id);
+        daySlots.push({
+          time: '08:30', type: 'departure',
+          item: { id: hotel.id, name: hotel.name, neighborhood: hotel.neighborhood, description: 'Saída do hotel', address: hotelAddr?.fullAddress },
+          timeBlock: 'morning'
+        });
+      }
+
+      // Morning activity (9:00-11:00)
+      if (!overlapsLocked(540, 660)) {
+        const morningPool = day === 1 ? iconic : regular;
+        const morningActivity = morningPool.find(a => !usedActivities.has(a.id) && (a.bestTime === 'manhã' || a.bestTime === 'qualquer')) || regular.find(a => !usedActivities.has(a.id));
+        if (morningActivity) {
+          usedActivities.add(morningActivity.id);
+          const activityLocation = getValidatedLocation(morningActivity.id);
+          const transportResult = createTransportSegment(currentPlaceId, morningActivity.id, currentNeighborhood, morningActivity.neighborhood);
+          if (transportResult) {
+            daySlots.push({ time: '08:45', type: 'transport', item: { id: 'transport', name: transportResult.segment.mode === 'walking' ? 'A pé' : 'Uber', neighborhood: '', description: '' }, transport: transportResult.segment, timeBlock: 'morning' });
+            dayCost.transport += transportResult.cost;
+          }
+          currentPlaceId = morningActivity.id;
+          currentNeighborhood = morningActivity.neighborhood;
+          daySlots.push({ time: '09:00', type: 'activity', item: { ...morningActivity, address: activityLocation?.fullAddress }, timeBlock: 'morning' });
+          dayCost.activities += 50;
+        }
+      }
+
+      // Lunch (12:00-14:00)
+      if (!overlapsLocked(720, 840)) {
+        let upgradesUsedToday = 0;
+        const currentLocation = getValidatedLocation(currentPlaceId);
+        let sortedRestaurants = restaurants
+          .filter(r => !usedRestaurants.has(r.id) && r.mealType.includes('lunch'))
+          .map(r => { const loc = getValidatedLocation(r.id); const dist = currentLocation && loc ? calculateDistance(currentLocation.lat, currentLocation.lng, loc.lat, loc.lng) : 999; return { ...r, distance: dist, priceScore: getPriceMatchScore(r.priceLevel) }; })
+          .sort((a, b) => a.priceScore !== b.priceScore ? a.priceScore - b.priceScore : a.distance - b.distance);
+        let lunch = sortedRestaurants.find(r => { if (r.priceScore <= 1) return true; if (upgradesUsedToday < 1) { upgradesUsedToday++; return true; } return false; });
+        if (lunch) {
+          usedRestaurants.add(lunch.id);
+          const lunchLocation = getValidatedLocation(lunch.id);
+          const transportResult = createTransportSegment(currentPlaceId, lunch.id, currentNeighborhood, lunch.neighborhood);
+          if (transportResult) {
+            daySlots.push({ time: '12:15', type: 'transport', item: { id: 'transport', name: transportResult.segment.mode === 'walking' ? 'A pé' : 'Uber', neighborhood: '', description: '' }, transport: transportResult.segment, timeBlock: 'afternoon' });
+            dayCost.transport += transportResult.cost;
+          }
+          currentPlaceId = lunch.id; currentNeighborhood = lunch.neighborhood;
+          daySlots.push({ time: '12:30', type: 'meal', item: { ...lunch, address: lunchLocation?.fullAddress }, timeBlock: 'afternoon' });
+          dayCost.food += getPriceEstimate(lunch.priceLevel);
+        }
+      }
+
+      // Afternoon activity (14:30-17:00)
+      if (!overlapsLocked(870, 1020)) {
+        const afternoonLocation = getValidatedLocation(currentPlaceId);
+        let sortedAft = regular.filter(a => !usedActivities.has(a.id) && (a.bestTime === 'tarde' || a.bestTime === 'qualquer'))
+          .map(a => { const loc = getValidatedLocation(a.id); const dist = afternoonLocation && loc ? calculateDistance(afternoonLocation.lat, afternoonLocation.lng, loc.lat, loc.lng) : 999; return { ...a, distance: dist }; })
+          .sort((a, b) => a.distance - b.distance);
+        const aftAct = sortedAft[0];
+        if (aftAct) {
+          usedActivities.add(aftAct.id);
+          const actLoc = getValidatedLocation(aftAct.id);
+          const tr = createTransportSegment(currentPlaceId, aftAct.id, currentNeighborhood, aftAct.neighborhood);
+          if (tr) { daySlots.push({ time: '14:45', type: 'transport', item: { id: 'transport', name: tr.segment.mode === 'walking' ? 'A pé' : 'Uber', neighborhood: '', description: '' }, transport: tr.segment, timeBlock: 'afternoon' }); dayCost.transport += tr.cost; }
+          currentPlaceId = aftAct.id; currentNeighborhood = aftAct.neighborhood;
+          daySlots.push({ time: '15:00', type: 'activity', item: { ...aftAct, address: actLoc?.fullAddress }, timeBlock: 'afternoon' });
+          dayCost.activities += 50;
+        }
+      }
+
+      // Sunset (17:00-18:30)
+      if (!overlapsLocked(1020, 1110)) {
+        const sunsetAct = activities.find(a => !usedActivities.has(a.id) && a.bestTime === 'pôr do sol');
+        if (sunsetAct) {
+          usedActivities.add(sunsetAct.id);
+          const sunLoc = getValidatedLocation(sunsetAct.id);
+          const tr = createTransportSegment(currentPlaceId, sunsetAct.id, currentNeighborhood, sunsetAct.neighborhood);
+          if (tr) { daySlots.push({ time: '17:00', type: 'transport', item: { id: 'transport', name: tr.segment.mode === 'walking' ? 'A pé' : 'Uber', neighborhood: '', description: '' }, transport: tr.segment, timeBlock: 'evening' }); dayCost.transport += tr.cost; }
+          currentPlaceId = sunsetAct.id; currentNeighborhood = sunsetAct.neighborhood;
+          daySlots.push({ time: '17:30', type: 'sunset', item: { ...sunsetAct, address: sunLoc?.fullAddress }, timeBlock: 'evening' });
+        }
+      }
+
+      // Dinner (19:30-21:00)
+      if (!overlapsLocked(1170, 1260)) {
+        const dinLoc = getValidatedLocation(currentPlaceId);
+        let sortedDin = restaurants.filter(r => !usedRestaurants.has(r.id) && r.mealType.includes('dinner'))
+          .map(r => { const loc = getValidatedLocation(r.id); const dist = dinLoc && loc ? calculateDistance(dinLoc.lat, dinLoc.lng, loc.lat, loc.lng) : 999; return { ...r, distance: dist, priceScore: getPriceMatchScore(r.priceLevel) }; })
+          .sort((a, b) => a.priceScore !== b.priceScore ? a.priceScore - b.priceScore : a.distance - b.distance);
+        let dinner = sortedDin.find(r => r.priceScore <= 1);
+        if (dinner) {
+          usedRestaurants.add(dinner.id);
+          const dLoc = getValidatedLocation(dinner.id);
+          const tr = createTransportSegment(currentPlaceId, dinner.id, currentNeighborhood, dinner.neighborhood);
+          if (tr) { daySlots.push({ time: '19:30', type: 'transport', item: { id: 'transport', name: tr.segment.mode === 'walking' ? 'A pé' : 'Uber', neighborhood: '', description: '' }, transport: tr.segment, timeBlock: 'evening' }); dayCost.transport += tr.cost; }
+          currentPlaceId = dinner.id; currentNeighborhood = dinner.neighborhood;
+          daySlots.push({ time: '20:00', type: 'meal', item: { ...dinner, address: dLoc?.fullAddress }, timeBlock: 'evening' });
+          dayCost.food += getPriceEstimate(dinner.priceLevel);
+        }
+      }
+
+      // Return to hotel
+      const retTr = createTransportSegment(currentPlaceId, hotel.id, currentNeighborhood, hotel.neighborhood);
+      if (retTr) {
+        daySlots.push({ time: '22:00', type: 'transport', item: { id: 'transport', name: `${retTr.segment.mode === 'walking' ? 'A pé' : 'Uber'} — retorno ao hotel`, neighborhood: '', description: '' }, transport: retTr.segment, timeBlock: 'evening' });
+        dayCost.transport += retTr.cost;
+      }
+
+      dayCost.total = dayCost.food + dayCost.activities + dayCost.transport;
+      costs[day] = dayCost;
+
+      // Sort all slots by time
       daySlots.sort((a, b) => a.time.localeCompare(b.time));
+
+      // Debug summary
+      const scheduledFixed = daySlots.filter(s => fixedBlocos.some(b => b.id === s.item.id)).length;
+      const scheduledFlex = daySlots.filter(s => s.type !== 'transport' && !fixedBlocos.some(b => b.id === s.item.id)).length;
+      console.log(`[AutoItinerary] Day ${day} summary: scheduled_fixed=${scheduledFixed}, scheduled_flexible=${scheduledFlex}, total_slots=${daySlots.length}`);
 
       generated[day] = daySlots;
     }
