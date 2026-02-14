@@ -76,7 +76,7 @@ const SaveToRoteiroButton = ({
       ) : (
         <>
           <Plus className="w-4 h-4" />
-          Salvar no Meu Roteiro
+          Salvar
         </>
       )}
     </Button>
