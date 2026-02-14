@@ -170,6 +170,8 @@ const DestinationHub = ({ destinationId, name, country, backgroundImage, actions
             label={action.label}
             path={action.path}
             isSpecial={action.isSpecial}
+            badge={isCarnavalMode && action.id === 'fazer' ? 'especial bloquinhos' : undefined}
+            badgeShort={isCarnavalMode && action.id === 'fazer' ? 'bloquinhos' : undefined}
           />
         ))}
       </div>
@@ -188,9 +190,11 @@ interface ListButtonProps {
   label: string;
   path: string;
   isSpecial?: boolean;
+  badge?: string;
+  badgeShort?: string;
 }
 
-const ListButton = ({ icon: Icon, label, path, isSpecial }: ListButtonProps) => {
+const ListButton = ({ icon: Icon, label, path, isSpecial, badge, badgeShort }: ListButtonProps) => {
   return (
     <Link
       to={path}
@@ -208,6 +212,12 @@ const ListButton = ({ icon: Icon, label, path, isSpecial }: ListButtonProps) => 
       <span className="text-white text-base font-medium tracking-wide">
         {label}
       </span>
+      {badge && (
+        <span className="ml-auto text-[0.65rem] font-normal tracking-wide text-primary/90 flex-shrink-0">
+          <span className="hidden min-[380px]:inline">{badge}</span>
+          <span className="inline min-[380px]:hidden">{badgeShort || badge}</span>
+        </span>
+      )}
     </Link>
   );
 };
