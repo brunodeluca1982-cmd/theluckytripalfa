@@ -1,15 +1,40 @@
 import { useSearchParams, useNavigate, Link } from "react-router-dom";
-import { ChevronLeft, Clock } from "lucide-react";
+import { ChevronLeft, Clock, Check } from "lucide-react";
 import { getBlocksByDate } from "@/data/carnival-blocks";
 import { formatCarnavalDateTitle } from "@/lib/carnaval-date-utils";
+import { useItemSave } from "@/hooks/use-item-save";
+import { useState, useEffect, useCallback } from "react";
 import carnavalBlocoBg from "@/assets/highlights/carnaval-bloco-bg.jpeg";
 
 const BlocosDia = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const selectedDate = searchParams.get("date") || "";
+  const { saveItem } = useItemSave();
+  const [allSaved, setAllSaved] = useState(false);
+  const [isAnimating, setIsAnimating] = useState(false);
 
   const blocos = getBlocksByDate(selectedDate);
+
+  // Check if all blocos for this day are already saved
+  useEffect(() => {
+    if (blocos.length === 0) return;
+    const draft = JSON.parse(localStorage.getItem('draft-roteiro') || '[]');
+    const allAlreadySaved = blocos.every((b) =>
+      draft.some((item: { id: string }) => item.id === b.id)
+    );
+    setAllSaved(allAlreadySaved);
+  }, [blocos]);
+
+  const handleSaveAll = useCallback(() => {
+    if (allSaved) return;
+    blocos.forEach((bloco) => {
+      saveItem(bloco.id, 'activity', bloco.name, false);
+    });
+    setAllSaved(true);
+    setIsAnimating(true);
+    setTimeout(() => setIsAnimating(false), 600);
+  }, [blocos, saveItem, allSaved]);
 
   if (blocos.length === 0 && selectedDate) {
     console.log("[BlocosDia debug]", { selectedDate });
@@ -21,11 +46,29 @@ const BlocosDia = () => {
       <div className="absolute inset-0 bg-black/50" />
 
       <div className="relative z-10 h-full overflow-y-auto pb-24">
-        <header className="px-5 pt-14 pb-4 flex items-center gap-3">
+        <header className="px-5 pt-14 pb-4 flex items-center justify-between">
           <Link to="/calendario-carnaval" className="inline-flex items-center gap-1.5 text-white/80 hover:text-white transition-colors text-sm">
             <ChevronLeft className="w-4 h-4" />
             Voltar
           </Link>
+          <button
+            onClick={handleSaveAll}
+            disabled={allSaved}
+            className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-300 ${
+              allSaved
+                ? "backdrop-blur-md bg-white/20 text-white/70 border border-white/20"
+                : "backdrop-blur-md bg-white/15 text-white border border-white/25 hover:bg-white/25 active:scale-95"
+            } ${isAnimating ? "scale-105" : ""}`}
+          >
+            {allSaved ? (
+              <>
+                <Check className="w-3.5 h-3.5" />
+                Adicionado
+              </>
+            ) : (
+              "Eu vou"
+            )}
+          </button>
         </header>
 
         <div className="px-5 pb-6 text-center">
