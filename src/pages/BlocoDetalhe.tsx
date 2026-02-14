@@ -1,6 +1,6 @@
 import { useParams, useSearchParams, Link } from "react-router-dom";
 import { ChevronLeft, Clock, MapPin, Music, Users, Sparkles } from "lucide-react";
-import { carnavalBlocos } from "@/data/carnaval-blocos-data";
+import { getBlockById } from "@/data/carnival-blocks";
 import SaveToRoteiroButton from "@/components/SaveToRoteiroButton";
 import carnavalBlocoBg from "@/assets/highlights/carnaval-bloco-bg.jpeg";
 
@@ -9,7 +9,7 @@ const BlocoDetalhe = () => {
   const [searchParams] = useSearchParams();
   const date = searchParams.get("date") || "";
 
-  const bloco = carnavalBlocos.flatMap((d) => d.blocos).find((b) => b.id === id);
+  const bloco = id ? getBlockById(id) : undefined;
 
   if (!bloco) {
     return (
@@ -41,23 +41,19 @@ const BlocoDetalhe = () => {
           <div className="space-y-3">
             <div className="flex items-center gap-3">
               <Clock className="w-4 h-4 text-white/60 shrink-0" />
-              <span className="text-sm text-white">{bloco.startHour}h</span>
+              <span className="text-sm text-white">{bloco.time}</span>
             </div>
             <div className="flex items-center gap-3">
               <MapPin className="w-4 h-4 text-white/60 shrink-0" />
-              <span className="text-sm text-white">{bloco.location}</span>
+              <span className="text-sm text-white">{bloco.neighborhood}</span>
             </div>
             <div className="flex items-center gap-3">
               <Sparkles className="w-4 h-4 text-white/60 shrink-0" />
-              <span className="text-sm text-white">{bloco.vibe}</span>
+              <span className="text-sm text-white">{bloco.category}</span>
             </div>
             <div className="flex items-center gap-3">
               <Users className="w-4 h-4 text-white/60 shrink-0" />
-              <span className="text-sm text-white">{bloco.publico}</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <Music className="w-4 h-4 text-white/60 shrink-0" />
-              <span className="text-sm text-white">{bloco.musica}</span>
+              <span className="text-sm text-white">{bloco.description}</span>
             </div>
           </div>
 

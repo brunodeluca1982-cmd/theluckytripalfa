@@ -1,6 +1,6 @@
 import { useSearchParams, useNavigate, Link } from "react-router-dom";
 import { ChevronLeft, Clock } from "lucide-react";
-import { carnavalBlocos } from "@/data/carnaval-blocos-data";
+import { getBlocksByDate } from "@/data/carnival-blocks";
 import { formatCarnavalDateTitle } from "@/lib/carnaval-date-utils";
 import carnavalBlocoBg from "@/assets/highlights/carnaval-bloco-bg.jpeg";
 
@@ -9,11 +9,10 @@ const BlocosDia = () => {
   const navigate = useNavigate();
   const selectedDate = searchParams.get("date") || "";
 
-  const dayData = carnavalBlocos.find((d) => d.date === selectedDate);
-  const blocos = dayData?.blocos || [];
+  const blocos = getBlocksByDate(selectedDate);
 
   if (blocos.length === 0 && selectedDate) {
-    console.log("[BlocosDia debug]", { selectedDate, sampleDates: carnavalBlocos.slice(0, 3).map((d) => d.date) });
+    console.log("[BlocosDia debug]", { selectedDate });
   }
 
   return (
@@ -41,7 +40,7 @@ const BlocosDia = () => {
         <div className="mx-4 space-y-2">
           {blocos.length === 0 && (
             <div className="rounded-2xl backdrop-blur-xl bg-white/10 border border-white/20 p-6 text-center">
-              <p className="text-white/60 text-sm">Nenhum bloco neste dia.</p>
+              <p className="text-white/60 text-sm">Programação em atualização.</p>
             </div>
           )}
           {blocos.map((bloco) => (
@@ -52,7 +51,7 @@ const BlocosDia = () => {
             >
               <div className="flex items-center gap-2 shrink-0">
                 <Clock className="w-4 h-4 text-white/50" />
-                <span className="text-white font-medium text-sm w-10">{bloco.startHour}h</span>
+                <span className="text-white font-medium text-sm w-10">{bloco.time}</span>
               </div>
               <span className="text-white text-sm font-medium truncate">{bloco.name}</span>
               <ChevronLeft className="w-4 h-4 text-white/40 ml-auto rotate-180 shrink-0" />
