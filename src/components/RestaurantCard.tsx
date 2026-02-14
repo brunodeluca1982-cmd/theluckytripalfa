@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
-import type { ImageStatus } from "@/data/carnival-blocks";
-import { getApprovedImageUrl } from "@/lib/image-utils";
+import { usePlacePhoto, buildPlaceQuery } from "@/hooks/use-place-photo";
 
 interface RestaurantCardProps {
   name: string;
@@ -12,33 +11,36 @@ interface RestaurantCardProps {
   image_url?: string | null;
   image_source_url?: string | null;
   image_credit?: string | null;
-  image_status?: ImageStatus;
+  image_status?: string;
 }
 
-const RestaurantCard = ({ name, description, slug, neighborhood, imageUrl, image_url, image_status, image_credit }: RestaurantCardProps) => {
+const RestaurantCard = ({ name, description, slug, neighborhood, imageUrl }: RestaurantCardProps) => {
   const detailUrl = slug ? `/restaurante/${slug}?from=${neighborhood || ''}` : undefined;
-  const approvedImage = getApprovedImageUrl(image_url, image_status) || imageUrl;
+  const placeQuery = buildPlaceQuery(name, neighborhood);
+  const { photoUrl, isLoading } = usePlacePhoto(slug || name, "restaurant", placeQuery);
+  const displayImage = photoUrl || imageUrl;
 
   const CardContent = () => (
     <>
       {/* Thumbnail Image */}
       <div className="w-full aspect-[16/9] bg-muted/50 rounded overflow-hidden mb-4">
-        {approvedImage ? (
+        {displayImage ? (
           <img 
-            src={approvedImage} 
+            src={displayImage} 
             alt={name}
             className="w-full h-full object-cover"
             loading="lazy"
           />
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-muted to-muted-foreground/10 flex items-center justify-center">
-            <span className="text-2xl text-muted-foreground/30">{name.charAt(0)}</span>
+            {isLoading ? (
+              <div className="w-5 h-5 border-2 border-muted-foreground/30 border-t-muted-foreground/70 rounded-full animate-spin" />
+            ) : (
+              <span className="text-2xl text-muted-foreground/30">{name.charAt(0)}</span>
+            )}
           </div>
         )}
       </div>
-      {image_credit && approvedImage && (
-        <p className="text-[10px] text-muted-foreground/50 -mt-3 mb-2">📷 {image_credit}</p>
-      )}
       
       {/* Restaurant Info */}
       <p className="text-base text-foreground mb-2">{name}</p>

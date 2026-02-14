@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import RoteiroAccessLink from "@/components/RoteiroAccessLink";
 import { useItemSave } from "@/hooks/use-item-save";
 import { getRestaurantImage } from "@/data/place-images";
+import { usePlacePhoto, buildPlaceQuery } from "@/hooks/use-place-photo";
 
 /**
  * RESTAURANT DETAIL PAGE
@@ -658,6 +659,12 @@ const RestaurantDetail = () => {
   const from = searchParams.get("from");
   const backPath = from ? `/onde-comer/${from}` : "/eat-map-view";
 
+  const placeQuery = restaurant ? buildPlaceQuery(restaurant.name, restaurant.neighborhoodName) : "";
+  const { photoUrl, isLoading: photoLoading } = usePlacePhoto(
+    resolvedSlug, "restaurant", placeQuery, !!restaurant
+  );
+  const heroImage = photoUrl || (restaurant ? getRestaurantImage(restaurant.neighborhood) : "");
+
   if (!restaurant) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -693,11 +700,17 @@ const RestaurantDetail = () => {
       <main className="pb-12">
         {/* Hero Image */}
         <div className="w-full aspect-[16/9] bg-muted overflow-hidden">
-          <img 
-            src={getRestaurantImage(restaurant.neighborhood)} 
-            alt={restaurant.name}
-            className="w-full h-full object-cover"
-          />
+          {photoLoading && !heroImage ? (
+            <div className="w-full h-full flex items-center justify-center">
+              <div className="w-6 h-6 border-2 border-muted-foreground/30 border-t-muted-foreground/70 rounded-full animate-spin" />
+            </div>
+          ) : (
+            <img 
+              src={heroImage} 
+              alt={restaurant.name}
+              className="w-full h-full object-cover"
+            />
+          )}
         </div>
 
         {/* Restaurant Info */}
