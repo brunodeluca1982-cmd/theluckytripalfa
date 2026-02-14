@@ -11,6 +11,8 @@
  * - Only BASE MAP neighborhoods can appear here
  */
 
+import type { ImageStatus } from './carnival-blocks';
+
 export interface Activity {
   id: string;
   title: string;
@@ -21,6 +23,10 @@ export interface Activity {
   description: string;
   externalLink?: string;
   mediaUrl?: string;
+  image_url?: string | null;
+  image_source_url?: string | null;
+  image_credit?: string | null;
+  image_status?: ImageStatus;
 }
 
 export interface NeighborhoodActivities {

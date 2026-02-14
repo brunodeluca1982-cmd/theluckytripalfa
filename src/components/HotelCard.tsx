@@ -1,4 +1,6 @@
 import { Link } from "react-router-dom";
+import type { ImageStatus } from "@/data/carnival-blocks";
+import { getApprovedImageUrl } from "@/lib/image-utils";
 
 interface HotelCardProps {
   name: string;
@@ -7,6 +9,10 @@ interface HotelCardProps {
   slug?: string;
   neighborhood?: string;
   imageUrl?: string;
+  image_url?: string | null;
+  image_source_url?: string | null;
+  image_credit?: string | null;
+  image_status?: ImageStatus;
 }
 
 const HotelCard = ({ 
@@ -16,16 +22,20 @@ const HotelCard = ({
   slug,
   neighborhood,
   imageUrl,
+  image_url,
+  image_status,
+  image_credit,
 }: HotelCardProps) => {
   const detailUrl = slug ? `/hotel/${slug}?from=${neighborhood || ''}` : undefined;
+  const approvedImage = getApprovedImageUrl(image_url, image_status) || imageUrl;
 
   const CardContent = () => (
     <>
       {/* Thumbnail Image */}
       <div className="w-full aspect-[16/9] bg-muted/50 rounded overflow-hidden mb-4">
-        {imageUrl ? (
+        {approvedImage ? (
           <img 
-            src={imageUrl} 
+            src={approvedImage} 
             alt={name}
             className="w-full h-full object-cover"
             loading="lazy"
@@ -36,6 +46,9 @@ const HotelCard = ({
           </div>
         )}
       </div>
+      {image_credit && approvedImage && (
+        <p className="text-[10px] text-muted-foreground/50 -mt-3 mb-2">📷 {image_credit}</p>
+      )}
       
       {/* Hotel Info */}
       <div className="flex items-center justify-between mb-2">

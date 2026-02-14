@@ -1,3 +1,5 @@
+import type { ImageStatus } from './carnival-blocks';
+
 export interface BlocoEvent {
   id: string;
   name: string;
@@ -6,6 +8,10 @@ export interface BlocoEvent {
   vibe: string;
   publico: string;
   musica: string;
+  image_url?: string | null;
+  image_source_url?: string | null;
+  image_credit?: string | null;
+  image_status?: ImageStatus;
 }
 
 export interface CarnavalDay {
