@@ -14,7 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      place_photos: {
+        Row: {
+          created_at: string
+          id: string
+          item_id: string
+          item_type: string
+          photo_last_fetched_at: string | null
+          photo_source: string
+          photo_url: string | null
+          place_id: string | null
+          place_query: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          item_id: string
+          item_type: string
+          photo_last_fetched_at?: string | null
+          photo_source?: string
+          photo_url?: string | null
+          place_id?: string | null
+          place_query: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          item_id?: string
+          item_type?: string
+          photo_last_fetched_at?: string | null
+          photo_source?: string
+          photo_url?: string | null
+          place_id?: string | null
+          place_query?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
