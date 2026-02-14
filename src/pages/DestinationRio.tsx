@@ -1,4 +1,5 @@
 import DestinationHub, { MapPin, Bed, Utensils, Compass, Sparkles } from "@/components/DestinationHub";
+import rioHeroImage from "@/assets/highlights/rio-hero-carnaval.jpg";
 
 /**
  * ═══════════════════════════════════════════════════════════════════════════
@@ -37,7 +38,7 @@ import DestinationHub, { MapPin, Bed, Utensils, Compass, Sparkles } from "@/comp
  * ═══════════════════════════════════════════════════════════════════════════
  */
 
-const RIO_BACKGROUND = "https://images.unsplash.com/photo-1483729558449-99ef09a8c325?q=80&w=2070&auto=format&fit=crop";
+const RIO_BACKGROUND = rioHeroImage;
 
 /**
  * PRIMARY HUB ACTIONS — LOCKED

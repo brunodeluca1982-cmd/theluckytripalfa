@@ -92,7 +92,14 @@ const DestinationHub = ({ destinationId, name, country, backgroundImage, actions
             : "saturate(1) contrast(1) brightness(1)",
         }}
       />
-      <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/10 to-black/40" />
+      <div
+        className="absolute inset-0 transition-opacity duration-300"
+        style={{
+          background: isCarnavalMode
+            ? "linear-gradient(to bottom, rgba(0,0,0,0.15), rgba(0,0,0,0.08), rgba(0,0,0,0.18))"
+            : "linear-gradient(to bottom, rgba(0,0,0,0.45), rgba(0,0,0,0.30), rgba(0,0,0,0.50))",
+        }}
+      />
 
       {/* Sepia editorial overlay — visible when Carnaval OFF, removed when ON */}
       <div
