@@ -115,6 +115,19 @@ const BlocoDetalhe = () => {
               </a>
             </div>
           )}
+          {extra?.route && (
+            <div>
+              <p className="text-xs text-white/50 font-semibold uppercase tracking-wider mb-1">📌 Percurso</p>
+              <a
+                href={mapsUrl(extra.route + ", Rio de Janeiro")}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-blue-300 underline underline-offset-2"
+              >
+                {extra.route}
+              </a>
+            </div>
+          )}
           {extra?.dispersal && (
             <div>
               <p className="text-xs text-white/50 font-semibold uppercase tracking-wider mb-1">📌 Dispersão</p>
