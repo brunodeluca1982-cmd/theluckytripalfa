@@ -84,9 +84,10 @@ const DestinationHub = ({ destinationId, name, country, backgroundImage, actions
           FULL-SCREEN HERO BACKGROUND
           ═══════════════════════════════════════════════════════════════ */}
       <div 
-        className="absolute inset-0 bg-cover bg-center bg-fixed transition-[filter] duration-300"
+        className="absolute inset-0 bg-cover bg-no-repeat bg-fixed transition-[filter] duration-300"
         style={{
           backgroundImage: `url(${backgroundImage})`,
+          backgroundPosition: "center 30%",
           filter: isCarnavalMode
             ? "saturate(1.35) contrast(1.1) brightness(1.02)"
             : "saturate(1) contrast(1) brightness(1)",
