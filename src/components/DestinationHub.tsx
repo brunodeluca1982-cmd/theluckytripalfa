@@ -170,8 +170,8 @@ const DestinationHub = ({ destinationId, name, country, backgroundImage, actions
             label={action.label}
             path={action.path}
             isSpecial={action.isSpecial}
-            badge={isCarnavalMode && action.id === 'fazer' ? 'especial bloquinhos' : undefined}
-            badgeShort={isCarnavalMode && action.id === 'fazer' ? 'bloquinhos' : undefined}
+            badge={isCarnavalMode && action.id === 'fazer' ? 'Especial: Bloquinhos' : undefined}
+            badgeShort={isCarnavalMode && action.id === 'fazer' ? 'Bloquinhos' : undefined}
           />
         ))}
       </div>
