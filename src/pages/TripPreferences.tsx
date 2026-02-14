@@ -120,14 +120,7 @@ const TripPreferences = () => {
               <p className="font-semibold text-primary">{tripDays} dias</p>
             </div>
           </div>
-          <div className="flex justify-between items-start pt-2 border-t border-border/50">
-            <div>
-              <p className="text-xs text-muted-foreground">Viajantes</p>
-              <p className="text-sm text-foreground">
-                {draft.adults} {draft.adults === 1 ? 'adulto' : 'adultos'}
-                {draft.children > 0 && `, ${draft.children} ${draft.children === 1 ? 'criança' : 'crianças'}`}
-              </p>
-            </div>
+          <div className="pt-2 border-t border-border/50">
             <div className="text-right">
               <p className="text-xs text-muted-foreground">Datas</p>
               <p className="text-sm text-foreground">

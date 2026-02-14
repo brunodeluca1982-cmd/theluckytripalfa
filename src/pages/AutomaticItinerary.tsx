@@ -146,7 +146,7 @@ const AutomaticItinerary = () => {
   const tripStyles = draft.tripStyles || [];
   const priceStyle = draft.priceStyle || '$$';
   const isGastronomy = tripStyles.includes('gastronomia');
-  const isFamily = tripStyles.includes('familia') || draft.children > 0;
+  const isFamily = tripStyles.includes('familia');
   const isAdventure = tripStyles.includes('aventura');
 
   /**
