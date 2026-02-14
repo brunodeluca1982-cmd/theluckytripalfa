@@ -2,3 +2,6 @@ project_id = "tniionfawnkaecbrhker"
 
 [functions.google-places]
 verify_jwt = false
+
+[functions.place-photos]
+verify_jwt = false

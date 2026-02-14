@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import RoteiroAccessLink from "@/components/RoteiroAccessLink";
 import { useItemSave } from "@/hooks/use-item-save";
 import { getHotelImage } from "@/data/place-images";
+import { usePlacePhoto, buildPlaceQuery } from "@/hooks/use-place-photo";
 
 /**
  * HOTEL DETAIL PAGE
@@ -285,6 +286,12 @@ const HotelDetail = () => {
   };
   const backPath = getBackPath();
 
+  const placeQuery = hotel ? buildPlaceQuery(hotel.name, hotel.neighborhoodName) : "";
+  const { photoUrl, isLoading: photoLoading } = usePlacePhoto(
+    resolvedSlug, "hotel", placeQuery, !!hotel
+  );
+  const heroImage = photoUrl || (hotel ? getHotelImage(hotel.neighborhood) : "");
+
   if (!hotel) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -320,11 +327,17 @@ const HotelDetail = () => {
       <main className="pb-12">
         {/* Hero Image */}
         <div className="w-full aspect-[16/9] bg-muted overflow-hidden">
-          <img 
-            src={getHotelImage(hotel.neighborhood)} 
-            alt={hotel.name}
-            className="w-full h-full object-cover"
-          />
+          {photoLoading && !heroImage ? (
+            <div className="w-full h-full flex items-center justify-center">
+              <div className="w-6 h-6 border-2 border-muted-foreground/30 border-t-muted-foreground/70 rounded-full animate-spin" />
+            </div>
+          ) : (
+            <img 
+              src={heroImage} 
+              alt={hotel.name}
+              className="w-full h-full object-cover"
+            />
+          )}
         </div>
 
         {/* Hotel Info */}
