@@ -1,7 +1,6 @@
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { ChevronLeft, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import RoteiroAccessLink from "@/components/RoteiroAccessLink";
 import { useItemSave } from "@/hooks/use-item-save";
 import { getRestaurantImage } from "@/data/place-images";
 import { usePlacePhoto, buildPlaceQuery } from "@/hooks/use-place-photo";
@@ -693,7 +692,15 @@ const RestaurantDetail = () => {
           <ChevronLeft className="w-4 h-4" />
           Voltar
         </Link>
-        <RoteiroAccessLink />
+        <Button
+          onClick={handleSave}
+          variant="outline"
+          size="sm"
+          className="gap-1.5 text-xs"
+        >
+          <Plus className="w-3 h-3" />
+          Salvar
+        </Button>
       </header>
 
       {/* Content */}
@@ -767,16 +774,6 @@ const RestaurantDetail = () => {
             )}
           </div>
           
-          {/* Save Action */}
-          <Button
-            onClick={handleSave}
-            variant="outline"
-            size="sm"
-            className="gap-1.5 text-xs"
-          >
-            <Plus className="w-3 h-3" />
-            Salvar
-          </Button>
         </div>
       </main>
 

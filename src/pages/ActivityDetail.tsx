@@ -1,7 +1,6 @@
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { ChevronLeft, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import RoteiroAccessLink from "@/components/RoteiroAccessLink";
 import { useItemSave } from "@/hooks/use-item-save";
 import { activitiesByNeighborhood, cityLevelActivities, Activity } from "@/data/what-to-do-data";
 import { guideActivities } from "@/data/rio-guide-data";
@@ -160,7 +159,15 @@ const ActivityDetail = () => {
           <ChevronLeft className="w-4 h-4" />
           Voltar
         </Link>
-        <RoteiroAccessLink />
+        <Button
+          onClick={handleSave}
+          variant="outline"
+          size="sm"
+          className="gap-1.5 text-xs"
+        >
+          <Plus className="w-3 h-3" />
+          Salvar
+        </Button>
       </header>
 
       {/* Content */}
@@ -229,28 +236,16 @@ const ActivityDetail = () => {
           </div>
           
           {/* Actions */}
-          <div className="flex items-center gap-3">
-            <Button
-              onClick={handleSave}
-              variant="outline"
-              size="sm"
-              className="gap-1.5 text-xs"
+          {activity.externalLink && (
+            <a 
+              href={activity.externalLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block py-2 px-4 bg-primary text-primary-foreground rounded-lg text-sm hover:opacity-90 transition-opacity"
             >
-              <Plus className="w-3 h-3" />
-              Salvar
-            </Button>
-            
-            {activity.externalLink && (
-              <a 
-                href={activity.externalLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-block py-2 px-4 bg-primary text-primary-foreground rounded-lg text-sm hover:opacity-90 transition-opacity"
-              >
-                Reservar / Saber mais
-              </a>
-            )}
-          </div>
+              Reservar / Saber mais
+            </a>
+          )}
         </div>
       </main>
 

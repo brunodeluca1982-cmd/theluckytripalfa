@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { RIO_NEIGHBORHOODS, getNeighborhoodById } from "@/data/rio-neighborhoods";
-import RoteiroAccessLink from "@/components/RoteiroAccessLink";
+
 import { useCarnavalMode } from "@/contexts/CarnavalModeContext";
 
 // Fixed editorial neighborhood order
@@ -191,7 +191,7 @@ const OndeficarRio = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
-      <header className="px-6 py-4 border-b border-border flex items-center justify-between">
+      <header className="px-6 py-4 border-b border-border">
         <Link
           to="/destino/rio-de-janeiro"
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -199,7 +199,6 @@ const OndeficarRio = () => {
           <ChevronLeft className="w-4 h-4" />
           Voltar
         </Link>
-        <RoteiroAccessLink />
       </header>
 
       {/* Header block */}
