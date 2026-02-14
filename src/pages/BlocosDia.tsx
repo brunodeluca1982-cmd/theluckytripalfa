@@ -14,7 +14,7 @@ const BlocosDia = () => {
   const [allSaved, setAllSaved] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
 
-  const blocos = getBlocksByDate(selectedDate);
+  const blocos = [...getBlocksByDate(selectedDate)].sort((a, b) => parseInt(a.time) - parseInt(b.time));
 
   // Check if all blocos for this day are already saved
   useEffect(() => {
