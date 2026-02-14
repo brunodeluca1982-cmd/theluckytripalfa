@@ -55,6 +55,8 @@ import CalendarioCarnaval from "./pages/CalendarioCarnaval";
 import BlocosDia from "./pages/BlocosDia";
 import BlocoDetalhe from "./pages/BlocoDetalhe";
 import BlocoInfo from "./pages/BlocoInfo";
+import FestasBailes from "./pages/FestasBailes";
+import FestaDetalhe from "./pages/FestaDetalhe";
 import NotFound from "./pages/NotFound";
 import { CarnavalModeProvider } from "@/contexts/CarnavalModeContext";
 import { SpotifyPlayerProvider } from "@/contexts/SpotifyPlayerContext";
@@ -154,6 +156,8 @@ const App = () => {
                   <Route path="/blocos-dia" element={<BlocosDia />} />
                   <Route path="/bloco-detalhe/:id" element={<BlocoDetalhe />} />
                   <Route path="/bloco-info/:id" element={<BlocoInfo />} />
+                  <Route path="/festas-bailes" element={<FestasBailes />} />
+                  <Route path="/festa-detalhe/:id" element={<FestaDetalhe />} />
                   
                   {/* Lucky List */}
                   <Route path="/lucky-list" element={<LuckyList />} />
