@@ -266,35 +266,60 @@ const AutomaticItinerary = () => {
       currentNeighborhood = hotel.neighborhood;
 
       // ── 1) Compute dayISO and fetch saved items ──
-      const tripStartDate = draft.arrivalAt ? new Date(draft.arrivalAt) : null;
+      const tripStartDate = draft.arrivalAt ? new Date(draft.arrivalAt + "T12:00:00") : null;
       let dayISO: string | null = null;
       if (tripStartDate) {
         const dayDate = new Date(tripStartDate);
         dayDate.setDate(dayDate.getDate() + (day - 1));
-        dayISO = dayDate.toISOString().slice(0, 10);
+        dayISO = `${dayDate.getFullYear()}-${String(dayDate.getMonth() + 1).padStart(2, '0')}-${String(dayDate.getDate()).padStart(2, '0')}`;
       }
 
       const allSaved = getAllSavedItems();
       let savedForDay: SavedItemRecord[] = [];
 
+      // Strategy 1: Direct date_iso match for this trip day
       if (dayISO) {
         savedForDay = allSaved.filter(i => i.date_iso === dayISO);
-      } else if (day === 1) {
-        savedForDay = [...allSaved];
       }
 
-      // Also catch items mapped by date offset within trip range
+      // Strategy 2: For blocks without a matching day, map by offset within trip range
       if (tripStartDate && dayISO) {
+        const tripStartISO = `${tripStartDate.getFullYear()}-${String(tripStartDate.getMonth() + 1).padStart(2, '0')}-${String(tripStartDate.getDate()).padStart(2, '0')}`;
         const tripEnd = new Date(tripStartDate);
         tripEnd.setDate(tripEnd.getDate() + actualTripDays - 1);
-        const tripEndISO = tripEnd.toISOString().slice(0, 10);
-        const tripStartISO = tripStartDate.toISOString().slice(0, 10);
+        const tripEndISO = `${tripEnd.getFullYear()}-${String(tripEnd.getMonth() + 1).padStart(2, '0')}-${String(tripEnd.getDate()).padStart(2, '0')}`;
         for (const item of allSaved) {
           if (!item.date_iso || savedForDay.some(s => s.id === item.id)) continue;
           if (item.date_iso >= tripStartISO && item.date_iso <= tripEndISO) {
             const itemDate = new Date(item.date_iso + "T12:00:00");
             const diffDays = Math.round((itemDate.getTime() - tripStartDate.getTime()) / (1000 * 60 * 60 * 24));
             if (diffDays + 1 === day) savedForDay.push(item);
+          }
+        }
+      }
+
+      // Strategy 3: If this is Day 1, also include any saved blocks that didn't match
+      // any trip day (e.g., block date is before trip start). This ensures saved blocks
+      // are NEVER silently dropped.
+      if (day === 1) {
+        const allDayISOs = new Set<string>();
+        if (tripStartDate) {
+          for (let d = 0; d < actualTripDays; d++) {
+            const dt = new Date(tripStartDate);
+            dt.setDate(dt.getDate() + d);
+            allDayISOs.add(`${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`);
+          }
+        }
+        for (const item of allSaved) {
+          if (savedForDay.some(s => s.id === item.id)) continue;
+          // Block has a date_iso that doesn't fall in ANY trip day
+          if (item.type === "block" && item.date_iso && !allDayISOs.has(item.date_iso)) {
+            savedForDay.push(item);
+            console.log(`[AutoItinerary] Orphan block "${item.title}" (date=${item.date_iso}) forced into Day 1`);
+          }
+          // Item with no date_iso at all
+          if (!item.date_iso && !savedForDay.some(s => s.id === item.id)) {
+            savedForDay.push(item);
           }
         }
       }
@@ -306,8 +331,8 @@ const AutomaticItinerary = () => {
       const flexibleSaved = savedForDay.filter(i => i.type !== "block");
 
       // Debug
-      console.log(`[AutoItinerary] Day ${day} (${dayISO}): fixed_blocos=${fixedBlocos.length}, flexible_saved=${flexibleSaved.length}`);
-      if (fixedBlocos.length > 0) console.log(`[AutoItinerary] Blocos:`, fixedBlocos.map(b => ({ id: b.id, time: b.start_time_24h })));
+      console.log(`[AutoItinerary] Day ${day} (${dayISO || 'no-date'}): saved_total=${allSaved.length}, matched=${savedForDay.length}, fixed_blocos=${fixedBlocos.length}, flexible=${flexibleSaved.length}`);
+      if (fixedBlocos.length > 0) console.log(`[AutoItinerary] Blocos:`, fixedBlocos.map(b => ({ id: b.id, time: b.start_time_24h, date: b.date_iso })));
 
       // Build locked time ranges from blocos (each ~2h)
       const lockedRanges: { start: number; end: number }[] = [];
@@ -843,7 +868,14 @@ const AutomaticItinerary = () => {
                                     "flex gap-3 items-start py-2 group cursor-pointer hover:bg-muted/50 rounded-lg -mx-2 px-2 transition-colors"
                                   )}
                                 >
-                                  <div className="w-12 text-xs text-muted-foreground pt-1 tabular-nums">{slot.time}</div>
+                                  <div className="w-12 text-xs text-muted-foreground pt-1 tabular-nums">
+                                    {/* Blocks show hour only (e.g. "8"), others show HH:MM */}
+                                    {(() => {
+                                      const savedItems = getAllSavedItems();
+                                      const isBlock = savedItems.some(i => i.id === slot.item.id && i.type === 'block');
+                                      return isBlock ? String(parseInt(slot.time)) + 'h' : slot.time;
+                                    })()}
+                                  </div>
                                   <div className={cn(
                                     "w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0",
                                     getSlotBg(slot)
@@ -852,7 +884,9 @@ const AutomaticItinerary = () => {
                                   </div>
                                   <div className="flex-1 min-w-0">
                                     <p className="font-medium text-foreground text-sm truncate">{slot.item.name}</p>
-                                    {slot.item.neighborhood && (
+                                    {slot.item.description?.startsWith('📍') ? (
+                                      <p className="text-xs text-muted-foreground">{slot.item.description}</p>
+                                    ) : slot.item.neighborhood && (
                                       <p className="text-xs text-muted-foreground">{slot.item.neighborhood}</p>
                                     )}
                                   </div>
