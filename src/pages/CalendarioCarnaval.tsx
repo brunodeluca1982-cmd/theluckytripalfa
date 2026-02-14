@@ -8,7 +8,7 @@ import { useSpotifyPlayer } from "@/contexts/SpotifyPlayerContext";
 import { clearVideoSeen } from "@/pages/DestinationVideoIntro";
 import { carnivalDates } from "@/data/carnival-blocks";
 import { formatCarnavalDateShort } from "@/lib/carnaval-date-utils";
-import calendarioBg from "@/assets/highlights/calendario-carnaval-bg.png";
+import calendarioBg from "@/assets/highlights/calendario-carnaval-bg.jpeg";
 
 const days = carnivalDates.map((iso) => ({
   date: iso,
@@ -39,9 +39,9 @@ const CalendarioCarnaval = () => {
       {/* Background — carnival bloco photo */}
       <div
         className="absolute inset-0 bg-cover bg-center bg-fixed"
-        style={{ backgroundImage: `url(${calendarioBg})`, filter: "blur(4px) contrast(0.9)", transform: "scale(1.05)" }}
+        style={{ backgroundImage: `url(${calendarioBg})`, filter: "blur(2px) contrast(0.95)", transform: "scale(1.05)" }}
       />
-      <div className="absolute inset-0 bg-black/50" />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/70" />
 
       {/* Sepia overlay — synced with Modo Carnaval */}
       <div
