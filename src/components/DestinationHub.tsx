@@ -87,7 +87,7 @@ const DestinationHub = ({ destinationId, name, country, backgroundImage, actions
         className="absolute inset-0 bg-cover bg-no-repeat transition-[filter] duration-300"
         style={{
           backgroundImage: `url(${backgroundImage})`,
-          backgroundPosition: "center center",
+          backgroundPosition: "50% 20%",
           filter: isCarnavalMode
             ? "saturate(1.15) contrast(1.05) brightness(1)"
             : "saturate(0.9) brightness(0.85)",
