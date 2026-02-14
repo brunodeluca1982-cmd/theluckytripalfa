@@ -54,10 +54,87 @@ const BlocoInfo = () => {
         </div>
 
         {/* Full text content */}
-        <div className="mx-4 rounded-2xl backdrop-blur-xl bg-white/10 border border-white/20 p-5">
-          <div className="text-sm text-white/90 leading-relaxed whitespace-pre-line">
-            {bloco.fullDetails}
-          </div>
+        <div className="mx-4 rounded-2xl backdrop-blur-xl bg-white/10 border border-white/20 p-5 space-y-4">
+          {bloco.address && (
+            <div className="text-sm text-white/90"><span className="font-semibold text-white">📍 Endereço:</span> {bloco.address}</div>
+          )}
+          {bloco.howToGetShort && (
+            <div className="text-sm text-white/90"><span className="font-semibold text-white">🚕 Como chegar:</span> {bloco.howToGetShort}</div>
+          )}
+          {bloco.audienceShort && (
+            <div className="text-sm text-white/90"><span className="font-semibold text-white">👥 Público:</span> {bloco.audienceShort}</div>
+          )}
+          {bloco.musicShort && (
+            <div className="text-sm text-white/90"><span className="font-semibold text-white">🎵 Música:</span> {bloco.musicShort}</div>
+          )}
+
+          {bloco.extraDetails && (
+            <div className="space-y-3 pt-2 border-t border-white/10">
+              {bloco.extraDetails.concentration && (
+                <div className="text-sm text-white/90"><span className="font-semibold text-white">Concentração:</span> {bloco.extraDetails.concentration}</div>
+              )}
+              {bloco.extraDetails.route && (
+                <div className="text-sm text-white/90"><span className="font-semibold text-white">Percurso:</span> {bloco.extraDetails.route}</div>
+              )}
+              {bloco.extraDetails.dispersal && (
+                <div className="text-sm text-white/90"><span className="font-semibold text-white">Dispersão:</span> {bloco.extraDetails.dispersal}</div>
+              )}
+              {bloco.extraDetails.vibe && (
+                <div className="text-sm text-white/90">
+                  <span className="font-semibold text-white">🎭 A vibe:</span>
+                  <ul className="mt-1 space-y-1 list-disc list-inside text-white/80">
+                    {bloco.extraDetails.vibe.map((v, i) => <li key={i}>{v}</li>)}
+                  </ul>
+                </div>
+              )}
+              {bloco.extraDetails.how_to_get_full && (
+                <div className="text-sm text-white/90">
+                  <span className="font-semibold text-white">🚕 Como chegar (detalhado):</span>
+                  <ul className="mt-1 space-y-1 list-disc list-inside text-white/80">
+                    {bloco.extraDetails.how_to_get_full.map((v, i) => <li key={i}>{v}</li>)}
+                  </ul>
+                </div>
+              )}
+              {bloco.extraDetails.music_style && (
+                <div className="text-sm text-white/90">
+                  <span className="font-semibold text-white">🎵 Estilo musical:</span>
+                  <ul className="mt-1 space-y-1 list-disc list-inside text-white/80">
+                    {bloco.extraDetails.music_style.map((v, i) => <li key={i}>{v}</li>)}
+                  </ul>
+                </div>
+              )}
+              {bloco.extraDetails.structure && (
+                <div className="text-sm text-white/90">
+                  <span className="font-semibold text-white">🏗️ Estrutura:</span>
+                  {Array.isArray(bloco.extraDetails.structure) ? (
+                    <ul className="mt-1 space-y-1 list-disc list-inside text-white/80">
+                      {bloco.extraDetails.structure.map((v, i) => <li key={i}>{v}</li>)}
+                    </ul>
+                  ) : (
+                    <span className="ml-1 text-white/80">{bloco.extraDetails.structure}</span>
+                  )}
+                </div>
+              )}
+              {bloco.extraDetails.end_time && (
+                <div className="text-sm text-white/90">
+                  <span className="font-semibold text-white">⏰ Que horas acaba:</span>
+                  {Array.isArray(bloco.extraDetails.end_time) ? (
+                    <span className="ml-1 text-white/80">{bloco.extraDetails.end_time.join(" ")}</span>
+                  ) : (
+                    <span className="ml-1 text-white/80">{bloco.extraDetails.end_time}</span>
+                  )}
+                </div>
+              )}
+              {bloco.extraDetails.my_reading && (
+                <div className="text-sm text-white/90">
+                  <span className="font-semibold text-white">📝 Minha leitura:</span>
+                  <ul className="mt-1 space-y-1 list-disc list-inside text-white/80">
+                    {bloco.extraDetails.my_reading.map((v, i) => <li key={i}>{v}</li>)}
+                  </ul>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
