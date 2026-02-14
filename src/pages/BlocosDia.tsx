@@ -53,10 +53,9 @@ const BlocosDia = () => {
                 <Clock className="w-4 h-4 text-white/50" />
                 <span className="text-white font-medium text-sm w-10">{bloco.time}</span>
               </div>
-              <span className="text-white/40 text-sm">—</span>
               <span className="text-white text-sm font-medium truncate">{bloco.name}</span>
-              <span className="text-white/40 text-sm">–</span>
-              <span className="text-white/60 text-sm truncate">{bloco.neighborhood}</span>
+              <span className="text-white/60 text-sm shrink-0">📍{bloco.neighborhood?.replace("Jardim Botânico", "J Botânico")}</span>
+              {bloco.tag && <span className="text-white/40 text-xs italic shrink-0">✨{bloco.tag}</span>}
               <ChevronLeft className="w-4 h-4 text-white/40 ml-auto rotate-180 shrink-0" />
             </button>
           ))}
