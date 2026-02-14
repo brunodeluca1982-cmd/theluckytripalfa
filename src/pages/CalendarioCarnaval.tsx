@@ -6,18 +6,14 @@ import { Switch } from "@/components/ui/switch";
 import { useCarnavalMode } from "@/contexts/CarnavalModeContext";
 import { useSpotifyPlayer } from "@/contexts/SpotifyPlayerContext";
 import { clearVideoSeen } from "@/pages/DestinationVideoIntro";
+import { carnavalBlocos } from "@/data/carnaval-blocos-data";
+import { formatCarnavalDateShort } from "@/lib/carnaval-date-utils";
 import calendarioBg from "@/assets/highlights/calendario-carnaval-bg.png";
 
-const days = [
-  { date: 14, label: "14 de fevereiro — sábado" },
-  { date: 15, label: "15 de fevereiro — domingo" },
-  { date: 16, label: "16 de fevereiro — segunda" },
-  { date: 17, label: "17 de fevereiro — terça" },
-  { date: 18, label: "18 de fevereiro — quarta" },
-  { date: 19, label: "19 de fevereiro — quinta" },
-  { date: 21, label: "21 de fevereiro — sábado" },
-  { date: 22, label: "22 de fevereiro — domingo" },
-];
+const days = carnavalBlocos.map((d) => ({
+  date: d.date,
+  label: formatCarnavalDateShort(d.date),
+}));
 
 const CalendarioCarnaval = () => {
   const navigate = useNavigate();

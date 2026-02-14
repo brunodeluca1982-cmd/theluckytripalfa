@@ -9,13 +9,13 @@ export interface BlocoEvent {
 }
 
 export interface CarnavalDay {
-  date: number; // day of month (Feb 2026)
+  date: string; // ISO format YYYY-MM-DD
   blocos: BlocoEvent[];
 }
 
 export const carnavalBlocos: CarnavalDay[] = [
   {
-    date: 14,
+    date: "2026-02-14",
     blocos: [
       { id: "ceu-na-terra", name: "Céu na Terra", startHour: 7, location: "Santa Teresa", vibe: "Tradicional, místico", publico: "Famílias e boêmios", musica: "Marchinhas e MPB" },
       { id: "exagerado", name: "Exagerado", startHour: 8, location: "Aterro do Flamengo", vibe: "Animado, pop", publico: "Jovens e adultos", musica: "Cazuza e pop brasileiro" },
@@ -24,7 +24,7 @@ export const carnavalBlocos: CarnavalDay[] = [
     ],
   },
   {
-    date: 15,
+    date: "2026-02-15",
     blocos: [
       { id: "bloco-areia", name: "Bloco Areia", startHour: 7, location: "Posto 9, Ipanema", vibe: "Praia, leve", publico: "Jovens", musica: "Pop e eletrônico" },
       { id: "divinas-tretas", name: "Divinas Tretas", startHour: 8, location: "Botafogo", vibe: "Irreverente, divertido", publico: "Adultos", musica: "Pop e funk" },
@@ -33,7 +33,7 @@ export const carnavalBlocos: CarnavalDay[] = [
     ],
   },
   {
-    date: 16,
+    date: "2026-02-16",
     blocos: [
       { id: "corre-atras", name: "Corre Atrás", startHour: 7, location: "Leblon", vibe: "Energético", publico: "Jovens", musica: "Pop e eletrônico" },
       { id: "brasilia-amarela", name: "Brasília Amarela", startHour: 8, location: "Urca", vibe: "Intimista, charmoso", publico: "Adultos", musica: "MPB e samba" },
@@ -43,7 +43,7 @@ export const carnavalBlocos: CarnavalDay[] = [
     ],
   },
   {
-    date: 17,
+    date: "2026-02-17",
     blocos: [
       { id: "vagalume", name: "Vagalume", startHour: 8, location: "Laranjeiras", vibe: "Intimista, boêmio", publico: "Adultos", musica: "MPB e samba" },
       { id: "empurra", name: "Empurra", startHour: 12, location: "Flamengo", vibe: "Intenso, quente", publico: "Jovens", musica: "Funk e pop" },
@@ -51,20 +51,20 @@ export const carnavalBlocos: CarnavalDay[] = [
     ],
   },
   {
-    date: 18,
+    date: "2026-02-18",
     blocos: [
       { id: "me-enterra-na-4a", name: "Me enterra na 4ª", startHour: 13, location: "Ipanema", vibe: "Despedida, saudoso", publico: "Todos", musica: "Marchinhas e MPB" },
       { id: "planta-na-mente", name: "Planta Na Mente", startHour: 14, location: "Jardim Botânico", vibe: "Tranquilo, verde", publico: "Adultos", musica: "Reggae e MPB" },
     ],
   },
   {
-    date: 19,
+    date: "2026-02-19",
     blocos: [
       { id: "fundo-de-quintal", name: "Fundo de Quintal", startHour: 18, location: "Madureira", vibe: "Raiz, autêntico", publico: "Todos", musica: "Pagode e samba" },
     ],
   },
   {
-    date: 21,
+    date: "2026-02-21",
     blocos: [
       { id: "bloconce", name: "Bloconcé", startHour: 9, location: "Ipanema", vibe: "Pop, empoderado", publico: "Jovens", musica: "Pop internacional" },
       { id: "batafa", name: "Batafá", startHour: 10, location: "Botafogo", vibe: "Percussivo, tribal", publico: "Adultos", musica: "Batucada e afrobeat" },
@@ -72,7 +72,7 @@ export const carnavalBlocos: CarnavalDay[] = [
     ],
   },
   {
-    date: 22,
+    date: "2026-02-22",
     blocos: [
       { id: "filhos-da-puc", name: "Filhos da PUC", startHour: 9, location: "Gávea", vibe: "Universitário, jovem", publico: "Jovens", musica: "Pop e funk" },
       { id: "boka-de-espuma", name: "Boka de Espuma", startHour: 14, location: "Copacabana", vibe: "Festa, espuma", publico: "Jovens e adultos", musica: "Eletrônico e pop" },

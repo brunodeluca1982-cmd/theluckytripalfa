@@ -2,19 +2,14 @@ import { useParams, useSearchParams, Link } from "react-router-dom";
 import { ChevronLeft } from "lucide-react";
 import { carnavalBlocos } from "@/data/carnaval-blocos-data";
 import { blocoExtendedInfo } from "@/data/bloco-extended-info";
+import { formatCarnavalDateFull } from "@/lib/carnaval-date-utils";
 import SaveToRoteiroButton from "@/components/SaveToRoteiroButton";
 import carnavalBlocoBg from "@/assets/highlights/carnaval-bloco-bg.jpeg";
-
-const WEEKDAYS: Record<number, string> = {
-  14: "Sábado", 15: "Domingo", 16: "Segunda-feira", 17: "Terça-feira",
-  18: "Quarta-feira", 19: "Quinta-feira", 21: "Sábado", 22: "Domingo",
-};
 
 const BlocoInfo = () => {
   const { id } = useParams();
   const [searchParams] = useSearchParams();
   const date = searchParams.get("date") || "";
-  const dateNum = Number(date);
 
   const bloco = carnavalBlocos.flatMap((d) => d.blocos).find((b) => b.id === id);
   const extra = id ? blocoExtendedInfo[id] : undefined;
@@ -27,9 +22,7 @@ const BlocoInfo = () => {
     );
   }
 
-  const fullDate = dateNum
-    ? `${dateNum} de fevereiro de 2026 — ${WEEKDAYS[dateNum] || ""}`
-    : "";
+  const fullDate = date ? formatCarnavalDateFull(date) : "";
 
   const fullText = extra?.fullText || "Detalhes completos em breve.";
 
