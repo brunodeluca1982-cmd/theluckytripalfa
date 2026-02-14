@@ -2,7 +2,7 @@ import { useParams, useSearchParams, Link } from "react-router-dom";
 import { ChevronLeft, Clock, MapPin, Music, Users, Sparkles } from "lucide-react";
 import { carnavalBlocos } from "@/data/carnaval-blocos-data";
 import SaveToRoteiroButton from "@/components/SaveToRoteiroButton";
-import calendarBg from "@/assets/highlights/calendario-carnaval-bg.png";
+import carnavalBlocoBg from "@/assets/highlights/carnaval-bloco-bg.jpeg";
 
 const BlocoDetalhe = () => {
   const { id } = useParams();
@@ -21,8 +21,11 @@ const BlocoDetalhe = () => {
 
   return (
     <div className="h-screen relative overflow-hidden">
-      <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${calendarBg})` }} />
-      <div className="absolute inset-0 bg-black/40" />
+      <div
+        className="absolute inset-0 bg-cover bg-center bg-fixed"
+        style={{ backgroundImage: `url(${carnavalBlocoBg})`, filter: "blur(4px) contrast(0.9)", transform: "scale(1.05)" }}
+      />
+      <div className="absolute inset-0 bg-black/50" />
 
       <div className="relative z-10 h-full overflow-y-auto pb-24">
         <header className="px-5 pt-14 pb-4">
@@ -32,7 +35,7 @@ const BlocoDetalhe = () => {
           </Link>
         </header>
 
-        <div className="mx-4 rounded-2xl backdrop-blur-xl bg-white/10 border border-white/20 p-6 space-y-5">
+        <div className="mx-4 rounded-2xl backdrop-blur-xl bg-white/10 border border-white/20 p-6 pb-6 space-y-5">
           <h1 className="text-2xl font-serif font-semibold text-white">{bloco.name}</h1>
 
           <div className="space-y-3">
@@ -64,6 +67,13 @@ const BlocoDetalhe = () => {
             itemTitle={bloco.name}
             className="w-full justify-center"
           />
+
+          <Link
+            to={`/bloco-info/${bloco.id}?date=${date}`}
+            className="mt-4 mb-0 flex items-center justify-center w-full py-3 rounded-2xl border border-white/40 text-white text-sm font-medium backdrop-blur-sm hover:bg-white/10 transition-colors"
+          >
+            Saiba mais
+          </Link>
         </div>
       </div>
     </div>

@@ -1,7 +1,7 @@
 import { useSearchParams, useNavigate, Link } from "react-router-dom";
 import { ChevronLeft, Clock } from "lucide-react";
 import { carnavalBlocos } from "@/data/carnaval-blocos-data";
-import calendarBg from "@/assets/highlights/calendario-carnaval-bg.png";
+import carnavalBlocoBg from "@/assets/highlights/carnaval-bloco-bg.jpeg";
 
 const BlocosDia = () => {
   const [searchParams] = useSearchParams();
@@ -13,8 +13,8 @@ const BlocosDia = () => {
 
   return (
     <div className="h-screen relative overflow-hidden">
-      <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${calendarBg})` }} />
-      <div className="absolute inset-0 bg-black/35" />
+      <div className="absolute inset-0 bg-cover bg-center bg-fixed" style={{ backgroundImage: `url(${carnavalBlocoBg})`, filter: "blur(4px) contrast(0.9)", transform: "scale(1.05)" }} />
+      <div className="absolute inset-0 bg-black/50" />
 
       <div className="relative z-10 h-full overflow-y-auto pb-24">
         <header className="px-5 pt-14 pb-4 flex items-center gap-3">

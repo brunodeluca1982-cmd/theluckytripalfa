@@ -1,0 +1,272 @@
+/**
+ * Extended information for each bloco, keyed by bloco ID.
+ * Used on the /bloco-info/:id detail screen.
+ */
+export interface BlocoExtended {
+  horarioCompleto: string;
+  endereco: string;
+  publicoDetalhado: string;
+  musicaDetalhada: string;
+  comoChegar: string;
+  dicas: string[];
+}
+
+export const blocoExtendedInfo: Record<string, BlocoExtended> = {
+  "ceu-na-terra": {
+    horarioCompleto: "7h — Concentração às 6h30 na Ladeira de Santa Teresa",
+    endereco: "Largo dos Guimarães → Rua Almirante Alexandrino, Santa Teresa",
+    publicoDetalhado: "Famílias, boêmios e moradores do bairro. Clima intimista e acolhedor, ideal para quem quer curtir sem tumulto.",
+    musicaDetalhada: "Marchinhas clássicas, MPB acústica e percussão artesanal. Repertório autoral com toques místicos.",
+    comoChegar: "Metrô até Glória ou Largo do Machado + táxi/app até Santa Teresa. Chegue cedo — as ladeiras lotam rápido. Evite carro próprio.",
+    dicas: [
+      "Use calçado confortável — o percurso é em ladeira de paralelepípedo.",
+      "Leve água e protetor solar, o sol bate forte pela manhã.",
+      "Banheiros químicos disponíveis no Largo dos Guimarães.",
+      "Melhor horário: chegue às 6h30 para pegar a concentração e o clima mais tranquilo.",
+    ],
+  },
+  "exagerado": {
+    horarioCompleto: "8h — Concentração no Aterro do Flamengo às 7h30",
+    endereco: "Aterro do Flamengo, próximo ao Monumento aos Pracinhas",
+    publicoDetalhado: "Jovens e adultos fãs de Cazuza. Ambiente animado e nostálgico.",
+    musicaDetalhada: "Pop rock brasileiro anos 80/90, hits de Cazuza, Barão Vermelho e clássicos nacionais.",
+    comoChegar: "Metrô até Cinelândia ou Catete + caminhada de 10 min. Apps de transporte deixam na Av. Infante Dom Henrique.",
+    dicas: [
+      "Área aberta com pouca sombra — protetor solar é obrigatório.",
+      "Chegue cedo para estacionar no entorno (vagas limitadas).",
+      "Leve doleira e evite mochilas grandes.",
+      "Pontos de hidratação espalhados pelo percurso.",
+    ],
+  },
+  "bola-preta": {
+    horarioCompleto: "9h — Concentração na Rua 1º de Março às 7h",
+    endereco: "Rua 1º de Março → Av. Rio Branco, Centro do Rio",
+    publicoDetalhado: "Todos os públicos — um dos maiores blocos do mundo. Multidão intensa, energia gigante.",
+    musicaDetalhada: "Marchinhas clássicas de Carnaval, samba e frevo. Repertório tradicional com trio elétrico.",
+    comoChegar: "Metrô até Uruguaiana ou Carioca. É o melhor acesso — ruas do entorno ficam fechadas. Não vá de carro.",
+    dicas: [
+      "Bloco gigante — defina um ponto de encontro com seu grupo antes.",
+      "Use fantasia leve e confortável, vai fazer calor.",
+      "Banheiros químicos ao longo da Av. Rio Branco.",
+      "Segurança reforçada, mas fique atento a pertences.",
+      "Melhor horário: 8h–11h para curtir sem o pico de lotação.",
+    ],
+  },
+  "bloco-brasil": {
+    horarioCompleto: "13h — Concentração às 12h no Aterro do Flamengo",
+    endereco: "Aterro do Flamengo, altura do MAM",
+    publicoDetalhado: "Adultos, clima patriótico e festivo. Público diversificado.",
+    musicaDetalhada: "Samba enredo, axé e hits brasileiros. Clima de arquibancada.",
+    comoChegar: "Metrô até Cinelândia + 15 min a pé. Ou app até o MAM.",
+    dicas: [
+      "Sol forte à tarde — chapéu e protetor obrigatórios.",
+      "Ambulantes vendem água e cerveja no percurso.",
+      "Melhor horário: 13h–15h.",
+    ],
+  },
+  "bloco-areia": {
+    horarioCompleto: "7h — Concentração às 6h30 no Posto 9, Ipanema",
+    endereco: "Posto 9, Praia de Ipanema — Rua Farme de Amoedo",
+    publicoDetalhado: "Jovens, clima de praia e descontração. LGBTQ+ friendly.",
+    musicaDetalhada: "Pop brasileiro, eletrônico leve e funk carioca.",
+    comoChegar: "Metrô até General Osório + 5 min a pé. Chegue cedo para aproveitar a areia.",
+    dicas: [
+      "Vá de biquíni/sunga — muita gente entra no mar durante o bloco.",
+      "Leve canga e protetor solar à prova d'água.",
+      "Evite levar muito dinheiro — use doleira.",
+      "Banheiros no quiosque próximo ao Posto 9.",
+    ],
+  },
+  "divinas-tretas": {
+    horarioCompleto: "8h — Concentração às 7h30 em Botafogo",
+    endereco: "Rua Voluntários da Pátria → Rua São Clemente, Botafogo",
+    publicoDetalhado: "Adultos, clima irreverente e bem-humorado. Fantasias criativas.",
+    musicaDetalhada: "Pop nacional e internacional, funk e músicas de meme.",
+    comoChegar: "Metrô Botafogo, saída Voluntários da Pátria.",
+    dicas: [
+      "Bloco compacto — ótimo para quem não gosta de multidão gigante.",
+      "Ruas estreitas, chegue cedo para se posicionar.",
+      "Banheiros em bares parceiros na Rua São Clemente.",
+    ],
+  },
+  "bangalafumenga": {
+    horarioCompleto: "9h — Concentração às 8h no Jardim Botânico",
+    endereco: "Rua Jardim Botânico → Rua Pacheco Leão",
+    publicoDetalhado: "Todos os públicos. Clássico carioca, clima familiar e animado.",
+    musicaDetalhada: "Samba, pop brasileiro e marchinhas. Bateria potente.",
+    comoChegar: "App até Rua Jardim Botânico. Metrô até General Osório + ônibus 584.",
+    dicas: [
+      "Área arborizada com sombra parcial.",
+      "Leve água — poucos ambulantes no início do percurso.",
+      "Melhor horário: 9h–12h.",
+    ],
+  },
+  "simpatia-quase-amor": {
+    horarioCompleto: "14h — Concentração às 13h na Praça General Osório, Ipanema",
+    endereco: "Praça General Osório → Rua Visconde de Pirajá, Ipanema",
+    publicoDetalhado: "Famílias, casais e público mais velho. Clima romântico e acolhedor.",
+    musicaDetalhada: "MPB, marchinhas e canções românticas brasileiras.",
+    comoChegar: "Metrô General Osório — saída direta para a praça.",
+    dicas: [
+      "Um dos blocos mais charmosos do Rio.",
+      "Ideal para quem quer curtir com crianças.",
+      "Banheiros químicos na praça.",
+      "Melhor horário: 14h–16h.",
+    ],
+  },
+  "corre-atras": {
+    horarioCompleto: "7h — Concentração às 6h30 no Leblon",
+    endereco: "Rua Dias Ferreira → Av. Ataulfo de Paiva, Leblon",
+    publicoDetalhado: "Jovens, clima energético e matinal.",
+    musicaDetalhada: "Pop, eletrônico e hits do momento.",
+    comoChegar: "App até Rua Dias Ferreira. Metrô até Antero de Quental (previsão 2026).",
+    dicas: [
+      "Bloco matinal — tome café reforçado antes.",
+      "Ruas estreitas, vá leve e sem mochila.",
+    ],
+  },
+  "brasilia-amarela": {
+    horarioCompleto: "8h — Concentração às 7h30 na Urca",
+    endereco: "Praia da Urca → Av. Portugal",
+    publicoDetalhado: "Adultos, clima intimista e charmoso com vista para o Pão de Açúcar.",
+    musicaDetalhada: "MPB e samba acústico. Repertório sofisticado.",
+    comoChegar: "App até Praia da Urca. Ônibus 107 ou 513 do Centro.",
+    dicas: [
+      "Um dos blocos mais bonitos — vista incrível.",
+      "Público menor, ideal para quem quer tranquilidade.",
+      "Leve canga e protetor.",
+    ],
+  },
+  "fica-comigo": {
+    horarioCompleto: "9h — Concentração às 8h30 na Lagoa Rodrigo de Freitas",
+    endereco: "Parque dos Patins → Av. Borges de Medeiros, Lagoa",
+    publicoDetalhado: "Famílias com crianças. Clima descontraído e seguro.",
+    musicaDetalhada: "Pop brasileiro, músicas infantis e marchinhas leves.",
+    comoChegar: "App até Parque dos Patins. Metrô até General Osório + ônibus.",
+    dicas: [
+      "Ótimo para crianças — espaço amplo e seguro.",
+      "Banheiros no Parque dos Patins.",
+      "Leve brinquedos de Carnaval para os pequenos.",
+    ],
+  },
+  "carvalho-em-pe": {
+    horarioCompleto: "10h — Concentração às 9h30 na Tijuca",
+    endereco: "Praça Saens Peña → Rua Conde de Bonfim, Tijuca",
+    publicoDetalhado: "Adultos, moradores da Zona Norte. Clima tradicional.",
+    musicaDetalhada: "Samba de raiz e pagode.",
+    comoChegar: "Metrô Saens Peña — saída direta.",
+    dicas: ["Bloco tradicional da Zona Norte.", "Chegue cedo — a praça enche rápido."],
+  },
+  "cruzada": {
+    horarioCompleto: "14h — Concentração às 13h em Copacabana",
+    endereco: "Av. Atlântica, altura do Posto 5, Copacabana",
+    publicoDetalhado: "Jovens e adultos. Intenso e animado.",
+    musicaDetalhada: "Funk carioca e samba pesado.",
+    comoChegar: "Metrô até Siqueira Campos + 10 min a pé até o Posto 5.",
+    dicas: [
+      "Bloco grande — fique atento a pertences.",
+      "Praia ao lado para refrescar.",
+      "Muitos ambulantes no percurso.",
+    ],
+  },
+  "vagalume": {
+    horarioCompleto: "8h — Concentração às 7h30 em Laranjeiras",
+    endereco: "Rua das Laranjeiras → Largo do Machado",
+    publicoDetalhado: "Adultos, clima intimista e boêmio.",
+    musicaDetalhada: "MPB, samba e bossa nova.",
+    comoChegar: "Metrô Largo do Machado.",
+    dicas: ["Bloco pequeno e charmoso.", "Boa opção para quem está hospedado na Zona Sul."],
+  },
+  "empurra": {
+    horarioCompleto: "12h — Concentração às 11h30 no Flamengo",
+    endereco: "Praia do Flamengo → Aterro",
+    publicoDetalhado: "Jovens, clima intenso e quente.",
+    musicaDetalhada: "Funk, pop e pancadão.",
+    comoChegar: "Metrô Catete ou Largo do Machado + caminhada.",
+    dicas: ["Sol forte ao meio-dia — hidrate-se.", "Leve pouca coisa."],
+  },
+  "s-pimenta": {
+    horarioCompleto: "20h — Concentração às 19h30 na Lapa",
+    endereco: "Arcos da Lapa → Rua Mem de Sá",
+    publicoDetalhado: "Adultos, clima noturno e apimentado.",
+    musicaDetalhada: "Samba de roda, funk e forró.",
+    comoChegar: "Metrô Cinelândia + 5 min a pé até os Arcos.",
+    dicas: [
+      "Único bloco noturno da lista — clima diferente.",
+      "Lapa fica lotada — vá de metrô.",
+      "Banheiros nos bares da Rua Mem de Sá.",
+    ],
+  },
+  "me-enterra-na-4a": {
+    horarioCompleto: "13h — Concentração às 12h em Ipanema",
+    endereco: "Praça General Osório → Rua Visconde de Pirajá",
+    publicoDetalhado: "Todos. Clima de despedida do Carnaval, saudoso e festivo.",
+    musicaDetalhada: "Marchinhas, MPB e sambas clássicos.",
+    comoChegar: "Metrô General Osório.",
+    dicas: ["Último grande bloco — aproveite!", "Clima emocionante de encerramento."],
+  },
+  "planta-na-mente": {
+    horarioCompleto: "14h — Concentração às 13h30 no Jardim Botânico",
+    endereco: "Rua Jardim Botânico, próximo ao portão principal",
+    publicoDetalhado: "Adultos, clima tranquilo e verde.",
+    musicaDetalhada: "Reggae, MPB e world music.",
+    comoChegar: "App até Rua Jardim Botânico.",
+    dicas: ["Bloco tranquilo em área arborizada.", "Ideal para quem quer desacelerar."],
+  },
+  "fundo-de-quintal": {
+    horarioCompleto: "18h — Concentração às 17h em Madureira",
+    endereco: "Parque de Madureira → Estrada do Portela",
+    publicoDetalhado: "Todos. Autêntico pagode e samba de raiz.",
+    musicaDetalhada: "Pagode raiz, samba de terreiro e partido alto.",
+    comoChegar: "Trem até Madureira + 10 min a pé até o Parque.",
+    dicas: ["Experiência autêntica de samba carioca.", "Parque amplo e seguro."],
+  },
+  "bloconce": {
+    horarioCompleto: "9h — Concentração às 8h em Ipanema",
+    endereco: "Praça General Osório → Rua Visconde de Pirajá",
+    publicoDetalhado: "Jovens, clima pop e empoderado. Muitas fantasias.",
+    musicaDetalhada: "Pop internacional (Beyoncé, Rihanna, Lady Gaga) com bateria de escola de samba.",
+    comoChegar: "Metrô General Osório.",
+    dicas: ["Fantasias criativas são quase obrigatórias.", "Ambiente LGBTQ+ friendly."],
+  },
+  "batafa": {
+    horarioCompleto: "10h — Concentração às 9h30 em Botafogo",
+    endereco: "Praia de Botafogo → Rua Voluntários da Pátria",
+    publicoDetalhado: "Adultos, clima percussivo e tribal.",
+    musicaDetalhada: "Batucada, afrobeat e ritmos africanos.",
+    comoChegar: "Metrô Botafogo.",
+    dicas: ["Bloco de percussão pura — experiência sonora única.", "Leve tampões se for sensível a volume alto."],
+  },
+  "chule-de-santa": {
+    horarioCompleto: "12h — Concentração às 11h em Santa Teresa",
+    endereco: "Largo dos Guimarães → Rua Almirante Alexandrino",
+    publicoDetalhado: "Adultos, boêmios e moradores de Santa Teresa.",
+    musicaDetalhada: "Samba, marchinhas e chorinho.",
+    comoChegar: "Táxi/app até Largo dos Guimarães. Ladeiras íngremes.",
+    dicas: ["Calçado fechado recomendado.", "Clima de botequim ao ar livre."],
+  },
+  "filhos-da-puc": {
+    horarioCompleto: "9h — Concentração às 8h na Gávea",
+    endereco: "Praça Santos Dumont → Rua Marquês de São Vicente, Gávea",
+    publicoDetalhado: "Jovens universitários, clima festivo e energético.",
+    musicaDetalhada: "Pop, funk e hits universitários.",
+    comoChegar: "App até Praça Santos Dumont. Ônibus 170 ou 172.",
+    dicas: ["Bloco universitário — público jovem.", "Chegue cedo, a praça lota rápido."],
+  },
+  "boka-de-espuma": {
+    horarioCompleto: "14h — Concentração às 13h em Copacabana",
+    endereco: "Av. Atlântica, Posto 3, Copacabana",
+    publicoDetalhado: "Jovens e adultos, clima de festa com espuma.",
+    musicaDetalhada: "Eletrônico, pop e dance music.",
+    comoChegar: "Metrô Cardeal Arcoverde + 5 min a pé.",
+    dicas: ["Vista roupa que pode molhar.", "Espuma no percurso — diversão garantida."],
+  },
+  "saideira": {
+    horarioCompleto: "16h — Concentração às 15h no Leblon",
+    endereco: "Praça Antero de Quental → Av. Ataulfo de Paiva, Leblon",
+    publicoDetalhado: "Todos. Clima de encerramento festivo.",
+    musicaDetalhada: "Samba, pop e marchinhas de despedida.",
+    comoChegar: "Metrô Antero de Quental (previsão 2026) ou app.",
+    dicas: ["Último bloco do Carnaval — clima especial.", "Ótimos restaurantes no entorno para o pós-bloco."],
+  },
+};

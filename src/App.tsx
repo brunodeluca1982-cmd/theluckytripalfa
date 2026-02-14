@@ -54,6 +54,7 @@ import RoteiroFinal from "./pages/RoteiroFinal";
 import CalendarioCarnaval from "./pages/CalendarioCarnaval";
 import BlocosDia from "./pages/BlocosDia";
 import BlocoDetalhe from "./pages/BlocoDetalhe";
+import BlocoInfo from "./pages/BlocoInfo";
 import NotFound from "./pages/NotFound";
 import { CarnavalModeProvider } from "@/contexts/CarnavalModeContext";
 import { SpotifyPlayerProvider } from "@/contexts/SpotifyPlayerContext";
@@ -152,6 +153,7 @@ const App = () => {
                   <Route path="/calendario-carnaval" element={<CalendarioCarnaval />} />
                   <Route path="/blocos-dia" element={<BlocosDia />} />
                   <Route path="/bloco-detalhe/:id" element={<BlocoDetalhe />} />
+                  <Route path="/bloco-info/:id" element={<BlocoInfo />} />
                   
                   {/* Lucky List */}
                   <Route path="/lucky-list" element={<LuckyList />} />
