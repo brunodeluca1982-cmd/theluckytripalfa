@@ -49,13 +49,13 @@ const BlocosDia = () => {
               onClick={() => navigate(`/bloco-detalhe/${bloco.id}?date=${selectedDate}`)}
               className="w-full rounded-2xl backdrop-blur-xl bg-white/10 border border-white/20 p-4 flex items-center gap-4 text-left active:scale-[0.98] transition-transform"
             >
-              <div className="flex items-center gap-2 shrink-0">
+              <div className="flex items-center gap-1.5 shrink-0">
                 <Clock className="w-4 h-4 text-white/50" />
-                <span className="text-white font-medium text-sm w-10">{bloco.time}</span>
+                <span className="text-white font-medium text-sm w-6 text-center">{parseInt(bloco.time)}</span>
               </div>
-              <span className="text-white text-sm font-medium truncate">{bloco.name}</span>
-              <span className="text-white/60 text-sm shrink-0">📍{bloco.neighborhood?.replace("Jardim Botânico", "J Botânico")}</span>
-              {bloco.tag && <span className="text-white/40 text-xs italic shrink-0">✨{bloco.tag}</span>}
+              <span className="text-white text-sm font-medium min-w-0 flex-1 truncate">{bloco.name}</span>
+              <span className="text-white/60 text-sm shrink-0">📍 {bloco.neighborhood?.replace("Jardim Botânico", "J Botânico")}</span>
+              {bloco.tag && <span className="text-white/40 text-[11px] italic shrink-0">✨ {bloco.tag}</span>}
               <ChevronLeft className="w-4 h-4 text-white/40 ml-auto rotate-180 shrink-0" />
             </button>
           ))}
