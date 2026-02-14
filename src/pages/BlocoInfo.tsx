@@ -1,7 +1,6 @@
 import { useParams, useSearchParams, Link } from "react-router-dom";
 import { ChevronLeft } from "lucide-react";
-import { carnavalBlocos } from "@/data/carnaval-blocos-data";
-import { blocoExtendedInfo } from "@/data/bloco-extended-info";
+import { getBlockById } from "@/data/carnival-blocks";
 import { formatCarnavalDateFull } from "@/lib/carnaval-date-utils";
 import SaveToRoteiroButton from "@/components/SaveToRoteiroButton";
 import carnavalBlocoBg from "@/assets/highlights/carnaval-bloco-bg.jpeg";
@@ -11,8 +10,7 @@ const BlocoInfo = () => {
   const [searchParams] = useSearchParams();
   const date = searchParams.get("date") || "";
 
-  const bloco = carnavalBlocos.flatMap((d) => d.blocos).find((b) => b.id === id);
-  const extra = id ? blocoExtendedInfo[id] : undefined;
+  const bloco = id ? getBlockById(id) : undefined;
 
   if (!bloco) {
     return (
@@ -23,8 +21,6 @@ const BlocoInfo = () => {
   }
 
   const fullDate = date ? formatCarnavalDateFull(date) : "";
-
-  const fullText = extra?.fullText || "Detalhes completos em breve.";
 
   return (
     <div className="min-h-screen relative">
@@ -60,7 +56,7 @@ const BlocoInfo = () => {
         {/* Full text content */}
         <div className="mx-4 rounded-2xl backdrop-blur-xl bg-white/10 border border-white/20 p-5">
           <div className="text-sm text-white/90 leading-relaxed whitespace-pre-line">
-            {fullText}
+            {bloco.fullDetails}
           </div>
         </div>
       </div>

@@ -6,13 +6,13 @@ import { Switch } from "@/components/ui/switch";
 import { useCarnavalMode } from "@/contexts/CarnavalModeContext";
 import { useSpotifyPlayer } from "@/contexts/SpotifyPlayerContext";
 import { clearVideoSeen } from "@/pages/DestinationVideoIntro";
-import { carnavalBlocos } from "@/data/carnaval-blocos-data";
+import { carnivalDates } from "@/data/carnival-blocks";
 import { formatCarnavalDateShort } from "@/lib/carnaval-date-utils";
 import calendarioBg from "@/assets/highlights/calendario-carnaval-bg.png";
 
-const days = carnavalBlocos.map((d) => ({
-  date: d.date,
-  label: formatCarnavalDateShort(d.date),
+const days = carnivalDates.map((iso) => ({
+  date: iso,
+  label: formatCarnavalDateShort(iso),
 }));
 
 const CalendarioCarnaval = () => {
