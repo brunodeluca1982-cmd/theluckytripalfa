@@ -164,7 +164,7 @@ const App = () => {
                   
                   {/* Meu Roteiro */}
                   <Route path="/meu-roteiro" element={<MeuRoteiro />} />
-                  <Route path="/meu-roteiro/grupo" element={<TripGroup />} />
+                  <Route path="/meu-roteiro/grupo" element={<Navigate to="/meu-roteiro/datas" replace />} />
                   <Route path="/meu-roteiro/datas" element={<TripDates />} />
                   <Route path="/meu-roteiro/preferencias" element={<TripPreferences />} />
                   <Route path="/meu-roteiro/decisao" element={<ItineraryDecision />} />

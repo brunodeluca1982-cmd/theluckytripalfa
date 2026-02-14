@@ -36,19 +36,13 @@ const TripDates = () => {
     return null;
   }
 
-  // If no group info, go back to step 2
-  if (draft.adults < 1) {
-    navigate('/meu-roteiro/grupo', { replace: true });
-    return null;
-  }
-
   const handleContinue = () => {
     // Navigate to preferences step
     navigate('/meu-roteiro/preferencias');
   };
 
   const handleBack = () => {
-    navigate('/meu-roteiro/grupo');
+    navigate('/meu-roteiro');
   };
 
   const handleArrivalSelect = (date: Date | undefined) => {
@@ -101,13 +95,6 @@ const TripDates = () => {
           <div>
             <p className="text-xs text-muted-foreground">Destino</p>
             <p className="font-semibold text-foreground">{draft.destinationName}</p>
-          </div>
-          <div>
-            <p className="text-xs text-muted-foreground">Viajantes</p>
-            <p className="text-sm text-foreground">
-              {draft.adults} {draft.adults === 1 ? 'adulto' : 'adultos'}
-              {draft.children > 0 && `, ${draft.children} ${draft.children === 1 ? 'criança' : 'crianças'}`}
-            </p>
           </div>
         </div>
 

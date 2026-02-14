@@ -193,8 +193,7 @@ const MeuRoteiro = () => {
       setShowError(true);
       return;
     }
-    // Navigate to group composition step
-    navigate('/meu-roteiro/grupo');
+    navigate('/meu-roteiro/datas');
   };
 
   // Fixed back navigation - always go to home
