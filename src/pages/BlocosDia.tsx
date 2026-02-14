@@ -4,6 +4,29 @@ import { getBlocksByDate } from "@/data/carnival-blocks";
 import { formatCarnavalDateTitle } from "@/lib/carnaval-date-utils";
 import carnavalBlocoBg from "@/assets/highlights/carnaval-bloco-bg.jpeg";
 
+// Short display name for list only — never overwrites stored name
+function shortenBlocoName(name: string): string {
+  let s = name;
+  const prefixes = ["Cordão da ", "Cordão do ", "Banda do ", "Bloco do ", "Bloco da ", "Bloco de "];
+  for (const p of prefixes) {
+    if (s.startsWith(p)) { s = s.slice(p.length); break; }
+  }
+  if (s.length > 20) s = s.replace(/^Enredo /, "E. ");
+  return s;
+}
+
+// Abbreviate neighborhood for list only
+const NEIGHBORHOOD_SHORT: Record<string, string> = {
+  "Copacabana": "Copa",
+  "Ipanema": "Ipa",
+  "Arpoador": "Arpex",
+  "Santa Teresa": "S. Tereza",
+  "Jardim Botânico": "J Botânico",
+};
+function shortenNeighborhood(n: string): string {
+  return NEIGHBORHOOD_SHORT[n] ?? n;
+}
+
 const BlocosDia = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -49,8 +72,8 @@ const BlocosDia = () => {
                 <Clock className="w-4 h-4 text-white/50" />
                 <span className="text-white font-medium text-sm w-6 text-center">{parseInt(bloco.time)}</span>
               </div>
-              <span className="text-white text-sm font-medium min-w-0 flex-1 truncate">{bloco.name}</span>
-              <span className="text-white/60 text-sm shrink-0">📍 {bloco.neighborhoodShort}</span>
+              <span className="text-white text-sm font-medium min-w-0 flex-1 truncate">{shortenBlocoName(bloco.name)}</span>
+              <span className="text-white/60 text-sm shrink-0">📍 {shortenNeighborhood(bloco.neighborhoodShort || bloco.neighborhood || "")}</span>
               {bloco.tag && <span className="text-white/40 text-[11px] italic shrink-0">✨ {bloco.tag}</span>}
               <ChevronLeft className="w-4 h-4 text-white/40 ml-auto rotate-180 shrink-0" />
             </button>
