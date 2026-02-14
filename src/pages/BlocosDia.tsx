@@ -12,6 +12,10 @@ const BlocosDia = () => {
   const dayData = carnavalBlocos.find((d) => d.date === selectedDate);
   const blocos = dayData?.blocos || [];
 
+  if (blocos.length === 0 && selectedDate) {
+    console.log("[BlocosDia debug]", { selectedDate, sampleDates: carnavalBlocos.slice(0, 3).map((d) => d.date) });
+  }
+
   return (
     <div className="h-screen relative overflow-hidden">
       <div className="absolute inset-0 bg-cover bg-center bg-fixed" style={{ backgroundImage: `url(${carnavalBlocoBg})`, filter: "blur(4px) contrast(0.9)", transform: "scale(1.05)" }} />
