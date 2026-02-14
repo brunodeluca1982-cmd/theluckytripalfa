@@ -47,13 +47,15 @@ const BlocoDetalhe = () => {
               <MapPin className="w-4 h-4 text-white/60 shrink-0" />
               <span className="text-sm text-white">{bloco.neighborhood}</span>
             </div>
-            <div className="flex items-center gap-3">
-              <Sparkles className="w-4 h-4 text-white/60 shrink-0" />
-              <span className="text-sm text-white">{bloco.category}</span>
-            </div>
+            {bloco.tag && (
+              <div className="flex items-center gap-3">
+                <Sparkles className="w-4 h-4 text-white/60 shrink-0" />
+                <span className="text-sm text-white">{bloco.tag}</span>
+              </div>
+            )}
             <div className="flex items-center gap-3">
               <Users className="w-4 h-4 text-white/60 shrink-0" />
-              <span className="text-sm text-white">{bloco.description}</span>
+              <span className="text-sm text-white">{bloco.shortDescription}</span>
             </div>
           </div>
 

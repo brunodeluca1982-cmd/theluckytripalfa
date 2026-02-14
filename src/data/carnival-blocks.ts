@@ -1,21 +1,44 @@
 /**
- * Unified carnival blocks data.
- * Single source of truth — all screens read from this flat array.
+ * Unified carnival blocks data — SINGLE SOURCE OF TRUTH.
+ * All screens read from this flat array filtered by dateISO.
  */
+
+export interface CarnivalBlockExtraDetails {
+  schedule_line?: string;
+  concentration?: string;
+  route?: string;
+  dispersal?: string;
+  how_to_get_full?: string[];
+  vibe?: string[];
+  music_style?: string[];
+  structure?: string[] | string;
+  end_time?: string[] | string;
+  my_reading?: string[];
+}
 
 export interface CarnivalBlock {
   id: string;
-  dateISO: string; // YYYY-MM-DD
+  dateISO: string;
   name: string;
   neighborhood: string;
-  category: string; // raiz | moderno | cultural | infantil | elétrico | clássico | etc.
-  time: string; // display time e.g. "7h"
-  startHour: number; // numeric for sorting
-  description: string; // short, for list view
-  fullDetails: string; // long-form for "Saiba mais"
+  tag: string;
+  address: string;
+  shortDescription: string;
+  time: string;
+  howToGetShort: string;
+  audienceShort: string;
+  musicShort: string;
+  extraDetails?: CarnivalBlockExtraDetails;
 }
 
-const PLACEHOLDER = "Detalhes completos em breve.";
+function slug(name: string): string {
+  return name
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+}
 
 export const carnivalBlocks: CarnivalBlock[] = [
   // ── 14 de fevereiro ──────────────────────────────────────────
@@ -24,296 +47,877 @@ export const carnivalBlocks: CarnivalBlock[] = [
     dateISO: "2026-02-14",
     name: "Céu na Terra",
     neighborhood: "Santa Teresa",
-    category: "cultural",
-    time: "7h",
-    startHour: 7,
-    description: "Bloco intimista e místico pelas ladeiras de Santa Teresa. Marchinhas e MPB ao amanhecer.",
-    fullDetails: `📍 Concentração
-Largo dos Guimarães, Santa Teresa
-A concentração começa por volta das 6h30 — sim, é cedo, mas faz parte da experiência. O bloco sai do Largo dos Guimarães e desce pela Rua Almirante Alexandrino, passando por ladeiras estreitas e charmosas de Santa Teresa.
-
-🚕 Como eu chego
-Metrô até Glória ou Largo do Machado + táxi ou app até Santa Teresa. Não vá de carro — não tem onde estacionar e as ruas fecham. Se puder, vá a pé subindo pela Rua Joaquim Murtinho. É ladeira, mas a vista compensa.
-
-🎭 A vibe
-O Céu na Terra é um dos blocos mais bonitos e intimistas do Rio. A energia é mística, quase espiritual. Muita gente fantasiada com referências celestiais — anjos, estrelas, lua. O clima é de comunidade, de vizinhança, de quem ama Santa Teresa. Não é bloco de bagunça, é bloco de alma.
-
-🎵 Estilo musical
-Marchinhas clássicas com releituras autorais, MPB acústica e percussão artesanal feita pelos próprios moradores. A bateria é pequena mas potente — o som ecoa pelas ladeiras e cria uma acústica natural única.
-
-🏗️ Estrutura
-Banheiros químicos espalhados pelo Largo dos Guimarães. Ambulantes vendem água, cerveja e mate. Não espere grande estrutura — faz parte do charme. Leve sua água e um lanche leve.
-
-⏰ Que horas acaba
-Por volta das 11h–12h. O bloco desce devagar, curtindo cada metro de ladeira.
-
-📝 Minha leitura
-Se você quer começar o Carnaval com o pé direito — e com a alma leve — o Céu na Terra é obrigatório. É o bloco que te lembra por que o Carnaval de rua do Rio é patrimônio. Vista branco, leve glitter, e deixe a cidade te abraçar.`,
+    tag: "cultural",
+    address: "Rua Almirante Alexandrino, Santa Teresa",
+    shortDescription: "Cortejo de Santa Teresa com aquela estética artesanal e imaginário popular que deixa o bairro ainda mais cinematográfico.",
+    time: "concentração 07:00 | dispersão 13:00",
+    howToGetShort: "metrô até Glória/Cinelândia e subo de táxi/Uber até um ponto mais baixo (e sigo andando), ou já chego cedo e faço tudo a pé no bairro.",
+    audienceShort: "locais e turistas; vá com amigos, amigos dos amigos, agregados e quem você conhece lá na hora.",
+    musicShort: "clássicos dos blocos.",
+    extraDetails: {
+      schedule_line: "🎭 07:00 — Céu na Terra (Santa Teresa)",
+      concentration: "Largo do Curvelo",
+      route: "Ruas internas de Santa Teresa",
+      dispersal: "Região do Largo dos Guimarães",
+      how_to_get_full: [
+        "Santa Teresa no carnaval é território fechado cedo.",
+        "Uber / Táxi: Melhor desembarque: Rua Riachuelo (antes da subida). Subir a pé é parte da experiência. Depois das 7h, carros praticamente não sobem.",
+        "Metrô: Estação: Glória ou Cinelândia. De lá, caminhada + subida (20–30 min).",
+        "Ruas estreitas, fechadas para veículos. Vá leve. Sapato confortável. Nada de salto.",
+      ],
+      vibe: [
+        "Esse é um dos blocos mais bonitos do Rio.",
+        "Atmosfera quase poética.",
+        "Visual de casarões, crianças fantasiadas, banda com instrumentos de sopro.",
+        "Parece um carnaval europeu tropicalizado.",
+        "Faixa etária: muita família + jovens adultos alternativos (25–45 predominante).",
+        "Perfil: artistas, arquitetos, músicos, gente ligada à cultura, famílias da Zona Sul.",
+      ],
+      music_style: [
+        "Marchinhas tradicionais, sopros, clima retrô.",
+        "Nada de pancadão. Nada de som eletrônico.",
+      ],
+      structure: [
+        "Banheiros químicos espalhados pelo Largo.",
+        "Ambulância da prefeitura.",
+        "Presença forte da Guarda Municipal.",
+        "Comércio local funcionando.",
+      ],
+      end_time: ["Oficialmente até 11h30.", "Mas a região segue viva até 14h."],
+      my_reading: [
+        "Se você quer um carnaval elegante, quase cinematográfico, é aqui.",
+        "Não é bloco de pegação. É bloco de contemplação.",
+      ],
+    },
+  },
+  {
+    id: "cordao-da-bola-preta",
+    dateISO: "2026-02-14",
+    name: "Cordão da Bola Preta",
+    neighborhood: "Centro",
+    tag: "caótico",
+    address: "Rua Primeiro de Março / entorno da Av. Presidente Antônio Carlos, Centro",
+    shortDescription: "Esse é o dia em que o Centro \"fecha na marra\". É megabloco, multidão e a cidade virando um salão público.",
+    time: "desfile 09:00–13:00 (operação começa por volta de 05:00)",
+    howToGetShort: "metrô (Carioca/Uruguaiana/Cinelândia) e vou no fluxo a pé.",
+    audienceShort: "local e turistas; bom pra ir em grupo grande (e pra você acabar reunindo pessoas aleatórias que você nunca sabe como reunir no mesmo ambiente).",
+    musicShort: "clássicos dos blocos.",
+    extraDetails: {
+      schedule_line: "🎭 07:00 — Cordão da Bola Preta (Centro)",
+      concentration: "Rua Primeiro de Março (altura da Candelária)",
+      route: "segue pela Av. Presidente Vargas",
+      dispersal: "região da Av. Presidente Vargas",
+      how_to_get_full: [
+        "Se você quer inteligência, não vá de carro.",
+        "Metrô: Uruguaiana ou Presidente Vargas. Melhor estratégia: Uruguaiana costuma ser mais prática.",
+        "Uber: desembarcar na altura da Av. Rio Branco com Rua da Alfândega e seguir a pé.",
+        "Ônibus: muitas linhas sofrem desvios (consulte o app Rio Ônibus no dia).",
+        "A partir das 5h várias ruas já começam a fechar. Depois das 7h o Centro vira pedestre.",
+      ],
+      vibe: [
+        "É o maior bloco do Rio. Multidão real.",
+        "Aqui não é \"bloquinho\". É massa humana.",
+        "Mistura de servidor público, estudante, gente que trabalha no Centro, turista, grupos tradicionais.",
+        "Faixa etária: 25 a 60+ (muita gente mais velha que acompanha há décadas).",
+        "Patrimônio cultural.",
+      ],
+      music_style: [
+        "Marchinhas clássicas.",
+        "Samba tradicional.",
+        "Carnaval raiz.",
+        "Você vai ouvir \"Cidade Maravilhosa\" cantada como hino.",
+      ],
+      structure: [
+        "Banheiros químicos espalhados pela Av. Presidente Vargas.",
+        "Postos médicos avançados.",
+        "Ambulâncias.",
+        "Forte presença da Guarda Municipal e PM.",
+        "Estrutura existe, mas densidade é alta (não é conforto).",
+      ],
+      end_time: ["Oficialmente encerra por volta de 12h/13h.", "Na prática, dispersão até 14h."],
+      my_reading: [
+        "Se você quer sentir o peso cultural do carnaval carioca, vá.",
+        "Se você quer conforto e espaço, escolha outro.",
+        "Experiência histórica. Não é boutique.",
+      ],
+    },
+  },
+  {
+    id: "amigos-da-onca",
+    dateISO: "2026-02-14",
+    name: "Amigos da Onça",
+    neighborhood: "Flamengo",
+    tag: "",
+    address: "Posto 8 – Praia do Flamengo (altura do Parque do Flamengo)",
+    shortDescription: "",
+    time: "",
+    howToGetShort: "",
+    audienceShort: "",
+    musicShort: "",
+    extraDetails: {
+      schedule_line: "🎭 07:00 — Amigos da Onça (Flamengo)",
+      concentration: "Posto 8 – Praia do Flamengo",
+      route: "Geralmente segue pela orla até o Leme",
+      dispersal: "Próximo à Praça do Monumento aos Pracinhas",
+      how_to_get_full: [
+        "Uber / Táxi: Melhor desembarque: Av. Atlântica com Rua Bulhões de Carvalho (posto 8). Evite quarteirões estreitos.",
+        "Metrô: estação Flamengo (linha 1) + 15 min caminhando leve.",
+        "Ônibus: linhas para Praia do Flamengo/Botafogo ajudam (rotas mudam; veja Rio Ônibus).",
+        "Chegue 06:30 (orla trava cedo).",
+      ],
+      vibe: [
+        "Cara de praia, clima leve.",
+        "Moradores da Zona Sul, universitários, gente que passou a madrugada acordado.",
+        "Faixa etária: 20–40 (aparece 40–50 tranquilo).",
+      ],
+      music_style: [
+        "Eclético com predominância de samba e axé misturado.",
+        "Marchinha aparece, mas puxa para batida de verão.",
+      ],
+      structure: [
+        "Banheiros químicos pela orla.",
+        "Barracas de praia como apoio informal.",
+        "Ambulâncias circulando.",
+        "Segurança da prefeitura/guarda local.",
+      ],
+      end_time: ["Até 10h30–11h, dispersão até 12h."],
+      my_reading: [
+        "Ótimo para acordar cedo com vibe praiana.",
+        "Bom para evitar tumulto do Centro.",
+      ],
+    },
+  },
+  {
+    id: "multibloco",
+    dateISO: "2026-02-14",
+    name: "Multibloco",
+    neighborhood: "Centro",
+    tag: "moderno",
+    address: "Av. Henrique Valadares, 75",
+    shortDescription: "Bloco com cara de \"rua moderna\": mistura de referências e uma energia bem coletiva.",
+    time: "concentração 07:00 | desfile 08:00–12:00",
+    howToGetShort: "metrô Carioca/Uruguaiana e caminhada curta pro miolo.",
+    audienceShort: "locais e turistas; vá com amigos, amigos dos amigos, agregados e quem você conhece lá na hora.",
+    musicShort: "open format.",
+  },
+  {
+    id: "blocobuster",
+    dateISO: "2026-02-14",
+    name: "Blocobuster",
+    neighborhood: "Leme",
+    tag: "moderno",
+    address: "Praça Almirante Júlio de Noronha, 1",
+    shortDescription: "O Leme vira set a céu aberto: trilhas e clássicos da cultura pop em versão samba, com clima de filme logo cedo.",
+    time: "concentração 07:00 | início 08:00",
+    howToGetShort: "metrô até Cardeal Arcoverde e sigo de Uber curto até o Leme (ou vou andando pela orla, se estiver com tempo).",
+    audienceShort: "locais e poucos turistas; bom para ir com toda a família, ambiente respeitoso e seguro.",
+    musicShort: "open format (pop em versão carnaval/samba).",
   },
   {
     id: "exagerado",
     dateISO: "2026-02-14",
     name: "Exagerado",
-    neighborhood: "Aterro do Flamengo",
-    category: "moderno",
-    time: "8h",
-    startHour: 8,
-    description: "Homenagem a Cazuza no Aterro. Pop rock brasileiro dos anos 80/90.",
-    fullDetails: PLACEHOLDER,
+    neighborhood: "Centro",
+    tag: "moderno",
+    address: "Praça Tiradentes",
+    shortDescription: "Carnaval cantando Cazuza em ritmo de folia: é bloco com identidade, tema e emoção, sem cara genérica.",
+    time: "08:00",
+    howToGetShort: "metrô Carioca/Uruguaiana e vou a pé.",
+    audienceShort: "locais e turistas; vá com amigos, amigos dos amigos, agregados e quem você conhece lá na hora.",
+    musicShort: "open format (com clássicos).",
   },
   {
-    id: "bola-preta",
+    id: "escangalha",
     dateISO: "2026-02-14",
-    name: "Bola Preta",
+    name: "Escangalha",
+    neighborhood: "Jardim Botânico",
+    tag: "raiz",
+    address: "Rua Jardim Botânico com Rua Pacheco Leão",
+    shortDescription: "Bateria e samba de verdade: repertório com sambas clássicos e pegada de escola, numa das áreas mais lindas da cidade.",
+    time: "08:00",
+    howToGetShort: "metrô (Botafogo/General Osório) + Uber curto até perto e final a pé.",
+    audienceShort: "local e turistas; bom para ir com toda a família, ambiente respeitoso e seguro.",
+    musicShort: "clássicos dos blocos.",
+    extraDetails: {
+      schedule_line: "🎭 08:00 — Escangalha (Jardim Botânico)",
+      concentration: "Rua Jardim Botânico (altura do Parque Lage)",
+      route: "Região do bairro",
+      dispersal: "Próximo ao Horto",
+      how_to_get_full: [
+        "Sem metrô direto.",
+        "Uber: desça antes da Rua Pacheco Leão e caminhe.",
+        "Ônibus: linhas para Jardim Botânico funcionam bem cedo.",
+        "Bairro fecha parcialmente.",
+      ],
+      vibe: [
+        "Jovem, criativo, alternativo, mais organizado.",
+        "Faixa etária: 20–35 predominante.",
+        "Perfil: publicidade, cinema, design, startups, universitários.",
+      ],
+      music_style: ["Open format com base em marchinha moderna.", "Releituras e surpresa."],
+      structure: ["Banheiros químicos.", "Ambulância.", "Apoio da prefeitura.", "Comércio local aberto."],
+      end_time: ["Até 12h30–13h."],
+      my_reading: ["Equilíbrio entre energia e conforto.", "Meio termo inteligente."],
+    },
+  },
+  {
+    id: "skabloco",
+    dateISO: "2026-02-14",
+    name: "Skabloco",
+    neighborhood: "Glória",
+    tag: "moderno",
+    address: "Passarela da Glória (Aterro do Flamengo)",
+    shortDescription: "Alternativo no Carnaval: estética própria, cortejo no Aterro e energia de \"tribo\".",
+    time: "09:00",
+    howToGetShort: "metrô Glória e caminho pro Aterro.",
+    audienceShort: "locais e poucos turistas; bom pra ir em grupo e terminar o dia conhecendo metade do Rio sem esforço.",
+    musicShort: "open format.",
+  },
+  {
+    id: "forro-da-taylor",
+    dateISO: "2026-02-14",
+    name: "Forró da Taylor",
     neighborhood: "Centro",
-    category: "clássico",
-    time: "9h",
-    startHour: 9,
-    description: "Um dos maiores blocos do mundo. Marchinhas clássicas tomam o Centro do Rio.",
-    fullDetails: `📍 Concentração
-Rua 1º de Março, Centro — o bloco se concentra ali e desfila pela Av. Rio Branco. É um dos maiores blocos do planeta, com mais de 1 milhão de foliões nos bons anos.
-
-🚕 Como eu chego
-Metrô até Uruguaiana ou Carioca — saída direta para o percurso. Não vá de carro. As ruas ao redor ficam completamente fechadas desde as 6h da manhã. Chegue cedo (antes das 8h) para entrar no bloco antes que a multidão fique impenetrável.
-
-🎭 A vibe
-Caos organizado. O Cordão da Bola Preta é o maior bloco do Rio e talvez do mundo. É uma massa humana gigante que toma o Centro inteiro. O clima é de euforia coletiva — todo mundo fantasiado, cantando marchinhas que seus avós cantavam. É tradição pura, sem frescura.
-
-🎵 Estilo musical
-Marchinhas clássicas, samba e frevo. Trio elétrico potente com repertório 100% tradicional. "Me dá um dinheiro aí", "Ó abre alas", "Allah-la-ô" — tudo que é hino do Carnaval brasileiro toca aqui.
-
-🏗️ Estrutura
-Banheiros químicos ao longo da Av. Rio Branco. Ambulantes em cada esquina. Postos médicos da prefeitura espalhados. Segurança reforçada com policiamento e câmeras.
-
-⏰ Que horas acaba
-O desfile principal vai até 13h–14h, mas a festa no entorno continua até o fim da tarde.
-
-📝 Minha leitura
-Se você quer sentir o Carnaval na sua forma mais grandiosa e tradicional, o Bola Preta é insubstituível. Mas vá preparado: é intenso, é quente, é multidão. Defina um ponto de encontro com seu grupo ANTES. Leve doleira, nada de mochila, e aceite que você vai suar. Muito.`,
+    tag: "moderno",
+    address: "Largo São Francisco de Paula, 50",
+    shortDescription: "Manhã com pista improvisada no Centro: quem dança de verdade aparece.",
+    time: "09:00",
+    howToGetShort: "metrô Cinelândia/Carioca e vou andando.",
+    audienceShort: "locais e turistas; vá com amigos, amigos dos amigos, agregados e quem você conhece lá na hora.",
+    musicShort: "open format.",
+  },
+  {
+    id: "exaltacao-ao-samba-de-enredo",
+    dateISO: "2026-02-14",
+    name: "Exaltação ao Samba de Enredo",
+    neighborhood: "Centro",
+    tag: "raiz",
+    address: "Av. Gomes Freire, 256",
+    shortDescription: "Carnaval \"por dentro\": enredo, refrão, conversa de escola e energia de cantar junto.",
+    time: "10:00",
+    howToGetShort: "metrô Carioca e caminhada.",
+    audienceShort: "local e turistas; bom pra ir em grupo e acabar reunindo pessoas aleatórias.",
+    musicShort: "clássicos dos blocos.",
+  },
+  {
+    id: "beco-do-rato",
+    dateISO: "2026-02-14",
+    name: "Beco do Rato",
+    neighborhood: "Lapa",
+    tag: "raiz",
+    address: "Rua Joaquim Silva, 11",
+    shortDescription: "Lapa com samba e rua cheia desde cedo.",
+    time: "10:00",
+    howToGetShort: "metrô Cinelândia e desço andando.",
+    audienceShort: "locais e turistas; amigos, amigos dos amigos, agregados.",
+    musicShort: "clássicos dos blocos.",
+  },
+  {
+    id: "bloco-do-barbas",
+    dateISO: "2026-02-14",
+    name: "Bloco do Barbas",
+    neighborhood: "Botafogo",
+    tag: "moderno",
+    address: "Rua Arnaldo Quintela, 120",
+    shortDescription: "Botafogo no modo \"rua que vira festa\".",
+    time: "concentração 12:00 | dispersão 17:00",
+    howToGetShort: "metrô Botafogo e caminhada curta.",
+    audienceShort: "locais e poucos turistas; bom pra ir em grupo.",
+    musicShort: "clássicos dos blocos.",
+  },
+  {
+    id: "enredo-do-meu-samba",
+    dateISO: "2026-02-14",
+    name: "Enredo do Meu Samba",
+    neighborhood: "Flamengo",
+    tag: "raiz",
+    address: "Travessa dos Tamoios, 45",
+    shortDescription: "Samba de rua em clima de bairro.",
+    time: "12:00",
+    howToGetShort: "metrô Flamengo e vou andando.",
+    audienceShort: "local e turistas; vá com amigos, amigos dos amigos, agregados.",
+    musicShort: "clássicos dos blocos.",
+  },
+  {
+    id: "banda-do-choppinho-da-paula-freitas",
+    dateISO: "2026-02-14",
+    name: "Banda do Choppinho da Paula Freitas",
+    neighborhood: "Copacabana",
+    tag: "clássico",
+    address: "Av. Atlântica, 2134",
+    shortDescription: "Marchinha e hits de Carnaval com sensação de bairro + orla.",
+    time: "12:00 | dispersão 17:00",
+    howToGetShort: "metrô Siqueira Campos/Cantagalo e desço a pé pra orla.",
+    audienceShort: "locais e turistas; bom para ir com toda a família, ambiente respeitoso e seguro.",
+    musicShort: "clássicos dos blocos.",
+  },
+  {
+    id: "fogo-na-cueca",
+    dateISO: "2026-02-14",
+    name: "Fogo na Cueca",
+    neighborhood: "Copacabana",
+    tag: "irreverente",
+    address: "Rua Anita Garibaldi, 60",
+    shortDescription: "Bloco de amigos que cresceu e virou tradição local.",
+    time: "12:00",
+    howToGetShort: "metrô Cantagalo/Siqueira Campos e caminho.",
+    audienceShort: "locais e poucos turistas; amigos, amigos dos amigos, agregados.",
+    musicShort: "open format.",
+  },
+  {
+    id: "ordinarios-eletricos",
+    dateISO: "2026-02-14",
+    name: "Ordinários Elétricos",
+    neighborhood: "Flamengo",
+    tag: "elétrico",
+    address: "Av. Infante Dom Henrique, 10",
+    shortDescription: "Energia do Carnaval baiano no Rio: trio e samba-reggae/ijexá.",
+    time: "13:00",
+    howToGetShort: "metrô Glória/Flamengo e ando até o Aterro.",
+    audienceShort: "locais e turistas; bom pra ir em grupo e acabar reunindo pessoas aleatórias.",
+    musicShort: "open format.",
   },
   {
     id: "bloco-brasil",
     dateISO: "2026-02-14",
     name: "Bloco Brasil",
-    neighborhood: "Flamengo",
-    category: "moderno",
-    time: "13h",
-    startHour: 13,
-    description: "Clima patriótico e festivo no Aterro. Samba enredo e axé.",
-    fullDetails: PLACEHOLDER,
+    neighborhood: "Leme",
+    tag: "alto astral",
+    address: "Praça Almirante Júlio de Noronha, 1",
+    shortDescription: "Orla com clima leve e repertório pra todo mundo cantar junto.",
+    time: "13:00",
+    howToGetShort: "metrô Cardeal Arcoverde + Uber curto até o Leme.",
+    audienceShort: "locais e turistas; bom para ir com toda a família, ambiente respeitoso e seguro.",
+    musicShort: "clássicos dos blocos.",
+  },
+  {
+    id: "batuquebato",
+    dateISO: "2026-02-14",
+    name: "Batuquebato",
+    neighborhood: "Centro",
+    tag: "percussivo",
+    address: "Praça Tiradentes, 28",
+    shortDescription: "Corpo no ritmo: foco em percussão e sensação de \"todo mundo tocando junto\".",
+    time: "14:00 (comunicado do próprio bloco)",
+    howToGetShort: "metrô Uruguaiana/Carioca e sigo a pé.",
+    audienceShort: "locais e turistas; amigos, amigos dos amigos, agregados.",
+    musicShort: "open format.",
+  },
+  {
+    id: "roda-mas-nao-sai",
+    dateISO: "2026-02-14",
+    name: "Roda Mas Não Sai",
+    neighborhood: "Centro",
+    tag: "raiz",
+    address: "Praça Presidente Aguirre Cerda, 17",
+    shortDescription: "Bloco de praça: samba-enredo e marchinhas, com cara de encontro.",
+    time: "14:00",
+    howToGetShort: "metrô Carioca e vou andando.",
+    audienceShort: "locais e turistas; bom pra ir em grupo e acabar reunindo pessoas aleatórias.",
+    musicShort: "clássicos dos blocos.",
+  },
+  {
+    id: "rebarbas",
+    dateISO: "2026-02-14",
+    name: "Rebarbas",
+    neighborhood: "Botafogo",
+    tag: "moderno",
+    address: "Rua da Passagem, 69",
+    shortDescription: "Bailão a céu aberto: repertório popular que atravessa gerações.",
+    time: "14:00",
+    howToGetShort: "metrô Botafogo e caminhada curta.",
+    audienceShort: "locais e poucos turistas; bom para ir com toda a família, ambiente respeitoso e seguro.",
+    musicShort: "open format.",
+  },
+  {
+    id: "pombo-correio",
+    dateISO: "2026-02-14",
+    name: "Pombo Correio",
+    neighborhood: "Vila Isabel",
+    tag: "raiz",
+    address: "Boulevard 28 de Setembro, 219",
+    shortDescription: "Carnaval de bairro com tradição de samba.",
+    time: "14:00",
+    howToGetShort: "se você estiver Zona Sul/Centro, eu só iria se fosse uma escolha do dia.",
+    audienceShort: "local e turistas.",
+    musicShort: "clássicos dos blocos.",
+  },
+  {
+    id: "banda-de-ipanema",
+    dateISO: "2026-02-14",
+    name: "Banda de Ipanema",
+    neighborhood: "Ipanema",
+    tag: "icônico",
+    address: "Rua Gomes Carneiro, 55",
+    shortDescription: "Ipanema vira passarela sem pose: clássico, democrático.",
+    time: "15:00",
+    howToGetShort: "metrô General Osório e vou andando.",
+    audienceShort: "locais e turistas; bom pra ir em grupo e acabar reunindo pessoas aleatórias.",
+    musicShort: "clássicos dos blocos.",
+  },
+  {
+    id: "flor-de-lis",
+    dateISO: "2026-02-14",
+    name: "Flor de Lis",
+    neighborhood: "Centro",
+    tag: "cultural",
+    address: "Largo São Francisco de Paula",
+    shortDescription: "Celebração da música brasileira, clima de encontro no Centro.",
+    time: "15:00",
+    howToGetShort: "metrô Cinelândia/Carioca e vou a pé.",
+    audienceShort: "locais e turistas; amigos, amigos dos amigos, agregados.",
+    musicShort: "open format.",
+  },
+  {
+    id: "quilombo-da-gloria",
+    dateISO: "2026-02-14",
+    name: "Quilombo da Glória",
+    neighborhood: "Glória",
+    tag: "cultural",
+    address: "Rua Cândido Mendes, 320",
+    shortDescription: "Pegada de bairro e identidade, pra ficar sem pressão.",
+    time: "15:00",
+    howToGetShort: "metrô Glória e caminhada curta.",
+    audienceShort: "locais e turistas.",
+    musicShort: "clássicos dos blocos.",
+  },
+  {
+    id: "aconteceu",
+    dateISO: "2026-02-14",
+    name: "Aconteceu",
+    neighborhood: "Santa Teresa",
+    tag: "raiz",
+    address: "Largo dos Neves, 412",
+    shortDescription: "Bateria forte e espírito de Carnaval antigo.",
+    time: "16:00",
+    howToGetShort: "metrô Glória e subo de Uber até perto; o final é sempre andando.",
+    audienceShort: "locais e poucos turistas; bom para ir com toda a família, ambiente respeitoso e seguro.",
+    musicShort: "clássicos dos blocos.",
   },
 
   // ── 15 de fevereiro ──────────────────────────────────────────
   {
-    id: "bloco-areia",
-    dateISO: "2026-02-15",
-    name: "Bloco Areia",
-    neighborhood: "Posto 9, Ipanema",
-    category: "moderno",
-    time: "7h",
-    startHour: 7,
-    description: "Bloco de praia no Posto 9. Pop, eletrônico e mar.",
-    fullDetails: PLACEHOLDER,
-  },
-  {
     id: "divinas-tretas",
     dateISO: "2026-02-15",
     name: "Divinas Tretas",
-    neighborhood: "Botafogo",
-    category: "moderno",
-    time: "8h",
-    startHour: 8,
-    description: "Irreverente e compacto em Botafogo. Fantasias criativas e hits virais.",
-    fullDetails: `📍 Concentração
-Rua Voluntários da Pátria, Botafogo — concentração às 7h30, saída às 8h. O bloco percorre as ruas de Botafogo até a Rua São Clemente.
-
-🚕 Como eu chego
-Metrô Botafogo, saída Voluntários da Pátria. Você sai do metrô e já está no bloco. Simples assim.
-
-🎭 A vibe
-Irreverente, criativo e muito bem-humorado. O Divinas Tretas é o bloco das fantasias absurdas e das piadas internas que viram meme. O público é adulto, descolado, e não se leva a sério. É compacto — não espere multidão de milhão. É mais 5–10 mil pessoas se divertindo de verdade.
-
-🎵 Estilo musical
-Pop nacional e internacional, funk, músicas de meme e hits virais. A banda toca de tudo — de Beyoncé a funk carioca, passando por aquela música que ficou na sua cabeça a semana inteira.
-
-🏗️ Estrutura
-Banheiros em bares parceiros na Rua São Clemente (eles abrem especialmente pro bloco). Ambulantes vendem de tudo. Ruas estreitas, então fica cheio rápido.
-
-⏰ Que horas acaba
-Por volta das 12h–13h.
-
-📝 Minha leitura
-Um dos melhores blocos pra quem quer rir, dançar e não perder amigo na multidão. Tamanho perfeito, energia alta, e a fantasia mais criativa sempre ganha atenção. Vá fantasiado(a) — é quase obrigatório.`,
+    neighborhood: "Flamengo",
+    tag: "",
+    address: "Praia do Flamengo (Aterro / eixo Monumento aos Pracinhas)",
+    shortDescription: "Bloco de diversidade com energia alta, mas organizado.",
+    time: "08:00",
+    howToGetShort: "metrô Flamengo (caminhar). Uber: Largo do Machado / Rua Senador Vergueiro e ir andando.",
+    audienceShort: "público LGBTQIA+ e aliados; comunicação, artes, moda, publicidade, eventos; amigos dos amigos.",
+    musicShort: "pop, rock, axé e ritmos brasileiros.",
+    extraDetails: {
+      structure: "apoio público costuma existir, mas banheiro é de rua.",
+      end_time: "2–3 horas de bloco \"valendo\" + dispersão lenta.",
+    },
   },
   {
     id: "bangalafumenga",
     dateISO: "2026-02-15",
     name: "Bangalafumenga",
-    neighborhood: "Jardim Botânico",
-    category: "clássico",
-    time: "9h",
-    startHour: 9,
-    description: "Clássico carioca no Jardim Botânico. Samba, sombra e família.",
-    fullDetails: `📍 Concentração
-Rua Jardim Botânico, próximo à Praça Santos Dumont. Concentração às 8h, saída às 9h. Percurso pela Rua Jardim Botânico até a Rua Pacheco Leão.
-
-🚕 Como eu chego
-App até a Rua Jardim Botânico. Se vier de metrô, desça em General Osório e pegue o ônibus 584. O acesso de carro é complicado — ruas fecham cedo.
-
-🎭 A vibe
-O Bangalafumenga é um clássico carioca. Familiar, democrático e com energia de bairro. O público é de todas as idades — tem criança fantasiada, casal dançando, e o grupo de amigos que vem todo ano. Não é o maior, mas é um dos mais queridos.
-
-🎵 Estilo musical
-Samba, pop brasileiro e marchinhas clássicas. A bateria é potente e cadenciada — dá pra sentir no peito. Tocam de tudo, de Alceu Valença a Tim Maia, passando por Jorge Ben.
-
-🏗️ Estrutura
-Área arborizada com sombra parcial — uma benção no calor de fevereiro. Poucos ambulantes no início do percurso, então leve água. Banheiros químicos espalhados ao longo da rua.
-
-⏰ Que horas acaba
-Por volta das 13h–14h.
-
-📝 Minha leitura
-Se você quer um bloco que mistura tradição com energia sem ser caótico, o Bangalafumenga é perfeito. Ótimo pra famílias e pra quem quer curtir sombra e samba ao mesmo tempo.`,
+    neighborhood: "Glória",
+    tag: "",
+    address: "Av. Infante Dom Henrique (Monumento aos Pracinhas)",
+    shortDescription: "Carnaval de rua com cara de Rio: volumoso, animado, sem frescura.",
+    time: "09:00",
+    howToGetShort: "metrô Glória e caminha; Uber: desce perto do metrô, não tenta encostar no Monumento.",
+    audienceShort: "mistura grande (local + turista), muita gente de grupo.",
+    musicShort: "samba + marchinhas + bateria forte.",
+    extraDetails: {
+      end_time: "dispersão por volta de 12:00/13:00.",
+    },
+  },
+  {
+    id: "que-merda-e-essa",
+    dateISO: "2026-02-15",
+    name: "Que Merda É Essa?",
+    neighborhood: "Ipanema",
+    tag: "",
+    address: "Rua Garcia d'Ávila, 151 (referência) | dispersão Av. Vieira Souto, 1",
+    shortDescription: "Humor/crítica, irreverente, mais \"cérebro ligado\".",
+    time: "08:00",
+    howToGetShort: "metrô Nossa Senhora da Paz ou General Osório; Uber desce perto do metrô.",
+    audienceShort: "comunicação, publicidade, roteiristas, artistas.",
+    musicShort: "marchinhas e sátira musical.",
+    extraDetails: {
+      end_time: "dispersa por volta de 14:00.",
+    },
+  },
+  {
+    id: "bloco-areia",
+    dateISO: "2026-02-15",
+    name: "Bloco Areia",
+    neighborhood: "Leblon",
+    tag: "",
+    address: "Orla do Leblon (referência: Av. Delfim Moreira / perto da praia)",
+    shortDescription: "Jovem Zona Sul, domingo com sol na cara, energia de praia.",
+    time: "07:00",
+    howToGetShort: "metrô Antero de Quental e caminha; Uber desce em ruas internas.",
+    audienceShort: "galera fitness, amigos do Leblon/Gávea, público bem local.",
+    musicShort: "pop, open format e clássicos.",
+    extraDetails: {
+      end_time: "antes do meio-dia já está em dispersão.",
+    },
+  },
+  {
+    id: "bloco-do-j",
+    dateISO: "2026-02-15",
+    name: "Bloco do J",
+    neighborhood: "Centro",
+    tag: "",
+    address: "Praça XV e arredores do Centro histórico",
+    shortDescription: "Tradicional, cara de Centro antigo, samba direto.",
+    time: "07:00",
+    howToGetShort: "metrô Uruguaiana ou Carioca; Uber desce perto e entra a pé.",
+    audienceShort: "trabalhadores do Centro, sambistas, grupos tradicionais.",
+    musicShort: "samba raiz, marchinhas clássicas.",
+    extraDetails: {
+      end_time: "por volta de 11h30 já começa a dispersar.",
+    },
+  },
+  {
+    id: "e-tudo-ou-nada",
+    dateISO: "2026-02-15",
+    name: "É Tudo ou Nada",
+    neighborhood: "Centro",
+    tag: "",
+    address: "circuito tradicional do Centro (normalmente próximo à Cinelândia)",
+    shortDescription: "Tradicional, volume alto, muita gente.",
+    time: "09:00",
+    howToGetShort: "metrô Cinelândia ou Carioca; Uber desce antes e vai a pé.",
+    audienceShort: "público misturado (local + turista).",
+    musicShort: "samba, marchinha e clássicos.",
+    extraDetails: {
+      end_time: "dispersão por volta de 12h.",
+    },
+  },
+  {
+    id: "buda-da-barra",
+    dateISO: "2026-02-15",
+    name: "Buda da Barra",
+    neighborhood: "Barra da Tijuca",
+    tag: "",
+    address: "orla da Barra (Posto 2 / proximidades)",
+    shortDescription: "Descontraído, clima praia, mais espaçado.",
+    time: "09:00",
+    howToGetShort: "BRT + caminhada; Uber desce antes da Av. Lúcio Costa e entra andando.",
+    audienceShort: "moradores da Barra, famílias jovens, grupos de amigos.",
+    musicShort: "open format, pop e brasilidades.",
+    extraDetails: {
+      end_time: "por volta de 13h.",
+    },
+  },
+  {
+    id: "bloco-pra-iaia",
+    dateISO: "2026-02-15",
+    name: "Bloco pra Iaiá",
+    neighborhood: "Leme",
+    tag: "",
+    address: "orla do Leme",
+    shortDescription: "Leve, clima de bairro, acolhedor.",
+    time: "09:00",
+    howToGetShort: "metrô Cardeal Arcoverde + caminhada; Uber desce em ruas internas.",
+    audienceShort: "moradores do Leme/Copacabana.",
+    musicShort: "samba e marchinhas tradicionais.",
+    extraDetails: {
+      end_time: "perto de 12h30.",
+    },
+  },
+  {
+    id: "ai-que-vergonha",
+    dateISO: "2026-02-15",
+    name: "Ai, Que Vergonha",
+    neighborhood: "São Conrado",
+    tag: "",
+    address: "Praia de São Conrado",
+    shortDescription: "Descontraído, mais espaçado, visual bonito.",
+    time: "10:00",
+    howToGetShort: "metrô São Conrado + caminhada.",
+    audienceShort: "moradores e público jovem.",
+    musicShort: "open format e clássicos.",
+    extraDetails: {
+      end_time: "por volta de 14h.",
+    },
+  },
+  {
+    id: "cordao-do-boitata",
+    dateISO: "2026-02-15",
+    name: "Cordão do Boitatá – Baile Multicultural",
+    neighborhood: "Centro",
+    tag: "",
+    address: "Praça XV e arredores históricos",
+    shortDescription: "Cultural, tradicional e muito respeitado.",
+    time: "10:00",
+    howToGetShort: "metrô Uruguaiana ou Carioca; Uber desce antes e entra a pé.",
+    audienceShort: "músicos, artistas, público que valoriza carnaval raiz.",
+    musicShort: "samba tradicional e marchinhas históricas.",
+    extraDetails: {
+      end_time: "dispersa por volta de 14h.",
+    },
+  },
+  {
+    id: "marcha-nerd",
+    dateISO: "2026-02-15",
+    name: "Marcha Nerd",
+    neighborhood: "Centro",
+    tag: "",
+    address: "região central (circuito histórico)",
+    shortDescription: "Fantasia criativa, cultura pop e humor.",
+    time: "12:00",
+    howToGetShort: "metrô Carioca ou Uruguaiana; Uber em ruas internas.",
+    audienceShort: "público geek/cosplay, jovens adultos.",
+    musicShort: "trilhas pop/nerd e marchinhas adaptadas.",
+    extraDetails: {
+      end_time: "por volta de 16h.",
+    },
   },
   {
     id: "simpatia-quase-amor",
     dateISO: "2026-02-15",
-    name: "Simpatia quase ❤️",
+    name: "Simpatia é Quase Amor",
     neighborhood: "Ipanema",
-    category: "cultural",
-    time: "14h",
-    startHour: 14,
-    description: "Romântico e acolhedor em Ipanema. MPB e marchinhas para famílias e casais.",
-    fullDetails: PLACEHOLDER,
+    tag: "",
+    address: "Praça General Osório",
+    shortDescription: "Clássico da Zona Sul.",
+    time: "14:00",
+    howToGetShort: "metrô General Osório; Uber no entorno.",
+    audienceShort: "moradores, turistas, grupos grandes.",
+    musicShort: "samba e marchinhas.",
+    extraDetails: {
+      end_time: "dispersa entre 17h e 18h.",
+    },
   },
 
   // ── 16 de fevereiro ──────────────────────────────────────────
+  {
+    id: "que-pena-amor",
+    dateISO: "2026-02-16",
+    name: "Que Pena Amor",
+    neighborhood: "Centro",
+    tag: "",
+    address: "Cinelândia e arredores históricos",
+    shortDescription: "Centro clássico, começo de semana intenso.",
+    time: "07:00",
+    howToGetShort: "metrô Cinelândia ou Carioca; Uber desce antes das interdições.",
+    audienceShort: "trabalhadores do Centro que estendem o fim de semana, sambistas, grupos de amigos.",
+    musicShort: "samba tradicional, marchinhas e repertório raiz.",
+    extraDetails: {
+      end_time: "por volta de 11h começa a dispersão.",
+    },
+  },
   {
     id: "corre-atras",
     dateISO: "2026-02-16",
     name: "Corre Atrás",
     neighborhood: "Leblon",
-    category: "moderno",
-    time: "7h",
-    startHour: 7,
-    description: "Energético e matinal no Leblon. Pop e eletrônico.",
-    fullDetails: PLACEHOLDER,
+    tag: "",
+    address: "orla do Leblon",
+    shortDescription: "Jovem Zona Sul, descontraído, clima praia.",
+    time: "07:00",
+    howToGetShort: "metrô Antero de Quental; Uber rua interna.",
+    audienceShort: "moradores, galera fitness, amigos Gávea/Leblon.",
+    musicShort: "pop, open format e clássicos.",
+    extraDetails: {
+      end_time: "antes do meio-dia já está esvaziando.",
+    },
   },
   {
     id: "brasilia-amarela",
     dateISO: "2026-02-16",
     name: "Brasília Amarela",
-    neighborhood: "Urca",
-    category: "cultural",
-    time: "8h",
-    startHour: 8,
-    description: "Intimista na Urca com vista para o Pão de Açúcar. MPB e samba acústico.",
-    fullDetails: PLACEHOLDER,
+    neighborhood: "Centro",
+    tag: "",
+    address: "circuito tradicional do Centro",
+    shortDescription: "Irreverente, criativo, fantasia e humor.",
+    time: "08:00",
+    howToGetShort: "metrô Uruguaiana ou Carioca; Uber + caminhada.",
+    audienceShort: "jovem-adulto, estudantes, criativos.",
+    musicShort: "marchinhas adaptadas, pop e brasilidades.",
+    extraDetails: {
+      end_time: "perto de 12h.",
+    },
   },
   {
-    id: "fica-comigo",
+    id: "vem-ca-minha-flor",
     dateISO: "2026-02-16",
-    name: "Fica Comigo",
-    neighborhood: "Lagoa",
-    category: "infantil",
-    time: "9h",
-    startHour: 9,
-    description: "Familiar e descontraído na Lagoa. Pop brasileiro e marchinhas leves.",
-    fullDetails: PLACEHOLDER,
+    name: "Vem Cá Minha Flor",
+    neighborhood: "Centro",
+    tag: "",
+    address: "região central histórica",
+    shortDescription: "Leve, romântico e tradicional.",
+    time: "08:00",
+    howToGetShort: "metrô Carioca; Uber desce antes das interdições.",
+    audienceShort: "público misturado, casais e grupos menores.",
+    musicShort: "samba, marchinhas e clássicos.",
+    extraDetails: {
+      end_time: "por volta de 12h.",
+    },
+  },
+  {
+    id: "largo-do-machadinho",
+    dateISO: "2026-02-16",
+    name: "Largo do Machadinho, mas não Largo do Suquinho",
+    neighborhood: "Catete",
+    tag: "infantil",
+    address: "Largo do Machado",
+    shortDescription: "Totalmente familiar.",
+    time: "09:00",
+    howToGetShort: "metrô Largo do Machado; Uber ruas internas.",
+    audienceShort: "pais com crianças pequenas (até 10 anos).",
+    musicShort: "repertório infantil e marchinhas leves.",
+    extraDetails: {
+      end_time: "até 12h já encerra.",
+    },
+  },
+  {
+    id: "bafo-da-onca",
+    dateISO: "2026-02-16",
+    name: "Bafo da Onça",
+    neighborhood: "Santa Teresa",
+    tag: "",
+    address: "circuito tradicional de Santa Teresa",
+    shortDescription: "Tradicional, histórico, muito samba.",
+    time: "10:00",
+    howToGetShort: "metrô Carioca + táxi/app até início da ladeira; Uber desce antes e sobe andando.",
+    audienceShort: "público antigo, sambistas.",
+    musicShort: "samba tradicional e marchinhas.",
+    extraDetails: {
+      end_time: "por volta de 14h começa a dispersar.",
+    },
   },
   {
     id: "carvalho-em-pe",
     dateISO: "2026-02-16",
-    name: "Carvalho em pé",
-    neighborhood: "Tijuca",
-    category: "raiz",
-    time: "10h",
-    startHour: 10,
-    description: "Tradicional da Zona Norte. Samba de raiz na Praça Saens Peña.",
-    fullDetails: PLACEHOLDER,
+    name: "Carvalho em Pé",
+    neighborhood: "Botafogo",
+    tag: "",
+    address: "Rua Voluntários da Pátria e entorno",
+    shortDescription: "Jovem, energético e muito cantado.",
+    time: "10:00",
+    howToGetShort: "metrô Botafogo; Uber ruas paralelas.",
+    audienceShort: "20–35, estudantes e grupos grandes.",
+    musicShort: "pop, funk, hits nacionais.",
+    extraDetails: {
+      end_time: "entre 14h e 15h.",
+    },
   },
   {
-    id: "cruzada",
+    id: "imperio-da-cruzada",
     dateISO: "2026-02-16",
-    name: "Cruzada",
-    neighborhood: "Copacabana",
-    category: "moderno",
-    time: "14h",
-    startHour: 14,
-    description: "Animado e intenso em Copacabana. Funk e samba na orla.",
-    fullDetails: PLACEHOLDER,
+    name: "Império da Cruzada",
+    neighborhood: "Leblon",
+    tag: "",
+    address: "Cruzada São Sebastião, Leblon",
+    shortDescription: "Tradicional do bairro, clima comunitário.",
+    time: "14:00",
+    howToGetShort: "metrô Antero de Quental; Uber ruas internas.",
+    audienceShort: "moradores do Leblon e entorno.",
+    musicShort: "samba e marchinhas.",
+    extraDetails: {
+      end_time: "final de tarde.",
+    },
   },
 
   // ── 17 de fevereiro ──────────────────────────────────────────
   {
-    id: "vagalume",
+    id: "vagalume-o-verde",
     dateISO: "2026-02-17",
-    name: "Vagalume",
-    neighborhood: "Laranjeiras",
-    category: "cultural",
-    time: "8h",
-    startHour: 8,
-    description: "Intimista e boêmio em Laranjeiras. MPB, samba e bossa nova.",
-    fullDetails: PLACEHOLDER,
+    name: "Vagalume O Verde",
+    neighborhood: "Jardim Botânico",
+    tag: "",
+    address: "Rua Jardim Botânico e entorno da Lagoa",
+    shortDescription: "Leve, arborizado, agradável.",
+    time: "08:00",
+    howToGetShort: "metrô Botafogo + Uber curto; Uber direto e seguir a pé nos trechos fechados.",
+    audienceShort: "moradores da Zona Sul, famílias jovens, grupos de amigos.",
+    musicShort: "samba, marchinhas e clássicos.",
+    extraDetails: {
+      end_time: "por volta de 12h.",
+    },
   },
   {
-    id: "empurra",
+    id: "empurra-que-pega-do-leblon",
     dateISO: "2026-02-17",
-    name: "Empurra",
-    neighborhood: "Flamengo",
-    category: "moderno",
-    time: "12h",
-    startHour: 12,
-    description: "Intenso e quente no Flamengo. Funk, pop e energia jovem.",
-    fullDetails: PLACEHOLDER,
+    name: "Empurra que Pega do Leblon",
+    neighborhood: "Leblon",
+    tag: "",
+    address: "Cruzada São Sebastião",
+    shortDescription: "Tradicional do bairro, clima comunitário.",
+    time: "12:00",
+    howToGetShort: "metrô Antero de Quental; Uber até ruas internas e segue andando.",
+    audienceShort: "moradores, famílias, grupos locais.",
+    musicShort: "samba e marchinhas.",
+    extraDetails: {
+      end_time: "final da tarde.",
+    },
   },
   {
-    id: "s-pimenta",
+    id: "sargento-pimenta",
     dateISO: "2026-02-17",
-    name: "S. Pimenta",
-    neighborhood: "Lapa",
-    category: "raiz",
-    time: "20h",
-    startHour: 20,
-    description: "Único bloco noturno — Lapa, samba de roda e forró.",
-    fullDetails: PLACEHOLDER,
+    name: "All We Need is Carnival com Sargento Pimenta",
+    neighborhood: "Jardim Botânico",
+    tag: "",
+    address: "região próxima à Lagoa / Jardim Botânico",
+    shortDescription: "Beatles com bateria de carnaval.",
+    time: "20:00",
+    howToGetShort: "Uber direto; metrô + Uber curto.",
+    audienceShort: "público criativo, músicos, jovens adultos.",
+    musicShort: "Beatles em ritmo de samba/carnaval.",
+    extraDetails: {
+      end_time: "por volta de 23h.",
+    },
   },
 
   // ── 18 de fevereiro ──────────────────────────────────────────
   {
     id: "me-enterra-na-4a",
     dateISO: "2026-02-18",
-    name: "Me enterra na 4ª",
-    neighborhood: "Ipanema",
-    category: "clássico",
-    time: "13h",
-    startHour: 13,
-    description: "Despedida saudosa do Carnaval em Ipanema. Marchinhas e MPB.",
-    fullDetails: PLACEHOLDER,
+    name: "Me Enterra na Quarta",
+    neighborhood: "Centro",
+    tag: "",
+    address: "circuito do Centro",
+    shortDescription: "Despedida do carnaval.",
+    time: "13:00",
+    howToGetShort: "metrô Cinelândia; Uber até ruas próximas.",
+    audienceShort: "público que não aceita que acabou.",
+    musicShort: "marchinhas clássicas e repertório nostálgico.",
+    extraDetails: {
+      end_time: "fim da tarde.",
+    },
   },
   {
     id: "planta-na-mente",
     dateISO: "2026-02-18",
     name: "Planta Na Mente",
-    neighborhood: "Jardim Botânico",
-    category: "cultural",
-    time: "14h",
-    startHour: 14,
-    description: "Tranquilo e verde no Jardim Botânico. Reggae e MPB.",
-    fullDetails: "14h — Rua Jardim Botânico, próximo ao portão principal do Jardim Botânico.",
+    neighborhood: "Lapa",
+    tag: "",
+    address: "Praça Cardeal Câmara, 71",
+    shortDescription: "",
+    time: "14:00",
+    howToGetShort: "",
+    audienceShort: "",
+    musicShort: "",
   },
 
   // ── 19 de fevereiro ──────────────────────────────────────────
   {
     id: "fundo-de-quintal",
     dateISO: "2026-02-19",
-    name: "Fundo de Quintal",
-    neighborhood: "Madureira",
-    category: "raiz",
-    time: "18h",
-    startHour: 18,
-    description: "Pagode e samba de raiz autêntico em Madureira.",
-    fullDetails: PLACEHOLDER,
+    name: "Fundo de Quintal no Bar da Lapa",
+    neighborhood: "Centro/Lapa",
+    tag: "",
+    address: "região da Lapa",
+    shortDescription: "Samba forte, clima de roda tradicional.",
+    time: "18:00",
+    howToGetShort: "metrô Carioca; Uber direto ao endereço.",
+    audienceShort: "público 30+, sambistas e casais.",
+    musicShort: "samba raiz.",
+    extraDetails: {
+      structure: "evento em bar estruturado.",
+      end_time: "por volta de 23h.",
+    },
   },
 
   // ── 21 de fevereiro ──────────────────────────────────────────
@@ -321,69 +925,132 @@ Se você quer um bloco que mistura tradição com energia sem ser caótico, o Ba
     id: "bloconce",
     dateISO: "2026-02-21",
     name: "Bloconcé",
-    neighborhood: "Ipanema",
-    category: "moderno",
-    time: "9h",
-    startHour: 9,
-    description: "Pop internacional empoderado em Ipanema. Fantasias obrigatórias.",
-    fullDetails: PLACEHOLDER,
+    neighborhood: "Flamengo",
+    tag: "",
+    address: "Praia do Flamengo",
+    shortDescription: "Pop, coreografado e divertido.",
+    time: "09:00",
+    howToGetShort: "metrô Flamengo; Uber até Largo do Machado e segue a pé.",
+    audienceShort: "jovens adultos e fãs de pop.",
+    musicShort: "pop nacional e internacional.",
+    extraDetails: {
+      structure: "apoio público padrão Aterro.",
+      end_time: "13h.",
+    },
   },
   {
     id: "batafa",
     dateISO: "2026-02-21",
     name: "Batafá",
-    neighborhood: "Botafogo",
-    category: "cultural",
-    time: "10h",
-    startHour: 10,
-    description: "Percussivo e tribal em Botafogo. Batucada e afrobeat.",
-    fullDetails: PLACEHOLDER,
+    neighborhood: "Laranjeiras",
+    tag: "",
+    address: "região das Laranjeiras",
+    shortDescription: "Bairro, mais tranquilo.",
+    time: "10:00",
+    howToGetShort: "metrô Largo do Machado + caminhada.",
+    audienceShort: "moradores e famílias.",
+    musicShort: "samba e marchinhas.",
+    extraDetails: {
+      end_time: "início da tarde.",
+    },
   },
   {
     id: "chule-de-santa",
     dateISO: "2026-02-21",
     name: "Chulé de Santa",
     neighborhood: "Santa Teresa",
-    category: "raiz",
-    time: "12h",
-    startHour: 12,
-    description: "Irreverente e boêmio em Santa Teresa. Samba, marchinhas e chorinho.",
-    fullDetails: PLACEHOLDER,
+    tag: "",
+    address: "Santa Teresa",
+    shortDescription: "Alternativo, artístico.",
+    time: "12:00",
+    howToGetShort: "metrô Carioca + subida de Uber.",
+    audienceShort: "público criativo e moradores do bairro.",
+    musicShort: "samba e alternativo.",
+    extraDetails: {
+      end_time: "final da tarde.",
+    },
+  },
+  {
+    id: "bloco-beatles-para-criancas",
+    dateISO: "2026-02-21",
+    name: "Bloco Beatles Para Crianças",
+    neighborhood: "Gávea",
+    tag: "infantil",
+    address: "Gávea",
+    shortDescription: "Totalmente familiar.",
+    time: "15:00",
+    howToGetShort: "Uber direto ao local.",
+    audienceShort: "pais e crianças pequenas (até 10 anos).",
+    musicShort: "Beatles adaptado para crianças.",
+    extraDetails: {
+      end_time: "fim de tarde.",
+    },
   },
 
   // ── 22 de fevereiro ──────────────────────────────────────────
   {
+    id: "bloco-little-be",
+    dateISO: "2026-02-22",
+    name: "Bloco Little Be",
+    neighborhood: "Ipanema",
+    tag: "infantil",
+    address: "Praça General Osório",
+    shortDescription: "Familiar, tranquilo.",
+    time: "08:00",
+    howToGetShort: "metrô General Osório.",
+    audienceShort: "pais e crianças.",
+    musicShort: "repertório infantil e marchinhas leves.",
+    extraDetails: {
+      end_time: "11h.",
+    },
+  },
+  {
     id: "filhos-da-puc",
     dateISO: "2026-02-22",
     name: "Filhos da PUC",
-    neighborhood: "Gávea",
-    category: "moderno",
-    time: "9h",
-    startHour: 9,
-    description: "Universitário e jovem na Gávea. Pop e funk.",
-    fullDetails: PLACEHOLDER,
+    neighborhood: "Leblon (PUC/Gávea)",
+    tag: "",
+    address: "região da PUC / Gávea",
+    shortDescription: "Universitário e jovem.",
+    time: "09:00",
+    howToGetShort: "Uber direto à região.",
+    audienceShort: "estudantes e jovens adultos (18–30).",
+    musicShort: "samba e hits carnavalescos.",
+    extraDetails: {
+      end_time: "meio da tarde.",
+    },
   },
   {
     id: "boka-de-espuma",
     dateISO: "2026-02-22",
     name: "Boka de Espuma",
-    neighborhood: "Copacabana",
-    category: "elétrico",
-    time: "14h",
-    startHour: 14,
-    description: "Festa com espuma em Copacabana. Eletrônico e pop na orla.",
-    fullDetails: PLACEHOLDER,
+    neighborhood: "Botafogo",
+    tag: "",
+    address: "Botafogo",
+    shortDescription: "Irreverente e animado.",
+    time: "14:00",
+    howToGetShort: "metrô Botafogo.",
+    audienceShort: "jovens adultos e grupos grandes (20–40).",
+    musicShort: "samba e pop.",
+    extraDetails: {
+      end_time: "final da tarde.",
+    },
   },
   {
     id: "saideira",
     dateISO: "2026-02-22",
     name: "Saideira",
-    neighborhood: "Leblon",
-    category: "clássico",
-    time: "16h",
-    startHour: 16,
-    description: "Encerramento festivo no Leblon. O último bloco do Carnaval.",
-    fullDetails: PLACEHOLDER,
+    neighborhood: "Leme",
+    tag: "",
+    address: "orla do Leme",
+    shortDescription: "Clima de encerramento.",
+    time: "16:00",
+    howToGetShort: "metrô Cardeal Arcoverde + caminhada.",
+    audienceShort: "público misturado.",
+    musicShort: "marchinhas e samba.",
+    extraDetails: {
+      end_time: "início da noite.",
+    },
   },
 ];
 
