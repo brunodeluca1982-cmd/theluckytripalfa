@@ -1,7 +1,7 @@
 import { useSpotifyPlayer } from "@/contexts/SpotifyPlayerContext";
 import { ChevronUp, X } from "lucide-react";
 
-const PLAYLIST_URL = "https://open.spotify.com/embed/playlist/242Q0AaUu4kqsANYUaEufj?utm_source=generator&theme=0&autoplay=1";
+const playlistId = '29a9JisauRbV4eRkjyFAkW';
 
 const PersistentSpotifyPlayer = () => {
   const { active, sheetOpen, openSheet, closeSheet, dismiss } = useSpotifyPlayer();
@@ -49,16 +49,16 @@ const PersistentSpotifyPlayer = () => {
             </p>
           </div>
 
-          <div className="px-4 pb-6">
+          <div className="px-4 pb-6" style={{ minHeight: '360px' }}>
             <iframe
-              style={{ borderRadius: "12px" }}
-              src={PLAYLIST_URL}
+              title="Spotify Embed: Recommendation Playlist"
+              src={`https://open.spotify.com/embed/playlist/${playlistId}?utm_source=generator&theme=0`}
               width="100%"
-              height="352"
+              height="100%"
+              style={{ minHeight: '360px', borderRadius: '12px' }}
               frameBorder="0"
               allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
               loading="lazy"
-              title="Spotify Playlist"
             />
             <p className="text-xs text-muted-foreground text-center mt-3">
               Toque ▶ para ouvir
