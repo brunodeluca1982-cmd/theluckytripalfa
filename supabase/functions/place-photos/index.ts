@@ -6,34 +6,103 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
+// Basic in-memory rate limiter (resets on cold start)
+const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
+const RATE_LIMIT = 30;
+const RATE_WINDOW_MS = 60_000;
+
+function checkRateLimit(userId: string): boolean {
+  const now = Date.now();
+  const entry = rateLimitMap.get(userId);
+  if (!entry || now > entry.resetAt) {
+    rateLimitMap.set(userId, { count: 1, resetAt: now + RATE_WINDOW_MS });
+    return true;
+  }
+  if (entry.count >= RATE_LIMIT) return false;
+  entry.count++;
+  return true;
+}
+
+function errorResponse(message: string, status: number) {
+  return new Response(JSON.stringify({ error: message }), {
+    status,
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+  });
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // 1. POST only
+  if (req.method !== 'POST') {
+    return errorResponse('Method not allowed', 405);
+  }
+
   try {
-    const GOOGLE_MAPS_API_KEY = Deno.env.get('GOOGLE_MAPS_API_KEY');
-    if (!GOOGLE_MAPS_API_KEY) {
-      return new Response(JSON.stringify({ error: 'API key not configured' }), {
-        status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+    // 2. Authenticate user via JWT
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return errorResponse('Unauthorized', 401);
     }
 
+    const supabaseAuth = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      { global: { headers: { Authorization: authHeader } } }
+    );
+
+    const token = authHeader.replace('Bearer ', '');
+    const { data: claimsData, error: claimsError } = await supabaseAuth.auth.getClaims(token);
+    if (claimsError || !claimsData?.claims) {
+      return errorResponse('Unauthorized', 401);
+    }
+
+    const userId = claimsData.claims.sub as string;
+
+    // 3. Rate limit per user
+    if (!checkRateLimit(userId)) {
+      return errorResponse('Rate limit exceeded. Try again later.', 429);
+    }
+
+    // 4. Parse and validate JSON body
+    let body: Record<string, unknown>;
+    try {
+      body = await req.json();
+    } catch {
+      return errorResponse('Invalid JSON body', 400);
+    }
+
+    const { action } = body;
+
+    // 5. Google API key (server-side only)
+    const GOOGLE_MAPS_API_KEY = Deno.env.get('GOOGLE_MAPS_API_KEY');
+    if (!GOOGLE_MAPS_API_KEY) {
+      return errorResponse('API key not configured', 500);
+    }
+
+    // Admin client for DB writes
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
     );
 
-    const body = await req.json();
-    const { action } = body;
-
-    // Action: fetch-photo — find a place photo and cache it
+    // === Action: fetch-photo ===
     if (action === 'fetch-photo') {
-      const { item_id, item_type, place_query } = body;
-      if (!item_id || !item_type || !place_query) {
-        return new Response(JSON.stringify({ error: 'Missing required fields' }), {
-          status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
+      const { item_id, item_type, place_query } = body as {
+        item_id?: string; item_type?: string; place_query?: string;
+      };
+
+      // Input validation
+      if (!item_id || typeof item_id !== 'string' || item_id.length > 100) {
+        return errorResponse('Invalid item_id', 400);
+      }
+      if (!item_type || !['hotel', 'restaurant', 'attraction', 'block'].includes(item_type as string)) {
+        return errorResponse('Invalid item_type', 400);
+      }
+      if (!place_query || typeof place_query !== 'string' || place_query.length > 300) {
+        return errorResponse('Invalid place_query', 400);
       }
 
       // Check cache first
@@ -62,13 +131,8 @@ serve(async (req) => {
         searchUrl.searchParams.set('fields', 'place_id,photos');
         searchUrl.searchParams.set('key', GOOGLE_MAPS_API_KEY);
 
-        console.log('[place-photos] Searching for:', place_query);
         const searchRes = await fetch(searchUrl.toString());
         const searchData = await searchRes.json();
-        console.log('[place-photos] Search result status:', searchData.status, 'candidates:', searchData.candidates?.length || 0);
-        if (searchData.error_message) {
-          console.error('[place-photos] API error:', searchData.error_message);
-        }
 
         if (searchData.candidates?.length > 0) {
           const candidate = searchData.candidates[0];
@@ -81,7 +145,7 @@ serve(async (req) => {
           }
         }
       } catch (e) {
-        console.error('Places search error:', e);
+        console.error('Places search failed');
       }
 
       // Step 2: Fallback to Street View
@@ -90,7 +154,7 @@ serve(async (req) => {
           const svMetaUrl = new URL('https://maps.googleapis.com/maps/api/streetview/metadata');
           svMetaUrl.searchParams.set('location', place_query);
           svMetaUrl.searchParams.set('key', GOOGLE_MAPS_API_KEY);
-          
+
           const svRes = await fetch(svMetaUrl.toString());
           const svData = await svRes.json();
 
@@ -99,7 +163,7 @@ serve(async (req) => {
             photoSource = 'streetview';
           }
         } catch (e) {
-          console.error('Street View error:', e);
+          console.error('Street View fallback failed');
         }
       }
 
@@ -124,16 +188,14 @@ serve(async (req) => {
       });
     }
 
-    // Action: batch-lookup — check cache for multiple items
+    // === Action: batch-lookup ===
     if (action === 'batch-lookup') {
-      const { items } = body; // [{item_id, item_type}]
-      if (!Array.isArray(items) || items.length === 0) {
-        return new Response(JSON.stringify({ photos: [] }), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
+      const { items } = body as { items?: Array<{ item_id: string }> };
+      if (!Array.isArray(items) || items.length === 0 || items.length > 100) {
+        return errorResponse('Invalid items array (max 100)', 400);
       }
 
-      const ids = items.map((i: { item_id: string }) => i.item_id);
+      const ids = items.map((i) => i.item_id);
       const { data } = await supabaseAdmin
         .from('place_photos')
         .select('*')
@@ -144,20 +206,15 @@ serve(async (req) => {
       });
     }
 
-    // Action: proxy-photo — proxy an image to avoid CORS
+    // === Action: proxy-photo ===
     if (action === 'proxy-photo') {
-      const { url } = body;
-      if (!url || typeof url !== 'string') {
-        return new Response(JSON.stringify({ error: 'Missing url' }), {
-          status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
+      const { url } = body as { url?: string };
+      if (!url || typeof url !== 'string' || url.length > 500) {
+        return errorResponse('Missing or invalid url', 400);
       }
 
-      // Only allow Google APIs URLs
       if (!url.startsWith('https://maps.googleapis.com/') && !url.startsWith('https://lh3.googleusercontent.com/')) {
-        return new Response(JSON.stringify({ error: 'Invalid URL domain' }), {
-          status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
+        return errorResponse('Invalid URL domain', 400);
       }
 
       const imgRes = await fetch(url);
@@ -173,13 +230,9 @@ serve(async (req) => {
       });
     }
 
-    return new Response(JSON.stringify({ error: 'Invalid action' }), {
-      status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    return errorResponse('Invalid action', 400);
   } catch (error) {
-    console.error('Error in place-photos function:', error);
-    return new Response(JSON.stringify({ error: 'Internal server error' }), {
-      status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    console.error('Internal error in place-photos function');
+    return errorResponse('Internal server error', 500);
   }
 });
