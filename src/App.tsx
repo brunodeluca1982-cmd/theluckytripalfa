@@ -59,6 +59,7 @@ import BlocoInfo from "./pages/BlocoInfo";
 import FestasBailes from "./pages/FestasBailes";
 import FestaDetalhe from "./pages/FestaDetalhe";
 import DesfilesSapucai from "./pages/DesfilesSapucai";
+import CamarotesRanking from "./pages/CamarotesRanking";
 import NotFound from "./pages/NotFound";
 import { CarnavalModeProvider } from "@/contexts/CarnavalModeContext";
 import { SpotifyPlayerProvider } from "@/contexts/SpotifyPlayerContext";
@@ -161,6 +162,7 @@ const App = () => {
                   <Route path="/festas-bailes" element={<FestasBailes />} />
                   <Route path="/festa-detalhe/:id" element={<FestaDetalhe />} />
                   <Route path="/desfiles-sapucai" element={<DesfilesSapucai />} />
+                  <Route path="/camarotes" element={<CamarotesRanking />} />
                   
                   {/* Lucky List */}
                   <Route path="/lucky-list" element={<LuckyList />} />
