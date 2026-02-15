@@ -149,4 +149,18 @@ export const decisionShortcuts: DecisionShortcut[] = [
   { intent: "Se você quer conforto sem excesso", camaroteName: "Camarote VerdeRosa" },
 ];
 
+export interface PublicProfile {
+  id: string;
+  label: string;
+  description: string;
+}
+
+export const publicAnalysis: PublicProfile[] = [
+  { id: "paulistas", label: "Paulistas", description: "Chegam organizados, ingressos comprados antecipadamente, foco total na experiência premium." },
+  { id: "mineiros", label: "Mineiros", description: "Animados, sociáveis, circulam bem entre camarotes." },
+  { id: "cariocas", label: "Cariocas", description: "Sabem se movimentar, ficam menos dentro e mais vivendo os arredores." },
+  { id: "moderno", label: "Público Moderno", description: "Mix de criativos, publicitários e empreendedores de tech." },
+  { id: "tradicional", label: "Público Tradicional", description: "Empresários locais e famílias influentes." },
+];
+
 export const closingStatement = "Carnaval não é sobre onde você está. É sobre o que você quer viver dentro dele.";

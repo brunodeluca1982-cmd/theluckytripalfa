@@ -11,7 +11,7 @@ import blocoBackground from "@/assets/highlights/bloco2.jpg";
 const actions = [
   { id: "blocos", label: "Blocos de Rua", subtitle: "só os melhores", path: "/calendario-carnaval" },
   { id: "sapucai", label: "Desfiles na Sapucaí", subtitle: "o que não te contam", path: "/desfiles-sapucai" },
-  { id: "camarotes", label: "Camarotes", subtitle: "ache sua vibe", path: "/atividade/festas-carnaval?from=city" },
+  { id: "camarotes", label: "Camarotes", subtitle: "ache sua vibe", path: "/rio/carnaval-2026/camarotes/ranking" },
   { id: "festas", label: "Festas e Bailes", subtitle: "só os hypes", path: "/festas-bailes" },
   { id: "lucky-list", label: "Lucky List", subtitle: "com esquema", path: "/lucky-list", isSpecial: true },
 ];

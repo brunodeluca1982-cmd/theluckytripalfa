@@ -163,6 +163,7 @@ const App = () => {
                   <Route path="/festa-detalhe/:id" element={<FestaDetalhe />} />
                   <Route path="/desfiles-sapucai" element={<DesfilesSapucai />} />
                   <Route path="/camarotes" element={<CamarotesRanking />} />
+                  <Route path="/rio/carnaval-2026/camarotes/ranking" element={<CamarotesRanking />} />
                   
                   {/* Lucky List */}
                   <Route path="/lucky-list" element={<LuckyList />} />
