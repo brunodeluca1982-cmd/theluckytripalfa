@@ -2,6 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { ChevronLeft, Clock } from "lucide-react";
 import { getFestasByDate } from "@/data/festas-bailes-data";
 import { formatCarnavalDateTitle } from "@/lib/carnaval-date-utils";
+import { formatHour, abbreviateNeighborhood, shortenEventName } from "@/lib/festas-formatters";
 import carnavalBlocoBg from "@/assets/highlights/carnaval-bloco-bg.jpeg";
 
 const FestasBailes = () => {
@@ -51,14 +52,14 @@ const FestasBailes = () => {
                   >
                     <div className="flex items-center gap-1.5 shrink-0">
                       <Clock className="w-4 h-4 text-white/50" />
-                      <span className="text-white font-medium text-sm w-14 text-center">
-                        {festa.timeDisplay}
+                      <span className="text-white font-medium text-sm w-10 text-center">
+                        {formatHour(festa.time)}
                       </span>
                     </div>
                     <span className="text-white text-sm font-medium min-w-0 flex-1 truncate">
-                      {festa.name}
+                      {shortenEventName(festa.name)}
                     </span>
-                    <span className="text-white/60 text-sm shrink-0">📍 {festa.neighborhood}</span>
+                    <span className="text-white/60 text-xs shrink-0">📍 {abbreviateNeighborhood(festa.neighborhood)}</span>
                     <span className="text-white/40 text-[11px] italic shrink-0">✨ {festa.tag}</span>
                     <ChevronLeft className="w-4 h-4 text-white/40 ml-auto rotate-180 shrink-0" />
                   </button>
