@@ -14,13 +14,14 @@ import { getHotelImage } from "@/data/place-images";
 
 // Neighborhood descriptions for staying
 const neighborhoodDescriptions: Record<string, string> = {
-  ipanema: "Urbano, vivo e bastante democrático. Mistura moradores antigos, gente jovem, turistas, artistas e famílias modernas. É um dos lugares mais fáceis de entender o Rio pela primeira vez, porque tudo acontece perto e a vida é muito visível na rua. Dá pra fazer quase tudo a pé: praia, restaurantes, cafés, metrô e lojas. Alugar bike é fácil e funciona bem. Carro não é essencial e, muitas vezes, atrapalha. Ideal pra quem quer sentir a cidade acontecendo o tempo todo.",
+  ipanema: "Bairro icônico do Rio clássico.",
   leblon: "Mais residencial, organizado e tradicional. Frequentado por famílias antigas, gente que mora há décadas no bairro e um público mais maduro. É elegante, seguro e previsível, no bom sentido. Também dá pra fazer tudo a pé: praia, restaurantes e serviços. É ótimo pra quem quer conforto, tranquilidade e boa estrutura, sem abrir mão da Zona Sul. Menos agitado que Ipanema, mais estável.",
   copacabana: "Intensa, histórica e muito movimentada. Recebe gente do mundo inteiro e funciona quase como um bairro internacional dentro do Rio. Tem prédios antigos, comércio forte e vida acontecendo o dia inteiro. Tudo é acessível a pé: praia, metrô, mercados e restaurantes. É prático para quem vem pela primeira vez e quer logística fácil. Não é o bairro mais silencioso, mas é um dos mais completos.",
+  arpoador: "Arpoador é onde o Rio respira. Ponto de encontro entre Ipanema e Copacabana, com pedra icônica e pôr do sol aplaudido.",
   leme: "Mais calmo, residencial e com clima de bairro. É uma extensão tranquila de Copacabana, muito procurada por famílias e por quem quer dormir melhor à noite. Dá pra fazer tudo a pé dentro do bairro e chegar facilmente a Copacabana caminhando. Ótima opção pra quem quer praia, vista bonita e menos agitação.",
   "sao-conrado": "Silencioso, contemplativo e menos urbano. Mistura moradores antigos, gente ligada ao esporte e quem busca tranquilidade entre a Zona Sul e a Barra. Carro ou aplicativo são praticamente obrigatórios. A praia é próxima, mas o bairro não é caminhável. Bom pra quem quer sossego e natureza.",
-  "barra-da-tijuca": "A Barra é o Rio em versão expandida. Avenida larga, prédios modernos, condomínio com portaria e uma praia imensa que parece não ter fim. Aqui o ritmo é outro: menos aperto, menos caos, mais espaço.\n\nDurante o dia, a orla é perfeita para bike, corrida e esportes de areia. À noite, os restaurantes se concentram no Jardim Oceânico e no VillageMall. Não é um bairro para fazer tudo a pé — carro ou aplicativo são praticamente indispensáveis.\n\nEu acompanhei a Barra crescer. Vivi fases importantes aqui. Não é o Rio clássico de calçada de pedra portuguesa — é o Rio do conforto, da estrutura e da vida mais espaçosa.",
-  recreio: "Recreio é jovem, esportivo e mais selvagem. Muito surf, corrida, bicicleta e contato direto com a natureza. Menos urbano e menos turístico.\n\nCarro é indispensável. Ótimo para quem gosta de praias vazias, trilhas e rotina ao ar livre. Não é a melhor escolha para primeira viagem sem planejamento.\n\nPassei seis meses no Recreio durante a reforma da minha casa e a gravidez da Sthefany. O que poderia ter sido um período desafiador virou um dos momentos mais prazerosos da nossa vida. Acordar com o mar praticamente vazio na frente e viver uma rotina mais simples mudou completamente minha relação com esse bairro.",
+  "barra-da-tijuca": "A Barra é o Rio em versão expandida. Avenida larga, prédios modernos, condomínio com portaria e uma praia imensa que parece não ter fim. Aqui o ritmo é outro: menos aperto, menos caos, mais espaço.\n\nEu acompanhei esse bairro crescer. Vivi fases importantes aqui. A Barra não tenta ser Ipanema — e quando você entende isso, ela começa a fazer muito sentido.",
+  recreio: "Jovem, esportivo e mais selvagem. Muito surf, corrida, bicicleta e contato direto com a natureza.\n\nCarro é indispensável. Não é a melhor escolha para primeira viagem sem planejamento.\n\nEu tenho uma história especial aqui. Morei seis meses no C Design com a Sthefany durante a reforma da minha casa e a gravidez dela. Um período que poderia ser tenso virou prazeroso.",
   "santa-teresa": "Artístico, histórico e cheio de personalidade. Frequentado por artistas, estrangeiros e gente que busca uma experiência menos óbvia do Rio. Não é bairro pra fazer tudo a pé nem pra praia. Exige táxi ou aplicativo. Ideal pra quem quer charme, vista e clima cultural acima de praticidade.",
   centro: "O coração histórico do Rio. Arquitetura grandiosa, instituições culturais e um vislumbre do passado da cidade. Ideal para viajantes focados em cultura.",
   "jardim-botanico": "Verde, silencioso e mais familiar. Mistura moradores tradicionais com famílias jovens e gente que busca qualidade de vida. É menos turístico e mais local. Não é o melhor lugar pra fazer tudo a pé, mas dá pra circular bem dentro do bairro. Praia exige deslocamento curto de carro ou aplicativo. Ótimo pra quem quer calma e contato com a natureza.",
@@ -42,26 +43,18 @@ const hotelsByNeighborhood: Record<string, {
     { 
       name: "Hotel Fasano Rio de Janeiro", 
       price: "$$$$", 
-      description: "O endereço de luxo mais clássico do Rio. O rooftop virou cenário de campanhas, entrevistas e reuniões importantes. Já vi jogadores de futebol, gente do cinema, moda e música ali — todos buscando vista, discrição e serviço impecável.",
+      description: "Ícone absoluto da hotelaria carioca, com vista para o Arpoador.",
       address: "https://maps.google.com/?q=Hotel+Fasano+Rio+de+Janeiro",
       instagram: "@fasano",
-      externalLink: ""
+      externalLink: "https://fasano.com.br"
     },
     { 
-      name: "Ipanema Inn", 
-      price: "$$$", 
-      description: "Pequeno, acolhedor e com cara de casa. Perfeito pra quem vai e vem o dia todo sem depender de carro.",
-      address: "https://maps.google.com/?q=Ipanema+Inn",
-      instagram: "@ipanemainn",
-      externalLink: ""
-    },
-    { 
-      name: "Mar Ipanema Hotel", 
-      price: "$$$", 
-      description: "Urbano, prático e extremamente bem localizado. Funciona muito bem pra quem quer viver Ipanema intensamente.",
-      address: "https://maps.google.com/?q=Mar+Ipanema+Hotel",
-      instagram: "@mariipanemahotel",
-      externalLink: ""
+      name: "Emiliano Rio", 
+      price: "$$$$", 
+      description: "Sofisticação contemporânea com spa e design minimalista.",
+      address: "https://maps.google.com/?q=Emiliano+Rio",
+      instagram: "@emilianorio",
+      externalLink: "https://www.emiliano.com.br/"
     },
   ],
   leblon: [
@@ -92,36 +85,22 @@ const hotelsByNeighborhood: Record<string, {
   ],
   copacabana: [
     { 
-      name: "Copacabana Palace", 
+      name: "Fairmont Rio de Janeiro Copacabana", 
       price: "$$$$", 
-      description: "Ícone absoluto do Brasil. Mesmo quando não fico, é referência. Presidentes, artistas, jogadores e grandes eventos passam por aqui há décadas.",
-      address: "https://maps.google.com/?q=Copacabana+Palace",
-      instagram: "@copacabanapalace",
-      externalLink: ""
+      description: "Charme francês com vista para a Praia de Copacabana.",
+      address: "https://maps.google.com/?q=Fairmont+Rio+de+Janeiro+Copacabana",
+      instagram: "@fairmontcopacabana",
+      externalLink: "https://www.fairmont.com/copacabana-rio/"
     },
+  ],
+  arpoador: [
     { 
-      name: "Emiliano Rio", 
-      price: "$$$$", 
-      description: "Arquitetura elegante, serviço preciso e rooftop reservado. Muito escolhido por quem quer luxo discreto e boa localização.",
-      address: "https://maps.google.com/?q=Hotel+Emiliano+Rio",
-      instagram: "@emiliano_rio",
-      externalLink: ""
-    },
-    { 
-      name: "Fairmont Rio", 
-      price: "$$$$", 
-      description: "O antigo Rio Palace. Da piscina, o Pão de Açúcar entra no enquadramento como se fosse cenário montado.",
-      address: "https://maps.google.com/?q=Fairmont+Rio+Copacabana",
-      instagram: "@fairmontricopacabana",
-      externalLink: ""
-    },
-    { 
-      name: "Hilton Copacabana", 
+      name: "Hotel Arpoador", 
       price: "$$$", 
-      description: "Hotel grande, vista panorâmica e logística fácil. Muito usado por bandas, equipes esportivas e grandes produções.",
-      address: "https://maps.google.com/?q=Hilton+Copacabana",
-      instagram: "@hiltoncopacabana",
-      externalLink: ""
+      description: "Hotel boutique pé na areia com clima descontraído.",
+      address: "https://maps.google.com/?q=Hotel+Arpoador",
+      instagram: "@hotelarpoador",
+      externalLink: "https://hotelarpoador.com/"
     },
   ],
   leme: [
@@ -156,7 +135,7 @@ const hotelsByNeighborhood: Record<string, {
     { 
       name: "Grand Hyatt Rio de Janeiro", 
       price: "$$$$", 
-      description: "Luxo contemporâneo com arquitetura elegante e integração total com a natureza da Reserva. Quartos amplos, spa sofisticado e atmosfera tranquila. Ideal para quem quer conforto moderno com menos exposição e mais silêncio.",
+      description: "Luxo contemporâneo com arquitetura elegante e integração total com a natureza da Reserva. Quartos amplos, spa sofisticado e atmosfera tranquila.",
       address: "https://maps.google.com/?q=Grand+Hyatt+Rio+de+Janeiro",
       instagram: "@grandhyattrio",
       externalLink: "https://www.hyatt.com/grand-hyatt/pt-BR/riogh-grand-hyatt-rio-de-janeiro"
@@ -164,28 +143,28 @@ const hotelsByNeighborhood: Record<string, {
     { 
       name: "Windsor Barra", 
       price: "$$$$", 
-      description: "Clássico da orla, muito usado para eventos e grandes encontros. Vista frontal para o mar, estrutura robusta e localização estratégica para quem quer estar no coração da Barra.",
+      description: "Clássico da orla, muito usado para eventos. Vista frontal para o mar e localização estratégica.",
       address: "https://maps.google.com/?q=Windsor+Barra+Hotel",
       instagram: "@windsorhoteis",
-      externalLink: "https://windsorhoteis.com/hotel/windsor-barra"
+      externalLink: "https://windsorhoteis.com/hotel/windsor-barra/"
     },
     { 
       name: "ibis Rio de Janeiro Barra da Tijuca", 
       price: "$$", 
-      description: "Prático, direto e funcional. Boa opção para quem quer localização eficiente e custo mais controlado, sem abrir mão de estar perto da praia.",
+      description: "Prático, funcional e direto ao ponto. Boa localização e custo eficiente.",
       address: "https://maps.google.com/?q=ibis+Rio+de+Janeiro+Barra+da+Tijuca",
       instagram: "@ibisrio",
-      externalLink: "https://all.accor.com"
+      externalLink: "https://all.accor.com/"
     },
   ],
   recreio: [
     { 
       name: "C Design Hotel", 
-      price: "$$$$", 
-      description: "Design contemporâneo com vista frontal para o mar. Atmosfera mais tranquila que a Barra, piscina na cobertura e acesso direto à praia. Para quem quer natureza, silêncio e conforto moderno.",
-      address: "https://maps.google.com/?q=C+Design+Hotel+Rio+de+Janeiro",
+      price: "$$$", 
+      description: "Design contemporâneo, vista frontal para o mar e clima leve.",
+      address: "https://maps.google.com/?q=C+Design+Hotel+Recreio",
       instagram: "@cdesignhotel",
-      externalLink: "https://www.cdesignhotel.com.br"
+      externalLink: "https://www.cdesignhotel.com.br/"
     },
   ],
   "santa-teresa": [
