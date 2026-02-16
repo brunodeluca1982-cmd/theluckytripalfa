@@ -9,6 +9,7 @@ import { useItemSave } from "@/hooks/use-item-save";
 import carnavalBlocoBg from "@/assets/highlights/carnaval-bloco-bg.jpeg";
 
 const TAB_KEYS = [
+  { key: "2026-02-16", label: "Seg 16/02" },
   { key: "2026-02-17", label: "Ter 17/02" },
 ];
 
@@ -222,7 +223,7 @@ const DesfilesSapucai = () => {
             Desfiles na Sapucaí
           </h1>
           <p className="text-xs text-white/50 mt-1 tracking-widest uppercase">
-            Janelas de entrada (17/02/2026)
+            Janelas de entrada (16–17/02/2026)
           </p>
         </div>
 
@@ -232,7 +233,7 @@ const DesfilesSapucai = () => {
           <SummaryTable />
 
           {/* B: Tabs by day */}
-          <Tabs defaultValue="2026-02-17" className="w-full">
+          <Tabs defaultValue="2026-02-16" className="w-full">
             <TabsList className="w-full bg-white/10 border border-white/15 backdrop-blur-xl p-1 rounded-xl">
               {TAB_KEYS.map((t) => (
                 <TabsTrigger
