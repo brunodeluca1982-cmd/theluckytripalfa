@@ -7,19 +7,19 @@ import { useCarnavalMode } from "@/contexts/CarnavalModeContext";
 
 // Fixed editorial neighborhood order
 const NEIGHBORHOOD_ORDER = [
-  "recreio",
-  "barra-da-tijuca",
-  "sao-conrado",
-  "leblon",
   "ipanema",
+  "leblon",
   "arpoador",
   "copacabana",
   "leme",
+  "santa-teresa",
+  "centro",
+  "recreio",
+  "barra-da-tijuca",
+  "sao-conrado",
   "botafogo",
   "jardim-botanico",
   "gavea",
-  "santa-teresa",
-  "centro",
 ];
 
 // Carnaval hotspots with verified lat/lng
