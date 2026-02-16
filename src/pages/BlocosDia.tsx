@@ -101,7 +101,7 @@ const BlocosDia = () => {
         <div className="mx-4 space-y-2">
           {items.length === 0 && (
             <div className="rounded-2xl backdrop-blur-xl bg-white/10 border border-white/20 p-6 text-center">
-              <p className="text-white/60 text-sm">Programação em atualização.</p>
+              <p className="text-white/60 text-sm">Programação encerrada. Confira os próximos eventos.</p>
             </div>
           )}
 
