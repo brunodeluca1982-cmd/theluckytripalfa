@@ -19,8 +19,8 @@ const neighborhoodDescriptions: Record<string, string> = {
   copacabana: "Intensa, histórica e muito movimentada. Recebe gente do mundo inteiro e funciona quase como um bairro internacional dentro do Rio. Tem prédios antigos, comércio forte e vida acontecendo o dia inteiro. Tudo é acessível a pé: praia, metrô, mercados e restaurantes. É prático para quem vem pela primeira vez e quer logística fácil. Não é o bairro mais silencioso, mas é um dos mais completos.",
   leme: "Mais calmo, residencial e com clima de bairro. É uma extensão tranquila de Copacabana, muito procurada por famílias e por quem quer dormir melhor à noite. Dá pra fazer tudo a pé dentro do bairro e chegar facilmente a Copacabana caminhando. Ótima opção pra quem quer praia, vista bonita e menos agitação.",
   "sao-conrado": "Silencioso, contemplativo e menos urbano. Mistura moradores antigos, gente ligada ao esporte e quem busca tranquilidade entre a Zona Sul e a Barra. Carro ou aplicativo são praticamente obrigatórios. A praia é próxima, mas o bairro não é caminhável. Bom pra quem quer sossego e natureza.",
-  "barra-da-tijuca": "Moderna, ampla e voltada para famílias e vida privada. Condomínios grandes, shoppings e praias longas definem o ritmo. Carro é essencial para tudo. Dá pra pedalar na orla, mas o dia a dia depende de deslocamento. Ideal pra quem gosta de espaço, estrutura e menos vida de rua.",
-  recreio: "Jovem, esportivo e mais selvagem. Muito surf, corrida, bicicleta e contato direto com a natureza. Menos urbano e menos turístico. Carro é indispensável. Ótimo pra quem gosta de praias vazias, trilhas e rotina ao ar livre. Não é a melhor escolha pra primeira viagem sem planejamento.",
+  "barra-da-tijuca": "A Barra é o Rio em versão expandida. Avenida larga, prédios modernos, condomínio com portaria e uma praia imensa que parece não ter fim. Aqui o ritmo é outro: menos aperto, menos caos, mais espaço.\n\nDurante o dia, a orla é perfeita para bike, corrida e esportes de areia. À noite, os restaurantes se concentram no Jardim Oceânico e no VillageMall. Não é um bairro para fazer tudo a pé — carro ou aplicativo são praticamente indispensáveis.\n\nEu acompanhei a Barra crescer. Vivi fases importantes aqui. Não é o Rio clássico de calçada de pedra portuguesa — é o Rio do conforto, da estrutura e da vida mais espaçosa.",
+  recreio: "Recreio é jovem, esportivo e mais selvagem. Muito surf, corrida, bicicleta e contato direto com a natureza. Menos urbano e menos turístico.\n\nCarro é indispensável. Ótimo para quem gosta de praias vazias, trilhas e rotina ao ar livre. Não é a melhor escolha para primeira viagem sem planejamento.\n\nPassei seis meses no Recreio durante a reforma da minha casa e a gravidez da Sthefany. O que poderia ter sido um período desafiador virou um dos momentos mais prazerosos da nossa vida. Acordar com o mar praticamente vazio na frente e viver uma rotina mais simples mudou completamente minha relação com esse bairro.",
   "santa-teresa": "Artístico, histórico e cheio de personalidade. Frequentado por artistas, estrangeiros e gente que busca uma experiência menos óbvia do Rio. Não é bairro pra fazer tudo a pé nem pra praia. Exige táxi ou aplicativo. Ideal pra quem quer charme, vista e clima cultural acima de praticidade.",
   centro: "O coração histórico do Rio. Arquitetura grandiosa, instituições culturais e um vislumbre do passado da cidade. Ideal para viajantes focados em cultura.",
   "jardim-botanico": "Verde, silencioso e mais familiar. Mistura moradores tradicionais com famílias jovens e gente que busca qualidade de vida. É menos turístico e mais local. Não é o melhor lugar pra fazer tudo a pé, mas dá pra circular bem dentro do bairro. Praia exige deslocamento curto de carro ou aplicativo. Ótimo pra quem quer calma e contato com a natureza.",
@@ -154,46 +154,38 @@ const hotelsByNeighborhood: Record<string, {
   ],
   "barra-da-tijuca": [
     { 
-      name: "Hyatt Regency Barra", 
+      name: "Grand Hyatt Rio de Janeiro", 
       price: "$$$$", 
-      description: "Clima de resort dentro da cidade. Muito usado por bandas e equipes de grandes shows.",
-      address: "https://maps.google.com/?q=Hyatt+Regency+Barra+da+Tijuca",
-      instagram: "@hyattregencyrio",
-      externalLink: ""
+      description: "Luxo contemporâneo com arquitetura elegante e integração total com a natureza da Reserva. Quartos amplos, spa sofisticado e atmosfera tranquila. Ideal para quem quer conforto moderno com menos exposição e mais silêncio.",
+      address: "https://maps.google.com/?q=Grand+Hyatt+Rio+de+Janeiro",
+      instagram: "@grandhyattrio",
+      externalLink: "https://www.hyatt.com/grand-hyatt/pt-BR/riogh-grand-hyatt-rio-de-janeiro"
     },
     { 
       name: "Windsor Barra", 
-      price: "$$$", 
-      description: "Clássico da orla. Recebe delegações esportivas e congressos.",
-      address: "https://maps.google.com/?q=Windsor+Barra",
+      price: "$$$$", 
+      description: "Clássico da orla, muito usado para eventos e grandes encontros. Vista frontal para o mar, estrutura robusta e localização estratégica para quem quer estar no coração da Barra.",
+      address: "https://maps.google.com/?q=Windsor+Barra+Hotel",
       instagram: "@windsorhoteis",
-      externalLink: ""
+      externalLink: "https://windsorhoteis.com/hotel/windsor-barra"
     },
     { 
-      name: "LSH Hotel", 
-      price: "$$$", 
-      description: "Compacto, moderno e bem localizado. Ótimo pra quem quer viver o Jardim Oceânico a pé.",
-      address: "https://maps.google.com/?q=LSH+Hotel+Barra",
-      instagram: "@lshhotel",
-      externalLink: ""
-    },
-    { 
-      name: "Laghetto Stilo Barra", 
+      name: "ibis Rio de Janeiro Barra da Tijuca", 
       price: "$$", 
-      description: "Boa relação custo-benefício para trabalho e eventos.",
-      address: "https://maps.google.com/?q=Laghetto+Stilo+Barra",
-      instagram: "@laghettostilobarra",
-      externalLink: ""
+      description: "Prático, direto e funcional. Boa opção para quem quer localização eficiente e custo mais controlado, sem abrir mão de estar perto da praia.",
+      address: "https://maps.google.com/?q=ibis+Rio+de+Janeiro+Barra+da+Tijuca",
+      instagram: "@ibisrio",
+      externalLink: "https://all.accor.com"
     },
   ],
   recreio: [
     { 
       name: "C Design Hotel", 
-      price: "$$$", 
-      description: "Pé na areia, fachada marcante e clima jovem. Muito usado por surfistas e equipes esportivas.",
-      address: "https://maps.google.com/?q=C+Design+Hotel",
+      price: "$$$$", 
+      description: "Design contemporâneo com vista frontal para o mar. Atmosfera mais tranquila que a Barra, piscina na cobertura e acesso direto à praia. Para quem quer natureza, silêncio e conforto moderno.",
+      address: "https://maps.google.com/?q=C+Design+Hotel+Rio+de+Janeiro",
       instagram: "@cdesignhotel",
-      externalLink: ""
+      externalLink: "https://www.cdesignhotel.com.br"
     },
   ],
   "santa-teresa": [
