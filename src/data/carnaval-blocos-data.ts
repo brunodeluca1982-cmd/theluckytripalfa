@@ -21,34 +21,6 @@ export interface CarnavalDay {
 
 export const carnavalBlocos: CarnavalDay[] = [
   {
-    date: "2026-02-14",
-    blocos: [
-      { id: "ceu-na-terra", name: "Céu na Terra", startHour: 7, location: "Santa Teresa", vibe: "Tradicional, místico", publico: "Famílias e boêmios", musica: "Marchinhas e MPB" },
-      { id: "exagerado", name: "Exagerado", startHour: 8, location: "Aterro do Flamengo", vibe: "Animado, pop", publico: "Jovens e adultos", musica: "Cazuza e pop brasileiro" },
-      { id: "bola-preta", name: "Bola Preta", startHour: 9, location: "Centro", vibe: "Gigante, tradicional", publico: "Todos", musica: "Marchinhas clássicas" },
-      { id: "bloco-brasil", name: "Bloco Brasil", startHour: 13, location: "Flamengo", vibe: "Patriótico, festivo", publico: "Adultos", musica: "Samba e axé" },
-    ],
-  },
-  {
-    date: "2026-02-15",
-    blocos: [
-      { id: "bloco-areia", name: "Bloco Areia", startHour: 7, location: "Posto 9, Ipanema", vibe: "Praia, leve", publico: "Jovens", musica: "Pop e eletrônico" },
-      { id: "divinas-tretas", name: "Divinas Tretas", startHour: 8, location: "Botafogo", vibe: "Irreverente, divertido", publico: "Adultos", musica: "Pop e funk" },
-      { id: "bangalafumenga", name: "Bangalafumenga", startHour: 9, location: "Jardim Botânico", vibe: "Clássico, animado", publico: "Todos", musica: "Samba e pop" },
-      { id: "simpatia-quase-amor", name: "Simpatia quase ❤️", startHour: 14, location: "Ipanema", vibe: "Romântico, acolhedor", publico: "Famílias e casais", musica: "MPB e marchinhas" },
-    ],
-  },
-  {
-    date: "2026-02-16",
-    blocos: [
-      { id: "corre-atras", name: "Corre Atrás", startHour: 7, location: "Leblon", vibe: "Energético", publico: "Jovens", musica: "Pop e eletrônico" },
-      { id: "brasilia-amarela", name: "Brasília Amarela", startHour: 8, location: "Urca", vibe: "Intimista, charmoso", publico: "Adultos", musica: "MPB e samba" },
-      { id: "fica-comigo", name: "Fica Comigo", startHour: 9, location: "Lagoa", vibe: "Familiar, descontraído", publico: "Famílias", musica: "Pop brasileiro" },
-      { id: "carvalho-em-pe", name: "Carvalho em pé", startHour: 10, location: "Tijuca", vibe: "Tradicional", publico: "Adultos", musica: "Samba" },
-      { id: "cruzada", name: "Cruzada", startHour: 14, location: "Copacabana", vibe: "Animado, intenso", publico: "Jovens e adultos", musica: "Funk e samba" },
-    ],
-  },
-  {
     date: "2026-02-17",
     blocos: [
       { id: "vagalume", name: "Vagalume", startHour: 8, location: "Laranjeiras", vibe: "Intimista, boêmio", publico: "Adultos", musica: "MPB e samba" },
