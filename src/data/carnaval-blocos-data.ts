@@ -23,38 +23,44 @@ export const carnavalBlocos: CarnavalDay[] = [
   {
     date: "2026-02-17",
     blocos: [
-      { id: "vagalume", name: "Vagalume", startHour: 8, location: "Laranjeiras", vibe: "Intimista, boêmio", publico: "Adultos", musica: "MPB e samba" },
-      { id: "empurra", name: "Empurra", startHour: 12, location: "Flamengo", vibe: "Intenso, quente", publico: "Jovens", musica: "Funk e pop" },
-      { id: "s-pimenta", name: "S. Pimenta", startHour: 20, location: "Lapa", vibe: "Noturno, apimentado", publico: "Adultos", musica: "Samba e funk" },
+      { id: "fervo-da-lud", name: "Fervo da Lud", startHour: 7, location: "Centro", vibe: "Alta energia, clima de show", publico: "Jovens, LGBTQIA+, turistas", musica: "Pop, funk, hits atuais" },
+      { id: "as-carmelitas", name: "As Carmelitas", startHour: 8, location: "Santa Teresa", vibe: "Boêmio, histórico", publico: "Locais, artistas, famílias", musica: "Samba e marchinhas" },
+      { id: "vagalume-o-verde", name: "Vagalume O Verde", startHour: 8, location: "Jardim Botânico", vibe: "Organizado, menos caótico", publico: "Zona Sul, famílias", musica: "Samba e marchinhas" },
+      { id: "empurra-que-pega-do-leblon", name: "Empurra que Pega", startHour: 12, location: "Leblon", vibe: "Comunitário, tradicional", publico: "Moradores, famílias", musica: "Samba e marchinhas" },
+      { id: "sargento-pimenta", name: "Sargento Pimenta", startHour: 20, location: "Jardim Botânico", vibe: "Alternativo, animado", publico: "Criativos, jovens adultos", musica: "Beatles em samba" },
     ],
   },
   {
     date: "2026-02-18",
     blocos: [
-      { id: "me-enterra-na-4a", name: "Me enterra na 4ª", startHour: 13, location: "Ipanema", vibe: "Despedida, saudoso", publico: "Todos", musica: "Marchinhas e MPB" },
-      { id: "planta-na-mente", name: "Planta Na Mente", startHour: 14, location: "Jardim Botânico", vibe: "Tranquilo, verde", publico: "Adultos", musica: "Reggae e MPB" },
+      { id: "me-enterra-na-4a", name: "Me Enterra na Quarta", startHour: 13, location: "Centro", vibe: "Tradicional, nostálgico", publico: "Carnavalescos raiz", musica: "Samba-enredo e marchinhas" },
+      { id: "planta-na-mente", name: "Planta Na Mente", startHour: 14, location: "Lapa", vibe: "—", publico: "—", musica: "—" },
     ],
   },
   {
     date: "2026-02-19",
     blocos: [
-      { id: "fundo-de-quintal", name: "Fundo de Quintal", startHour: 18, location: "Madureira", vibe: "Raiz, autêntico", publico: "Todos", musica: "Pagode e samba" },
+      { id: "fundo-de-quintal", name: "Fundo de Quintal", startHour: 18, location: "Lapa", vibe: "Raiz, autêntico", publico: "30+, sambistas, casais", musica: "Samba raiz" },
     ],
   },
   {
     date: "2026-02-21",
     blocos: [
-      { id: "bloconce", name: "Bloconcé", startHour: 9, location: "Ipanema", vibe: "Pop, empoderado", publico: "Jovens", musica: "Pop internacional" },
-      { id: "batafa", name: "Batafá", startHour: 10, location: "Botafogo", vibe: "Percussivo, tribal", publico: "Adultos", musica: "Batucada e afrobeat" },
-      { id: "chule-de-santa", name: "Chulé de Santa", startHour: 12, location: "Santa Teresa", vibe: "Irreverente, boêmio", publico: "Adultos", musica: "Samba e marchinhas" },
+      { id: "bloco-da-anitta", name: "Bloco da Anitta", startHour: 7, location: "Centro", vibe: "Megaevento, show internacional", publico: "Jovens, turistas", musica: "Pop, funk, hits" },
+      { id: "bloconce", name: "Bloconcé", startHour: 9, location: "Flamengo", vibe: "Pop, coreografado", publico: "Jovens adultos", musica: "Pop nacional e internacional" },
+      { id: "batafa", name: "Batafá", startHour: 10, location: "Laranjeiras", vibe: "Tranquilo, bairro", publico: "Moradores, famílias", musica: "Samba e marchinhas" },
+      { id: "chule-de-santa", name: "Chulé de Santa", startHour: 12, location: "Santa Teresa", vibe: "Alternativo, artístico", publico: "Criativos, moradores", musica: "Samba e alternativo" },
+      { id: "mulheres-de-chico", name: "Mulheres de Chico", startHour: 15, location: "Leme", vibe: "Romântico, sofisticado", publico: "Adultos, casais, MPB", musica: "Chico Buarque" },
+      { id: "bloco-beatles-para-criancas", name: "Beatles P/ Crianças", startHour: 15, location: "Gávea", vibe: "Infantil, familiar", publico: "Pais e crianças", musica: "Beatles adaptado" },
     ],
   },
   {
     date: "2026-02-22",
     blocos: [
-      { id: "filhos-da-puc", name: "Filhos da PUC", startHour: 9, location: "Gávea", vibe: "Universitário, jovem", publico: "Jovens", musica: "Pop e funk" },
-      { id: "boka-de-espuma", name: "Boka de Espuma", startHour: 14, location: "Copacabana", vibe: "Festa, espuma", publico: "Jovens e adultos", musica: "Eletrônico e pop" },
-      { id: "saideira", name: "Saideira", startHour: 16, location: "Leblon", vibe: "Encerramento, festivo", publico: "Todos", musica: "Samba e pop" },
+      { id: "bloco-little-be", name: "Little Be", startHour: 8, location: "Ipanema", vibe: "Familiar, tranquilo", publico: "Pais e crianças", musica: "Infantil e marchinhas" },
+      { id: "filhos-da-puc", name: "Filhos da PUC", startHour: 9, location: "Gávea", vibe: "Universitário, jovem", publico: "Estudantes, jovens", musica: "Pop e samba" },
+      { id: "boka-de-espuma", name: "Boka de Espuma", startHour: 14, location: "Botafogo", vibe: "Irreverente, animado", publico: "Jovens e adultos", musica: "Samba e pop" },
+      { id: "saideira", name: "Saideira", startHour: 16, location: "Leme", vibe: "Encerramento, festivo", publico: "Todos", musica: "Samba e marchinhas" },
     ],
   },
 ];
