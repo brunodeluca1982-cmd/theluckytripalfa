@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { ArrowLeft, Crown, Sparkles, Users, Camera, ChevronDown, ChevronRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -174,7 +174,7 @@ export default function CamarotesRanking() {
             className="text-[10px] uppercase tracking-[0.22em] mb-2"
             style={{ ...sans, color: textMuted, fontWeight: 500 }}
           >
-            Atualizado em 15 de fevereiro, 2026
+            Atualizado em 17 de fevereiro, 2026
           </p>
           <h1
             className="text-[26px] font-bold leading-tight tracking-tight"
@@ -231,12 +231,12 @@ export default function CamarotesRanking() {
               </p>
             ) : (
               honestRanking.map((cam, i) => (
+                <Link key={cam.id} to={`/camarote/${cam.id}`}>
                 <motion.div
-                  key={cam.id}
                   initial={{ opacity: 0, x: -16 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.1 + i * 0.07, duration: 0.4 }}
-                  className="rounded-2xl p-5"
+                  className="rounded-2xl p-5 active:scale-[0.98] transition-transform cursor-pointer"
                   style={{
                     backgroundColor: cardBg,
                     border: `1px solid ${borderClr}`,
@@ -279,6 +279,7 @@ export default function CamarotesRanking() {
                     </p>
                   </div>
                 </motion.div>
+                </Link>
               ))
             )}
           </div>

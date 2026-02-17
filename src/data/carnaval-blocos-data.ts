@@ -21,16 +21,6 @@ export interface CarnavalDay {
 
 export const carnavalBlocos: CarnavalDay[] = [
   {
-    date: "2026-02-16",
-    blocos: [
-      { id: "corre-atras", name: "Corre Atrás", startHour: 7, location: "Leblon", vibe: "Energético", publico: "Jovens", musica: "Pop e eletrônico" },
-      { id: "brasilia-amarela", name: "Brasília Amarela", startHour: 8, location: "Urca", vibe: "Intimista, charmoso", publico: "Adultos", musica: "MPB e samba" },
-      { id: "fica-comigo", name: "Fica Comigo", startHour: 9, location: "Lagoa", vibe: "Familiar, descontraído", publico: "Famílias", musica: "Pop brasileiro" },
-      { id: "carvalho-em-pe", name: "Carvalho em pé", startHour: 10, location: "Tijuca", vibe: "Tradicional", publico: "Adultos", musica: "Samba" },
-      { id: "cruzada", name: "Cruzada", startHour: 14, location: "Copacabana", vibe: "Animado, intenso", publico: "Jovens e adultos", musica: "Funk e samba" },
-    ],
-  },
-  {
     date: "2026-02-17",
     blocos: [
       { id: "vagalume", name: "Vagalume", startHour: 8, location: "Laranjeiras", vibe: "Intimista, boêmio", publico: "Adultos", musica: "MPB e samba" },
