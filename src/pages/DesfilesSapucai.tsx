@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronDown, ExternalLink, Music, Crown, Sparkles, Clock, Bookmark } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
@@ -9,13 +9,17 @@ import { useItemSave } from "@/hooks/use-item-save";
 import carnavalBlocoBg from "@/assets/highlights/carnaval-bloco-bg.jpeg";
 
 const TAB_KEYS = [
-  { key: "2026-02-16", label: "Seg 16/02" },
   { key: "2026-02-17", label: "Ter 17/02" },
 ];
 
 /* ─── School Card ─── */
-const SchoolCard = ({ parade }: { parade: SapucaiParade }) => (
-  <div className="rounded-2xl backdrop-blur-xl bg-white/10 border border-white/20 p-5 space-y-4">
+const SchoolCard = ({ parade }: { parade: SapucaiParade }) => {
+  const navigate = useNavigate();
+  return (
+  <button
+    onClick={() => navigate(`/desfile/${parade.id}`)}
+    className="w-full text-left rounded-2xl backdrop-blur-xl bg-white/10 border border-white/20 p-5 space-y-4 active:scale-[0.98] transition-transform"
+  >
     {/* Header */}
     <div>
       <h3 className="text-xl font-serif font-semibold text-white leading-tight">{parade.school_name}</h3>
@@ -106,8 +110,9 @@ const SchoolCard = ({ parade }: { parade: SapucaiParade }) => (
         </AccordionContent>
       </AccordionItem>
     </Accordion>
-  </div>
-);
+  </button>
+  );
+};
 
 /* ─── Day Tab Content ─── */
 const DayTabContent = ({ dateISO }: { dateISO: string }) => {
@@ -157,9 +162,9 @@ const SummaryTable = () => {
           g.parades.map((p, i) => (
             <div key={p.id} className="flex items-center gap-3 px-4 py-2.5 text-sm">
               {i === 0 ? (
-                <span className="text-white/40 w-20 shrink-0 font-medium">
-                  {p.date_iso === "2026-02-14" ? "Sáb 14/02" : p.date_iso === "2026-02-15" ? "Dom 15/02" : p.date_iso === "2026-02-16" ? "Seg 16/02" : "Ter 17/02"}
-                </span>
+                  <span className="text-white/40 w-20 shrink-0 font-medium">
+                    Ter 17/02
+                  </span>
               ) : (
                 <span className="w-20 shrink-0" />
               )}
@@ -223,7 +228,7 @@ const DesfilesSapucai = () => {
             Desfiles na Sapucaí
           </h1>
           <p className="text-xs text-white/50 mt-1 tracking-widest uppercase">
-            Janelas de entrada (16–17/02/2026)
+            Janelas de entrada (17/02/2026)
           </p>
         </div>
 
@@ -233,7 +238,7 @@ const DesfilesSapucai = () => {
           <SummaryTable />
 
           {/* B: Tabs by day */}
-          <Tabs defaultValue="2026-02-16" className="w-full">
+          <Tabs defaultValue="2026-02-17" className="w-full">
             <TabsList className="w-full bg-white/10 border border-white/15 backdrop-blur-xl p-1 rounded-xl">
               {TAB_KEYS.map((t) => (
                 <TabsTrigger

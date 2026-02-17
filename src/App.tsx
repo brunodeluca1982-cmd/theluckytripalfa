@@ -60,6 +60,8 @@ import FestasBailes from "./pages/FestasBailes";
 import FestaDetalhe from "./pages/FestaDetalhe";
 import DesfilesSapucai from "./pages/DesfilesSapucai";
 import CamarotesRanking from "./pages/CamarotesRanking";
+import CamaroteDetail from "./pages/CamaroteDetail";
+import SapucaiParadeDetail from "./pages/SapucaiParadeDetail";
 import NotFound from "./pages/NotFound";
 import { CarnavalModeProvider } from "@/contexts/CarnavalModeContext";
 import { SpotifyPlayerProvider } from "@/contexts/SpotifyPlayerContext";
@@ -163,7 +165,9 @@ const App = () => {
                   <Route path="/festa-detalhe/:id" element={<FestaDetalhe />} />
                   <Route path="/desfiles-sapucai" element={<DesfilesSapucai />} />
                   <Route path="/camarotes" element={<CamarotesRanking />} />
+                  <Route path="/camarote/:id" element={<CamaroteDetail />} />
                   <Route path="/rio/carnaval-2026/camarotes/ranking" element={<CamarotesRanking />} />
+                  <Route path="/desfile/:id" element={<SapucaiParadeDetail />} />
                   
                   {/* Lucky List */}
                   <Route path="/lucky-list" element={<LuckyList />} />

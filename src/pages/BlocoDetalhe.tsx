@@ -1,6 +1,6 @@
 import { useParams, useSearchParams, Link } from "react-router-dom";
-import { ChevronLeft, Clock, Check } from "lucide-react";
-import { getBlockById } from "@/data/carnival-blocks";
+import { ChevronLeft, Clock, Check, Share2, MapPin } from "lucide-react";
+import { getBlockById, getBlocksByDate } from "@/data/carnival-blocks";
 import { formatCarnavalDateFull } from "@/lib/carnaval-date-utils";
 import { useItemSave } from "@/hooks/use-item-save";
 import { upsertSavedItem, removeSavedItem, isItemSaved } from "@/hooks/use-saved-items";
@@ -109,6 +109,16 @@ const BlocoDetalhe = () => {
             <ChevronLeft className="w-4 h-4" />
             Voltar
           </Link>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => {
+                const text = `${bloco.name} — ${bloco.neighborhood}\n${fullDate}`;
+                navigator.share ? navigator.share({ title: bloco.name, text }) : navigator.clipboard.writeText(text);
+              }}
+              className="inline-flex items-center justify-center w-9 h-9 rounded-full backdrop-blur-md bg-white/10 border border-white/20 text-white/70 hover:bg-white/20"
+            >
+              <Share2 className="w-4 h-4" />
+            </button>
           <button
             onClick={handleToggleSave}
             
@@ -127,6 +137,7 @@ const BlocoDetalhe = () => {
               "Eu vou"
             )}
           </button>
+          </div>
         </header>
 
         {/* 2️⃣ Block Header */}
@@ -238,6 +249,49 @@ const BlocoDetalhe = () => {
             </Section>
           )}
         </div>
+
+        {/* Google Maps button */}
+        <div className="mx-4 mt-3">
+          <a
+            href={mapsUrl((extra?.concentration || bloco.address || bloco.neighborhood) + ", Rio de Janeiro")}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center gap-2 w-full py-3 rounded-2xl backdrop-blur-md bg-white/10 border border-white/20 text-white/80 text-sm font-medium hover:bg-white/20 transition-colors"
+          >
+            <MapPin className="w-4 h-4" />
+            Abrir no Maps
+          </a>
+        </div>
+
+        {/* You may also like */}
+        {(() => {
+          const others = getBlocksByDate(date).filter((b) => b.id !== bloco.id).slice(0, 3);
+          if (others.length === 0) return null;
+          return (
+            <div className="mx-4 mt-6">
+              <h3 className="text-sm font-semibold text-white mb-3">Você também pode gostar</h3>
+              <div className="space-y-2">
+                {others.map((other) => (
+                  <Link
+                    key={other.id}
+                    to={`/bloco-detalhe/${other.id}?date=${date}`}
+                    className="flex items-center gap-3 rounded-2xl backdrop-blur-xl bg-white/8 border border-white/15 p-4 hover:bg-white/15 transition-colors"
+                  >
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <Clock className="w-3.5 h-3.5 text-white/50" />
+                      <span className="text-white/70 text-xs">{parseInt(other.time)}h</span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm text-white font-medium truncate">{other.name}</p>
+                      <p className="text-xs text-white/50">📍 {other.neighborhoodShort || other.neighborhood}</p>
+                    </div>
+                    <ChevronLeft className="w-4 h-4 text-white/30 rotate-180 shrink-0" />
+                  </Link>
+                ))}
+              </div>
+            </div>
+          );
+        })()}
       </div>
     </div>
   );

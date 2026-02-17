@@ -1,6 +1,6 @@
 import { useParams, Link } from "react-router-dom";
-import { ChevronLeft, Clock, Check } from "lucide-react";
-import { getFestaById } from "@/data/festas-bailes-data";
+import { ChevronLeft, Clock, Check, Share2, MapPin } from "lucide-react";
+import { getFestaById, festasData } from "@/data/festas-bailes-data";
 import { formatCarnavalDateFull } from "@/lib/carnaval-date-utils";
 import { useItemSave } from "@/hooks/use-item-save";
 import { upsertSavedItem, removeSavedItem, isItemSaved } from "@/hooks/use-saved-items";
@@ -91,8 +91,18 @@ const FestaDetalhe = () => {
             <ChevronLeft className="w-4 h-4" />
             Voltar
           </Link>
-          <button
-            onClick={handleToggleSave}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => {
+                const text = `${festa.name} — ${festa.neighborhood}\n${fullDate}`;
+                navigator.share ? navigator.share({ title: festa.name, text }) : navigator.clipboard.writeText(text);
+              }}
+              className="inline-flex items-center justify-center w-9 h-9 rounded-full backdrop-blur-md bg-white/10 border border-white/20 text-white/70 hover:bg-white/20"
+            >
+              <Share2 className="w-4 h-4" />
+            </button>
+            <button
+              onClick={handleToggleSave}
             className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-300 ${
               isSaved
                 ? "backdrop-blur-md bg-white/20 text-white/70 border border-white/20"
@@ -108,6 +118,7 @@ const FestaDetalhe = () => {
               "Eu vou"
             )}
           </button>
+          </div>
         </header>
 
         {/* Event Header */}
@@ -154,6 +165,47 @@ const FestaDetalhe = () => {
             <p className="text-sm text-white/80 leading-relaxed">{festa.music}</p>
           </div>
         </div>
+
+        {/* Google Maps button */}
+        {festa.gmapsUrl && (
+          <div className="mx-4 mt-3">
+            <a
+              href={festa.gmapsUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-2 w-full py-3 rounded-2xl backdrop-blur-md bg-white/10 border border-white/20 text-white/80 text-sm font-medium hover:bg-white/20 transition-colors"
+            >
+              <MapPin className="w-4 h-4" />
+              Abrir no Maps
+            </a>
+          </div>
+        )}
+
+        {/* You may also like */}
+        {(() => {
+          const others = festasData.filter((f) => f.id !== festa.id).slice(0, 3);
+          if (others.length === 0) return null;
+          return (
+            <div className="mx-4 mt-6">
+              <h3 className="text-sm font-semibold text-white mb-3">Você também pode gostar</h3>
+              <div className="space-y-2">
+                {others.map((other) => (
+                  <Link
+                    key={other.id}
+                    to={`/festa-detalhe/${other.id}`}
+                    className="flex items-center gap-3 rounded-2xl backdrop-blur-xl bg-white/8 border border-white/15 p-4 hover:bg-white/15 transition-colors"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm text-white font-medium truncate">{other.name}</p>
+                      <p className="text-xs text-white/50">📍 {other.neighborhood} · {other.timeDisplay}h</p>
+                    </div>
+                    <ChevronLeft className="w-4 h-4 text-white/30 rotate-180 shrink-0" />
+                  </Link>
+                ))}
+              </div>
+            </div>
+          );
+        })()}
       </div>
     </div>
   );

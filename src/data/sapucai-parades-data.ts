@@ -19,103 +19,6 @@ export interface SapucaiParade {
 }
 
 export const sapucaiParades: SapucaiParade[] = [
-  // ── Segunda 16/02 — Grupo Especial (2º dia) ──
-  {
-    id: "mocidade-2026",
-    date_iso: "2026-02-16",
-    date_display: "16 de fevereiro de 2026 — segunda",
-    group_name: "Grupo Especial (2º dia)",
-    school_name: "Mocidade Independente de Padre Miguel",
-    start_time_24h: "21:45",
-    start_hour_display: "21h45",
-    end_time_text: "",
-    how_to_get_there:
-      "• Metrô: priorize e caminhe até seu setor.\n• Uber: desembarque fora dos bloqueios e finalize a pé.",
-    vibe_details:
-      "• Abertura da segunda noite: escola costuma vir \"pra brigar\".\n• Tema pop/rock: expectativa de refrões conhecidos \"adaptados\" pro samba.",
-    samba_title: "Rita Lee, a padroeira da liberdade",
-    samba_summary:
-      "Celebra a obra e a atitude libertária da homenageada como símbolo de transgressão e autonomia.",
-    samba_excerpt: "Quem foge ao padrão vence a regra",
-    samba_full_lyrics_url:
-      "https://liesa.org.br/carnaval/escolas/mocidade/samba-enredo.html",
-    muses_and_queens:
-      "Rainha: Fabíola Andrade.\nMusas (confirmadas): Erika Schneider (musa).",
-    missing_fields: [],
-    raw_source_text: "",
-  },
-  {
-    id: "beija-flor-2026",
-    date_iso: "2026-02-16",
-    date_display: "16 de fevereiro de 2026 — segunda",
-    group_name: "Grupo Especial (2º dia)",
-    school_name: "Beija-Flor de Nilópolis",
-    start_time_24h: "23:20",
-    start_hour_display: "entre 23h20 e 23h30",
-    end_time_text: "entre 23h20 e 23h30",
-    how_to_get_there:
-      "• Metrô: priorize e caminhe até seu setor.\n• Uber: desembarque fora dos bloqueios e finalize a pé.",
-    vibe_details:
-      "• Axé de rua: cortejo, atabaque, ocupação do espaço público.\n• Samba \"chamado de arquibancada\" (refrão forte e repetível).",
-    samba_title: "Bembé",
-    samba_summary:
-      "Gira em torno do Bembé do Mercado e da presença pública do candomblé como autorreparação e liberdade.",
-    samba_excerpt: "Isso aqui vai virar macumba!",
-    samba_full_lyrics_url:
-      "https://liesa.org.br/carnaval/escolas/beija-flor/samba-enredo.html",
-    muses_and_queens:
-      "Rainha: Lorena Raissa.\nMusas (confirmadas): Giovanna Lancellotti (musa).",
-    missing_fields: [],
-    raw_source_text: "",
-  },
-  {
-    id: "viradouro-2026",
-    date_iso: "2026-02-16",
-    date_display: "16 de fevereiro de 2026 — segunda",
-    group_name: "Grupo Especial (2º dia)",
-    school_name: "Unidos do Viradouro",
-    start_time_24h: "00:55",
-    start_hour_display: "entre 00h55 e 01h15",
-    end_time_text: "entre 00h55 e 01h15",
-    how_to_get_there:
-      "• Metrô: priorize e caminhe até seu setor.\n• Uber: desembarque fora dos bloqueios e finalize a pé.",
-    vibe_details:
-      "• Enredo autorreferente: bateria como personagem central.\n• Homenagem \"de dentro do samba\" (muito ritmo e disciplina).",
-    samba_title: "Pra cima, Ciça",
-    samba_summary:
-      "Celebra Mestre Ciça e a construção coletiva da bateria como escola.",
-    samba_excerpt: "Pra cima, Ciça!",
-    samba_full_lyrics_url:
-      "https://liesa.org.br/carnaval/escolas/viradouro/samba-enredo.html",
-    muses_and_queens: "Rainha: Juliana Paes.\nMusas: —",
-    missing_fields: [],
-    raw_source_text: "",
-  },
-  {
-    id: "unidos-da-tijuca-2026",
-    date_iso: "2026-02-16",
-    date_display: "16 de fevereiro de 2026 — segunda",
-    group_name: "Grupo Especial (2º dia)",
-    school_name: "Unidos da Tijuca",
-    start_time_24h: "02:30",
-    start_hour_display: "entre 02h30 e 03h00",
-    end_time_text: "entre 02h30 e 03h00",
-    how_to_get_there:
-      "• Metrô: priorize e caminhe até seu setor.\n• Uber: desembarque fora dos bloqueios e finalize a pé.",
-    vibe_details:
-      "• Desfile-livro: narrativa de vida, favela, escrita e denúncia social.\n• Final de noite: energia persistente e \"canto de resistência\".",
-    samba_title: "Carolina Maria de Jesus",
-    samba_summary:
-      "Costura a infância, a fome e o poder da palavra da homenageada, do interior ao Canindé.",
-    samba_excerpt: "A palavra é arma contra a tirania",
-    samba_full_lyrics_url:
-      "https://liesa.org.br/carnaval/escolas/unidos-da-tijuca/samba-enredo.html",
-    muses_and_queens:
-      "Rainha: Mileide Mihaile.\nMusas (confirmadas): Geisa Eloy (musa); Katarina Harmony (musa).",
-    missing_fields: [],
-    raw_source_text: "",
-  },
-
   // ── Terça 17/02 — Grupo Especial (3º dia) ──
   {
     id: "grande-rio-2026",
@@ -207,7 +110,7 @@ export const sapucaiParades: SapucaiParade[] = [
 
 /** Group parades by date_iso */
 export function getParadesByDate(): { dateISO: string; dateDisplay: string; groupName: string; parades: SapucaiParade[] }[] {
-  const dateOrder = ["2026-02-16", "2026-02-17"];
+  const dateOrder = ["2026-02-17"];
   const groups: { dateISO: string; dateDisplay: string; groupName: string; parades: SapucaiParade[] }[] = [];
 
   for (const d of dateOrder) {
@@ -226,16 +129,6 @@ export function getParadesByDate(): { dateISO: string; dateDisplay: string; grou
 
 /** Timeline text for each day */
 export const sapucaiTimeline = [
-  {
-    dateISO: "2026-02-16",
-    label: "16/02 (Seg)",
-    entries: [
-      "21h45 Mocidade",
-      "23h20–23h30 Beija-Flor",
-      "00h55–01h15 Viradouro",
-      "02h30–03h00 Unidos da Tijuca",
-    ],
-  },
   {
     dateISO: "2026-02-17",
     label: "17/02 (Ter)",
