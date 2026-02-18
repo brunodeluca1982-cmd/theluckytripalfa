@@ -24,6 +24,9 @@ serve(async (req) => {
     const { data, error, count } = await externalClient
       .from("hoteis")
       .select("*", { count: "exact" })
+      .eq("ativo", true)
+      .order("ordem_bairro", { ascending: true })
+      .order("nome", { ascending: true })
       .limit(100);
 
     console.log("External query result:", { count, dataLength: data?.length, error });
