@@ -28,7 +28,7 @@ async function fetchExternalHotels(): Promise<ExternalHotel[]> {
   });
   if (!resp.ok) throw new Error("Failed to fetch hotels");
   const json = await resp.json();
-  return (json.hotels || []).filter((h: ExternalHotel) => h.ativo);
+  return json.hotels || [];
 }
 
 export function useExternalHotels() {

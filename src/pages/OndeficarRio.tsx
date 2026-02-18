@@ -51,21 +51,6 @@ function minDistToHotspot(lat: number, lng: number): number {
   return Math.min(...CARNAVAL_HOTSPOTS.map((h) => haversineKm(lat, lng, h.lat, h.lng)));
 }
 
-// Static hotel data as fallback
-const STATIC_HOTELS = [
-  { id: "hotel-fasano-rio", name: "Hotel Fasano Rio de Janeiro", neighborhood: "ipanema", tag: "Luxo", lat: -22.9867, lng: -43.2022 },
-  { id: "copacabana-palace", name: "Copacabana Palace", neighborhood: "copacabana", tag: "Ícone", lat: -22.9669, lng: -43.1782 },
-  { id: "emiliano-rio", name: "Emiliano Rio", neighborhood: "copacabana", tag: "Elegante", lat: -22.9781, lng: -43.1903 },
-  { id: "janeiro-hotel", name: "Janeiro Hotel", neighborhood: "leblon", tag: "Design", lat: -22.9872, lng: -43.2297 },
-  { id: "santa-teresa-hotel", name: "Santa Teresa Hotel RJ MGallery", neighborhood: "santa-teresa", tag: "Refúgio", lat: -22.9227, lng: -43.1873 },
-  { id: "fairmont-rio", name: "Fairmont Rio", neighborhood: "copacabana", tag: "Vista", lat: -22.9812, lng: -43.1923 },
-  { id: "hotel-nacional", name: "Hotel Nacional", neighborhood: "sao-conrado", tag: "Histórico", lat: -22.9989, lng: -43.2644 },
-  { id: "ritz-leblon", name: "Ritz Leblon", neighborhood: "leblon", tag: "Discreto", lat: -22.9838, lng: -43.2234 },
-  { id: "hyatt-regency-barra", name: "Hyatt Regency Barra", neighborhood: "barra-da-tijuca", tag: "Resort", lat: -22.9998, lng: -43.3652 },
-  { id: "mama-shelter-rio", name: "Mama Shelter Rio", neighborhood: "santa-teresa", tag: "Jovem", lat: -22.9230, lng: -43.1880 },
-  { id: "windsor-leme", name: "Windsor Leme", neighborhood: "leme", tag: "Tranquilo", lat: -22.9634, lng: -43.1713 },
-  { id: "c-design-hotel", name: "C Design Hotel", neighborhood: "recreio", tag: "Praia", lat: -23.0130, lng: -43.4470 },
-];
 
 function normalizeNeighborhood(bairro: string): string {
   return bairro
@@ -90,21 +75,19 @@ const OndeficarRio = () => {
 
   const MAP_WIDTH = 900;
 
-  // Map external hotels to the display format, fallback to static
+  // Map external hotels to the display format
   const hotelListData = useMemo(() => {
-    if (externalHotels && externalHotels.length > 0) {
-      return externalHotels.map((h) => ({
-        id: h.id,
-        name: h.nome,
-        neighborhood: normalizeNeighborhood(h.bairro),
-        tag: h.categoria?.trim() || "Hotel",
-        lat: 0,
-        lng: 0,
-        meuOlhar: h.meu_olhar,
-        instagram: h.instagram,
-      }));
-    }
-    return STATIC_HOTELS;
+    if (!externalHotels || externalHotels.length === 0) return [];
+    return externalHotels.map((h) => ({
+      id: h.id,
+      name: h.nome,
+      neighborhood: normalizeNeighborhood(h.bairro),
+      tag: h.categoria?.trim() || "Hotel",
+      lat: 0,
+      lng: 0,
+      meuOlhar: h.meu_olhar,
+      instagram: h.instagram,
+    }));
   }, [externalHotels]);
 
   // Pre-compute distances
