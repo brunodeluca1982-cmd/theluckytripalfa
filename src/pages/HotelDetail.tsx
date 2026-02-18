@@ -4,259 +4,15 @@ import { Button } from "@/components/ui/button";
 import { useItemSave } from "@/hooks/use-item-save";
 import { getHotelImage } from "@/data/place-images";
 import { usePlacePhoto, buildPlaceQuery } from "@/hooks/use-place-photo";
+import { useExternalHotels } from "@/hooks/use-external-hotels";
+import { useMemo } from "react";
 
 /**
  * HOTEL DETAIL PAGE
- * 
- * Individual detail view for a single hotel.
- * Each hotel has its own unique URL.
- * 
- * SAVING SCOPE: Only this individual hotel can be saved (item level).
+ *
+ * Renders hotel details exclusively from the external Supabase database.
+ * No static/fallback data. No dollar-sign price indicators.
  */
-
-// Hotel data store (mirrors WhereToStayDetail data)
-const hotelData: Record<string, {
-  name: string;
-  price: string;
-  description: string;
-  address?: string;
-  instagram?: string;
-  externalLink?: string;
-  neighborhood: string;
-  neighborhoodName: string;
-}> = {
-  // Ipanema hotels
-  "hotel-fasano-rio-de-janeiro": {
-    name: "Hotel Fasano Rio de Janeiro",
-    price: "$$$$",
-    description: "O endereço de luxo mais clássico do Rio. O rooftop virou cenário de campanhas, entrevistas e reuniões importantes. Já vi jogadores de futebol, gente do cinema, moda e música ali — todos buscando vista, discrição e serviço impecável.",
-    address: "https://maps.google.com/?q=Hotel+Fasano+Rio+de+Janeiro",
-    instagram: "@fasano",
-    neighborhood: "ipanema",
-    neighborhoodName: "Ipanema",
-  },
-  "ipanema-inn": {
-    name: "Ipanema Inn",
-    price: "$$$",
-    description: "Pequeno, acolhedor e com cara de casa. Perfeito pra quem vai e vem o dia todo sem depender de carro.",
-    address: "https://maps.google.com/?q=Ipanema+Inn",
-    instagram: "@ipanemainn",
-    neighborhood: "ipanema",
-    neighborhoodName: "Ipanema",
-  },
-  "mar-ipanema-hotel": {
-    name: "Mar Ipanema Hotel",
-    price: "$$$",
-    description: "Urbano, prático e extremamente bem localizado. Funciona muito bem pra quem quer viver Ipanema intensamente.",
-    address: "https://maps.google.com/?q=Mar+Ipanema+Hotel",
-    instagram: "@mariipanemahotel",
-    neighborhood: "ipanema",
-    neighborhoodName: "Ipanema",
-  },
-  // Leblon hotels
-  "janeiro-hotel": {
-    name: "Janeiro Hotel",
-    price: "$$$$",
-    description: "Minimalista, silencioso e luminoso. Atrai quem gosta de design, arte e acordar com o mar sem perder o clima de bairro do Leblon.",
-    address: "https://maps.google.com/?q=Janeiro+Hotel+Leblon",
-    instagram: "@janeirolifestyle",
-    neighborhood: "leblon",
-    neighborhoodName: "Leblon",
-  },
-  "ritz-leblon": {
-    name: "Ritz Leblon",
-    price: "$$$",
-    description: "Discreto e confortável. Vejo muita gente que grava, escreve ou trabalha na Zona Sul escolhendo o Ritz justamente pelo silêncio e localização.",
-    address: "https://maps.google.com/?q=Ritz+Leblon",
-    instagram: "@ritzleblon",
-    neighborhood: "leblon",
-    neighborhoodName: "Leblon",
-  },
-  "promenade-palladium": {
-    name: "Promenade Palladium",
-    price: "$$",
-    description: "Tem cara de residência do bairro. Muito usado por quem vem trabalhar no Rio e prefere discrição e praticidade.",
-    address: "https://maps.google.com/?q=Promenade+Palladium+Leblon",
-    instagram: "@promenadehotels",
-    neighborhood: "leblon",
-    neighborhoodName: "Leblon",
-  },
-  // Copacabana hotels
-  "copacabana-palace": {
-    name: "Copacabana Palace",
-    price: "$$$$",
-    description: "Ícone absoluto do Brasil. Mesmo quando não fico, é referência. Presidentes, artistas, jogadores e grandes eventos passam por aqui há décadas.",
-    address: "https://maps.google.com/?q=Copacabana+Palace",
-    instagram: "@copacabanapalace",
-    neighborhood: "copacabana",
-    neighborhoodName: "Copacabana",
-  },
-  "emiliano-rio": {
-    name: "Emiliano Rio",
-    price: "$$$$",
-    description: "Arquitetura elegante, serviço preciso e rooftop reservado. Muito escolhido por quem quer luxo discreto e boa localização.",
-    address: "https://maps.google.com/?q=Hotel+Emiliano+Rio",
-    instagram: "@emiliano_rio",
-    neighborhood: "copacabana",
-    neighborhoodName: "Copacabana",
-  },
-  "fairmont-rio": {
-    name: "Fairmont Rio",
-    price: "$$$$",
-    description: "O antigo Rio Palace. Da piscina, o Pão de Açúcar entra no enquadramento como se fosse cenário montado.",
-    address: "https://maps.google.com/?q=Fairmont+Rio+Copacabana",
-    instagram: "@fairmontricopacabana",
-    neighborhood: "copacabana",
-    neighborhoodName: "Copacabana",
-  },
-  "hilton-copacabana": {
-    name: "Hilton Copacabana",
-    price: "$$$",
-    description: "Hotel grande, vista panorâmica e logística fácil. Muito usado por bandas, equipes esportivas e grandes produções.",
-    address: "https://maps.google.com/?q=Hilton+Copacabana",
-    instagram: "@hiltoncopacabana",
-    neighborhood: "copacabana",
-    neighborhoodName: "Copacabana",
-  },
-  // Leme hotels
-  "windsor-leme": {
-    name: "Windsor Leme",
-    price: "$$$",
-    description: "Mais silencioso, com clima de bairro e mar na porta. Boa escolha pra quem quer dormir bem.",
-    address: "https://maps.google.com/?q=Windsor+Leme",
-    instagram: "@windsorhoteis",
-    neighborhood: "leme",
-    neighborhoodName: "Leme",
-  },
-  "arena-leme": {
-    name: "Arena Leme",
-    price: "$$",
-    description: "Moderno, funcional e bem localizado. Base frequente de produções que filmam na Urca e no Forte do Leme.",
-    address: "https://maps.google.com/?q=Arena+Leme+Hotel",
-    instagram: "@arenahotels",
-    neighborhood: "leme",
-    neighborhoodName: "Leme",
-  },
-  // São Conrado hotels
-  "hotel-nacional": {
-    name: "Hotel Nacional",
-    price: "$$$$",
-    description: "Projeto de Niemeyer à beira-mar. Já recebeu presidentes, músicos internacionais e grandes eventos. Hoje é escolha de quem quer vista e história.",
-    address: "https://maps.google.com/?q=Hotel+Nacional+Rio",
-    instagram: "@hotelnacionalrio",
-    neighborhood: "sao-conrado",
-    neighborhoodName: "São Conrado",
-  },
-  // Barra da Tijuca hotels
-  "hyatt-regency-barra": {
-    name: "Hyatt Regency Barra",
-    price: "$$$$",
-    description: "Clima de resort dentro da cidade. Muito usado por bandas e equipes de grandes shows.",
-    address: "https://maps.google.com/?q=Hyatt+Regency+Barra+da+Tijuca",
-    instagram: "@hyattregencyrio",
-    neighborhood: "barra-da-tijuca",
-    neighborhoodName: "Barra da Tijuca",
-  },
-  "windsor-barra": {
-    name: "Windsor Barra",
-    price: "$$$",
-    description: "Clássico da orla. Recebe delegações esportivas e congressos.",
-    address: "https://maps.google.com/?q=Windsor+Barra",
-    instagram: "@windsorhoteis",
-    neighborhood: "barra-da-tijuca",
-    neighborhoodName: "Barra da Tijuca",
-  },
-  "lsh-hotel": {
-    name: "LSH Hotel",
-    price: "$$$",
-    description: "Compacto, moderno e bem localizado. Ótimo pra quem quer viver o Jardim Oceânico a pé.",
-    address: "https://maps.google.com/?q=LSH+Hotel+Barra",
-    instagram: "@lshhotel",
-    neighborhood: "barra-da-tijuca",
-    neighborhoodName: "Barra da Tijuca",
-  },
-  "laghetto-stilo-barra": {
-    name: "Laghetto Stilo Barra",
-    price: "$$",
-    description: "Boa relação custo-benefício para trabalho e eventos.",
-    address: "https://maps.google.com/?q=Laghetto+Stilo+Barra",
-    instagram: "@laghettostilobarra",
-    neighborhood: "barra-da-tijuca",
-    neighborhoodName: "Barra da Tijuca",
-  },
-  // Recreio hotels
-  "c-design-hotel": {
-    name: "C Design Hotel",
-    price: "$$$",
-    description: "Pé na areia, fachada marcante e clima jovem. Muito usado por surfistas e equipes esportivas.",
-    address: "https://maps.google.com/?q=C+Design+Hotel",
-    instagram: "@cdesignhotel",
-    neighborhood: "recreio",
-    neighborhoodName: "Recreio",
-  },
-  // Santa Teresa hotels
-  "santa-teresa-hotel-rj-mgallery": {
-    name: "Santa Teresa Hotel RJ MGallery",
-    price: "$$$$",
-    description: "Refúgio criativo. Amy Winehouse, Alicia Keys e Alanis Morissette já se hospedaram aqui.",
-    address: "https://maps.google.com/?q=Santa+Teresa+Hotel+RJ",
-    instagram: "@santateresahotel",
-    neighborhood: "santa-teresa",
-    neighborhoodName: "Santa Teresa",
-  },
-  "mama-shelter-rio": {
-    name: "Mama Shelter Rio",
-    price: "$$",
-    description: "Colorido, jovem e animado. Boa mistura de hospedagem e vida social.",
-    address: "https://maps.google.com/?q=Mama+Shelter+Rio",
-    instagram: "@mamashelterrj",
-    neighborhood: "santa-teresa",
-    neighborhoodName: "Santa Teresa",
-  },
-  // Centro hotels
-  "prodigy-santos-dumont-by-wish": {
-    name: "Prodigy Santos Dumont by Wish",
-    price: "$$",
-    description: "Funcional e estratégico pra quem chega ou sai pelo Santos Dumont. O diferencial é o rooftop com piscina e vista da Baía, mas a proposta aqui é praticidade, não luxo.",
-    address: "https://maps.google.com/?q=Prodigy+Santos+Dumont+by+Wish",
-    instagram: "@prodigysantosdumont",
-    neighborhood: "centro",
-    neighborhoodName: "Centro",
-  },
-  "windsor-guanabara-hotel": {
-    name: "Windsor Guanabara Hotel",
-    price: "$$",
-    description: "Hotel tradicional do Centro, com estrutura grande e operação eficiente. Funciona bem pra quem vai circular entre Centro, Lapa e compromissos de trabalho, sem expectativa de experiência sofisticada.",
-    address: "https://maps.google.com/?q=Windsor+Guanabara+Hotel",
-    instagram: "@windsorhoteis",
-    neighborhood: "centro",
-    neighborhoodName: "Centro",
-  },
-};
-
-// Mapping from guide data IDs to detail page slugs
-const guideIdToSlug: Record<string, string> = {
-  "fasano": "hotel-fasano-rio-de-janeiro",
-  "janeiro": "janeiro-hotel",
-  "ritz-leblon": "ritz-leblon",
-  "ipanema-inn": "ipanema-inn",
-  "mar-ipanema": "mar-ipanema-hotel",
-  "promenade-palladium": "promenade-palladium",
-  "copa-palace": "copacabana-palace",
-  "emiliano": "emiliano-rio",
-  "fairmont": "fairmont-rio",
-  "hilton-copa": "hilton-copacabana",
-  "windsor-leme": "windsor-leme",
-  "arena-leme": "arena-leme",
-  "nacional": "hotel-nacional",
-  "hyatt-barra": "hyatt-regency-barra",
-  "windsor-barra": "windsor-barra",
-  "lsh-barra": "lsh-hotel",
-  "laghetto-barra": "laghetto-stilo-barra",
-  "c-design": "c-design-hotel",
-  "santa-teresa-mgallery": "santa-teresa-hotel-rj-mgallery",
-  "mama-shelter": "mama-shelter-rio",
-};
 
 // Helper to generate slug from hotel name
 export const generateHotelSlug = (name: string): string => {
@@ -274,10 +30,13 @@ const HotelDetail = () => {
   const { id } = useParams<{ id: string }>();
   const [searchParams] = useSearchParams();
   const { saveItem } = useItemSave();
-  
-  // Try direct lookup first, then try guide ID mapping
-  const resolvedSlug = guideIdToSlug[id || ""] || id || "";
-  const hotel = hotelData[resolvedSlug];
+  const { data: externalHotels, isLoading } = useExternalHotels();
+
+  const hotel = useMemo(() => {
+    if (!externalHotels || !id) return null;
+    return externalHotels.find((h) => generateHotelSlug(h.nome) === id) || null;
+  }, [externalHotels, id]);
+
   const from = searchParams.get("from");
   const getBackPath = () => {
     if (from && from !== "list" && from !== "map") return `/onde-ficar/${from}`;
@@ -285,19 +44,40 @@ const HotelDetail = () => {
   };
   const backPath = getBackPath();
 
-  const placeQuery = hotel ? buildPlaceQuery(hotel.name, hotel.neighborhoodName) : "";
+  const neighborhoodName = hotel?.bairro || "";
+  const placeQuery = hotel ? buildPlaceQuery(hotel.nome, neighborhoodName) : "";
   const { photoUrl, isLoading: photoLoading } = usePlacePhoto(
-    resolvedSlug, "hotel", placeQuery, !!hotel
+    id || "",
+    "hotel",
+    placeQuery,
+    !!hotel
   );
-  const heroImage = photoUrl || (hotel ? getHotelImage(hotel.neighborhood) : "");
+
+  const normalizeNeighborhood = (bairro: string) =>
+    bairro
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/\s+/g, "-");
+
+  const heroImage =
+    photoUrl || (hotel ? getHotelImage(normalizeNeighborhood(hotel.bairro)) : "");
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="w-6 h-6 border-2 border-muted-foreground/30 border-t-muted-foreground/70 rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   if (!hotel) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <p className="text-muted-foreground mb-4">Hotel não encontrado</p>
-          <Link to="/" className="text-foreground underline">
-            Voltar ao início
+          <Link to="/onde-ficar-rio" className="text-foreground underline">
+            Voltar
           </Link>
         </div>
       </div>
@@ -305,8 +85,17 @@ const HotelDetail = () => {
   }
 
   const handleSave = () => {
-    saveItem(resolvedSlug, "hotel", hotel.name, false);
+    saveItem(id || "", "hotel", hotel.nome, false);
   };
+
+  const cleanUrl = (raw: string | null | undefined): string | null => {
+    if (!raw) return null;
+    const match = raw.match(/https?:\/\/[^\s)]+/);
+    return match ? match[0] : null;
+  };
+
+  const mapsUrl = cleanUrl(hotel.google_maps_url);
+  const siteUrl = cleanUrl(hotel.site_oficial);
 
   return (
     <div className="min-h-screen bg-background">
@@ -339,9 +128,9 @@ const HotelDetail = () => {
               <div className="w-6 h-6 border-2 border-muted-foreground/30 border-t-muted-foreground/70 rounded-full animate-spin" />
             </div>
           ) : (
-            <img 
-              src={heroImage} 
-              alt={hotel.name}
+            <img
+              src={heroImage}
+              alt={hotel.nome}
               className="w-full h-full object-cover"
             />
           )}
@@ -351,33 +140,49 @@ const HotelDetail = () => {
         <div className="px-6 pt-8">
           {/* Category */}
           <p className="text-xs tracking-widest text-muted-foreground uppercase mb-2">
-            Hotel • {hotel.neighborhoodName}
+            {hotel.categoria?.trim() || "Hotel"} • {hotel.bairro}
           </p>
-          
+
           {/* Title */}
           <h1 className="text-4xl font-serif font-semibold text-foreground leading-tight mb-4">
-            {hotel.name}
+            {hotel.nome}
           </h1>
-          
-          {/* Price */}
-          <p className="text-sm text-muted-foreground mb-4">{hotel.price}</p>
-          
-          {/* Description */}
-          <div className="space-y-2 mb-6">
-            {hotel.description.split('\n').map((paragraph, index) => (
-              <p key={index} className="text-base text-muted-foreground leading-relaxed">
-                {paragraph}
-              </p>
-            ))}
-          </div>
-          
+
+          {/* Price — only real value, no symbols */}
+          {hotel.preco_medio_diaria && (
+            <p className="text-sm text-muted-foreground mb-4">
+              Diária média: R$ {hotel.preco_medio_diaria}
+            </p>
+          )}
+
+          {/* Description (meu_olhar) */}
+          {hotel.meu_olhar && (
+            <div className="space-y-2 mb-6">
+              {hotel.meu_olhar.split("\n").map((paragraph, index) => (
+                <p
+                  key={index}
+                  className="text-base text-muted-foreground leading-relaxed"
+                >
+                  {paragraph}
+                </p>
+              ))}
+            </div>
+          )}
+
+          {/* Atmosfera */}
+          {hotel.atmosfera && (
+            <p className="text-sm italic text-muted-foreground/80 mb-6">
+              {hotel.atmosfera}
+            </p>
+          )}
+
           {/* Metadata */}
           <div className="space-y-2 text-sm text-muted-foreground mb-6">
-            {hotel.address && (
+            {mapsUrl && (
               <p>
-                <a 
-                  href={hotel.address} 
-                  target="_blank" 
+                <a
+                  href={mapsUrl}
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="hover:text-foreground transition-colors underline"
                 >
@@ -387,9 +192,9 @@ const HotelDetail = () => {
             )}
             {hotel.instagram && (
               <p>
-                <a 
-                  href={`https://instagram.com/${hotel.instagram.replace('@', '')}`}
-                  target="_blank" 
+                <a
+                  href={`https://instagram.com/${hotel.instagram.replace("@", "")}`}
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="hover:text-foreground transition-colors"
                 >
@@ -397,26 +202,26 @@ const HotelDetail = () => {
                 </a>
               </p>
             )}
+            {siteUrl && (
+              <p>
+                <a
+                  href={siteUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-foreground transition-colors underline"
+                >
+                  Site oficial
+                </a>
+              </p>
+            )}
           </div>
-          
-          {/* Actions */}
-          {hotel.externalLink && (
-            <a 
-              href={hotel.externalLink} 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-xs text-foreground underline"
-            >
-              Ver disponibilidade
-            </a>
-          )}
         </div>
       </main>
 
       {/* Footer */}
       <footer className="px-6 py-8 border-t border-border">
         <p className="text-xs text-muted-foreground">
-          The Lucky Trip — {hotel.neighborhoodName}
+          The Lucky Trip — {hotel.bairro}
         </p>
       </footer>
     </div>
