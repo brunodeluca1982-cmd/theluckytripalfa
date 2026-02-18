@@ -16,6 +16,7 @@ import { ItineraryItemDetailSheet } from "@/components/roteiro/ItineraryItemDeta
 import { useItineraryCoherence, getTravelBetweenSlots, TravelSegment } from "@/hooks/use-itinerary-coherence";
 import { TravelIndicator } from "@/components/roteiro/TravelIndicator";
 import { DayCoherenceWarning } from "@/components/roteiro/DayCoherenceWarning";
+import { CARNAVAL_TODAY } from "@/lib/carnaval-date-utils";
 
 /**
  * AUTOMATIC ITINERARY GENERATOR
@@ -277,7 +278,15 @@ const AutomaticItinerary = () => {
         dayISO = `${dayDate.getFullYear()}-${String(dayDate.getMonth() + 1).padStart(2, '0')}-${String(dayDate.getDate()).padStart(2, '0')}`;
       }
 
-      const allSaved = getAllSavedItems();
+      const allSaved = getAllSavedItems()
+        // Filter out past carnival events (blocos/festas with a date before today)
+        .filter(i => {
+          if ((i.type === "block" || i.type === "festa") && i.date_iso && i.date_iso < CARNAVAL_TODAY) {
+            console.log(`[AutoItinerary] Skipping past event "${i.title}" (${i.date_iso})`);
+            return false;
+          }
+          return true;
+        });
       let savedForDay: SavedItemRecord[] = [];
 
       // Strategy 1: Direct date_iso match for this trip day

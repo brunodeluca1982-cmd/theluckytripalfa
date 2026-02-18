@@ -3,7 +3,7 @@ import { ChevronLeft, Clock } from "lucide-react";
 import { useState } from "react";
 import { getBlocksByDate } from "@/data/carnival-blocks";
 import { festasData } from "@/data/festas-bailes-data";
-import { formatCarnavalDateTitle } from "@/lib/carnaval-date-utils";
+import { formatCarnavalDateTitle, isCarnavalDatePast } from "@/lib/carnaval-date-utils";
 import carnavalBlocoBg from "@/assets/highlights/carnaval-bloco-bg.jpeg";
 
 // Short display name for list only — never overwrites stored name
@@ -39,6 +39,7 @@ const BlocosDia = () => {
   const navigate = useNavigate();
   const selectedDate = searchParams.get("date") || "";
   const [filter, setFilter] = useState<Filter>("blocos");
+  const isPast = selectedDate ? isCarnavalDatePast(selectedDate) : false;
 
   const blocos = getBlocksByDate(selectedDate);
   const festas = festasData.filter((f) => f.dateISO === selectedDate).sort((a, b) => a.time.localeCompare(b.time));
@@ -99,6 +100,11 @@ const BlocosDia = () => {
         )}
 
         <div className="mx-4 space-y-2">
+          {isPast && items.length > 0 && (
+            <div className="rounded-2xl backdrop-blur-xl bg-amber-500/10 border border-amber-400/20 p-4 text-center mb-2">
+              <p className="text-amber-200/80 text-sm">Este dia já passou. Confira como foi.</p>
+            </div>
+          )}
           {items.length === 0 && (
             <div className="rounded-2xl backdrop-blur-xl bg-white/10 border border-white/20 p-6 text-center">
               <p className="text-white/60 text-sm">Programação encerrada. Confira os próximos eventos.</p>

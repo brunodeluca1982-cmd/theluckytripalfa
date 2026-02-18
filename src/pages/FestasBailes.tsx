@@ -1,7 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { ChevronLeft, Clock } from "lucide-react";
 import { getFestasByDate } from "@/data/festas-bailes-data";
-import { formatCarnavalDateTitle } from "@/lib/carnaval-date-utils";
+import { formatCarnavalDateTitle, isCarnavalDatePast } from "@/lib/carnaval-date-utils";
 import { formatHour, abbreviateNeighborhood, shortenEventName } from "@/lib/festas-formatters";
 import carnavalBlocoBg from "@/assets/highlights/carnaval-bloco-bg.jpeg";
 
@@ -38,10 +38,12 @@ const FestasBailes = () => {
         </div>
 
         <div className="mx-4 space-y-6">
-          {grouped.map((group) => (
-            <div key={group.dateISO}>
+          {grouped.map((group) => {
+            const past = isCarnavalDatePast(group.dateISO);
+            return (
+            <div key={group.dateISO} className={past ? "opacity-50" : ""}>
               <p className="text-sm text-white/50 font-medium mb-2 px-1">
-                {formatCarnavalDateTitle(group.dateISO)}
+                {formatCarnavalDateTitle(group.dateISO)}{past ? " — encerrado" : ""}
               </p>
               <div className="space-y-2">
                 {group.events.map((festa) => (
@@ -66,7 +68,8 @@ const FestasBailes = () => {
                 ))}
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>
