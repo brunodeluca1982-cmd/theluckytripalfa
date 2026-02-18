@@ -2,8 +2,8 @@ import { useState, useRef, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { RIO_NEIGHBORHOODS, getNeighborhoodById } from "@/data/rio-neighborhoods";
-
 import { useCarnavalMode } from "@/contexts/CarnavalModeContext";
+import { useExternalHotels, type ExternalHotel } from "@/hooks/use-external-hotels";
 
 // Fixed editorial neighborhood order
 const NEIGHBORHOOD_ORDER = [
@@ -51,8 +51,8 @@ function minDistToHotspot(lat: number, lng: number): number {
   return Math.min(...CARNAVAL_HOTSPOTS.map((h) => haversineKm(lat, lng, h.lat, h.lng)));
 }
 
-// Static hotel data with lat/lng from validated-locations
-const hotelListData = [
+// Static hotel data as fallback
+const STATIC_HOTELS = [
   { id: "hotel-fasano-rio", name: "Hotel Fasano Rio de Janeiro", neighborhood: "ipanema", tag: "Luxo", lat: -22.9867, lng: -43.2022 },
   { id: "copacabana-palace", name: "Copacabana Palace", neighborhood: "copacabana", tag: "Ícone", lat: -22.9669, lng: -43.1782 },
   { id: "emiliano-rio", name: "Emiliano Rio", neighborhood: "copacabana", tag: "Elegante", lat: -22.9781, lng: -43.1903 },
@@ -67,6 +67,14 @@ const hotelListData = [
   { id: "c-design-hotel", name: "C Design Hotel", neighborhood: "recreio", tag: "Praia", lat: -23.0130, lng: -43.4470 },
 ];
 
+function normalizeNeighborhood(bairro: string): string {
+  return bairro
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, "-");
+}
+
 type SortMode = "editorial" | "blocos";
 
 const OndeficarRio = () => {
@@ -78,17 +86,35 @@ const OndeficarRio = () => {
   const [sortMode, setSortMode] = useState<SortMode>("editorial");
 
   const { isCarnavalMode } = useCarnavalMode();
+  const { data: externalHotels, isLoading: hotelsLoading } = useExternalHotels();
 
   const MAP_WIDTH = 900;
+
+  // Map external hotels to the display format, fallback to static
+  const hotelListData = useMemo(() => {
+    if (externalHotels && externalHotels.length > 0) {
+      return externalHotels.map((h) => ({
+        id: h.id,
+        name: h.nome,
+        neighborhood: normalizeNeighborhood(h.bairro),
+        tag: h.categoria?.trim() || "Hotel",
+        lat: 0,
+        lng: 0,
+        meuOlhar: h.meu_olhar,
+        instagram: h.instagram,
+      }));
+    }
+    return STATIC_HOTELS;
+  }, [externalHotels]);
 
   // Pre-compute distances
   const hotelsWithDist = useMemo(
     () =>
       hotelListData.map((h) => ({
         ...h,
-        distBlocos: minDistToHotspot(h.lat, h.lng),
+        distBlocos: h.lat !== 0 ? minDistToHotspot(h.lat, h.lng) : 999,
       })),
-    []
+    [hotelListData]
   );
 
   // Sorted flat list for "blocos" mode
