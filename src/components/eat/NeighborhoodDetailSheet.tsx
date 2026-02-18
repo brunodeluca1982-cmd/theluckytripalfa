@@ -1,5 +1,4 @@
-import { Link } from "react-router-dom";
-import { ChevronLeft, ChevronRight, ExternalLink, Instagram } from "lucide-react";
+import { ChevronLeft, ExternalLink, Instagram } from "lucide-react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { getNeighborhoodById } from "@/data/rio-neighborhoods";
 import { getRestaurantImage } from "@/data/place-images";
@@ -10,7 +9,6 @@ interface Restaurant {
   neighborhood: string;
   tag: string;
   category?: string;
-  price?: string;
   mapsLink?: string;
   instagram?: string;
   editorial?: string;
@@ -23,7 +21,6 @@ interface NeighborhoodDetailSheetProps {
   restaurants: Restaurant[];
 }
 
-// Editorial intro text for each neighborhood (2-3 sentences)
 const neighborhoodIntros: Record<string, string> = {
   ipanema: "Ipanema é onde o Rio fica mais \"curado\": bonito, caminhável e com uma cena gastronômica que vai do boteco perfeito à alta cozinha mais séria. Funciona para jantar especial, almoço sem pressa e começo de noite com clima leve.",
   leblon: "Leblon é mais maduro: cozinha sólida, serviço bom e lugares onde você volta porque entrega sempre. É ótimo para almoço longo, jantar calmo e programas que não dependem de moda.",
@@ -43,13 +40,12 @@ const NeighborhoodDetailSheet = ({
   restaurants,
 }: NeighborhoodDetailSheetProps) => {
   const neighborhood = neighborhoodId ? getNeighborhoodById(neighborhoodId) : null;
-  
-  // Filter restaurants for this neighborhood
+
   const filteredRestaurants = restaurants.filter(
     (r) => r.neighborhood === neighborhoodId
   );
 
-  const introText = neighborhoodId 
+  const introText = neighborhoodId
     ? neighborhoodIntros[neighborhoodId] || ""
     : "";
 
@@ -72,96 +68,75 @@ const NeighborhoodDetailSheet = ({
           <div className="flex-1 overflow-y-auto">
             {/* Hero Image */}
             <div className="w-full h-48 bg-muted overflow-hidden border-b border-border">
-              <img 
-                src={getRestaurantImage(neighborhoodId || "")} 
+              <img
+                src={getRestaurantImage(neighborhoodId || "")}
                 alt={`Onde comer em ${neighborhood?.name || neighborhoodId}`}
                 className="w-full h-full object-cover"
               />
             </div>
 
             <div className="px-6 py-6">
-              {/* Neighborhood Title */}
               <h1 className="text-2xl font-serif font-medium text-foreground mb-2">
                 Onde comer em {neighborhood?.name || neighborhoodId}
               </h1>
-              
-              {/* Intro Text */}
+
               {introText && (
                 <p className="text-base text-muted-foreground mb-6 leading-relaxed">
                   {introText}
                 </p>
               )}
 
-              {/* Restaurant List */}
               {filteredRestaurants.length > 0 ? (
                 <div className="space-y-6">
-                  {filteredRestaurants.map((restaurant) => {
-                    const slug = restaurant.name
-                      .toLowerCase()
-                      .normalize("NFD")
-                      .replace(/[\u0300-\u036f]/g, "")
-                      .replace(/[^a-z0-9\s-]/g, "")
-                      .replace(/\s+/g, "-");
-
-                    return (
-                      <div
-                        key={restaurant.id}
-                        className="pb-6 border-b border-border last:border-0"
-                      >
-                        {/* Restaurant Header */}
-                        <div className="flex items-start justify-between gap-3 mb-2">
-                          <h3 className="text-lg font-medium text-foreground">
-                            {restaurant.name}
-                          </h3>
-                          {restaurant.price && (
-                            <span className="text-sm text-muted-foreground font-medium flex-shrink-0">
-                              {restaurant.price}
-                            </span>
-                          )}
-                        </div>
-
-                        {/* Category Tag */}
-                        {restaurant.category && (
-                          <span className="inline-block text-xs text-muted-foreground/80 bg-muted/50 px-2 py-1 rounded mb-3">
-                            {restaurant.category}
-                          </span>
-                        )}
-
-                        {/* Editorial Text */}
-                        {restaurant.editorial && (
-                          <p className="text-sm text-muted-foreground leading-relaxed mb-3 whitespace-pre-line">
-                            {restaurant.editorial}
-                          </p>
-                        )}
-
-                        {/* Links */}
-                        <div className="flex items-center gap-4">
-                          {restaurant.mapsLink && (
-                            <a
-                              href={restaurant.mapsLink}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1.5 text-xs text-primary hover:text-primary/80 transition-colors"
-                            >
-                              <ExternalLink className="w-3.5 h-3.5" />
-                              Google Maps
-                            </a>
-                          )}
-                          {restaurant.instagram && (
-                            <a
-                              href={`https://instagram.com/${restaurant.instagram.replace('@', '')}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1.5 text-xs text-primary hover:text-primary/80 transition-colors"
-                            >
-                              <Instagram className="w-3.5 h-3.5" />
-                              {restaurant.instagram}
-                            </a>
-                          )}
-                        </div>
+                  {filteredRestaurants.map((restaurant) => (
+                    <div
+                      key={restaurant.id}
+                      className="pb-6 border-b border-border last:border-0"
+                    >
+                      <div className="flex items-start justify-between gap-3 mb-2">
+                        <h3 className="text-lg font-medium text-foreground">
+                          {restaurant.name}
+                        </h3>
                       </div>
-                    );
-                  })}
+
+                      {restaurant.category && (
+                        <span className="inline-block text-xs text-muted-foreground/80 bg-muted/50 px-2 py-1 rounded mb-3">
+                          {restaurant.category}
+                        </span>
+                      )}
+
+                      {restaurant.editorial && (
+                        <p className="text-sm text-muted-foreground leading-relaxed mb-3 whitespace-pre-line">
+                          {restaurant.editorial}
+                        </p>
+                      )}
+
+                      <div className="flex items-center gap-4">
+                        {restaurant.mapsLink && (
+                          <a
+                            href={restaurant.mapsLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 text-xs text-primary hover:text-primary/80 transition-colors"
+                          >
+                            <ExternalLink className="w-3.5 h-3.5" />
+                            Google Maps
+                          </a>
+                        )}
+                        {restaurant.instagram && (
+                          <a
+                            href={`https://instagram.com/${restaurant.instagram.replace('@', '')}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 text-xs text-primary hover:text-primary/80 transition-colors"
+                          >
+                            <Instagram className="w-3.5 h-3.5" />
+                            {restaurant.instagram}
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               ) : (
                 <p className="text-sm text-muted-foreground text-center py-8">
@@ -171,7 +146,6 @@ const NeighborhoodDetailSheet = ({
             </div>
           </div>
 
-          {/* Footer */}
           <footer className="px-6 py-4 border-t border-border">
             <p className="text-xs text-muted-foreground">
               The Lucky Trip — {neighborhood?.name || neighborhoodId}

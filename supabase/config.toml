@@ -8,3 +8,9 @@ verify_jwt = false
 
 [functions.lucky-trip-ai]
 verify_jwt = false
+
+[functions.external-hotels]
+verify_jwt = false
+
+[functions.external-restaurantes]
+verify_jwt = false
