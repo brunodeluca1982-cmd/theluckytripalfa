@@ -7,12 +7,13 @@ import { useCarnavalMode } from "@/contexts/CarnavalModeContext";
 import { useSpotifyPlayer } from "@/contexts/SpotifyPlayerContext";
 import { clearVideoSeen } from "@/pages/DestinationVideoIntro";
 import { carnivalDates } from "@/data/carnival-blocks";
-import { formatCarnavalDateShort } from "@/lib/carnaval-date-utils";
+import { formatCarnavalDateShort, isCarnavalDatePast } from "@/lib/carnaval-date-utils";
 import calendarioBg from "@/assets/highlights/calendario-carnaval-bg.jpeg";
 
 const days = carnivalDates.map((iso) => ({
   date: iso,
   label: formatCarnavalDateShort(iso),
+  isPast: isCarnavalDatePast(iso),
 }));
 
 const CalendarioCarnaval = () => {
@@ -111,11 +112,18 @@ const CalendarioCarnaval = () => {
           <Link
             key={day.date}
             to={`/blocos-dia?date=${day.date}`}
-            className="flex items-center gap-4 w-full py-3 px-5 rounded-2xl backdrop-blur-md transition-all duration-200 bg-white/20 border border-white/30 hover:bg-white/30"
+            className={`flex items-center gap-4 w-full py-3 px-5 rounded-2xl backdrop-blur-md transition-all duration-200 border ${
+              day.isPast
+                ? "bg-white/8 border-white/15 opacity-50"
+                : "bg-white/20 border-white/30 hover:bg-white/30"
+            }`}
           >
             <span className="text-white text-base font-medium tracking-wide">
               {day.label}
             </span>
+            {day.isPast && (
+              <span className="ml-auto text-white/40 text-xs italic">encerrado</span>
+            )}
           </Link>
         ))}
       </div>

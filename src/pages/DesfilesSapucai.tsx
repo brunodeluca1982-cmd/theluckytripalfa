@@ -6,10 +6,11 @@ import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/
 import { Button } from "@/components/ui/button";
 import { sapucaiParades, getParadesByDate, type SapucaiParade } from "@/data/sapucai-parades-data";
 import { useItemSave } from "@/hooks/use-item-save";
+import { isCarnavalDatePast } from "@/lib/carnaval-date-utils";
 import carnavalBlocoBg from "@/assets/highlights/carnaval-bloco-bg.jpeg";
 
 const TAB_KEYS = [
-  { key: "2026-02-17", label: "Ter 17/02" },
+  { key: "2026-02-17", label: "Ter 17/02", isPast: isCarnavalDatePast("2026-02-17") },
 ];
 
 /* ─── School Card ─── */
@@ -244,9 +245,9 @@ const DesfilesSapucai = () => {
                 <TabsTrigger
                   key={t.key}
                   value={t.key}
-                  className="flex-1 text-white/60 data-[state=active]:bg-white/20 data-[state=active]:text-white rounded-lg text-sm"
+                  className={`flex-1 data-[state=active]:bg-white/20 data-[state=active]:text-white rounded-lg text-sm ${t.isPast ? "text-white/30" : "text-white/60"}`}
                 >
-                  {t.label}
+                  {t.label}{t.isPast ? " ✓" : ""}
                 </TabsTrigger>
               ))}
             </TabsList>

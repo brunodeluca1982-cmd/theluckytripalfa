@@ -8,10 +8,27 @@ const DIAS_SEMANA = [
   "quinta-feira", "sexta-feira", "sábado",
 ];
 
+/**
+ * CARNAVAL_TODAY — the simulated "current date" for all carnival logic.
+ * Every screen that needs to distinguish past vs active/upcoming events
+ * must use this constant (or the helpers below) instead of `new Date()`.
+ */
+export const CARNAVAL_TODAY = "2026-02-18";
+
 /** Parse an ISO date string (YYYY-MM-DD) into local date parts to avoid timezone shifts. */
 function parseISO(iso: string) {
   const [y, m, d] = iso.split("-").map(Number);
   return new Date(y, m - 1, d);
+}
+
+/** Is the given ISO date in the past relative to CARNAVAL_TODAY? */
+export function isCarnavalDatePast(iso: string): boolean {
+  return iso < CARNAVAL_TODAY;
+}
+
+/** Is the given ISO date active (today or upcoming) relative to CARNAVAL_TODAY? */
+export function isCarnavalDateActive(iso: string): boolean {
+  return iso >= CARNAVAL_TODAY;
 }
 
 /** "14 de fevereiro de 2026 — sábado" */
