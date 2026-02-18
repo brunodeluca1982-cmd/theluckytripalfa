@@ -21,10 +21,12 @@ serve(async (req) => {
 
     const externalClient = createClient(EXTERNAL_URL, EXTERNAL_KEY);
 
-    const { data, error } = await externalClient
+    const { data, error, count } = await externalClient
       .from("hoteis")
-      .select("*")
+      .select("*", { count: "exact" })
       .limit(100);
+
+    console.log("External query result:", { count, dataLength: data?.length, error });
 
     if (error) {
       console.error("External DB error:", error);
