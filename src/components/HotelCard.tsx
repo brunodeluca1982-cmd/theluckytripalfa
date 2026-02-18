@@ -3,26 +3,22 @@ import { usePlacePhoto, buildPlaceQuery } from "@/hooks/use-place-photo";
 
 interface HotelCardProps {
   name: string;
-  price: string;
   description?: string;
   slug?: string;
   neighborhood?: string;
   imageUrl?: string;
-  image_url?: string | null;
-  image_source_url?: string | null;
-  image_credit?: string | null;
-  image_status?: string;
+  categoria?: string;
 }
 
-const HotelCard = ({ 
-  name, 
-  price, 
-  description, 
+const HotelCard = ({
+  name,
+  description,
   slug,
   neighborhood,
   imageUrl,
+  categoria,
 }: HotelCardProps) => {
-  const detailUrl = slug ? `/hotel/${slug}?from=${neighborhood || ''}` : undefined;
+  const detailUrl = slug ? `/hotel/${slug}?from=${neighborhood || ""}` : undefined;
   const placeQuery = buildPlaceQuery(name, neighborhood);
   const { photoUrl, isLoading } = usePlacePhoto(slug || name, "hotel", placeQuery);
   const displayImage = photoUrl || imageUrl;
@@ -32,8 +28,8 @@ const HotelCard = ({
       {/* Thumbnail Image */}
       <div className="w-full aspect-[16/9] bg-muted/50 rounded overflow-hidden mb-4">
         {displayImage ? (
-          <img 
-            src={displayImage} 
+          <img
+            src={displayImage}
             alt={name}
             className="w-full h-full object-cover"
             loading="lazy"
@@ -48,30 +44,32 @@ const HotelCard = ({
           </div>
         )}
       </div>
-      
+
       {/* Hotel Info */}
       <div className="flex items-center justify-between mb-2">
         <p className="text-base text-foreground">{name}</p>
-        <p className="text-sm text-muted-foreground">{price}</p>
+        {categoria && (
+          <span className="text-xs text-muted-foreground/80 bg-muted/50 px-2 py-1 rounded">
+            {categoria}
+          </span>
+        )}
       </div>
-      
+
       {/* Description */}
       {description && (
-        <p className="text-sm text-muted-foreground leading-relaxed mb-3">
+        <p className="text-sm text-muted-foreground leading-relaxed mb-3 line-clamp-3">
           {description}
         </p>
       )}
-      
+
       {/* View indicator */}
-      <span className="text-xs text-muted-foreground/60">
-        Ver detalhes
-      </span>
+      <span className="text-xs text-muted-foreground/60">Ver detalhes</span>
     </>
   );
 
   if (detailUrl) {
     return (
-      <Link 
+      <Link
         to={detailUrl}
         className="block py-6 border-b border-border last:border-b-0 hover:bg-muted/30 transition-colors -mx-2 px-2 rounded"
       >
