@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useMemo } from "react";
+import { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { RIO_NEIGHBORHOODS, getNeighborhoodById } from "@/data/rio-neighborhoods";
@@ -34,6 +34,110 @@ const EatMapView = () => {
 
   const isSubscriber = false;
 
+  // Pan/zoom state (same pattern as OndeficarRio)
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(0.7);
+  const [translate, setTranslate] = useState({ x: 0, y: 0 });
+  const gestureRef = useRef({
+    isPanning: false,
+    startX: 0, startY: 0,
+    lastX: 0, lastY: 0,
+    initialDist: 0,
+    initialScale: 0.7,
+  });
+
+  const MIN_SCALE = 0.5;
+  const MAX_SCALE = 3.0;
+
+  const clampTranslate = useCallback((tx: number, ty: number, s: number) => {
+    const container = containerRef.current;
+    if (!container) return { x: tx, y: ty };
+    const cw = container.clientWidth;
+    const ch = container.clientHeight;
+    const imgW = cw * 1.8 * s;
+    const imgH = ch * 1.8 * s;
+    const minX = Math.min(0, cw - imgW);
+    const minY = Math.min(0, ch - imgH);
+    return {
+      x: Math.max(minX, Math.min(0, tx)),
+      y: Math.max(minY, Math.min(0, ty)),
+    };
+  }, []);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+    const cw = container.clientWidth;
+    const ch = container.clientHeight;
+    const initScale = 0.7;
+    const imgW = cw * initScale;
+    const imgH = ch * initScale;
+    setScale(initScale);
+    setTranslate({
+      x: (cw - imgW) / 2,
+      y: (ch - imgH) / 2,
+    });
+  }, []);
+
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    if (e.touches.length === 1) {
+      gestureRef.current.isPanning = true;
+      gestureRef.current.startX = e.touches[0].clientX - translate.x;
+      gestureRef.current.startY = e.touches[0].clientY - translate.y;
+    } else if (e.touches.length === 2) {
+      gestureRef.current.isPanning = false;
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      gestureRef.current.initialDist = Math.hypot(dx, dy);
+      gestureRef.current.initialScale = scale;
+    }
+  }, [translate, scale]);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    e.preventDefault();
+    if (e.touches.length === 1 && gestureRef.current.isPanning) {
+      const nx = e.touches[0].clientX - gestureRef.current.startX;
+      const ny = e.touches[0].clientY - gestureRef.current.startY;
+      setTranslate(clampTranslate(nx, ny, scale));
+    } else if (e.touches.length === 2) {
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      const dist = Math.hypot(dx, dy);
+      const newScale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, gestureRef.current.initialScale * (dist / gestureRef.current.initialDist)));
+      setScale(newScale);
+      setTranslate(prev => clampTranslate(prev.x, prev.y, newScale));
+    }
+  }, [scale, clampTranslate]);
+
+  const handleTouchEnd = useCallback(() => {
+    gestureRef.current.isPanning = false;
+  }, []);
+
+  const handleWheel = useCallback((e: React.WheelEvent) => {
+    e.stopPropagation();
+    const delta = e.deltaY > 0 ? 0.9 : 1.1;
+    const newScale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, scale * delta));
+    setScale(newScale);
+    setTranslate(prev => clampTranslate(prev.x, prev.y, newScale));
+  }, [scale, clampTranslate]);
+
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    gestureRef.current.isPanning = true;
+    gestureRef.current.startX = e.clientX - translate.x;
+    gestureRef.current.startY = e.clientY - translate.y;
+  }, [translate]);
+
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    if (!gestureRef.current.isPanning) return;
+    const nx = e.clientX - gestureRef.current.startX;
+    const ny = e.clientY - gestureRef.current.startY;
+    setTranslate(clampTranslate(nx, ny, scale));
+  }, [scale, clampTranslate]);
+
+  const handleMouseUp = useCallback(() => {
+    gestureRef.current.isPanning = false;
+  }, []);
+
   // Map external data to the shape used by NeighborhoodDetailSheet and the list
   const restaurantListData = useMemo(() => {
     if (!externalRestaurants) return [];
@@ -56,55 +160,6 @@ const EatMapView = () => {
   const handleNeighborhoodTap = (neighborhoodId: string) => {
     setSelectedNeighborhood(neighborhoodId);
     setNeighborhoodSheetOpen(true);
-  };
-
-  const mapContainerRef = useRef<HTMLDivElement>(null);
-  const mapContentRef = useRef<HTMLDivElement>(null);
-  const [isDragging, setIsDragging] = useState(false);
-  const [startX, setStartX] = useState(0);
-  const [scrollLeft, setScrollLeft] = useState(0);
-
-  const MAP_WIDTH = 900;
-
-  useEffect(() => {
-    if (mapContainerRef.current) {
-      const container = mapContainerRef.current;
-      const initialScroll = (MAP_WIDTH - container.clientWidth) / 2;
-      container.scrollLeft = Math.max(0, initialScroll);
-    }
-  }, []);
-
-  const handleMouseDown = (e: React.MouseEvent) => {
-    if (!mapContainerRef.current) return;
-    setIsDragging(true);
-    setStartX(e.pageX - mapContainerRef.current.offsetLeft);
-    setScrollLeft(mapContainerRef.current.scrollLeft);
-  };
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging || !mapContainerRef.current) return;
-    e.preventDefault();
-    const x = e.pageX - mapContainerRef.current.offsetLeft;
-    const walk = (x - startX) * 1.2;
-    mapContainerRef.current.scrollLeft = scrollLeft - walk;
-  };
-
-  const handleMouseUp = () => {
-    setIsDragging(false);
-  };
-
-  const handleTouchStart = (e: React.TouchEvent) => {
-    if (!mapContainerRef.current) return;
-    setIsDragging(true);
-    setStartX(e.touches[0].pageX - mapContainerRef.current.offsetLeft);
-    setScrollLeft(mapContainerRef.current.scrollLeft);
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isDragging || !mapContainerRef.current) return;
-    const x = e.touches[0].pageX - mapContainerRef.current.offsetLeft;
-    const walk = (x - startX) * 1.2;
-    mapContainerRef.current.scrollLeft = scrollLeft - walk;
   };
 
   return (
@@ -131,32 +186,33 @@ const EatMapView = () => {
         </p>
       </div>
 
-      {/* Map Area */}
+      {/* Interactive Map (same pattern as OndeficarRio) */}
       <div
-        ref={mapContainerRef}
-        className="relative w-full h-[40vh] overflow-x-auto overflow-y-hidden cursor-grab active:cursor-grabbing flex-shrink-0"
+        ref={containerRef}
+        className="relative w-full overflow-hidden cursor-grab active:cursor-grabbing flex-shrink-0"
+        style={{ height: "300px", touchAction: "none" }}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        onWheel={handleWheel}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleMouseUp}
-        style={{
-          scrollbarWidth: 'none',
-          msOverflowStyle: 'none',
-          WebkitOverflowScrolling: 'touch'
-        }}
       >
         <div
-          ref={mapContentRef}
-          className="relative h-full"
-          style={{ width: `${MAP_WIDTH}px`, minWidth: `${MAP_WIDTH}px` }}
+          className="absolute origin-top-left"
+          style={{
+            width: "180%",
+            height: "180%",
+            transform: `translate(${translate.x}px, ${translate.y}px) scale(${scale})`,
+            willChange: "transform",
+          }}
         >
           <img
             src="/assets/maps/rio-3d-map-eat.png"
             alt="Rio de Janeiro 3D Map"
-            className="absolute inset-0 w-full h-full object-cover pointer-events-none select-none"
+            className="w-full h-full object-contain pointer-events-none select-none"
             draggable={false}
           />
 
@@ -167,7 +223,7 @@ const EatMapView = () => {
                 e.stopPropagation();
                 handleNeighborhoodTap(neighborhood.id);
               }}
-              className="absolute w-10 h-10 -ml-5 -mt-5 rounded-full bg-foreground/10 border border-foreground/20 hover:bg-foreground/20 hover:border-foreground/40 transition-colors flex items-center justify-center"
+              className="absolute w-8 h-8 -ml-4 -mt-4 rounded-full bg-foreground/10 border border-foreground/20 hover:bg-foreground/20 hover:border-foreground/40 transition-colors flex items-center justify-center z-20"
               style={{ top: neighborhood.mapPosition.top, left: neighborhood.mapPosition.left }}
               aria-label={`Explorar restaurantes em ${neighborhood.name}`}
             >
@@ -188,10 +244,10 @@ const EatMapView = () => {
         </div>
       </div>
 
-      {/* Instruction */}
-      <div className="px-6 py-4 border-b border-border">
-        <p className="text-sm text-muted-foreground text-center">
-          Toque em um bairro para explorar onde comer
+      {/* Hint */}
+      <div className="px-6 py-3 border-b border-border">
+        <p className="text-xs text-muted-foreground text-center">
+          Arraste e dê zoom para explorar o mapa.
         </p>
       </div>
 
