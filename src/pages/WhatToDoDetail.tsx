@@ -4,6 +4,10 @@ import { getNeighborhoodById } from "@/data/rio-neighborhoods";
 import { activitiesByNeighborhood } from "@/data/what-to-do-data";
 import RoteiroAccessLink from "@/components/RoteiroAccessLink";
 import { getAttractionImage } from "@/data/place-images";
+import { GooglePlaceSearchSection } from "@/components/GooglePlaceSearchSection";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
+import type { PlaceResult } from "@/lib/search-places";
 
 /**
  * O QUE FAZER — NEIGHBORHOOD ACTIVITY LIST
@@ -21,6 +25,28 @@ const WhatToDoDetail = () => {
   const name = neighborhoodData?.name || "Bairro";
   const data = activitiesByNeighborhood[neighborhood || ""];
   const activities = data?.activities || [];
+
+  const handleAddToRoteiro = async (place: PlaceResult) => {
+    const { error } = await supabase.from("roteiro_itens").insert({
+      roteiro_id: "rio-de-janeiro-draft",
+      source: "google",
+      ref_table: "places_cache",
+      place_id: place.placeId,
+      name: place.name,
+      address: place.address,
+      neighborhood: neighborhood || null,
+      city: "Rio de Janeiro",
+      lat: place.lat,
+      lng: place.lng,
+      day_index: 1,
+      order_in_day: 0,
+    });
+    if (error) {
+      toast({ title: "Erro ao adicionar", description: "Tente novamente.", variant: "destructive" });
+    } else {
+      toast({ title: "Adicionado ao roteiro!", description: place.name });
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -105,6 +131,17 @@ const WhatToDoDetail = () => {
               Atividades em breve.
             </p>
           )}
+        </div>
+
+        {/* Google Places search section */}
+        <div className="px-6 pt-8">
+          <GooglePlaceSearchSection
+            city="Rio de Janeiro"
+            bairro={name}
+            title="Outras opções (Google)"
+            placeholder="Buscar atrações no Google..."
+            onAddToRoteiro={handleAddToRoteiro}
+          />
         </div>
       </main>
 
