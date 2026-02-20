@@ -7,6 +7,8 @@ import LuckyListPreviewSheet from "@/components/LuckyListPreviewSheet";
 import RoteiroAccessLink from "@/components/RoteiroAccessLink";
 import NeighborhoodDetailSheet from "@/components/eat/NeighborhoodDetailSheet";
 import { useExternalRestaurants, normalizeNeighborhood, generateRestaurantSlug } from "@/hooks/use-external-restaurants";
+import { usePlacePhoto, buildPlaceQuery } from "@/hooks/use-place-photo";
+import { getRestaurantImage } from "@/data/place-images";
 
 // Fixed editorial neighborhood order
 const NEIGHBORHOOD_ORDER = [
@@ -25,6 +27,58 @@ const NEIGHBORHOOD_ORDER = [
 const luckyListMarkers = [
   { id: "confeitaria-colombo", top: "20%", left: "60%" },
 ];
+
+// Small thumbnail row for the restaurant list
+function RestaurantRow({
+  id,
+  name,
+  neighborhood,
+  tag,
+}: {
+  id: string;
+  name: string;
+  neighborhood: string;
+  tag: string;
+}) {
+  const slug = generateRestaurantSlug(name);
+  const placeQuery = buildPlaceQuery(name, neighborhood);
+  const { photoUrl } = usePlacePhoto(id, "restaurant", placeQuery);
+  const fallback = getRestaurantImage(neighborhood);
+  const thumb = photoUrl || fallback;
+
+  return (
+    <Link
+      to={`/restaurante/${slug}?from=${neighborhood}`}
+      className="flex items-center gap-3 py-3 border-b border-border hover:bg-muted/30 transition-colors -mx-2 px-2 rounded"
+    >
+      {/* Thumbnail */}
+      <div className="w-12 h-12 flex-shrink-0 rounded overflow-hidden bg-muted">
+        {thumb ? (
+          <img
+            src={thumb}
+            alt={name}
+            className="w-full h-full object-cover"
+            loading="lazy"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center bg-muted">
+            <span className="text-lg text-muted-foreground/30">{name.charAt(0)}</span>
+          </div>
+        )}
+      </div>
+
+      {/* Name + tag */}
+      <div className="flex-1 min-w-0">
+        <p className="text-base text-foreground truncate">{name}</p>
+        {tag && (
+          <p className="text-xs text-muted-foreground/70 truncate">{tag}</p>
+        )}
+      </div>
+
+      <ChevronRight className="w-4 h-4 text-muted-foreground/50 flex-shrink-0" />
+    </Link>
+  );
+}
 
 const EatMapView = () => {
   const [previewOpen, setPreviewOpen] = useState(false);
@@ -279,27 +333,15 @@ const EatMapView = () => {
                       {neighborhoodData?.name || neighborhoodId}
                     </h3>
                     <div className="space-y-1">
-                      {neighborhoodRestaurants.map((restaurant) => {
-                        const slug = generateRestaurantSlug(restaurant.name);
-
-                        return (
-                          <Link
-                            key={restaurant.id}
-                            to={`/restaurante/${slug}?from=${restaurant.neighborhood}`}
-                            className="flex items-center justify-between py-4 border-b border-border hover:bg-muted/30 transition-colors -mx-2 px-2 rounded"
-                          >
-                            <div className="flex-1 min-w-0">
-                              <p className="text-base text-foreground truncate">{restaurant.name}</p>
-                            </div>
-                            <div className="flex items-center gap-3 flex-shrink-0">
-                              <span className="text-xs text-muted-foreground/80 bg-muted/50 px-2 py-1 rounded">
-                                {restaurant.tag}
-                              </span>
-                              <ChevronRight className="w-4 h-4 text-muted-foreground/50" />
-                            </div>
-                          </Link>
-                        );
-                      })}
+                      {neighborhoodRestaurants.map((restaurant) => (
+                        <RestaurantRow
+                          key={restaurant.id}
+                          id={restaurant.id}
+                          name={restaurant.name}
+                          neighborhood={restaurant.neighborhood}
+                          tag={restaurant.tag}
+                        />
+                      ))}
                     </div>
                   </div>
                 );
