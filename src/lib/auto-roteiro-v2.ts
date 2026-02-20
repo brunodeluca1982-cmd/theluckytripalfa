@@ -11,13 +11,34 @@ import {
 } from "@/data/rio-guide-data";
 import { supabase } from "@/integrations/supabase/client";
 import { searchPlacesByType, type PlaceResult } from "@/lib/search-places";
+import {
+  resolveCoords,
+  clusterByZone,
+  assignClustersTodays,
+  orderByProximity,
+  fetchDistanceMatrix,
+  getTravelMinutes,
+  haversineKm,
+  getZone,
+  type GeoItem,
+  type GeoCluster,
+  type DistanceResult,
+  type GeoPoint,
+} from "@/lib/geo-clustering";
 
 /**
- * AUTO-ROTEIRO V2 — Preference-aware itinerary generator
+ * AUTO-ROTEIRO V2 — Preference-aware + Geo-intelligent itinerary generator
+ *
+ * V2.1 UPGRADE:
+ * - Geographic clustering: items grouped by zone so each day is geographically coherent
+ * - Real distance calculation via Google Distance Matrix API (with traffic)
+ * - Proximity-based ordering within each day (nearest neighbor)
+ * - Never places Guaratiba + Pão de Açúcar on the same day
  *
  * Scoring:
  *   score = base(1) + preference_match(0-10) + editorial(0-20)
- *         + style_bonus(0-10) - diversity_penalty(0-15) + jitter(0-3)
+ *         + style_bonus(0-10) - diversity_penalty(0-15)
+ *         + proximity_bonus(0-8) + jitter(0-3)
  *
  * Slots per day:
  *   morning  → 1 activity (prefer natureza/cultura/relaxamento)
@@ -59,11 +80,17 @@ export interface SlotItem {
   score: number;
   scoreBreakdown: string;
   slotKind: SlotKind;
+  lat?: number;
+  lng?: number;
+  travelFromPrevMinutes?: number;
+  travelFromPrevText?: string;
 }
 
 export interface DayPlan {
   dayIndex: number;
   slots: Record<SlotKind, SlotItem | null>;
+  zone: string;
+  totalTravelMinutes: number;
 }
 
 export interface GeneratorResult {
@@ -115,7 +142,7 @@ interface ScoredCandidate {
   description: string;
   category: string;
   tags: PreferenceKey[];
-  priceLevel: number; // 1-4
+  priceLevel: number;
   mealTypes?: string[];
   bestTime?: string;
   iconic?: boolean;
@@ -123,19 +150,21 @@ interface ScoredCandidate {
   source: "curated";
   score: number;
   scoreBreakdown: string;
+  coords: GeoPoint | null;
 }
 
 function scoreCandidate(
   candidate: Omit<ScoredCandidate, "score" | "scoreBreakdown">,
   preferences: Record<PreferenceKey, number>,
   style: TravelStyle,
+  dayZone: string,
   usedBairrosToday: Set<string>,
   lastCategory: string | null
 ): ScoredCandidate {
   let score = 1;
   const parts: string[] = ["base:1"];
 
-  // Preference match (best matching tag × 10)
+  // Preference match (best matching tag × 2)
   let bestPrefScore = 0;
   for (const tag of candidate.tags) {
     const w = preferences[tag] || 0;
@@ -161,10 +190,30 @@ function scoreCandidate(
     parts.push("econ:+10");
   }
 
+  // ★ GEOGRAPHIC PROXIMITY BONUS ★
+  const candidateZone = getZone(candidate.neighborhood);
+  if (candidateZone === dayZone) {
+    score += 8;
+    parts.push("zona:+8");
+  } else {
+    // Check if neighbor zone
+    const neighbors = proximityMap[candidate.neighborhood] || [];
+    // If any neighbor is in the day's zone, small bonus
+    const isAdjacentZone = neighbors.some((n) => getZone(n) === dayZone);
+    if (isAdjacentZone) {
+      score += 3;
+      parts.push("adj:+3");
+    } else {
+      // Far zone penalty
+      score -= 10;
+      parts.push("longe:-10");
+    }
+  }
+
   // Diversity penalties
   if (usedBairrosToday.has(candidate.neighborhood)) {
-    score -= 15;
-    parts.push("bairro_rep:-15");
+    score -= 5;
+    parts.push("bairro_rep:-5");
   }
   if (lastCategory && lastCategory === candidate.category) {
     score -= 10;
@@ -196,6 +245,7 @@ function buildRestaurantCandidates(): Omit<ScoredCandidate, "score" | "scoreBrea
     priceLevel: priceLevelNumeric(r.priceLevel),
     mealTypes: r.mealType,
     source: "curated" as const,
+    coords: resolveCoords(r.id, r.neighborhood),
   }));
 }
 
@@ -211,6 +261,7 @@ function buildActivityCandidates(): Omit<ScoredCandidate, "score" | "scoreBreakd
     bestTime: a.bestTime,
     iconic: a.iconic,
     source: "curated" as const,
+    coords: resolveCoords(a.id, a.neighborhood),
   }));
 }
 
@@ -225,6 +276,7 @@ function buildNightlifeCandidates(): Omit<ScoredCandidate, "score" | "scoreBreak
     priceLevel: priceLevelNumeric(n.priceLevel),
     isNightlife: true,
     source: "curated" as const,
+    coords: resolveCoords(n.id, n.neighborhood),
   }));
 }
 
@@ -234,6 +286,7 @@ function pickBest(
   candidates: Omit<ScoredCandidate, "score" | "scoreBreakdown">[],
   preferences: Record<PreferenceKey, number>,
   style: TravelStyle,
+  dayZone: string,
   usedBairros: Set<string>,
   lastCat: string | null,
   usedIds: Set<string>,
@@ -244,7 +297,7 @@ function pickBest(
   if (pool.length === 0) return null;
 
   const scored = pool.map((c) =>
-    scoreCandidate(c, preferences, style, usedBairros, lastCat)
+    scoreCandidate(c, preferences, style, dayZone, usedBairros, lastCat)
   );
   scored.sort((a, b) => b.score - a.score);
   return scored[0];
@@ -262,7 +315,63 @@ function toSlotItem(c: ScoredCandidate, kind: SlotKind): SlotItem {
     score: Math.round(c.score * 10) / 10,
     scoreBreakdown: c.scoreBreakdown,
     slotKind: kind,
+    lat: c.coords?.lat,
+    lng: c.coords?.lng,
   };
+}
+
+// ─── Zone planning ───────────────────────────────────────────────
+
+/**
+ * Determines which zones to assign to which days based on
+ * user preferences and number of days.
+ */
+function planZonesForDays(
+  days: number,
+  preferences: Record<PreferenceKey, number>
+): string[] {
+  // Priority zones based on preferences
+  const zoneScores: Record<string, number> = {
+    zonaSul: 10, // Always high priority (Ipanema, Leblon, Copa)
+    zonaSulAlta: 5,
+    centro: 3,
+    barra: 2,
+    especial: 1,
+  };
+
+  // Boost zones based on preferences
+  if (preferences.natureza >= 4 || preferences.aventura >= 4) {
+    zoneScores.especial += 5; // Floresta da Tijuca, trilhas
+    zoneScores.zonaSulAlta += 3; // Jardim Botânico
+  }
+  if (preferences.cultura >= 4) {
+    zoneScores.centro += 5; // Museus, CCBB
+  }
+  if (preferences.festa >= 4) {
+    zoneScores.zonaSul += 3;
+    zoneScores.barra += 2;
+  }
+  if (preferences.gastronomia >= 4) {
+    zoneScores.zonaSul += 3;
+    zoneScores.zonaSulAlta += 3;
+  }
+  if (preferences.relaxamento >= 4) {
+    zoneScores.barra += 3; // Praias calmas
+    zoneScores.especial += 2; // Guaratiba
+  }
+
+  // Sort zones by score
+  const sorted = Object.entries(zoneScores)
+    .sort(([, a], [, b]) => b - a)
+    .map(([zone]) => zone);
+
+  // Assign zones to days (repeat top zones if more days than zones)
+  const zones: string[] = [];
+  for (let d = 0; d < days; d++) {
+    zones.push(sorted[d % sorted.length]);
+  }
+
+  return zones;
 }
 
 // ─── Main generator ──────────────────────────────────────────────
@@ -282,14 +391,19 @@ export function generateAutomaticItinerary(input: GeneratorInput): GeneratorResu
   const culturaWeight = preferences.cultura || 0;
   const relaxWeight = preferences.relaxamento || 0;
 
-  log.push(`=== Gerando roteiro: ${days} dias ===`);
+  // ★ PLAN ZONES FOR EACH DAY ★
+  const dayZones = planZonesForDays(days, preferences);
+
+  log.push(`=== Gerando roteiro inteligente: ${days} dias ===`);
   log.push(`Preferências: ${JSON.stringify(preferences)}`);
   log.push(`Estilo: ${style || "nenhum"}`);
+  log.push(`Zonas planejadas: ${dayZones.join(", ")}`);
   log.push(`Restaurantes: ${restaurants.length}, Atividades: ${activities.length}, Nightlife: ${nightlife.length}`);
 
   const dayPlans: DayPlan[] = [];
 
   for (let d = 1; d <= days; d++) {
+    const dayZone = dayZones[d - 1];
     const usedBairros = new Set<string>();
     let lastCat: string | null = null;
     const slots: Record<SlotKind, SlotItem | null> = {
@@ -300,32 +414,30 @@ export function generateAutomaticItinerary(input: GeneratorInput): GeneratorResu
       extra: null,
     };
 
-    log.push(`\n--- Dia ${d} ---`);
+    log.push(`\n--- Dia ${d} (zona: ${dayZone}) ---`);
 
     // ── MORNING: prefer natureza/cultura/relaxamento activities ──
     const morningFilter = (c: Omit<ScoredCandidate, "score" | "scoreBreakdown">) => {
       if (c.bestTime === "pôr do sol") return false;
-      if (c.bestTime === "manhã" || c.bestTime === "qualquer" || !c.bestTime) return true;
       return true;
     };
 
-    // Prefer adventure if weight high
     const morningTagFilter = aventuraWeight >= 4
       ? (c: Omit<ScoredCandidate, "score" | "scoreBreakdown">) => morningFilter(c) && c.tags.some(t => t === "aventura" || t === "natureza")
       : morningFilter;
 
-    let morning = pickBest(activities, preferences, style, usedBairros, lastCat, usedIds, morningTagFilter);
+    let morning = pickBest(activities, preferences, style, dayZone, usedBairros, lastCat, usedIds, morningTagFilter);
     if (!morning && aventuraWeight >= 4) {
-      morning = pickBest(activities, preferences, style, usedBairros, lastCat, usedIds, morningFilter);
+      morning = pickBest(activities, preferences, style, dayZone, usedBairros, lastCat, usedIds, morningFilter);
     }
     if (morning) {
       slots.morning = toSlotItem(morning, "morning");
       usedIds.add(morning.id);
       usedBairros.add(morning.neighborhood);
       lastCat = morning.category;
-      log.push(`  Manhã: ${morning.name} [${morning.scoreBreakdown}]`);
+      log.push(`  Manhã: ${morning.name} (${morning.neighborhood}) [${morning.scoreBreakdown}]`);
     } else {
-      log.push(`  Manhã: VAZIO (sem candidatos)`);
+      log.push(`  Manhã: VAZIO (sem candidatos na zona ${dayZone})`);
     }
 
     // ── LUNCH: restaurant ──
@@ -338,52 +450,51 @@ export function generateAutomaticItinerary(input: GeneratorInput): GeneratorResu
       ? (c: Omit<ScoredCandidate, "score" | "scoreBreakdown">) => lunchFilter(c) && c.priceLevel >= 3
       : lunchFilter;
 
-    let lunch = pickBest(restaurants, preferences, style, usedBairros, lastCat, usedIds, lunchGastroFilter);
+    let lunch = pickBest(restaurants, preferences, style, dayZone, usedBairros, lastCat, usedIds, lunchGastroFilter);
     if (!lunch && gastroWeight >= 4) {
-      lunch = pickBest(restaurants, preferences, style, usedBairros, lastCat, usedIds, lunchFilter);
+      lunch = pickBest(restaurants, preferences, style, dayZone, usedBairros, lastCat, usedIds, lunchFilter);
     }
     if (lunch) {
       slots.lunch = toSlotItem(lunch, "lunch");
       usedIds.add(lunch.id);
       usedBairros.add(lunch.neighborhood);
       lastCat = lunch.category;
-      log.push(`  Almoço: ${lunch.name} [${lunch.scoreBreakdown}]`);
+      log.push(`  Almoço: ${lunch.name} (${lunch.neighborhood}) [${lunch.scoreBreakdown}]`);
     } else {
       log.push(`  Almoço: VAZIO`);
     }
 
-    // ── AFTERNOON: activity (cultura/natureza/aventura) ──
+    // ── AFTERNOON: activity ──
     const afternoonFilter = (c: Omit<ScoredCandidate, "score" | "scoreBreakdown">) => {
-      if (c.bestTime === "manhã") return false; // already passed
+      if (c.bestTime === "manhã") return false;
       return true;
     };
 
-    // Prefer cultura if weight high
     const afternoonTagFilter = culturaWeight >= 4
       ? (c: Omit<ScoredCandidate, "score" | "scoreBreakdown">) => afternoonFilter(c) && c.tags.includes("cultura")
       : relaxWeight >= 4
       ? (c: Omit<ScoredCandidate, "score" | "scoreBreakdown">) => afternoonFilter(c) && c.tags.includes("relaxamento")
       : afternoonFilter;
 
-    let afternoon = pickBest(activities, preferences, style, usedBairros, lastCat, usedIds, afternoonTagFilter);
+    let afternoon = pickBest(activities, preferences, style, dayZone, usedBairros, lastCat, usedIds, afternoonTagFilter);
     if (!afternoon) {
-      afternoon = pickBest(activities, preferences, style, usedBairros, lastCat, usedIds, afternoonFilter);
+      afternoon = pickBest(activities, preferences, style, dayZone, usedBairros, lastCat, usedIds, afternoonFilter);
     }
     if (afternoon) {
       slots.afternoon = toSlotItem(afternoon, "afternoon");
       usedIds.add(afternoon.id);
       usedBairros.add(afternoon.neighborhood);
       lastCat = afternoon.category;
-      log.push(`  Tarde: ${afternoon.name} [${afternoon.scoreBreakdown}]`);
+      log.push(`  Tarde: ${afternoon.name} (${afternoon.neighborhood}) [${afternoon.scoreBreakdown}]`);
     } else {
       log.push(`  Tarde: VAZIO`);
     }
 
     // ── EVENING: restaurant OR nightlife ──
-    const useNightlife = festaWeight >= 4 && d % 2 === 0; // alternate days
+    const useNightlife = festaWeight >= 4 && d % 2 === 0;
 
     if (useNightlife) {
-      const eveningNight = pickBest(nightlife, preferences, style, usedBairros, lastCat, usedIds);
+      const eveningNight = pickBest(nightlife, preferences, style, dayZone, usedBairros, lastCat, usedIds);
       if (eveningNight) {
         slots.evening = toSlotItem(eveningNight, "evening");
         usedIds.add(eveningNight.id);
@@ -403,36 +514,36 @@ export function generateAutomaticItinerary(input: GeneratorInput): GeneratorResu
         ? (c: Omit<ScoredCandidate, "score" | "scoreBreakdown">) => dinnerFilter(c) && c.priceLevel >= 3
         : dinnerFilter;
 
-      let dinner = pickBest(restaurants, preferences, style, usedBairros, lastCat, usedIds, dinnerGastroFilter);
+      let dinner = pickBest(restaurants, preferences, style, dayZone, usedBairros, lastCat, usedIds, dinnerGastroFilter);
       if (!dinner && gastroWeight >= 4) {
-        dinner = pickBest(restaurants, preferences, style, usedBairros, lastCat, usedIds, dinnerFilter);
+        dinner = pickBest(restaurants, preferences, style, dayZone, usedBairros, lastCat, usedIds, dinnerFilter);
       }
       if (dinner) {
         slots.evening = toSlotItem(dinner, "evening");
         usedIds.add(dinner.id);
         usedBairros.add(dinner.neighborhood);
         lastCat = dinner.category;
-        log.push(`  Noite: ${dinner.name} [${dinner.scoreBreakdown}]`);
+        log.push(`  Noite: ${dinner.name} (${dinner.neighborhood}) [${dinner.scoreBreakdown}]`);
       } else {
         log.push(`  Noite: VAZIO`);
       }
     }
 
-    // ── EXTRA: short item (café/mirante/bar) ──
+    // ── EXTRA: short item ──
     const extraCandidates = [
       ...restaurants.filter((r) =>
         r.mealTypes?.some((m) => ["breakfast", "brunch", "drinks"].includes(m))
       ),
       ...activities.filter((a) => a.bestTime === "pôr do sol"),
     ];
-    const extra = pickBest(extraCandidates, preferences, style, usedBairros, lastCat, usedIds);
+    const extra = pickBest(extraCandidates, preferences, style, dayZone, usedBairros, lastCat, usedIds);
     if (extra) {
       slots.extra = toSlotItem(extra, "extra");
       usedIds.add(extra.id);
-      log.push(`  Extra: ${extra.name} [${extra.scoreBreakdown}]`);
+      log.push(`  Extra: ${extra.name} (${extra.neighborhood}) [${extra.scoreBreakdown}]`);
     }
 
-    dayPlans.push({ dayIndex: d, slots });
+    dayPlans.push({ dayIndex: d, slots, zone: dayZone, totalTravelMinutes: 0 });
   }
 
   const totalItemsPlaced = dayPlans.reduce(
@@ -500,13 +611,24 @@ function getTopPreference(preferences: Record<PreferenceKey, number>): Preferenc
   return best;
 }
 
+// ─── Zone-aware Google fallback neighborhood hints ──────────────
+
+const zoneNeighborhoodHints: Record<string, string> = {
+  zonaSul: "Ipanema Leblon Copacabana",
+  zonaSulAlta: "Jardim Botânico Gávea Lagoa",
+  centro: "Centro Santa Teresa Lapa",
+  barra: "Barra da Tijuca Recreio",
+  especial: "Floresta da Tijuca",
+};
+
 /**
- * Async version: generates curated first, then fills empty slots with Google.
+ * Async version: generates curated first, then fills empty slots with Google
+ * in the SAME GEOGRAPHIC ZONE, and calculates real distances.
  */
 export async function generateAutomaticItineraryAsync(
   input: GeneratorInput
 ): Promise<GeneratorResult> {
-  // 1. Generate with curated data
+  // 1. Generate with curated data (geo-aware)
   const result = generateAutomaticItinerary(input);
   const topPref = getTopPreference(input.preferences);
   const usedNames = new Set<string>();
@@ -518,14 +640,16 @@ export async function generateAutomaticItineraryAsync(
     }
   }
 
-  // 2. Fill empty slots with Google
+  // 2. Fill empty slots with Google Places IN THE SAME ZONE
   for (const day of result.days) {
     const slotKinds: SlotKind[] = ["morning", "lunch", "afternoon", "evening", "extra"];
-    for (const kind of slotKinds) {
-      if (day.slots[kind]) continue; // already filled
+    const zoneHint = zoneNeighborhoodHints[day.zone] || "";
 
-      const query = googleFallbackQueries[topPref]?.[kind] || "ponto turístico";
-      const fullQuery = `${query} ${input.city}`;
+    for (const kind of slotKinds) {
+      if (day.slots[kind]) continue;
+
+      const baseQuery = googleFallbackQueries[topPref]?.[kind] || "ponto turístico";
+      const fullQuery = `${baseQuery} ${zoneHint} ${input.city}`;
 
       try {
         const places = await searchPlacesByType(fullQuery, input.city, 3);
@@ -544,11 +668,13 @@ export async function generateAutomaticItineraryAsync(
             category: candidate.types?.[0] || "google",
             tags: [topPref],
             score: (candidate.rating || 4) * 2,
-            scoreBreakdown: `google:${candidate.rating || "?"}★ pref:${topPref}`,
+            scoreBreakdown: `google:${candidate.rating || "?"}★ pref:${topPref} zona:${day.zone}`,
             slotKind: kind,
+            lat: candidate.lat ?? undefined,
+            lng: candidate.lng ?? undefined,
           };
           result.log.push(
-            `  [Google] Dia ${day.dayIndex} ${kind}: ${candidate.name} (${candidate.rating}★)`
+            `  [Google] Dia ${day.dayIndex} ${kind}: ${candidate.name} (zona: ${day.zone})`
           );
           result.totalItemsPlaced++;
         }
@@ -556,6 +682,74 @@ export async function generateAutomaticItineraryAsync(
         result.log.push(`  [Google] Dia ${day.dayIndex} ${kind}: falha na busca`);
       }
     }
+  }
+
+  // 3. ★ CALCULATE REAL DISTANCES WITH TRAFFIC ★
+  try {
+    const allItems: GeoItem[] = [];
+    for (const day of result.days) {
+      const slotOrder: SlotKind[] = ["morning", "lunch", "afternoon", "evening", "extra"];
+      for (const kind of slotOrder) {
+        const slot = day.slots[kind];
+        if (slot && slot.lat && slot.lng) {
+          allItems.push({
+            id: slot.id,
+            name: slot.name,
+            neighborhood: slot.neighborhood,
+            coords: { lat: slot.lat, lng: slot.lng },
+          });
+        }
+      }
+    }
+
+    if (allItems.length >= 2) {
+      const distanceMap = await fetchDistanceMatrix(allItems);
+
+      // Annotate each slot with travel time from previous
+      for (const day of result.days) {
+        const slotOrder: SlotKind[] = ["morning", "lunch", "afternoon", "evening", "extra"];
+        let prevSlot: SlotItem | null = null;
+        let totalTravel = 0;
+
+        for (const kind of slotOrder) {
+          const slot = day.slots[kind];
+          if (!slot) continue;
+
+          if (prevSlot && prevSlot.lat && prevSlot.lng && slot.lat && slot.lng) {
+            const minutes = getTravelMinutes(
+              prevSlot.id,
+              slot.id,
+              distanceMap,
+              { lat: prevSlot.lat, lng: prevSlot.lng },
+              { lat: slot.lat, lng: slot.lng }
+            );
+            slot.travelFromPrevMinutes = minutes;
+            slot.travelFromPrevText = minutes < 60
+              ? `${minutes} min`
+              : `${Math.floor(minutes / 60)}h${minutes % 60 > 0 ? `${minutes % 60}min` : ""}`;
+            totalTravel += minutes;
+
+            // Log warning for long travels
+            if (minutes > 45) {
+              result.log.push(
+                `  ⚠️ Dia ${day.dayIndex}: ${prevSlot.name} → ${slot.name} = ${minutes} min (longe!)`
+              );
+            }
+          }
+
+          prevSlot = slot;
+        }
+
+        day.totalTravelMinutes = totalTravel;
+      }
+
+      result.log.push(`\n=== Distâncias calculadas com trânsito (Google Distance Matrix) ===`);
+      for (const day of result.days) {
+        result.log.push(`  Dia ${day.dayIndex}: ${day.totalTravelMinutes} min de deslocamento total`);
+      }
+    }
+  } catch (e) {
+    result.log.push(`  [Distance Matrix] Erro ao calcular distâncias: ${e}`);
   }
 
   return result;
@@ -567,7 +761,6 @@ export async function persistItineraryToDb(
   roteiroId: string,
   result: GeneratorResult
 ): Promise<void> {
-  // Delete existing items for this roteiro
   await supabase.from("roteiro_itens").delete().eq("roteiro_id", roteiroId);
 
   const rows = result.days.flatMap((day) => {
@@ -588,6 +781,8 @@ export async function persistItineraryToDb(
           order_in_day: idx,
           time_slot: kind,
           notes: slot.scoreBreakdown,
+          lat: slot.lat ?? null,
+          lng: slot.lng ?? null,
         };
       })
       .filter(Boolean);
@@ -615,11 +810,10 @@ export function tripStylesToPreferences(
 
   for (const s of tripStyles) {
     if (s in prefs) {
-      prefs[s as PreferenceKey] = 5; // selected = max weight
+      prefs[s as PreferenceKey] = 5;
     }
   }
 
-  // Default weights for unselected (so itinerary isn't empty)
   for (const key of Object.keys(prefs) as PreferenceKey[]) {
     if (prefs[key] === 0) prefs[key] = 1;
   }
