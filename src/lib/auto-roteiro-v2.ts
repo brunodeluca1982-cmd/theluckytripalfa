@@ -10,6 +10,7 @@ import {
   type GuideHotel,
 } from "@/data/rio-guide-data";
 import { supabase } from "@/integrations/supabase/client";
+import { searchPlacesByType, type PlaceResult } from "@/lib/search-places";
 
 /**
  * AUTO-ROTEIRO V2 — Preference-aware itinerary generator
@@ -441,6 +442,123 @@ export function generateAutomaticItinerary(input: GeneratorInput): GeneratorResu
   log.push(`\n=== Total: ${totalItemsPlaced} itens em ${days} dias ===`);
 
   return { days: dayPlans, log, totalItemsPlaced };
+}
+
+// ─── Google fallback queries per preference ──────────────────────
+
+const googleFallbackQueries: Record<PreferenceKey, Record<SlotKind, string>> = {
+  gastronomia: {
+    morning: "café da manhã especial",
+    lunch: "alta gastronomia almoço",
+    afternoon: "café especial",
+    evening: "jantar fine dining",
+    extra: "café artesanal",
+  },
+  natureza: {
+    morning: "trilha natureza",
+    lunch: "restaurante vista mar",
+    afternoon: "parque passeio",
+    evening: "restaurante pé na areia",
+    extra: "mirante pôr do sol",
+  },
+  cultura: {
+    morning: "museu arte",
+    lunch: "restaurante histórico",
+    afternoon: "galeria de arte",
+    evening: "teatro show cultural",
+    extra: "centro cultural",
+  },
+  aventura: {
+    morning: "aventura esporte radical",
+    lunch: "restaurante esportivo",
+    afternoon: "surf mergulho",
+    evening: "bar aventureiro",
+    extra: "escalada rapel",
+  },
+  relaxamento: {
+    morning: "spa bem-estar",
+    lunch: "restaurante tranquilo",
+    afternoon: "praia calma relaxamento",
+    evening: "restaurante calmo lounge",
+    extra: "café tranquilo",
+  },
+  festa: {
+    morning: "brunch animado",
+    lunch: "restaurante com música",
+    afternoon: "rooftop bar",
+    evening: "balada nightclub",
+    extra: "bar samba ao vivo",
+  },
+};
+
+function getTopPreference(preferences: Record<PreferenceKey, number>): PreferenceKey {
+  let best: PreferenceKey = "gastronomia";
+  let max = 0;
+  for (const [key, val] of Object.entries(preferences)) {
+    if (val > max) { max = val; best = key as PreferenceKey; }
+  }
+  return best;
+}
+
+/**
+ * Async version: generates curated first, then fills empty slots with Google.
+ */
+export async function generateAutomaticItineraryAsync(
+  input: GeneratorInput
+): Promise<GeneratorResult> {
+  // 1. Generate with curated data
+  const result = generateAutomaticItinerary(input);
+  const topPref = getTopPreference(input.preferences);
+  const usedNames = new Set<string>();
+
+  // Collect already-used names
+  for (const day of result.days) {
+    for (const slot of Object.values(day.slots)) {
+      if (slot) usedNames.add(slot.name.toLowerCase());
+    }
+  }
+
+  // 2. Fill empty slots with Google
+  for (const day of result.days) {
+    const slotKinds: SlotKind[] = ["morning", "lunch", "afternoon", "evening", "extra"];
+    for (const kind of slotKinds) {
+      if (day.slots[kind]) continue; // already filled
+
+      const query = googleFallbackQueries[topPref]?.[kind] || "ponto turístico";
+      const fullQuery = `${query} ${input.city}`;
+
+      try {
+        const places = await searchPlacesByType(fullQuery, input.city, 3);
+        const candidate = places.find(
+          (p) => !usedNames.has(p.name.toLowerCase()) && p.rating !== null && (p.rating ?? 0) >= 4.0
+        ) || places.find((p) => !usedNames.has(p.name.toLowerCase()));
+
+        if (candidate) {
+          usedNames.add(candidate.name.toLowerCase());
+          day.slots[kind] = {
+            id: candidate.placeId,
+            name: candidate.name,
+            neighborhood: candidate.address?.split(",")[1]?.trim() || "Google",
+            description: candidate.address || "",
+            source: "google",
+            category: candidate.types?.[0] || "google",
+            tags: [topPref],
+            score: (candidate.rating || 4) * 2,
+            scoreBreakdown: `google:${candidate.rating || "?"}★ pref:${topPref}`,
+            slotKind: kind,
+          };
+          result.log.push(
+            `  [Google] Dia ${day.dayIndex} ${kind}: ${candidate.name} (${candidate.rating}★)`
+          );
+          result.totalItemsPlaced++;
+        }
+      } catch {
+        result.log.push(`  [Google] Dia ${day.dayIndex} ${kind}: falha na busca`);
+      }
+    }
+  }
+
+  return result;
 }
 
 // ─── Persist to roteiro_itens ────────────────────────────────────
