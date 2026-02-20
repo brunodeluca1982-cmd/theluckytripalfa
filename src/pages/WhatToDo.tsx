@@ -35,7 +35,7 @@ const WhatToDo = () => {
   const topPlacement = getPlacement("o_que_fazer_top");
 
   return (
-    <div className="h-screen relative overflow-hidden pb-20">
+    <div className="h-screen relative overflow-hidden pb-20 flex flex-col">
       {/* Full-screen background */}
       <div
         className="absolute inset-0 bg-cover bg-fixed bg-center"
@@ -76,7 +76,7 @@ const WhatToDo = () => {
       </div>
 
       {/* Title */}
-      <div className="relative z-10 flex flex-col items-center mt-10 mb-4 px-6">
+      <div className="relative z-10 flex flex-col items-center mt-6 mb-2 px-6">
         <h1 className="text-[2.75rem] font-serif font-medium text-white leading-none text-center drop-shadow-lg tracking-tight">
           O Que Fazer
         </h1>
@@ -126,12 +126,12 @@ const WhatToDo = () => {
       )}
 
       {/* Category Buttons */}
-      <div className="relative z-20 px-6 flex flex-col gap-2 mt-2">
+      <div className="relative z-20 px-6 flex flex-col gap-2 mt-auto mb-auto">
         {categories.map((cat) => (
           <Link
             key={cat.id}
             to={cat.path}
-            className="flex items-center justify-between w-full py-3 px-5 rounded-2xl backdrop-blur-md transition-all duration-200 bg-white/20 border border-white/30 hover:bg-white/30"
+            className="flex items-center justify-center w-full py-3 px-5 rounded-2xl backdrop-blur-md transition-all duration-200 bg-white/20 border border-white/30 hover:bg-white/30"
           >
             <span className="text-white text-base font-medium tracking-wide">
               {cat.label}
