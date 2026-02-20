@@ -53,6 +53,123 @@ export type Database = {
         }
         Relationships: []
       }
+      places_cache: {
+        Row: {
+          address: string | null
+          created_at: string
+          google_maps_url: string | null
+          id: string
+          lat: number | null
+          lng: number | null
+          name: string
+          phone: string | null
+          photo_refs: string[] | null
+          place_id: string
+          price_level: number | null
+          rating: number | null
+          types: string[] | null
+          updated_at: string
+          user_ratings_total: number | null
+          website: string | null
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string
+          google_maps_url?: string | null
+          id?: string
+          lat?: number | null
+          lng?: number | null
+          name: string
+          phone?: string | null
+          photo_refs?: string[] | null
+          place_id: string
+          price_level?: number | null
+          rating?: number | null
+          types?: string[] | null
+          updated_at?: string
+          user_ratings_total?: number | null
+          website?: string | null
+        }
+        Update: {
+          address?: string | null
+          created_at?: string
+          google_maps_url?: string | null
+          id?: string
+          lat?: number | null
+          lng?: number | null
+          name?: string
+          phone?: string | null
+          photo_refs?: string[] | null
+          place_id?: string
+          price_level?: number | null
+          rating?: number | null
+          types?: string[] | null
+          updated_at?: string
+          user_ratings_total?: number | null
+          website?: string | null
+        }
+        Relationships: []
+      }
+      roteiro_itens: {
+        Row: {
+          address: string | null
+          city: string | null
+          created_at: string
+          day_index: number
+          id: string
+          lat: number | null
+          lng: number | null
+          name: string
+          neighborhood: string | null
+          notes: string | null
+          order_in_day: number
+          place_id: string | null
+          ref_table: string | null
+          roteiro_id: string
+          source: string
+          time_slot: string | null
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          city?: string | null
+          created_at?: string
+          day_index?: number
+          id?: string
+          lat?: number | null
+          lng?: number | null
+          name: string
+          neighborhood?: string | null
+          notes?: string | null
+          order_in_day?: number
+          place_id?: string | null
+          ref_table?: string | null
+          roteiro_id: string
+          source?: string
+          time_slot?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          city?: string | null
+          created_at?: string
+          day_index?: number
+          id?: string
+          lat?: number | null
+          lng?: number | null
+          name?: string
+          neighborhood?: string | null
+          notes?: string | null
+          order_in_day?: number
+          place_id?: string | null
+          ref_table?: string | null
+          roteiro_id?: string
+          source?: string
+          time_slot?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

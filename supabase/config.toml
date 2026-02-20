@@ -14,3 +14,12 @@ verify_jwt = false
 
 [functions.external-restaurantes]
 verify_jwt = false
+
+[functions.places-autocomplete]
+verify_jwt = false
+
+[functions.places-details]
+verify_jwt = false
+
+[functions.places-photo]
+verify_jwt = false
