@@ -1,14 +1,18 @@
 import { useState, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, Heart, Search, X, MapPin, ChevronRight, Check, Trash2, Utensils, BedDouble, Camera, Star, PartyPopper, Leaf } from "lucide-react";
+import { ChevronLeft, Heart, Search, X, MapPin, ChevronRight, Check, Trash2, Utensils, BedDouble, Camera, Star, PartyPopper, Leaf, Calendar as CalendarIcon } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { curatedDestinations, searchDestinations, Destination } from "@/data/destinations-database";
 import { useTripDraft } from "@/hooks/use-trip-draft";
 import { useDestinationDrafts, DestinationDraft } from "@/hooks/use-destination-drafts";
 import { toast } from "@/hooks/use-toast";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 /**
  * MONTE SEU ROTEIRO — Entry Screen (Step 1: Destination Only)
@@ -133,7 +137,9 @@ const DestinationDraftSection = ({
 const MeuRoteiro = () => {
   const navigate = useNavigate();
   const carouselRef = useRef<HTMLDivElement>(null);
-  const { draft, setDestination, isDestinationSelected } = useTripDraft();
+  const { draft, setDestination, setArrival, setDeparture, isDestinationSelected, tripDays } = useTripDraft();
+  const [arrivalOpen, setArrivalOpen] = useState(false);
+  const [departureOpen, setDepartureOpen] = useState(false);
   const { drafts, removeItem } = useDestinationDrafts();
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -187,13 +193,40 @@ const MeuRoteiro = () => {
     });
   };
 
+  // Date validation
+  const datesValid = draft.arrivalAt !== null && draft.departureAt !== null && draft.departureAt >= draft.arrivalAt;
+  const showDateError = draft.arrivalAt && draft.departureAt && draft.departureAt < draft.arrivalAt;
+  const canContinue = isDestinationSelected && datesValid;
+
+  const handleArrivalSelect = (date: Date | undefined) => {
+    if (date) {
+      setArrival(date, draft.arrivalTime || '');
+      setArrivalOpen(false);
+      if (draft.departureAt && draft.departureAt < date) {
+        setDeparture(null, '');
+      }
+    }
+  };
+
+  const handleDepartureSelect = (date: Date | undefined) => {
+    if (date) {
+      setDeparture(date, draft.departureTime || '');
+      setDepartureOpen(false);
+    }
+  };
+
+  const formatDate = (date: Date | null) => {
+    if (!date) return null;
+    return format(date, "dd 'de' MMMM, yyyy", { locale: ptBR });
+  };
+
   // Handle continue button
   const handleContinue = () => {
-    if (!isDestinationSelected) {
+    if (!canContinue) {
       setShowError(true);
       return;
     }
-    navigate('/meu-roteiro/datas');
+    navigate('/meu-roteiro/preferencias');
   };
 
   // Fixed back navigation - always go to home
@@ -406,14 +439,115 @@ const MeuRoteiro = () => {
           </motion.section>
         )}
 
+        {/* Inline date pickers — below selected destination */}
+        {isDestinationSelected && (
+          <motion.section
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-card rounded-2xl p-4 space-y-4 border border-border"
+          >
+            <div className="flex items-center gap-2 mb-1">
+              <CalendarIcon className="w-5 h-5 text-primary" />
+              <h3 className="text-base font-semibold text-foreground">Quando você vai?</h3>
+            </div>
+
+            {/* Arrival */}
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-foreground">Data de ida</label>
+              <Popover open={arrivalOpen} onOpenChange={setArrivalOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal h-12 rounded-xl",
+                      !draft.arrivalAt && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-3 h-4 w-4" />
+                    {draft.arrivalAt ? formatDate(draft.arrivalAt) : "Selecione a data de ida"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={draft.arrivalAt || undefined}
+                    onSelect={handleArrivalSelect}
+                    disabled={(date) => date < new Date()}
+                    locale={ptBR}
+                    initialFocus
+                    className="p-3 pointer-events-auto"
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            {/* Departure */}
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-foreground">Data de volta</label>
+              <Popover open={departureOpen} onOpenChange={setDepartureOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal h-12 rounded-xl",
+                      !draft.departureAt && "text-muted-foreground"
+                    )}
+                    disabled={!draft.arrivalAt}
+                  >
+                    <CalendarIcon className="mr-3 h-4 w-4" />
+                    {draft.departureAt ? formatDate(draft.departureAt) : "Selecione a data de volta"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={draft.departureAt || undefined}
+                    onSelect={handleDepartureSelect}
+                    disabled={(date) =>
+                      date < new Date() ||
+                      (draft.arrivalAt ? date < draft.arrivalAt : false)
+                    }
+                    locale={ptBR}
+                    initialFocus
+                    className="p-3 pointer-events-auto"
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            {/* Inline date error */}
+            {showDateError && (
+              <p className="text-sm text-destructive">
+                A data de volta deve ser igual ou posterior à data de ida.
+              </p>
+            )}
+
+            {/* Trip duration badge */}
+            {datesValid && tripDays > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-primary/10 rounded-xl p-3 text-center"
+              >
+                <p className="text-sm text-muted-foreground">Duração</p>
+                <p className="text-xl font-bold text-primary">
+                  {tripDays} {tripDays === 1 ? 'dia' : 'dias'}
+                </p>
+              </motion.div>
+            )}
+          </motion.section>
+        )}
+
         {/* Error message */}
-        {showError && !isDestinationSelected && (
+        {showError && !canContinue && (
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             className="text-sm text-destructive text-center"
           >
-            Escolha um destino para continuar.
+            {!isDestinationSelected
+              ? "Escolha um destino para continuar."
+              : "Selecione as datas de ida e volta."}
           </motion.p>
         )}
 
@@ -442,7 +576,7 @@ const MeuRoteiro = () => {
       <div className="fixed bottom-safe-cta left-0 right-0 p-4 bg-background/95 backdrop-blur-sm border-t border-border z-40">
         <Button
           onClick={handleContinue}
-          disabled={!isDestinationSelected}
+          disabled={!canContinue}
           className="w-full h-14 text-lg font-semibold rounded-2xl"
         >
           Continuar
