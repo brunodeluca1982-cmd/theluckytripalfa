@@ -157,7 +157,7 @@ const ListButton = ({ icon: Icon, label, path, isSpecial, badge }: ListButtonPro
     <Link
       to={path}
       className={`
-        flex items-center gap-4 w-full
+        flex items-center justify-center w-full
         py-3 px-5 rounded-2xl
         backdrop-blur-md transition-all duration-200
         ${isSpecial
@@ -166,18 +166,9 @@ const ListButton = ({ icon: Icon, label, path, isSpecial, badge }: ListButtonPro
         }
       `}
     >
-      <Icon className="w-5 h-5 text-white/90 flex-shrink-0" />
       <span className="text-white text-base font-medium tracking-wide">
         {label}
       </span>
-      {badge && (
-        <span
-          className="ml-auto text-[0.65rem] font-medium tracking-wide text-white flex-shrink-0"
-          style={{ textShadow: "0 2px 8px rgba(0,0,0,0.4)" }}
-        >
-          {badge}
-        </span>
-      )}
     </Link>
   );
 };
