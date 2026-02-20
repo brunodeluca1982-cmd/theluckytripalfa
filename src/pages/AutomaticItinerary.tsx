@@ -16,7 +16,8 @@ import { ItineraryItemDetailSheet } from "@/components/roteiro/ItineraryItemDeta
 import { useItineraryCoherence, getTravelBetweenSlots, TravelSegment } from "@/hooks/use-itinerary-coherence";
 import { TravelIndicator } from "@/components/roteiro/TravelIndicator";
 import { DayCoherenceWarning } from "@/components/roteiro/DayCoherenceWarning";
-import { CARNAVAL_TODAY } from "@/lib/carnaval-date-utils";
+// Current date reference (no longer hardcoded to carnival)
+const TODAY_ISO = new Date().toISOString().slice(0, 10);
 
 /**
  * AUTOMATIC ITINERARY GENERATOR
@@ -279,9 +280,9 @@ const AutomaticItinerary = () => {
       }
 
       const allSaved = getAllSavedItems()
-        // Filter out past carnival events (blocos/festas with a date before today)
+        // Filter out past events
         .filter(i => {
-          if ((i.type === "block" || i.type === "festa") && i.date_iso && i.date_iso < CARNAVAL_TODAY) {
+          if (i.date_iso && i.date_iso < TODAY_ISO) {
             console.log(`[AutoItinerary] Skipping past event "${i.title}" (${i.date_iso})`);
             return false;
           }
@@ -560,7 +561,7 @@ const AutomaticItinerary = () => {
     if (slot.type === 'departure') return <Clock className="w-4 h-4 text-primary" />;
     if (slot.type === 'meal') return <Utensils className="w-4 h-4 text-orange-500" />;
     if (slot.type === 'sunset') return <Sun className="w-4 h-4 text-amber-500" />;
-    // Check if this is a saved carnival block or festa
+    // Check if this is a saved event item
     const savedItems = getAllSavedItems();
     if (savedItems.some(i => i.id === slot.item.id && (i.type === 'block' || i.type === 'festa'))) {
       return <PartyPopper className="w-4 h-4 text-pink-500" />;

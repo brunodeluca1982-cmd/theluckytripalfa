@@ -53,19 +53,8 @@ import IACriarRoteiro from "./pages/ia/IACriarRoteiro";
 import IAMelhorarRoteiro from "./pages/ia/IAMelhorarRoteiro";
 import IALuckyTrip from "./pages/ia/IALuckyTrip";
 import RoteiroFinal from "./pages/RoteiroFinal";
-import CalendarioCarnaval from "./pages/CalendarioCarnaval";
-import BlocosDia from "./pages/BlocosDia";
-import BlocoDetalhe from "./pages/BlocoDetalhe";
-import BlocoInfo from "./pages/BlocoInfo";
-import FestasBailes from "./pages/FestasBailes";
-import FestaDetalhe from "./pages/FestaDetalhe";
-import DesfilesSapucai from "./pages/DesfilesSapucai";
-import CamarotesRanking from "./pages/CamarotesRanking";
-import CamaroteDetail from "./pages/CamaroteDetail";
-import SapucaiParadeDetail from "./pages/SapucaiParadeDetail";
 import NotFound from "./pages/NotFound";
 import AdminEventos from "./pages/AdminEventos";
-import { CarnavalModeProvider } from "@/contexts/CarnavalModeContext";
 import { SpotifyPlayerProvider } from "@/contexts/SpotifyPlayerContext";
 import PersistentSpotifyPlayer from "@/components/PersistentSpotifyPlayer";
 import HeroVideo from "@/components/HeroVideo";
@@ -109,7 +98,6 @@ const App = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <CarnavalModeProvider>
       <SpotifyPlayerProvider>
       <TooltipProvider>
         <Toaster />
@@ -160,17 +148,6 @@ const App = () => {
                   <Route path="/o-que-fazer" element={<WhatToDo />} />
                   <Route path="/o-que-fazer/:neighborhood" element={<WhatToDoDetail />} />
                   <Route path="/atividade/:id" element={<ActivityDetail />} />
-                  <Route path="/calendario-carnaval" element={<CalendarioCarnaval />} />
-                  <Route path="/blocos-dia" element={<BlocosDia />} />
-                  <Route path="/bloco-detalhe/:id" element={<BlocoDetalhe />} />
-                  <Route path="/bloco-info/:id" element={<BlocoInfo />} />
-                  <Route path="/festas-bailes" element={<FestasBailes />} />
-                  <Route path="/festa-detalhe/:id" element={<FestaDetalhe />} />
-                  <Route path="/desfiles-sapucai" element={<DesfilesSapucai />} />
-                  <Route path="/camarotes" element={<CamarotesRanking />} />
-                  <Route path="/camarote/:id" element={<CamaroteDetail />} />
-                  <Route path="/rio/carnaval-2026/camarotes/ranking" element={<CamarotesRanking />} />
-                  <Route path="/desfile/:id" element={<SapucaiParadeDetail />} />
                   
                   {/* Lucky List */}
                   <Route path="/lucky-list" element={<LuckyList />} />
@@ -225,7 +202,6 @@ const App = () => {
         <PersistentSpotifyPlayer />
       </TooltipProvider>
       </SpotifyPlayerProvider>
-      </CarnavalModeProvider>
     </QueryClientProvider>
   );
 };

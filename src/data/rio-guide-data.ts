@@ -6,7 +6,7 @@
  * DO NOT modify without explicit permission.
  */
 
-import type { ImageStatus } from './carnival-blocks';
+import type { ImageStatus } from '@/lib/image-utils';
 
 // ============= HOTELS =============
 export interface GuideHotel {

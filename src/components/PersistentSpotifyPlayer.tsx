@@ -51,7 +51,7 @@ const PersistentSpotifyPlayer = () => {
 
           <div className="px-4 pb-6" style={{ minHeight: '360px' }}>
             <iframe
-              title="Spotify Embed: Carnival Playlist"
+              title="Spotify Embed: Playlist"
               src={`https://open.spotify.com/embed/playlist/${playlistId}?utm_source=generator&theme=0`}
               width="100%"
               height="100%"
