@@ -64,6 +64,7 @@ import CamarotesRanking from "./pages/CamarotesRanking";
 import CamaroteDetail from "./pages/CamaroteDetail";
 import SapucaiParadeDetail from "./pages/SapucaiParadeDetail";
 import NotFound from "./pages/NotFound";
+import AdminEventos from "./pages/AdminEventos";
 import { CarnavalModeProvider } from "@/contexts/CarnavalModeContext";
 import { SpotifyPlayerProvider } from "@/contexts/SpotifyPlayerContext";
 import PersistentSpotifyPlayer from "@/components/PersistentSpotifyPlayer";
@@ -127,6 +128,7 @@ const App = () => {
           <Routes>
             {/* Standalone pages (no app shell) */}
             <Route path="/roteiro/rio-3-dias-final" element={<RoteiroFinal />} />
+            <Route path="/admin-eventos" element={<AdminEventos />} />
             
             {/* App pages (with bottom navigation) */}
             <Route path="/*" element={
