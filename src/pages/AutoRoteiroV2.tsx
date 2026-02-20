@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ChevronLeft, Loader2, MapPin, Utensils, Sun, Moon, Coffee, ChevronRight, Check, RefreshCw, Plus } from "lucide-react";
+import { ChevronLeft, Loader2, MapPin, Utensils, Sun, Moon, Coffee, ChevronRight, Check, RefreshCw, Plus, Car, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTripDraft } from "@/hooks/use-trip-draft";
 import {
@@ -243,7 +243,10 @@ const AutoRoteiroV2 = () => {
         {isGenerating && (
           <div className="flex flex-col items-center justify-center py-16 gap-4">
             <Loader2 className="w-8 h-8 animate-spin text-primary" />
-            <p className="text-sm text-muted-foreground">Gerando seu roteiro...</p>
+            <div className="text-center space-y-1">
+              <p className="text-sm text-muted-foreground">Montando roteiro inteligente...</p>
+              <p className="text-xs text-muted-foreground/60">Analisando distâncias com trânsito</p>
+            </div>
           </div>
         )}
 
@@ -256,27 +259,72 @@ const AutoRoteiroV2 = () => {
                 {" "}em <span className="font-semibold">{days}</span> dias
               </p>
               <p className="text-xs text-muted-foreground mt-1">
-                Toque em um item para ver detalhes
+                Roteiro otimizado por proximidade geográfica
               </p>
             </div>
 
             {/* Days */}
-            {result.days.map((day) => (
-              <motion.div
-                key={day.dayIndex}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: day.dayIndex * 0.08 }}
-                className="space-y-2"
-              >
-                <h3 className="text-base font-semibold text-foreground">Dia {day.dayIndex}</h3>
-                <div className="space-y-2">
-                  {(["morning", "lunch", "afternoon", "evening", "extra"] as SlotKind[]).map((kind) =>
-                    renderSlot(day.slots[kind], kind)
-                  )}
-                </div>
-              </motion.div>
-            ))}
+            {result.days.map((day) => {
+              const zoneLabels: Record<string, string> = {
+                zonaSul: "Zona Sul",
+                zonaSulAlta: "Zona Sul Alta",
+                centro: "Centro & Santa Teresa",
+                barra: "Barra & Recreio",
+                especial: "Especial",
+              };
+              const zoneLabel = zoneLabels[day.zone] || day.zone;
+
+              return (
+                <motion.div
+                  key={day.dayIndex}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: day.dayIndex * 0.08 }}
+                  className="space-y-2"
+                >
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-base font-semibold text-foreground">Dia {day.dayIndex}</h3>
+                    <div className="flex items-center gap-2">
+                      {day.totalTravelMinutes > 0 && (
+                        <span className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+                          <Car className="w-3 h-3" />
+                          {day.totalTravelMinutes < 60
+                            ? `${day.totalTravelMinutes} min`
+                            : `${Math.floor(day.totalTravelMinutes / 60)}h${day.totalTravelMinutes % 60 > 0 ? `${day.totalTravelMinutes % 60}` : ""}`}
+                        </span>
+                      )}
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium">
+                        📍 {zoneLabel}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    {(["morning", "lunch", "afternoon", "evening", "extra"] as SlotKind[]).map((kind) => {
+                      const slot = day.slots[kind];
+                      return (
+                        <div key={kind}>
+                          {/* Travel indicator */}
+                          {slot?.travelFromPrevMinutes && slot.travelFromPrevMinutes > 0 && (
+                            <div className={cn(
+                              "flex items-center gap-1.5 px-4 py-1",
+                              slot.travelFromPrevMinutes > 45 ? "text-destructive" : "text-muted-foreground"
+                            )}>
+                              <Car className="w-3 h-3" />
+                              <span className="text-[10px]">
+                                {slot.travelFromPrevText}
+                                {slot.travelFromPrevMinutes > 45 && " ⚠️"}
+                              </span>
+                              <div className="flex-1 border-t border-dashed border-border/50" />
+                            </div>
+                          )}
+                          {renderSlot(slot, kind)}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </motion.div>
+              );
+            })}
 
             {/* Add place from Google */}
             <div className="pt-2">

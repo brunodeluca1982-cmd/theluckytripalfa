@@ -23,3 +23,6 @@ verify_jwt = false
 
 [functions.places-photo]
 verify_jwt = false
+
+[functions.distance-matrix]
+verify_jwt = false
