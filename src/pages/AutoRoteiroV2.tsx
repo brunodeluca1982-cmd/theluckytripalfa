@@ -5,7 +5,7 @@ import { ChevronLeft, Loader2, MapPin, Utensils, Sun, Moon, Coffee, Bug, Chevron
 import { Button } from "@/components/ui/button";
 import { useTripDraft } from "@/hooks/use-trip-draft";
 import {
-  generateAutomaticItinerary,
+  generateAutomaticItineraryAsync,
   persistItineraryToDb,
   tripStylesToPreferences,
   type GeneratorResult,
@@ -38,29 +38,32 @@ const AutoRoteiroV2 = () => {
 
   const handleGenerate = async () => {
     setIsGenerating(true);
-    // Small delay for UX
-    await new Promise((r) => setTimeout(r, 400));
 
-    const preferences = tripStylesToPreferences(draft.tripStyles);
-    const style = draft.priceStyle === "$$$"
-      ? "luxo" as const
-      : draft.priceStyle === "$"
-      ? "economico" as const
-      : null;
+    try {
+      const preferences = tripStylesToPreferences(draft.tripStyles);
+      const style = draft.priceStyle === "$$$"
+        ? "luxo" as const
+        : draft.priceStyle === "$"
+        ? "economico" as const
+        : null;
 
-    const gen = generateAutomaticItinerary({
-      city: "Rio de Janeiro",
-      days,
-      preferences,
-      style,
-    });
+      const gen = await generateAutomaticItineraryAsync({
+        city: "Rio de Janeiro",
+        days,
+        preferences,
+        style,
+      });
 
-    setResult(gen);
-    setIsGenerating(false);
+      setResult(gen);
 
-    // Persist to DB
-    const roteiroId = `${draft.destinationId}-auto-v2`;
-    await persistItineraryToDb(roteiroId, gen);
+      // Persist to DB
+      const roteiroId = `${draft.destinationId}-auto-v2`;
+      await persistItineraryToDb(roteiroId, gen);
+    } catch (err) {
+      console.error("Error generating itinerary:", err);
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   const renderSlot = (slot: SlotItem | null, kind: SlotKind) => {

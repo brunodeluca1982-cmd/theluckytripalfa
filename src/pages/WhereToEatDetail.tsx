@@ -6,6 +6,10 @@ import RoteiroAccessLink from "@/components/RoteiroAccessLink";
 import { getRestaurantImage } from "@/data/place-images";
 import { useExternalRestaurants, normalizeNeighborhood, generateRestaurantSlug } from "@/hooks/use-external-restaurants";
 import { useMemo } from "react";
+import { GooglePlaceSearchSection } from "@/components/GooglePlaceSearchSection";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
+import type { PlaceResult } from "@/lib/search-places";
 
 /**
  * ONDE COMER — NEIGHBORHOOD RESTAURANT LIST
@@ -34,6 +38,28 @@ const WhereToEatDetail = () => {
   const { neighborhood } = useParams<{ neighborhood: string }>();
   const [searchParams] = useSearchParams();
   const { data: externalRestaurants, isLoading } = useExternalRestaurants();
+
+  const handleAddToRoteiro = async (place: PlaceResult) => {
+    const { error } = await supabase.from("roteiro_itens").insert({
+      roteiro_id: "rio-de-janeiro-draft",
+      source: "google",
+      ref_table: "places_cache",
+      place_id: place.placeId,
+      name: place.name,
+      address: place.address,
+      neighborhood: neighborhood || null,
+      city: "Rio de Janeiro",
+      lat: place.lat,
+      lng: place.lng,
+      day_index: 1,
+      order_in_day: 0,
+    });
+    if (error) {
+      toast({ title: "Erro ao adicionar", description: "Tente novamente.", variant: "destructive" });
+    } else {
+      toast({ title: "Adicionado ao roteiro!", description: place.name });
+    }
+  };
 
   const neighborhoodData = getNeighborhoodById(neighborhood || "");
   const name = neighborhoodData?.name || neighborhood || "Bairro";
@@ -129,6 +155,18 @@ const WhereToEatDetail = () => {
             </p>
           </div>
         )}
+
+        {/* Google Places search section */}
+        <div className="px-6 pt-8">
+          <GooglePlaceSearchSection
+            city="Rio de Janeiro"
+            bairro={name}
+            type="restaurant"
+            title="Outras opções (Google)"
+            placeholder="Buscar restaurantes no Google..."
+            onAddToRoteiro={handleAddToRoteiro}
+          />
+        </div>
       </main>
 
       <footer className="px-6 py-8 border-t border-border">

@@ -3,6 +3,10 @@ import { ChevronLeft, X } from "lucide-react";
 import { luckyListIntro, getLuckyListByNeighborhood } from "@/data/lucky-list-data";
 import luckyListHero from "@/assets/highlights/lucky-list-hero.jpg";
 import { useCarnavalMode } from "@/contexts/CarnavalModeContext";
+import { GooglePlaceSearchSection } from "@/components/GooglePlaceSearchSection";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
+import type { PlaceResult } from "@/lib/search-places";
 
 /**
  * LUCKY LIST — RIO DE JANEIRO
@@ -20,6 +24,27 @@ const LuckyList = () => {
   const groupedItems = getLuckyListByNeighborhood();
   const neighborhoods = Object.keys(groupedItems);
   const { isCarnavalMode, carnavalSuggestions, removeCarnavalSuggestion } = useCarnavalMode();
+
+  const handleAddToRoteiro = async (place: PlaceResult) => {
+    const { error } = await supabase.from("roteiro_itens").insert({
+      roteiro_id: "rio-de-janeiro-draft",
+      source: "google",
+      ref_table: "places_cache",
+      place_id: place.placeId,
+      name: place.name,
+      address: place.address,
+      city: "Rio de Janeiro",
+      lat: place.lat,
+      lng: place.lng,
+      day_index: 1,
+      order_in_day: 0,
+    });
+    if (error) {
+      toast({ title: "Erro ao adicionar", description: "Tente novamente.", variant: "destructive" });
+    } else {
+      toast({ title: "Adicionado ao roteiro!", description: place.name });
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -137,6 +162,16 @@ const LuckyList = () => {
             <div className="mt-8 border-t border-border" />
           </section>
         ))}
+
+        {/* Google Places search */}
+        <div className="px-6 pt-8">
+          <GooglePlaceSearchSection
+            city="Rio de Janeiro"
+            title="Adicionar item do Google"
+            placeholder="Buscar lugares no Google..."
+            onAddToRoteiro={handleAddToRoteiro}
+          />
+        </div>
       </main>
 
       {/* Footer */}
