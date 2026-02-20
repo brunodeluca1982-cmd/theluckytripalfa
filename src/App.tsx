@@ -20,6 +20,7 @@ import LuckyListDetail from "./pages/LuckyListDetail";
 import HowToGetThere from "./pages/HowToGetThere";
 import WhatToDo from "./pages/WhatToDo";
 import WhatToDoDetail from "./pages/WhatToDoDetail";
+import WhatToDoCategory from "./pages/WhatToDoCategory";
 import MeuRoteiro from "./pages/MeuRoteiro";
 import TripGroup from "./pages/TripGroup";
 import TripDates from "./pages/TripDates";
@@ -146,6 +147,7 @@ const App = () => {
                   
                   {/* What to Do */}
                   <Route path="/o-que-fazer" element={<WhatToDo />} />
+                  <Route path="/o-que-fazer/categoria/:category" element={<WhatToDoCategory />} />
                   <Route path="/o-que-fazer/:neighborhood" element={<WhatToDoDetail />} />
                   <Route path="/atividade/:id" element={<ActivityDetail />} />
                   
