@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
-import { Play, Music, ArrowLeft } from "lucide-react";
+import { Clapperboard, Music, ArrowLeft } from "lucide-react";
 import { useCallback } from "react";
 import { useSpotifyPlayer } from "@/contexts/SpotifyPlayerContext";
 import { useEventMode } from "@/contexts/EventModeContext";
@@ -68,7 +68,7 @@ const WhatToDo = () => {
             className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/15 backdrop-blur-sm border border-white/20 text-white/80 hover:bg-white/25 hover:text-white transition-colors"
             aria-label="Replay intro video"
           >
-            <Play className="w-4 h-4" />
+            <Clapperboard className="w-4 h-4" />
           </button>
           <button
             onClick={handleMusicTap}
