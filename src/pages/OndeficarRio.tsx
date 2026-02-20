@@ -34,25 +34,24 @@ const OndeficarRio = () => {
 
   // Pan/zoom state
   const containerRef = useRef<HTMLDivElement>(null);
-  const [scale, setScale] = useState(0.55);
-  const [translate, setTranslate] = useState({ x: 0, y: 0 });
+  const [scale, setScale] = useState(1.0);
+  const [translate, setTranslate] = useState({ x: -100, y: 0 });
   const gestureRef = useRef({
     isPanning: false,
     startX: 0, startY: 0,
     lastX: 0, lastY: 0,
     initialDist: 0,
-    initialScale: 0.55,
+    initialScale: 1.0,
   });
 
-  const MIN_SCALE = 0.4;
-  const MAX_SCALE = 2.5;
+  const MIN_SCALE = 0.5;
+  const MAX_SCALE = 3.0;
 
   const clampTranslate = useCallback((tx: number, ty: number, s: number) => {
     const container = containerRef.current;
     if (!container) return { x: tx, y: ty };
     const cw = container.clientWidth;
     const ch = container.clientHeight;
-    // The image is 100% of container at scale=1; at other scales it's larger/smaller
     const imgW = cw * s;
     const imgH = ch * s;
     const minX = Math.min(0, cw - imgW);
@@ -63,19 +62,19 @@ const OndeficarRio = () => {
     };
   }, []);
 
-  // Center the map on load
+  // Center map on load — zoomed in, centered horizontally
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
     const cw = container.clientWidth;
     const ch = container.clientHeight;
-    const initScale = 0.55;
+    const initScale = 1.0;
     const imgW = cw * initScale;
     const imgH = ch * initScale;
     setScale(initScale);
     setTranslate({
-      x: (cw - imgW) / 2,
-      y: (ch - imgH) / 2,
+      x: Math.min(0, (cw - imgW) / 2),
+      y: Math.min(0, (ch - imgH) / 2),
     });
   }, []);
 
