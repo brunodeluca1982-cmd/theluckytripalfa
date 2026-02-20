@@ -5,6 +5,31 @@
  * based on the neighborhood context in Rio de Janeiro.
  */
 
+/**
+ * NEIGHBORHOOD HERO IMAGES — RIO DE JANEIRO
+ * 
+ * Sourced from Supabase Storage. Keyed by city slug + neighborhood slug.
+ * Format: { "city-slug/neighborhood-slug": "https://..." }
+ * Fallback: local static asset via getHotelImage().
+ */
+const neighborhoodHeroUrls: Record<string, string> = {
+  "rio-de-janeiro/recreio":
+    "https://lsibzflaaqzvtzjlvrxw.supabase.co/storage/v1/object/public/heros/bairros/rio-de-janeiro/recreio/01.jpg",
+};
+
+/**
+ * Returns the hero image URL for a given city + neighborhood.
+ * Falls back to the static hotel image for the neighborhood.
+ */
+export const getNeighborhoodHeroUrl = (
+  citySlug: string,
+  neighborhoodId: string,
+  fallback: string
+): string => {
+  const key = `${citySlug}/${neighborhoodId}`;
+  return neighborhoodHeroUrls[key] ?? fallback;
+};
+
 // Hotel images by neighborhood
 import ipanemaHotel from "@/assets/places/ipanema-hotel.jpg";
 import leblonHotel from "@/assets/places/leblon-hotel.jpg";

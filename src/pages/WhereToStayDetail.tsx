@@ -3,7 +3,7 @@ import { ChevronLeft } from "lucide-react";
 import HotelCard from "@/components/HotelCard";
 import { getNeighborhoodById } from "@/data/rio-neighborhoods";
 import RoteiroAccessLink from "@/components/RoteiroAccessLink";
-import { getHotelImage } from "@/data/place-images";
+import { getHotelImage, getNeighborhoodHeroUrl } from "@/data/place-images";
 import { useExternalHotels } from "@/hooks/use-external-hotels";
 import { useMemo } from "react";
 
@@ -86,9 +86,12 @@ const WhereToStayDetail = () => {
 
         <div className="w-full aspect-[16/9] bg-muted overflow-hidden">
           <img
-            src={getHotelImage(neighborhood || "")}
+            src={getNeighborhoodHeroUrl("rio-de-janeiro", neighborhood || "", getHotelImage(neighborhood || ""))}
             alt={`Onde ficar em ${name}`}
             className="w-full h-full object-cover"
+            onError={(e) => {
+              (e.currentTarget as HTMLImageElement).src = getHotelImage(neighborhood || "");
+            }}
           />
         </div>
 
