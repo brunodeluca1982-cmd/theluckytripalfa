@@ -1,10 +1,10 @@
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
-import { Play, Music, Sparkles } from "lucide-react";
+import { Play, Music } from "lucide-react";
 import { useCallback } from "react";
-import { Switch } from "@/components/ui/switch";
-import { useCarnavalMode } from "@/contexts/CarnavalModeContext";
 import { useSpotifyPlayer } from "@/contexts/SpotifyPlayerContext";
+import { useEventMode } from "@/contexts/EventModeContext";
+import { EventBanner } from "@/components/EventBanner";
 import { clearVideoSeen } from "@/pages/DestinationVideoIntro";
 import blocoBackground from "@/assets/highlights/bloco2.jpg";
 
@@ -18,42 +18,37 @@ const actions = [
 
 const WhatToDo = () => {
   const navigate = useNavigate();
-  const { isCarnavalMode, toggleCarnavalMode } = useCarnavalMode();
   const { active, activate, openSheet } = useSpotifyPlayer();
+  const { evento, getPlacement } = useEventMode();
 
   const handleMusicTap = useCallback(() => {
     if (!active) activate();
     else openSheet();
   }, [active, activate, openSheet]);
 
-  const handleToggle = useCallback(() => {
-    toggleCarnavalMode();
-  }, [toggleCarnavalMode]);
-
   const handleReplayIntro = useCallback(() => {
     clearVideoSeen("rio-de-janeiro");
     navigate("/destino/rio-de-janeiro/intro", { replace: true });
   }, [navigate]);
+
+  const topPlacement = getPlacement("o_que_fazer_top");
 
   return (
     <div className="h-screen relative overflow-hidden pb-20">
       {/* Full-screen background */}
       <div
         className="absolute inset-0 bg-cover bg-fixed bg-center"
-        style={{
-          backgroundImage: `url(${blocoBackground})`,
-        }}
+        style={{ backgroundImage: `url(${blocoBackground})` }}
       />
-      {/* Dark overlay for readability (25–30%) */}
       <div className="absolute inset-0 bg-black/[0.27]" />
 
-      {/* Sepia editorial overlay — visible when Carnaval OFF */}
+      {/* Sepia editorial overlay — visible when no event */}
       <div
         className="absolute inset-0 pointer-events-none transition-opacity duration-[400ms]"
         style={{
           backgroundColor: "hsla(35, 30%, 20%, 0.35)",
           mixBlendMode: "color",
-          opacity: isCarnavalMode ? 0 : 1,
+          opacity: evento ? 0 : 1,
         }}
       />
 
@@ -88,16 +83,46 @@ const WhatToDo = () => {
           no rio
         </p>
 
-        {/* Modo Carnaval Toggle */}
-        <div className="flex items-center gap-3 mt-3">
-          <span className="text-sm text-white/80 font-medium">Modo Carnaval</span>
-          <Switch
-            checked={isCarnavalMode}
-            onCheckedChange={handleToggle}
-            className="data-[state=checked]:bg-primary"
-          />
-        </div>
+        {/* Event label (replaces old Modo Carnaval toggle) */}
+        {evento && (
+          <div className="flex items-center gap-2 mt-3 px-3 py-1 rounded-full bg-white/15 backdrop-blur-sm border border-white/20">
+            <span className="text-xs text-white/80 font-medium">{evento.titulo}</span>
+          </div>
+        )}
       </div>
+
+      {/* Sponsor placement banner */}
+      {topPlacement && (
+        <div className="relative z-20 px-6 mb-2">
+          <div className="p-3 rounded-xl border border-white/20 backdrop-blur-md bg-white/10">
+            <div className="flex items-center justify-between gap-2">
+              <div className="min-w-0">
+                {topPlacement.titulo && (
+                  <p className="text-sm font-semibold text-white truncate">{topPlacement.titulo}</p>
+                )}
+                {topPlacement.subtitulo && (
+                  <p className="text-xs text-white/70">{topPlacement.subtitulo}</p>
+                )}
+              </div>
+              {topPlacement.evento_sponsors && (
+                <span className="text-[8px] px-1.5 py-0.5 rounded bg-white/20 text-white/80 font-medium flex-shrink-0 uppercase">
+                  {topPlacement.evento_sponsors.badge_texto}
+                </span>
+              )}
+            </div>
+            {topPlacement.cta_label && topPlacement.cta_link && (
+              <a
+                href={topPlacement.cta_link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-2 inline-block text-xs font-medium text-white/90 hover:text-white"
+              >
+                {topPlacement.cta_label} →
+              </a>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Buttons */}
       <div className="relative z-20 px-6 flex flex-col gap-2 mt-2">

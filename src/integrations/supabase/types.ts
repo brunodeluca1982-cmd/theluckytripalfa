@@ -14,6 +14,58 @@ export type Database = {
   }
   public: {
     Tables: {
+      evento_item_sponsored: {
+        Row: {
+          ativo: boolean
+          badge_texto: string
+          destaque: boolean
+          evento_id: string
+          evento_item_id: string
+          id: string
+          sponsor_id: string
+        }
+        Insert: {
+          ativo?: boolean
+          badge_texto?: string
+          destaque?: boolean
+          evento_id: string
+          evento_item_id: string
+          id?: string
+          sponsor_id: string
+        }
+        Update: {
+          ativo?: boolean
+          badge_texto?: string
+          destaque?: boolean
+          evento_id?: string
+          evento_item_id?: string
+          id?: string
+          sponsor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "evento_item_sponsored_evento_id_fkey"
+            columns: ["evento_id"]
+            isOneToOne: false
+            referencedRelation: "eventos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evento_item_sponsored_evento_item_id_fkey"
+            columns: ["evento_item_id"]
+            isOneToOne: false
+            referencedRelation: "evento_itens"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evento_item_sponsored_sponsor_id_fkey"
+            columns: ["sponsor_id"]
+            isOneToOne: false
+            referencedRelation: "evento_sponsors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       evento_itens: {
         Row: {
           ativo: boolean
@@ -75,6 +127,122 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "evento_itens_evento_id_fkey"
+            columns: ["evento_id"]
+            isOneToOne: false
+            referencedRelation: "eventos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      evento_sponsor_placements: {
+        Row: {
+          ativo: boolean
+          created_at: string
+          cta_label: string | null
+          cta_link: string | null
+          evento_id: string
+          id: string
+          media_url: string | null
+          ordem: number
+          placement: string
+          sponsor_id: string
+          subtitulo: string | null
+          titulo: string | null
+          updated_at: string
+        }
+        Insert: {
+          ativo?: boolean
+          created_at?: string
+          cta_label?: string | null
+          cta_link?: string | null
+          evento_id: string
+          id?: string
+          media_url?: string | null
+          ordem?: number
+          placement: string
+          sponsor_id: string
+          subtitulo?: string | null
+          titulo?: string | null
+          updated_at?: string
+        }
+        Update: {
+          ativo?: boolean
+          created_at?: string
+          cta_label?: string | null
+          cta_link?: string | null
+          evento_id?: string
+          id?: string
+          media_url?: string | null
+          ordem?: number
+          placement?: string
+          sponsor_id?: string
+          subtitulo?: string | null
+          titulo?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "evento_sponsor_placements_evento_id_fkey"
+            columns: ["evento_id"]
+            isOneToOne: false
+            referencedRelation: "eventos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evento_sponsor_placements_sponsor_id_fkey"
+            columns: ["sponsor_id"]
+            isOneToOne: false
+            referencedRelation: "evento_sponsors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      evento_sponsors: {
+        Row: {
+          ativo: boolean
+          badge_texto: string
+          created_at: string
+          evento_id: string
+          id: string
+          link_url: string | null
+          logo_url: string | null
+          prioridade: number
+          sponsor_nome: string
+          sponsor_slug: string
+          tracking_tag: string | null
+          updated_at: string
+        }
+        Insert: {
+          ativo?: boolean
+          badge_texto?: string
+          created_at?: string
+          evento_id: string
+          id?: string
+          link_url?: string | null
+          logo_url?: string | null
+          prioridade?: number
+          sponsor_nome: string
+          sponsor_slug: string
+          tracking_tag?: string | null
+          updated_at?: string
+        }
+        Update: {
+          ativo?: boolean
+          badge_texto?: string
+          created_at?: string
+          evento_id?: string
+          id?: string
+          link_url?: string | null
+          logo_url?: string | null
+          prioridade?: number
+          sponsor_nome?: string
+          sponsor_slug?: string
+          tracking_tag?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "evento_sponsors_evento_id_fkey"
             columns: ["evento_id"]
             isOneToOne: false
             referencedRelation: "eventos"
