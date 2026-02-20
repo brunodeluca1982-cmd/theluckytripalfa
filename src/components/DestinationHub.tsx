@@ -11,7 +11,7 @@ import { EventTopBanner } from "@/components/EventBanner";
 /**
  * DESTINATION HUB — VERTICAL LIST LAYOUT
  *
- * Now uses generic EventMode instead of hardcoded Carnaval.
+ * Uses generic EventMode for dynamic event banners.
  * Event banner appears below title when an event is active.
  */
 
@@ -120,7 +120,7 @@ const DestinationHub = ({ destinationId, name, country, backgroundImage, actions
         </p>
       </div>
 
-      {/* Event banner (replaces old Carnaval toggle) */}
+      {/* Event banner */}
       {evento && (
         <div className="relative z-20 mb-2">
           <EventTopBanner />

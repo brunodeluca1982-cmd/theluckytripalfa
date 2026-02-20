@@ -27,7 +27,7 @@ function getUserContext() {
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/lucky-trip-ai`;
 
 const exampleQueries = [
-  "Organize meu sábado de carnaval",
+  "Organize meu sábado no Rio",
   "Qual o melhor bairro pra ficar no Rio?",
   "Sugira um roteiro gastronômico na Zona Sul",
   "O que fazer num dia de chuva?",
@@ -156,7 +156,7 @@ const IALuckyTrip = () => {
               <Sparkles className="w-6 h-6 text-primary" />
             </div>
             <p className="text-center text-foreground/80 leading-relaxed max-w-sm mb-8">
-              Pergunte sobre roteiros, blocos, restaurantes ou peça para organizar seu dia de carnaval.
+              Pergunte sobre roteiros, restaurantes ou peça para organizar seu dia no Rio.
             </p>
             <div className="w-full max-w-sm space-y-2">
               <p className="text-xs text-muted-foreground uppercase tracking-wider mb-3 text-center">

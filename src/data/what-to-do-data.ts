@@ -11,7 +11,7 @@
  * - Only BASE MAP neighborhoods can appear here
  */
 
-import type { ImageStatus } from './carnival-blocks';
+import type { ImageStatus } from '@/lib/image-utils';
 
 export interface Activity {
   id: string;

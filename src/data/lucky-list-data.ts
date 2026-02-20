@@ -10,7 +10,7 @@
  * - Items outside base map neighborhoods ONLY live here
  */
 
-import type { ImageStatus } from './carnival-blocks';
+import type { ImageStatus } from '@/lib/image-utils';
 
 export interface LuckyListItem {
   id: string;

@@ -2,7 +2,6 @@ import { useState, useRef, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { RIO_NEIGHBORHOODS, getNeighborhoodById } from "@/data/rio-neighborhoods";
-import { useCarnavalMode } from "@/contexts/CarnavalModeContext";
 import { useExternalHotels, type ExternalHotel } from "@/hooks/use-external-hotels";
 
 // Fixed editorial neighborhood order
@@ -22,36 +21,6 @@ const NEIGHBORHOOD_ORDER = [
   "gavea",
 ];
 
-// Carnaval hotspots with verified lat/lng
-const CARNAVAL_HOTSPOTS = [
-  { name: "Sapucaí", lat: -22.9117, lng: -43.1958 },
-  { name: "Cinelândia", lat: -22.9094, lng: -43.1762 },
-  { name: "Aterro do Flamengo", lat: -22.9326, lng: -43.1729 },
-  { name: "Lapa", lat: -22.9152, lng: -43.1791 },
-  { name: "Glória", lat: -22.9242, lng: -43.1761 },
-  { name: "Ipanema (Posto 9)", lat: -22.9868, lng: -43.2035 },
-  { name: "Leblon", lat: -22.9862, lng: -43.2246 },
-  { name: "Botafogo", lat: -22.9511, lng: -43.1822 },
-];
-
-// Haversine distance in km
-function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
-  const R = 6371;
-  const dLat = ((lat2 - lat1) * Math.PI) / 180;
-  const dLng = ((lng2 - lng1) * Math.PI) / 180;
-  const a =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos((lat1 * Math.PI) / 180) *
-      Math.cos((lat2 * Math.PI) / 180) *
-      Math.sin(dLng / 2) ** 2;
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-}
-
-function minDistToHotspot(lat: number, lng: number): number {
-  return Math.min(...CARNAVAL_HOTSPOTS.map((h) => haversineKm(lat, lng, h.lat, h.lng)));
-}
-
-
 function normalizeNeighborhood(bairro: string): string {
   return bairro
     .toLowerCase()
@@ -60,17 +29,13 @@ function normalizeNeighborhood(bairro: string): string {
     .replace(/\s+/g, "-");
 }
 
-type SortMode = "editorial" | "blocos";
-
 const OndeficarRio = () => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapContentRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
-  const [sortMode, setSortMode] = useState<SortMode>("editorial");
 
-  const { isCarnavalMode } = useCarnavalMode();
   const { data: externalHotels, isLoading: hotelsLoading } = useExternalHotels();
 
   const MAP_WIDTH = 900;
@@ -83,28 +48,10 @@ const OndeficarRio = () => {
       name: h.nome,
       neighborhood: normalizeNeighborhood(h.bairro),
       tag: h.categoria?.trim() || "Hotel",
-      lat: 0,
-      lng: 0,
       meuOlhar: h.meu_olhar,
       instagram: h.instagram,
     }));
   }, [externalHotels]);
-
-  // Pre-compute distances
-  const hotelsWithDist = useMemo(
-    () =>
-      hotelListData.map((h) => ({
-        ...h,
-        distBlocos: h.lat !== 0 ? minDistToHotspot(h.lat, h.lng) : 999,
-      })),
-    [hotelListData]
-  );
-
-  // Sorted flat list for "blocos" mode
-  const sortedByBlocos = useMemo(
-    () => [...hotelsWithDist].sort((a, b) => a.distBlocos - b.distBlocos),
-    [hotelsWithDist]
-  );
 
   // Persist and restore map scroll position across navigations
   useEffect(() => {
@@ -169,7 +116,7 @@ const OndeficarRio = () => {
       .replace(/[^a-z0-9\s-]/g, "")
       .replace(/\s+/g, "-");
 
-  const renderHotelRow = (hotel: typeof hotelsWithDist[0]) => {
+  const renderHotelRow = (hotel: typeof hotelListData[0]) => {
     const slug = makeSlug(hotel.name);
     return (
       <Link
@@ -181,13 +128,6 @@ const OndeficarRio = () => {
           <p className="text-base text-foreground truncate">{hotel.name}</p>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
-          {sortMode === "blocos" && (
-            <span className="text-[11px] text-accent-foreground bg-accent/60 px-2 py-0.5 rounded">
-              {hotel.distBlocos < 1
-                ? `${Math.round(hotel.distBlocos * 1000)}m dos blocos`
-                : `${hotel.distBlocos.toFixed(1)} km dos blocos`}
-            </span>
-          )}
           <span className="text-xs text-muted-foreground/80 bg-muted/50 px-2 py-1 rounded">
             {hotel.tag}
           </span>
@@ -259,23 +199,11 @@ const OndeficarRio = () => {
         </div>
       </div>
 
-      {/* Instruction + Filter */}
+      {/* Instruction */}
       <div className="px-6 py-4 border-b border-border flex items-center justify-between">
         <p className="text-sm text-muted-foreground">
           Toque em um bairro para explorar onde ficar
         </p>
-        {isCarnavalMode && (
-          <button
-            onClick={() => setSortMode(sortMode === "editorial" ? "blocos" : "editorial")}
-            className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${
-              sortMode === "blocos"
-                ? "bg-accent text-accent-foreground border-accent"
-                : "bg-transparent text-muted-foreground border-border"
-            }`}
-          >
-            Perto dos blocos
-          </button>
-        )}
       </div>
 
       {/* Hotel List */}
@@ -285,34 +213,27 @@ const OndeficarRio = () => {
             Hotéis
           </h2>
 
-          {sortMode === "blocos" ? (
-            /* Flat list sorted by distance */
-            <div className="space-y-1">
-              {sortedByBlocos.map(renderHotelRow)}
-            </div>
-          ) : (
-            /* Grouped by neighborhood */
-            <div className="space-y-6">
-              {NEIGHBORHOOD_ORDER.map((neighborhoodId) => {
-                const neighborhoodHotels = hotelsWithDist.filter(
-                  (h) => h.neighborhood === neighborhoodId
-                );
-                if (neighborhoodHotels.length === 0) return null;
-                const neighborhoodData = getNeighborhoodById(neighborhoodId);
+          {/* Grouped by neighborhood */}
+          <div className="space-y-6">
+            {NEIGHBORHOOD_ORDER.map((neighborhoodId) => {
+              const neighborhoodHotels = hotelListData.filter(
+                (h) => h.neighborhood === neighborhoodId
+              );
+              if (neighborhoodHotels.length === 0) return null;
+              const neighborhoodData = getNeighborhoodById(neighborhoodId);
 
-                return (
-                  <div key={neighborhoodId}>
-                    <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3">
-                      {neighborhoodData?.name || neighborhoodId}
-                    </h3>
-                    <div className="space-y-1">
-                      {neighborhoodHotels.map(renderHotelRow)}
-                    </div>
+              return (
+                <div key={neighborhoodId}>
+                  <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3">
+                    {neighborhoodData?.name || neighborhoodId}
+                  </h3>
+                  <div className="space-y-1">
+                    {neighborhoodHotels.map(renderHotelRow)}
                   </div>
-                );
-              })}
-            </div>
-          )}
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
 

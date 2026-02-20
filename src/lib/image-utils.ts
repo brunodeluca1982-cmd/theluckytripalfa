@@ -1,4 +1,4 @@
-import type { ImageStatus } from '@/data/carnival-blocks';
+export type ImageStatus = 'pending' | 'approved' | 'blocked';
 
 /**
  * Returns the image URL only if the image is approved and has a valid URL.

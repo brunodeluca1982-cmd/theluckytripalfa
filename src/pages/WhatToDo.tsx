@@ -9,10 +9,7 @@ import { clearVideoSeen } from "@/pages/DestinationVideoIntro";
 import blocoBackground from "@/assets/highlights/bloco2.jpg";
 
 const actions = [
-  { id: "blocos", label: "Blocos de Rua", subtitle: "só os melhores", path: "/calendario-carnaval" },
-  { id: "sapucai", label: "Desfiles na Sapucaí", subtitle: "o que não te contam", path: "/desfiles-sapucai" },
-  { id: "camarotes", label: "Camarotes", subtitle: "ache sua vibe", path: "/rio/carnaval-2026/camarotes/ranking" },
-  { id: "festas", label: "Festas e Bailes", subtitle: "só os hypes", path: "/festas-bailes" },
+  { id: "atividades", label: "Experiências", subtitle: "por bairro", path: "/o-que-fazer/ipanema" },
   { id: "lucky-list", label: "Lucky List", subtitle: "com esquema", path: "/lucky-list", isSpecial: true },
 ];
 
@@ -83,7 +80,7 @@ const WhatToDo = () => {
           no rio
         </p>
 
-        {/* Event label (replaces old Modo Carnaval toggle) */}
+        {/* Event label (shown when event is active) */}
         {evento && (
           <div className="flex items-center gap-2 mt-3 px-3 py-1 rounded-full bg-white/15 backdrop-blur-sm border border-white/20">
             <span className="text-xs text-white/80 font-medium">{evento.titulo}</span>

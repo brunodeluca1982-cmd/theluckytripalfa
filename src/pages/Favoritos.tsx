@@ -16,20 +16,18 @@ const typeIcons: Record<string, React.ReactNode> = {
 };
 
 const typeLabels: Record<string, string> = {
-  block: "Bloco",
-  festa: "Festa",
   activity: "Atividade",
   hotel: "Hotel",
   restaurant: "Restaurante",
   attraction: "Atração",
+  block: "Evento",
+  festa: "Evento",
 };
 
-type FilterType = "all" | "block" | "festa" | "activity" | "hotel" | "restaurant";
+type FilterType = "all" | "activity" | "hotel" | "restaurant";
 
 const filterOptions: { value: FilterType; label: string }[] = [
   { value: "all", label: "Todos" },
-  { value: "block", label: "Blocos" },
-  { value: "festa", label: "Festas" },
   { value: "activity", label: "Atividades" },
   { value: "hotel", label: "Hotéis" },
   { value: "restaurant", label: "Restaurantes" },
@@ -37,8 +35,6 @@ const filterOptions: { value: FilterType; label: string }[] = [
 
 function getDetailRoute(item: SavedItemRecord): string | null {
   switch (item.type) {
-    case "block": return `/bloco-detalhe/${item.id}${item.date_iso ? `?date=${item.date_iso}` : ""}`;
-    case "festa": return `/festa-detalhe/${item.id}`;
     case "hotel": return `/hotel/${item.id}`;
     case "restaurant": return `/restaurante/${item.id}`;
     case "activity": return `/atividade/${item.id}`;

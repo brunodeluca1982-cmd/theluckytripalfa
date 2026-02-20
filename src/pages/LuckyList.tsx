@@ -75,7 +75,7 @@ const LuckyList = () => {
 
         <div className="mx-6 border-t border-border" />
 
-        {/* Event sponsor placement (replaces old Carnaval suggestions) */}
+        {/* Event sponsor placement */}
         <EventBanner placementKey="lucky_list_top" className="mx-6 mt-6" />
 
         {/* Lucky List Items by Neighborhood */}
