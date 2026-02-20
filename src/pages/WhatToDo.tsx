@@ -8,9 +8,13 @@ import { EventBanner } from "@/components/EventBanner";
 import { clearVideoSeen } from "@/pages/DestinationVideoIntro";
 import blocoBackground from "@/assets/highlights/bloco2.jpg";
 
-const actions = [
-  { id: "atividades", label: "Experiências", subtitle: "por bairro", path: "/o-que-fazer/ipanema" },
-  { id: "lucky-list", label: "Lucky List", subtitle: "com esquema", path: "/lucky-list", isSpecial: true },
+const categories = [
+  { id: "classico", label: "Clássico", path: "/o-que-fazer/categoria/classico" },
+  { id: "praia", label: "Praia", path: "/o-que-fazer/categoria/praia" },
+  { id: "cultura", label: "Cultura", path: "/o-que-fazer/categoria/cultura" },
+  { id: "aventura", label: "Aventura", path: "/o-que-fazer/categoria/aventura" },
+  { id: "relax", label: "Relax", path: "/o-que-fazer/categoria/relax" },
+  { id: "festa", label: "Festa", path: "/o-que-fazer/categoria/festa" },
 ];
 
 const WhatToDo = () => {
@@ -121,27 +125,16 @@ const WhatToDo = () => {
         </div>
       )}
 
-      {/* Buttons */}
+      {/* Category Buttons */}
       <div className="relative z-20 px-6 flex flex-col gap-2 mt-2">
-        {actions.map((action) => (
+        {categories.map((cat) => (
           <Link
-            key={action.id}
-            to={action.path}
-            className={`
-              flex items-center justify-between w-full
-              py-3 px-5 rounded-2xl
-              backdrop-blur-md transition-all duration-200
-              ${action.isSpecial
-                ? "bg-white/25 border border-white/40 hover:bg-white/35"
-                : "bg-white/20 border border-white/30 hover:bg-white/30"
-              }
-            `}
+            key={cat.id}
+            to={cat.path}
+            className="flex items-center justify-between w-full py-3 px-5 rounded-2xl backdrop-blur-md transition-all duration-200 bg-white/20 border border-white/30 hover:bg-white/30"
           >
             <span className="text-white text-base font-medium tracking-wide">
-              {action.label}
-            </span>
-            <span className="text-white/50 text-sm font-normal lowercase">
-              {action.subtitle}
+              {cat.label}
             </span>
           </Link>
         ))}
