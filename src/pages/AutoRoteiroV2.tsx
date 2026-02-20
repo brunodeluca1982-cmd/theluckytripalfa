@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ChevronLeft, Loader2, MapPin, Utensils, Sun, Moon, Coffee, ChevronRight, Check, RefreshCw, Plus, Car, Clock } from "lucide-react";
+import { ChevronLeft, Loader2, MapPin, Utensils, Sun, Moon, Coffee, ChevronRight, Check, RefreshCw, Plus, Car, Clock, Hotel, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTripDraft } from "@/hooks/use-trip-draft";
 import {
@@ -11,6 +11,7 @@ import {
   type GeneratorResult,
   type SlotItem,
   type SlotKind,
+  type HotelRecommendation,
 } from "@/lib/auto-roteiro-v2";
 import { cn } from "@/lib/utils";
 import { GooglePlaceSearchSection } from "@/components/GooglePlaceSearchSection";
@@ -253,6 +254,42 @@ const AutoRoteiroV2 = () => {
         {/* Result */}
         {result && !isGenerating && (
           <div className="space-y-6">
+            {/* Hotel Recommendation */}
+            {result.recommendedHotel && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-gradient-to-r from-primary/10 to-primary/5 rounded-xl border border-primary/20 p-4 space-y-2"
+              >
+                <div className="flex items-center gap-2">
+                  <Hotel className="w-5 h-5 text-primary" />
+                  <h3 className="text-sm font-semibold text-foreground">Hotel recomendado</h3>
+                </div>
+                <div
+                  className="flex items-start gap-3 cursor-pointer hover:bg-primary/5 rounded-lg p-2 -m-1 transition-colors"
+                  onClick={() => navigate(`/hotel/${result.recommendedHotel!.id}`)}
+                >
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <p className="font-medium text-foreground">{result.recommendedHotel.name}</p>
+                      <span className="text-xs px-1.5 py-0.5 rounded bg-primary/10 text-primary font-medium">
+                        {result.recommendedHotel.priceLevel}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1 mt-0.5">
+                      <MapPin className="w-3 h-3 text-muted-foreground" />
+                      <p className="text-xs text-muted-foreground">{result.recommendedHotel.neighborhood}</p>
+                    </div>
+                    <p className="text-xs text-muted-foreground/70 mt-1">{result.recommendedHotel.description}</p>
+                    {result.recommendedHotel.instagram && (
+                      <p className="text-xs text-primary/70 mt-0.5">{result.recommendedHotel.instagram}</p>
+                    )}
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-muted-foreground mt-1 flex-shrink-0" />
+                </div>
+              </motion.div>
+            )}
+
             <div className="text-center">
               <p className="text-sm text-muted-foreground">
                 <span className="font-semibold text-primary">{result.totalItemsPlaced}</span> itens

@@ -93,10 +93,25 @@ export interface DayPlan {
   totalTravelMinutes: number;
 }
 
+export interface HotelRecommendation {
+  id: string;
+  name: string;
+  neighborhood: string;
+  description: string;
+  priceLevel: string;
+  instagram?: string;
+  source: "curated";
+  score: number;
+  scoreBreakdown: string;
+  lat?: number;
+  lng?: number;
+}
+
 export interface GeneratorResult {
   days: DayPlan[];
   log: string[];
   totalItemsPlaced: number;
+  recommendedHotel: HotelRecommendation | null;
 }
 
 // ─── Tag inference ────────────────────────────────────────────────
@@ -278,6 +293,69 @@ function buildNightlifeCandidates(): Omit<ScoredCandidate, "score" | "scoreBreak
     source: "curated" as const,
     coords: resolveCoords(n.id, n.neighborhood),
   }));
+}
+
+// ─── Hotel selection ─────────────────────────────────────────────
+
+function selectHotel(
+  preferences: Record<PreferenceKey, number>,
+  style: TravelStyle,
+  primaryZone: string,
+): HotelRecommendation | null {
+  if (guideHotels.length === 0) return null;
+
+  const scored = guideHotels.map((h) => {
+    let score = 1;
+    const parts: string[] = ["base:1"];
+    const pl = priceLevelNumeric(h.priceLevel);
+
+    // Style match
+    if (style === "luxo" && pl >= 4) { score += 12; parts.push("luxo:+12"); }
+    else if (style === "luxo" && pl >= 3) { score += 6; parts.push("luxo:+6"); }
+    else if (style === "economico" && pl <= 2) { score += 12; parts.push("econ:+12"); }
+    else if (style === "economico" && pl <= 3) { score += 6; parts.push("econ:+6"); }
+    else if (!style && pl >= 2 && pl <= 3) { score += 4; parts.push("mid:+4"); }
+
+    // Zone proximity to primary itinerary zone
+    const hotelZone = getZone(h.neighborhood);
+    if (hotelZone === primaryZone) { score += 8; parts.push("zona:+8"); }
+    else {
+      const neighbors = proximityMap[h.neighborhood] || [];
+      if (neighbors.some((n) => getZone(n) === primaryZone)) {
+        score += 3; parts.push("adj:+3");
+      } else {
+        score -= 5; parts.push("longe:-5");
+      }
+    }
+
+    // Kid-friendly bonus if relaxamento high
+    if (h.kidFriendly && preferences.relaxamento >= 4) {
+      score += 3; parts.push("kids:+3");
+    }
+
+    // Jitter
+    const jitter = Math.random() * 2;
+    score += jitter;
+    parts.push(`jitter:+${jitter.toFixed(1)}`);
+
+    const coords = resolveCoords(h.id, h.neighborhood);
+    return {
+      id: h.id,
+      name: h.name,
+      neighborhood: h.neighborhood,
+      description: h.description,
+      priceLevel: h.priceLevel,
+      instagram: h.instagram,
+      source: "curated" as const,
+      score,
+      scoreBreakdown: parts.join(" "),
+      lat: coords?.lat,
+      lng: coords?.lng,
+    };
+  });
+
+  scored.sort((a, b) => b.score - a.score);
+  return scored[0];
 }
 
 // ─── Slot selection helpers ──────────────────────────────────────
@@ -550,9 +628,16 @@ export function generateAutomaticItinerary(input: GeneratorInput): GeneratorResu
     (acc, dp) => acc + Object.values(dp.slots).filter(Boolean).length,
     0
   );
+  // ★ HOTEL RECOMMENDATION ★
+  const primaryZone = dayZones[0]; // Most important zone
+  const recommendedHotel = selectHotel(preferences, style, primaryZone);
+  if (recommendedHotel) {
+    log.push(`\n🏨 Hotel recomendado: ${recommendedHotel.name} (${recommendedHotel.neighborhood}) [${recommendedHotel.scoreBreakdown}]`);
+  }
+
   log.push(`\n=== Total: ${totalItemsPlaced} itens em ${days} dias ===`);
 
-  return { days: dayPlans, log, totalItemsPlaced };
+  return { days: dayPlans, log, totalItemsPlaced, recommendedHotel };
 }
 
 // ─── Google fallback queries per preference ──────────────────────
@@ -763,7 +848,21 @@ export async function persistItineraryToDb(
 ): Promise<void> {
   await supabase.from("roteiro_itens").delete().eq("roteiro_id", roteiroId);
 
-  const rows = result.days.flatMap((day) => {
+  const rows: Array<{
+    roteiro_id: string;
+    source: string;
+    ref_table: string;
+    place_id: string;
+    name: string;
+    neighborhood: string;
+    city: string;
+    day_index: number;
+    order_in_day: number;
+    time_slot: string;
+    notes: string;
+    lat: number | null;
+    lng: number | null;
+  }> = result.days.flatMap((day) => {
     const slotOrder: SlotKind[] = ["morning", "lunch", "afternoon", "evening", "extra"];
     return slotOrder
       .map((kind, idx) => {
@@ -779,14 +878,34 @@ export async function persistItineraryToDb(
           city: "Rio de Janeiro",
           day_index: day.dayIndex,
           order_in_day: idx,
-          time_slot: kind,
+          time_slot: kind as string,
           notes: slot.scoreBreakdown,
           lat: slot.lat ?? null,
           lng: slot.lng ?? null,
         };
       })
-      .filter(Boolean);
+      .filter((r): r is NonNullable<typeof r> => r !== null);
   });
+
+  // Add hotel recommendation as a special row
+  if (result.recommendedHotel) {
+    const h = result.recommendedHotel;
+    rows.push({
+      roteiro_id: roteiroId,
+      source: "curated",
+      ref_table: "curadoria",
+      place_id: h.id,
+      name: h.name,
+      neighborhood: h.neighborhood,
+      city: "Rio de Janeiro",
+      day_index: 0, // 0 = trip-wide (hotel)
+      order_in_day: 0,
+      time_slot: "hotel",
+      notes: h.scoreBreakdown,
+      lat: h.lat ?? null,
+      lng: h.lng ?? null,
+    });
+  }
 
   if (rows.length > 0) {
     const { error } = await supabase.from("roteiro_itens").insert(rows);
