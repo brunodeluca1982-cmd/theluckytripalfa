@@ -2,11 +2,15 @@ import { useState, useCallback, useRef, useEffect } from "react";
 import { Search, MapPin, Loader2, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 
+const SUPABASE_PROJECT_ID = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+
+const functionsBase = `https://${SUPABASE_PROJECT_ID}.supabase.co/functions/v1`;
+
 /**
- * Place data returned from Google Places API
+ * Place data returned from places-details edge function
  */
 export interface PlaceData {
   placeId: string;
@@ -17,18 +21,16 @@ export interface PlaceData {
   types: string[];
   neighborhood: string | null;
   city: string | null;
+  rating?: number | null;
+  user_ratings_total?: number | null;
+  price_level?: number | null;
+  google_maps_url?: string | null;
+  photo_refs?: string[];
 }
 
-/**
- * Autocomplete prediction from Google Places
- */
 interface Prediction {
-  place_id: string;
   description: string;
-  structured_formatting: {
-    main_text: string;
-    secondary_text: string;
-  };
+  place_id: string;
 }
 
 interface GooglePlacesAutocompleteProps {
@@ -36,19 +38,17 @@ interface GooglePlacesAutocompleteProps {
   placeholder?: string;
   className?: string;
   disabled?: boolean;
+  city?: string;
+  bairro?: string;
 }
 
-/**
- * Google Places Autocomplete Component
- * 
- * Allows users to search for places and returns validated place data
- * with place_id for mapping and export functionality.
- */
 export const GooglePlacesAutocomplete = ({
   onPlaceSelect,
   placeholder = "Buscar local...",
   className,
   disabled = false,
+  city = "Rio de Janeiro",
+  bairro,
 }: GooglePlacesAutocompleteProps) => {
   const [query, setQuery] = useState("");
   const [predictions, setPredictions] = useState<Prediction[]>([]);
@@ -56,24 +56,21 @@ export const GooglePlacesAutocomplete = ({
   const [isFetchingDetails, setIsFetchingDetails] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
-  const sessionTokenRef = useRef<string>(generateSessionToken());
+
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Close dropdown when clicking outside
+  // Close dropdown on outside click
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+    const handler = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
         setShowDropdown(false);
       }
     };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  // Fetch autocomplete predictions
   const fetchPredictions = useCallback(async (input: string) => {
     if (input.length < 3) {
       setPredictions([]);
@@ -85,76 +82,75 @@ export const GooglePlacesAutocomplete = ({
     setError(null);
 
     try {
-      const { data, error: fnError } = await supabase.functions.invoke('google-places', {
-        body: {
-          action: 'autocomplete',
-          input,
-          sessionToken: sessionTokenRef.current,
-        },
-      });
+      const params = new URLSearchParams({ input });
+      if (city) params.set("city", city);
+      if (bairro) params.set("bairro", bairro);
 
-      if (fnError) {
-        console.error('Autocomplete error:', fnError);
-        setError('Erro ao buscar locais');
+      const res = await fetch(`${functionsBase}/places-autocomplete?${params}`, {
+        headers: { apikey: SUPABASE_ANON_KEY },
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error || "Erro ao buscar");
         setPredictions([]);
-      } else if (data?.predictions) {
-        setPredictions(data.predictions);
-        setShowDropdown(data.predictions.length > 0);
+      } else {
+        setPredictions(data.predictions || []);
+        setShowDropdown((data.predictions || []).length > 0);
       }
-    } catch (err) {
-      console.error('Autocomplete fetch error:', err);
-      setError('Erro de conexão');
+    } catch {
+      setError("Erro de conexão");
       setPredictions([]);
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [city, bairro]);
 
-  // Handle input change with debounce
   const handleInputChange = (value: string) => {
     setQuery(value);
-    
-    if (debounceRef.current) {
-      clearTimeout(debounceRef.current);
-    }
-
-    debounceRef.current = setTimeout(() => {
-      fetchPredictions(value);
-    }, 300);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => fetchPredictions(value), 300);
   };
 
-  // Fetch place details and call onPlaceSelect
   const handleSelectPlace = async (prediction: Prediction) => {
     setIsFetchingDetails(true);
     setShowDropdown(false);
-    setQuery(prediction.structured_formatting.main_text);
+    setQuery(prediction.description.split(",")[0]);
 
     try {
-      const { data, error: fnError } = await supabase.functions.invoke('google-places', {
-        body: {
-          action: 'details',
-          placeId: prediction.place_id,
-          sessionToken: sessionTokenRef.current,
-        },
+      const params = new URLSearchParams({ place_id: prediction.place_id });
+      const res = await fetch(`${functionsBase}/places-details?${params}`, {
+        headers: { apikey: SUPABASE_ANON_KEY },
       });
+      const data = await res.json();
 
-      if (fnError) {
-        console.error('Place details error:', fnError);
-        setError('Erro ao obter detalhes do local');
-      } else if (data?.place) {
-        onPlaceSelect(data.place);
-        // Generate new session token for next search
-        sessionTokenRef.current = generateSessionToken();
+      if (!res.ok) {
+        setError(data.error || "Erro ao obter detalhes");
+      } else if (data.place) {
+        const p = data.place;
+        onPlaceSelect({
+          placeId: p.place_id,
+          name: p.name,
+          address: p.address || "",
+          lat: p.lat,
+          lng: p.lng,
+          types: p.types || [],
+          neighborhood: extractNeighborhood(p.address),
+          city: extractCity(p.address),
+          rating: p.rating,
+          user_ratings_total: p.user_ratings_total,
+          price_level: p.price_level,
+          google_maps_url: p.google_maps_url,
+          photo_refs: p.photo_refs || [],
+        });
       }
-    } catch (err) {
-      console.error('Place details fetch error:', err);
-      setError('Erro de conexão');
+    } catch {
+      setError("Erro de conexão");
     } finally {
       setIsFetchingDetails(false);
     }
   };
 
-  // Clear input
   const handleClear = () => {
     setQuery("");
     setPredictions([]);
@@ -190,27 +186,18 @@ export const GooglePlacesAutocomplete = ({
         )}
       </div>
 
-      {error && (
-        <p className="text-sm text-destructive mt-1">{error}</p>
-      )}
+      {error && <p className="text-sm text-destructive mt-1">{error}</p>}
 
       {showDropdown && predictions.length > 0 && (
         <div className="absolute z-50 w-full mt-1 bg-popover border border-border rounded-md shadow-lg max-h-60 overflow-auto">
-          {predictions.map((prediction) => (
+          {predictions.map((p) => (
             <button
-              key={prediction.place_id}
-              onClick={() => handleSelectPlace(prediction)}
+              key={p.place_id}
+              onClick={() => handleSelectPlace(p)}
               className="w-full px-3 py-2 text-left hover:bg-accent transition-colors flex items-start gap-2"
             >
               <MapPin className="h-4 w-4 mt-0.5 flex-shrink-0 text-muted-foreground" />
-              <div className="min-w-0">
-                <p className="font-medium text-sm truncate">
-                  {prediction.structured_formatting.main_text}
-                </p>
-                <p className="text-xs text-muted-foreground truncate">
-                  {prediction.structured_formatting.secondary_text}
-                </p>
-              </div>
+              <p className="text-sm truncate">{p.description}</p>
             </button>
           ))}
         </div>
@@ -219,9 +206,17 @@ export const GooglePlacesAutocomplete = ({
   );
 };
 
-// Generate a unique session token for Google Places API
-function generateSessionToken(): string {
-  return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+function extractNeighborhood(address: string | null): string | null {
+  if (!address) return null;
+  const parts = address.split(",").map((s) => s.trim());
+  return parts.length >= 3 ? parts[1] : null;
+}
+
+function extractCity(address: string | null): string | null {
+  if (!address) return null;
+  if (address.includes("Rio de Janeiro")) return "Rio de Janeiro";
+  const parts = address.split(",").map((s) => s.trim());
+  return parts.length >= 4 ? parts[2] : null;
 }
 
 export default GooglePlacesAutocomplete;

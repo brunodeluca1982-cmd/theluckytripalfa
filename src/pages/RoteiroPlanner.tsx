@@ -293,7 +293,27 @@ const RoteiroPlanner = () => {
     };
     addItem(day, item);
     toast({ title: "Adicionado ✓", description: `${place.name} → Dia ${day}` });
-  }, [addItem]);
+
+    // Also persist to roteiro_itens table
+    import("@/integrations/supabase/client").then(({ supabase }) => {
+      supabase.from("roteiro_itens").insert({
+        roteiro_id: `${destinationId}-draft`,
+        source: "google",
+        ref_table: "places_cache",
+        place_id: place.placeId,
+        name: place.name,
+        address: place.address,
+        neighborhood: place.neighborhood,
+        city: place.city || "Rio de Janeiro",
+        lat: place.lat,
+        lng: place.lng,
+        day_index: day,
+        order_in_day: (userItems[day]?.length || 0),
+      }).then(({ error }) => {
+        if (error) console.error("Failed to persist roteiro item:", error);
+      });
+    });
+  }, [addItem, destinationId, userItems]);
 
   const handleAddWithAI = useCallback((prompt: string, day: number) => {
     toast({ title: "Buscando sugestões...", description: `A IA está pensando em ideias para o Dia ${day}.` });
