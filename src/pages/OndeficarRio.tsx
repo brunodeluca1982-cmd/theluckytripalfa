@@ -34,14 +34,14 @@ const OndeficarRio = () => {
 
   // Pan/zoom state
   const containerRef = useRef<HTMLDivElement>(null);
-  const [scale, setScale] = useState(1.0);
-  const [translate, setTranslate] = useState({ x: -100, y: 0 });
+  const [scale, setScale] = useState(0.7);
+  const [translate, setTranslate] = useState({ x: 0, y: 0 });
   const gestureRef = useRef({
     isPanning: false,
     startX: 0, startY: 0,
     lastX: 0, lastY: 0,
     initialDist: 0,
-    initialScale: 1.0,
+    initialScale: 0.7,
   });
 
   const MIN_SCALE = 0.5;
@@ -52,8 +52,9 @@ const OndeficarRio = () => {
     if (!container) return { x: tx, y: ty };
     const cw = container.clientWidth;
     const ch = container.clientHeight;
-    const imgW = cw * s;
-    const imgH = ch * s;
+    // Inner content is 180% of container, then scaled
+    const imgW = cw * 1.8 * s;
+    const imgH = ch * 1.8 * s;
     const minX = Math.min(0, cw - imgW);
     const minY = Math.min(0, ch - imgH);
     return {
@@ -68,13 +69,13 @@ const OndeficarRio = () => {
     if (!container) return;
     const cw = container.clientWidth;
     const ch = container.clientHeight;
-    const initScale = 1.0;
+    const initScale = 0.7;
     const imgW = cw * initScale;
     const imgH = ch * initScale;
     setScale(initScale);
     setTranslate({
-      x: Math.min(0, (cw - imgW) / 2),
-      y: Math.min(0, (ch - imgH) / 2),
+      x: (cw - imgW) / 2,
+      y: (ch - imgH) / 2,
     });
   }, []);
 
@@ -220,8 +221,8 @@ const OndeficarRio = () => {
         <div
           className="absolute origin-top-left"
           style={{
-            width: "100%",
-            height: "100%",
+            width: "180%",
+            height: "180%",
             transform: `translate(${translate.x}px, ${translate.y}px) scale(${scale})`,
             willChange: "transform",
           }}
@@ -229,7 +230,7 @@ const OndeficarRio = () => {
           <img
             src="/assets/maps/rio-3d-map.png"
             alt="Rio de Janeiro 3D Map"
-            className="w-full h-full object-cover pointer-events-none select-none"
+            className="w-full h-full object-contain pointer-events-none select-none"
             draggable={false}
           />
 
