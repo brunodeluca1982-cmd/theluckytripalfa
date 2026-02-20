@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ChevronLeft, Sparkles, PenTool } from "lucide-react";
+import { ChevronLeft, Sparkles, PenTool, Bug } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTripDraft } from "@/hooks/use-trip-draft";
 
@@ -94,6 +94,29 @@ const ItineraryDecision = () => {
                 </h3>
                 <p className="text-sm text-muted-foreground">
                   Monte seu roteiro do zero, escolhendo cada experiência.
+                </p>
+              </div>
+            </div>
+          </motion.button>
+
+          {/* Debug V2 option */}
+          <motion.button
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            onClick={() => navigate('/meu-roteiro/automatico-v2')}
+            className="w-full p-4 bg-card border border-dashed border-primary/30 rounded-2xl text-left transition-all hover:bg-primary/5 active:scale-[0.98]"
+          >
+            <div className="flex items-start gap-4">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                <Bug className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <h3 className="font-medium text-foreground text-sm mb-0.5">
+                  Gerar roteiro V2 (debug)
+                </h3>
+                <p className="text-xs text-muted-foreground">
+                  Motor inteligente com scoring por preferências
                 </p>
               </div>
             </div>

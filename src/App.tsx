@@ -26,6 +26,7 @@ import TripDates from "./pages/TripDates";
 import TripPreferences from "./pages/TripPreferences";
 import ItineraryDecision from "./pages/ItineraryDecision";
 import AutomaticItinerary from "./pages/AutomaticItinerary";
+import AutoRoteiroV2 from "./pages/AutoRoteiroV2";
 import ManualItinerary from "./pages/ManualItinerary";
 import Favoritos from "./pages/Favoritos";
 import RoteiroPlanner from "./pages/RoteiroPlanner";
@@ -183,6 +184,7 @@ const App = () => {
                   <Route path="/meu-roteiro/preferencias" element={<TripPreferences />} />
                   <Route path="/meu-roteiro/decisao" element={<ItineraryDecision />} />
                   <Route path="/meu-roteiro/automatico" element={<AutomaticItinerary />} />
+                  <Route path="/meu-roteiro/automatico-v2" element={<AutoRoteiroV2 />} />
                   <Route path="/meu-roteiro/manual" element={<ManualItinerary />} />
                   <Route path="/favoritos" element={<Favoritos />} />
                   <Route path="/planejar/:destinationId" element={<RoteiroPlanner />} />
