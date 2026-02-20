@@ -1,6 +1,6 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useCallback, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { ChevronLeft, ChevronRight, Move } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { RIO_NEIGHBORHOODS, getNeighborhoodById } from "@/data/rio-neighborhoods";
 import { useExternalHotels } from "@/hooks/use-external-hotels";
 
@@ -30,8 +30,115 @@ function normalizeNeighborhood(bairro: string): string {
 }
 
 const OndeficarRio = () => {
-  const [mapInteractive, setMapInteractive] = useState(false);
   const { data: externalHotels } = useExternalHotels();
+
+  // Pan/zoom state
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(0.55);
+  const [translate, setTranslate] = useState({ x: 0, y: 0 });
+  const gestureRef = useRef({
+    isPanning: false,
+    startX: 0, startY: 0,
+    lastX: 0, lastY: 0,
+    initialDist: 0,
+    initialScale: 0.55,
+  });
+
+  const MIN_SCALE = 0.4;
+  const MAX_SCALE = 2.5;
+
+  const clampTranslate = useCallback((tx: number, ty: number, s: number) => {
+    const container = containerRef.current;
+    if (!container) return { x: tx, y: ty };
+    const cw = container.clientWidth;
+    const ch = container.clientHeight;
+    // The image is 100% of container at scale=1; at other scales it's larger/smaller
+    const imgW = cw * s;
+    const imgH = ch * s;
+    const minX = Math.min(0, cw - imgW);
+    const minY = Math.min(0, ch - imgH);
+    return {
+      x: Math.max(minX, Math.min(0, tx)),
+      y: Math.max(minY, Math.min(0, ty)),
+    };
+  }, []);
+
+  // Center the map on load
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+    const cw = container.clientWidth;
+    const ch = container.clientHeight;
+    const initScale = 0.55;
+    const imgW = cw * initScale;
+    const imgH = ch * initScale;
+    setScale(initScale);
+    setTranslate({
+      x: (cw - imgW) / 2,
+      y: (ch - imgH) / 2,
+    });
+  }, []);
+
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    if (e.touches.length === 1) {
+      gestureRef.current.isPanning = true;
+      gestureRef.current.startX = e.touches[0].clientX - translate.x;
+      gestureRef.current.startY = e.touches[0].clientY - translate.y;
+    } else if (e.touches.length === 2) {
+      gestureRef.current.isPanning = false;
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      gestureRef.current.initialDist = Math.hypot(dx, dy);
+      gestureRef.current.initialScale = scale;
+    }
+  }, [translate, scale]);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    e.preventDefault();
+    if (e.touches.length === 1 && gestureRef.current.isPanning) {
+      const nx = e.touches[0].clientX - gestureRef.current.startX;
+      const ny = e.touches[0].clientY - gestureRef.current.startY;
+      setTranslate(clampTranslate(nx, ny, scale));
+    } else if (e.touches.length === 2) {
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      const dist = Math.hypot(dx, dy);
+      const newScale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, gestureRef.current.initialScale * (dist / gestureRef.current.initialDist)));
+      setScale(newScale);
+      setTranslate(prev => clampTranslate(prev.x, prev.y, newScale));
+    }
+  }, [scale, clampTranslate]);
+
+  const handleTouchEnd = useCallback(() => {
+    gestureRef.current.isPanning = false;
+  }, []);
+
+  // Desktop wheel zoom
+  const handleWheel = useCallback((e: React.WheelEvent) => {
+    e.stopPropagation();
+    const delta = e.deltaY > 0 ? 0.9 : 1.1;
+    const newScale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, scale * delta));
+    setScale(newScale);
+    setTranslate(prev => clampTranslate(prev.x, prev.y, newScale));
+  }, [scale, clampTranslate]);
+
+  // Desktop drag
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    gestureRef.current.isPanning = true;
+    gestureRef.current.startX = e.clientX - translate.x;
+    gestureRef.current.startY = e.clientY - translate.y;
+  }, [translate]);
+
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    if (!gestureRef.current.isPanning) return;
+    const nx = e.clientX - gestureRef.current.startX;
+    const ny = e.clientY - gestureRef.current.startY;
+    setTranslate(clampTranslate(nx, ny, scale));
+  }, [scale, clampTranslate]);
+
+  const handleMouseUp = useCallback(() => {
+    gestureRef.current.isPanning = false;
+  }, []);
 
   const hotelListData = useMemo(() => {
     if (!externalHotels || externalHotels.length === 0) return [];
@@ -97,27 +204,37 @@ const OndeficarRio = () => {
         </p>
       </div>
 
-      {/* Map Area — fits viewport width, no horizontal scroll, doesn't capture vertical scroll */}
-      <div className="relative w-full" style={{ height: "40vh" }}>
-        {/* Overlay that blocks touch pan/scroll on map unless interactive mode is on */}
-        {!mapInteractive && (
-          <div className="absolute inset-0 z-10" />
-        )}
-
+      {/* Interactive Map */}
+      <div
+        ref={containerRef}
+        className="relative w-full overflow-hidden cursor-grab active:cursor-grabbing"
+        style={{ height: "300px", touchAction: "none" }}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        onWheel={handleWheel}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+      >
         <div
-          className="relative w-full h-full overflow-hidden"
+          className="absolute origin-top-left"
           style={{
-            touchAction: mapInteractive ? "pan-x pan-y pinch-zoom" : "auto",
+            width: "100%",
+            height: "100%",
+            transform: `translate(${translate.x}px, ${translate.y}px) scale(${scale})`,
+            willChange: "transform",
           }}
         >
           <img
             src="/assets/maps/rio-3d-map.png"
             alt="Rio de Janeiro 3D Map"
-            className="absolute inset-0 w-full h-full object-cover pointer-events-none select-none"
+            className="w-full h-full object-cover pointer-events-none select-none"
             draggable={false}
           />
 
-          {/* Pins — positioned with percentages so they scale with the image */}
+          {/* Neighborhood pins */}
           {RIO_NEIGHBORHOODS.map((neighborhood) => (
             <Link
               key={neighborhood.id}
@@ -125,34 +242,22 @@ const OndeficarRio = () => {
               className="absolute w-8 h-8 -ml-4 -mt-4 rounded-full bg-foreground/10 border border-foreground/20 hover:bg-foreground/20 hover:border-foreground/40 transition-colors flex items-center justify-center z-20"
               style={{ top: neighborhood.mapPosition.top, left: neighborhood.mapPosition.left }}
               aria-label={`Explorar hotéis em ${neighborhood.name}`}
+              onClick={(e) => e.stopPropagation()}
             >
               <div className="w-2 h-2 rounded-full bg-foreground/60" />
             </Link>
           ))}
         </div>
-
-        {/* Toggle interactive mode button */}
-        <button
-          onClick={() => setMapInteractive((v) => !v)}
-          className={`absolute bottom-3 right-3 z-30 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
-            mapInteractive
-              ? "bg-primary text-primary-foreground"
-              : "bg-background/80 text-foreground border border-border backdrop-blur-sm"
-          }`}
-        >
-          <Move className="w-3 h-3" />
-          {mapInteractive ? "Sair" : "Interagir"}
-        </button>
       </div>
 
-      {/* Instruction */}
-      <div className="px-6 py-4 border-b border-border">
-        <p className="text-sm text-muted-foreground">
-          Toque em um bairro para explorar onde ficar
+      {/* Hint */}
+      <div className="px-6 py-3 border-b border-border">
+        <p className="text-xs text-muted-foreground">
+          Arraste e dê zoom para explorar o mapa.
         </p>
       </div>
 
-      {/* Hotel List — flows naturally in page scroll */}
+      {/* Hotel List */}
       <div className="px-6 py-6">
         <h2 className="text-lg font-serif font-medium text-foreground mb-4">
           Hotéis
