@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ChevronLeft, Loader2, MapPin, Utensils, Sun, Moon, Coffee, Bug, ChevronRight } from "lucide-react";
+import { ChevronLeft, Loader2, MapPin, Utensils, Sun, Moon, Coffee, ChevronRight, Check, RefreshCw, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTripDraft } from "@/hooks/use-trip-draft";
 import {
@@ -13,6 +13,10 @@ import {
   type SlotKind,
 } from "@/lib/auto-roteiro-v2";
 import { cn } from "@/lib/utils";
+import { GooglePlaceSearchSection } from "@/components/GooglePlaceSearchSection";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
+import type { PlaceResult } from "@/lib/search-places";
 
 const slotConfig: Record<SlotKind, { label: string; icon: React.ElementType; color: string }> = {
   morning: { label: "Manhã", icon: Sun, color: "text-amber-500" },
@@ -22,23 +26,52 @@ const slotConfig: Record<SlotKind, { label: string; icon: React.ElementType; col
   extra: { label: "Extra", icon: Coffee, color: "text-emerald-500" },
 };
 
+/**
+ * Returns the detail route for a curated item based on its category/slot.
+ * For Google items, returns null (no detail page).
+ */
+function getItemDetailRoute(slot: SlotItem): string | null {
+  if (slot.source === "google") return null;
+
+  const id = slot.id;
+  const cat = slot.category?.toLowerCase() || "";
+
+  // Restaurants
+  if (
+    cat.includes("restaurante") || cat.includes("bar") || cat.includes("boteco") ||
+    cat.includes("alta gastronomia") || cat.includes("café") || cat.includes("padaria") ||
+    cat.includes("bistrô") || cat.includes("pizzaria") || cat.includes("japonês") ||
+    cat.includes("italiano") || cat.includes("peixes") || cat.includes("contemporâne") ||
+    slot.slotKind === "lunch" || (slot.slotKind === "evening" && !slot.tags.includes("festa"))
+  ) {
+    return `/restaurante/${id}`;
+  }
+
+  // Nightlife / festa
+  if (cat.includes("samba") || cat.includes("show") || cat.includes("balada") || cat.includes("festa") || slot.tags.includes("festa")) {
+    return `/atividade/${id}`;
+  }
+
+  // Hotels
+  if (cat.includes("hotel") || cat.includes("pousada") || cat.includes("hostel")) {
+    return `/hotel/${id}`;
+  }
+
+  // Default: activity
+  return `/atividade/${id}`;
+}
+
 const AutoRoteiroV2 = () => {
   const navigate = useNavigate();
   const { draft, tripDays } = useTripDraft();
   const [result, setResult] = useState<GeneratorResult | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [showDebugLog, setShowDebugLog] = useState(false);
-
-  if (!draft.destinationId) {
-    navigate("/meu-roteiro", { replace: true });
-    return null;
-  }
+  const [showAddPlace, setShowAddPlace] = useState(false);
 
   const days = Math.max(1, tripDays);
 
   const handleGenerate = async () => {
     setIsGenerating(true);
-
     try {
       const preferences = tripStylesToPreferences(draft.tripStyles);
       const style = draft.priceStyle === "$$$"
@@ -56,13 +89,61 @@ const AutoRoteiroV2 = () => {
 
       setResult(gen);
 
-      // Persist to DB
-      const roteiroId = `${draft.destinationId}-auto-v2`;
+      const roteiroId = `${draft.destinationId}-auto`;
       await persistItineraryToDb(roteiroId, gen);
     } catch (err) {
       console.error("Error generating itinerary:", err);
+      toast({ title: "Erro ao gerar", description: "Tente novamente.", variant: "destructive" });
     } finally {
       setIsGenerating(false);
+    }
+  };
+
+  // Auto-generate on mount
+  useEffect(() => {
+    if (!draft.destinationId) {
+      navigate("/meu-roteiro", { replace: true });
+      return;
+    }
+    if (!result && !isGenerating) {
+      handleGenerate();
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  if (!draft.destinationId) {
+    return null;
+  }
+
+  const handleAddToRoteiro = async (place: PlaceResult) => {
+    const { error } = await supabase.from("roteiro_itens").insert({
+      roteiro_id: `${draft.destinationId}-auto`,
+      source: "google",
+      ref_table: "places_cache",
+      place_id: place.placeId,
+      name: place.name,
+      address: place.address,
+      city: "Rio de Janeiro",
+      lat: place.lat,
+      lng: place.lng,
+      day_index: 1,
+      order_in_day: 99,
+    });
+    if (error) {
+      toast({ title: "Erro ao adicionar", description: "Tente novamente.", variant: "destructive" });
+    } else {
+      toast({ title: "Adicionado ao roteiro!", description: place.name });
+    }
+  };
+
+  const handleSlotClick = (slot: SlotItem | null) => {
+    if (!slot) return;
+    const route = getItemDetailRoute(slot);
+    if (route) {
+      navigate(route);
+    } else if (slot.source === "google") {
+      // For Google items, open Maps
+      const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(slot.name + " " + slot.neighborhood)}`;
+      window.open(mapsUrl, "_blank");
     }
   };
 
@@ -74,46 +155,49 @@ const AutoRoteiroV2 = () => {
       return (
         <div className="flex items-center gap-3 px-4 py-3 bg-muted/30 rounded-xl border border-dashed border-border">
           <Icon className={cn("w-4 h-4", config.color)} />
-          <div>
+          <div className="flex-1">
             <p className="text-sm text-muted-foreground">{config.label}</p>
-            <p className="text-xs text-muted-foreground/60 italic">Adicionar lugar →</p>
+            <p className="text-xs text-muted-foreground/60 italic">Sem sugestão</p>
           </div>
         </div>
       );
     }
 
+    const isClickable = slot.source === "curated" || slot.source === "google";
+
     return (
-      <div className="flex items-start gap-3 px-4 py-3 bg-card rounded-xl border border-border">
+      <div
+        onClick={() => handleSlotClick(slot)}
+        className={cn(
+          "flex items-start gap-3 px-4 py-3 bg-card rounded-xl border border-border transition-colors",
+          isClickable && "cursor-pointer hover:bg-accent active:scale-[0.99]"
+        )}
+      >
         <Icon className={cn("w-4 h-4 mt-0.5 flex-shrink-0", config.color)} />
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-medium text-foreground truncate">{slot.name}</p>
+          <div className="flex items-center gap-2">
+            <p className="text-sm font-medium text-foreground truncate">{slot.name}</p>
+            {slot.source === "google" && (
+              <span className="text-[9px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground font-medium flex-shrink-0">
+                Google
+              </span>
+            )}
+          </div>
           <div className="flex items-center gap-1 mt-0.5">
             <MapPin className="w-3 h-3 text-muted-foreground" />
             <p className="text-xs text-muted-foreground">{slot.neighborhood}</p>
           </div>
           <p className="text-xs text-muted-foreground/70 mt-0.5 line-clamp-1">{slot.description}</p>
-          {showDebugLog && (
-            <p className="text-[10px] font-mono text-primary/60 mt-1">
-              score:{slot.score} | {slot.scoreBreakdown}
-            </p>
-          )}
         </div>
-        <div className="flex flex-col items-end gap-1">
-          {slot.tags.map((tag) => (
-            <span
-              key={tag}
-              className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-medium"
-            >
-              {tag}
-            </span>
-          ))}
-        </div>
+        {isClickable && (
+          <ChevronRight className="w-4 h-4 text-muted-foreground mt-1 flex-shrink-0" />
+        )}
       </div>
     );
   };
 
   return (
-    <div className="min-h-screen bg-background pb-28">
+    <div className="min-h-screen bg-background pb-32">
       {/* Header */}
       <header className="sticky top-0 z-50 px-4 py-4 bg-background/95 backdrop-blur-sm border-b border-border">
         <div className="flex items-center justify-between">
@@ -124,19 +208,8 @@ const AutoRoteiroV2 = () => {
             >
               <ChevronLeft className="w-5 h-5" />
             </button>
-            <h1 className="text-lg font-semibold text-foreground">Roteiro Automático V2</h1>
+            <h1 className="text-lg font-semibold text-foreground">Roteiro automático</h1>
           </div>
-          {result && (
-            <button
-              onClick={() => setShowDebugLog(!showDebugLog)}
-              className={cn(
-                "p-2 rounded-lg transition-colors",
-                showDebugLog ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              <Bug className="w-4 h-4" />
-            </button>
-          )}
         </div>
       </header>
 
@@ -153,51 +226,37 @@ const AutoRoteiroV2 = () => {
               <p className="font-semibold text-primary">{days}</p>
             </div>
           </div>
-          <div className="pt-2 border-t border-border/50">
-            <p className="text-xs text-muted-foreground">Preferências</p>
-            <div className="flex flex-wrap gap-1 mt-1">
-              {draft.tripStyles.length > 0 ? (
-                draft.tripStyles.map((s) => (
+          {draft.tripStyles.length > 0 && (
+            <div className="pt-2 border-t border-border/50">
+              <div className="flex flex-wrap gap-1">
+                {draft.tripStyles.map((s) => (
                   <span key={s} className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary">
                     {s}
                   </span>
-                ))
-              ) : (
-                <span className="text-xs text-muted-foreground">Nenhuma selecionada</span>
-              )}
+                ))}
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
-        {/* Generate button */}
-        {!result && (
-          <div className="text-center">
-            <Button
-              onClick={handleGenerate}
-              disabled={isGenerating}
-              size="lg"
-              className="w-full max-w-sm h-14 text-lg font-semibold rounded-2xl"
-            >
-              {isGenerating ? (
-                <>
-                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                  Gerando...
-                </>
-              ) : (
-                "Gerar roteiro inteligente"
-              )}
-            </Button>
+        {/* Loading */}
+        {isGenerating && (
+          <div className="flex flex-col items-center justify-center py-16 gap-4">
+            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            <p className="text-sm text-muted-foreground">Gerando seu roteiro...</p>
           </div>
         )}
 
         {/* Result */}
-        {result && (
+        {result && !isGenerating && (
           <div className="space-y-6">
-            {/* Stats */}
             <div className="text-center">
               <p className="text-sm text-muted-foreground">
                 <span className="font-semibold text-primary">{result.totalItemsPlaced}</span> itens
-                em <span className="font-semibold">{days}</span> dias
+                {" "}em <span className="font-semibold">{days}</span> dias
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Toque em um item para ver detalhes
               </p>
             </div>
 
@@ -207,7 +266,7 @@ const AutoRoteiroV2 = () => {
                 key={day.dayIndex}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: day.dayIndex * 0.1 }}
+                transition={{ delay: day.dayIndex * 0.08 }}
                 className="space-y-2"
               >
                 <h3 className="text-base font-semibold text-foreground">Dia {day.dayIndex}</h3>
@@ -219,38 +278,47 @@ const AutoRoteiroV2 = () => {
               </motion.div>
             ))}
 
-            {/* Debug log */}
-            {showDebugLog && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="mt-8 p-4 bg-muted rounded-xl"
+            {/* Add place from Google */}
+            <div className="pt-2">
+              <button
+                onClick={() => setShowAddPlace(!showAddPlace)}
+                className="flex items-center gap-2 text-sm text-primary font-medium"
               >
-                <h4 className="text-sm font-semibold text-foreground mb-2 flex items-center gap-2">
-                  <Bug className="w-4 h-4" />
-                  Debug Log
-                </h4>
-                <pre className="text-[11px] font-mono text-muted-foreground whitespace-pre-wrap leading-relaxed max-h-96 overflow-auto">
-                  {result.log.join("\n")}
-                </pre>
-              </motion.div>
-            )}
+                <Plus className="w-4 h-4" />
+                {showAddPlace ? "Fechar busca" : "Adicionar lugar (Google)"}
+              </button>
+              {showAddPlace && (
+                <div className="mt-3">
+                  <GooglePlaceSearchSection
+                    city="Rio de Janeiro"
+                    title="Buscar no Google"
+                    placeholder="Buscar restaurantes, atrações..."
+                    onAddToRoteiro={handleAddToRoteiro}
+                  />
+                </div>
+              )}
+            </div>
 
             {/* Actions */}
             <div className="flex gap-3 pt-4">
               <Button
                 variant="outline"
                 onClick={handleGenerate}
-                className="flex-1 rounded-xl"
+                disabled={isGenerating}
+                className="flex-1 rounded-xl gap-2"
               >
+                <RefreshCw className="w-4 h-4" />
                 Regenerar
               </Button>
               <Button
-                onClick={() => navigate("/meu-roteiro")}
-                className="flex-1 rounded-xl"
+                onClick={() => {
+                  toast({ title: "Roteiro salvo!", description: `${result.totalItemsPlaced} itens confirmados.` });
+                  navigate("/meu-roteiro");
+                }}
+                className="flex-1 rounded-xl gap-2"
               >
+                <Check className="w-4 h-4" />
                 Usar roteiro
-                <ChevronRight className="w-4 h-4 ml-1" />
               </Button>
             </div>
           </div>

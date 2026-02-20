@@ -1,13 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ChevronLeft, Sparkles, PenTool, Bug } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { ChevronLeft, Sparkles, PenTool } from "lucide-react";
 import { useTripDraft } from "@/hooks/use-trip-draft";
-
-/**
- * ITINERARY DECISION STEP
- * After trip preferences, user chooses automatic or manual itinerary creation.
- */
 
 const ItineraryDecision = () => {
   const navigate = useNavigate();
@@ -18,17 +12,8 @@ const ItineraryDecision = () => {
     return null;
   }
 
-  const handleAutomatic = () => {
-    navigate('/meu-roteiro/automatico');
-  };
-
-  const handleManual = () => {
-    navigate('/meu-roteiro/manual');
-  };
-
   return (
     <div className="min-h-screen bg-background pb-28">
-      {/* Header */}
       <header className="sticky top-0 z-50 px-4 py-4 bg-background/95 backdrop-blur-sm border-b border-border">
         <div className="flex items-center gap-4">
           <button
@@ -41,7 +26,6 @@ const ItineraryDecision = () => {
         </div>
       </header>
 
-      {/* Content */}
       <main className="px-4 py-8">
         <div className="text-center mb-8">
           <h2 className="text-2xl font-serif font-semibold text-foreground mb-2">
@@ -58,7 +42,7 @@ const ItineraryDecision = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            onClick={handleAutomatic}
+            onClick={() => navigate('/meu-roteiro/automatico')}
             className="w-full p-6 bg-primary/10 border-2 border-primary rounded-2xl text-left transition-all hover:bg-primary/20 active:scale-[0.98]"
           >
             <div className="flex items-start gap-4">
@@ -70,7 +54,7 @@ const ItineraryDecision = () => {
                   Criar automático
                 </h3>
                 <p className="text-sm text-muted-foreground">
-                  Roteiro curado pelo The Lucky Trip, baseado nas suas preferências. Pronto para usar.
+                  Roteiro inteligente baseado nas suas preferências, com curadoria do The Lucky Trip.
                 </p>
               </div>
             </div>
@@ -81,7 +65,7 @@ const ItineraryDecision = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            onClick={handleManual}
+            onClick={() => navigate('/meu-roteiro/manual')}
             className="w-full p-6 bg-card border border-border rounded-2xl text-left transition-all hover:bg-accent active:scale-[0.98]"
           >
             <div className="flex items-start gap-4">
@@ -94,29 +78,6 @@ const ItineraryDecision = () => {
                 </h3>
                 <p className="text-sm text-muted-foreground">
                   Monte seu roteiro do zero, escolhendo cada experiência.
-                </p>
-              </div>
-            </div>
-          </motion.button>
-
-          {/* Debug V2 option */}
-          <motion.button
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            onClick={() => navigate('/meu-roteiro/automatico-v2')}
-            className="w-full p-4 bg-card border border-dashed border-primary/30 rounded-2xl text-left transition-all hover:bg-primary/5 active:scale-[0.98]"
-          >
-            <div className="flex items-start gap-4">
-              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                <Bug className="w-5 h-5 text-primary" />
-              </div>
-              <div>
-                <h3 className="font-medium text-foreground text-sm mb-0.5">
-                  Gerar roteiro V2 (debug)
-                </h3>
-                <p className="text-xs text-muted-foreground">
-                  Motor inteligente com scoring por preferências
                 </p>
               </div>
             </div>
