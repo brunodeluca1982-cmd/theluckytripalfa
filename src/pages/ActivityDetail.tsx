@@ -80,21 +80,21 @@ const ExternalActivityView = ({ exp, backPath }: { exp: ExternalExperiencia; bac
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="px-6 py-4 border-b border-border flex items-center justify-between">
-        <Link to={backPath} className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
-          <ChevronLeft className="w-4 h-4" />
-          Voltar
-        </Link>
-        <Button onClick={() => saveItem(exp.id, "activity", exp.nome, false)} variant="outline" size="sm" className="gap-1.5 text-xs">
-          <Plus className="w-3 h-3" />
-          Salvar
-        </Button>
-      </header>
+      {/* Hero Image — full top */}
+      <div className="relative w-full aspect-[4/3] bg-muted overflow-hidden">
+        <img src={getAttractionImage(slug)} alt={exp.nome} className="w-full h-full object-cover" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-transparent" />
+        <div className="absolute top-0 left-0 right-0 px-4 pt-[env(safe-area-inset-top,12px)] pb-2 flex items-center justify-between z-10">
+          <Link to={backPath} className="w-9 h-9 rounded-full bg-black/30 backdrop-blur-md flex items-center justify-center text-white">
+            <ChevronLeft className="w-5 h-5" />
+          </Link>
+          <button onClick={() => saveItem(exp.id, "activity", exp.nome, false)} className="w-9 h-9 rounded-full bg-black/30 backdrop-blur-md flex items-center justify-center text-white">
+            <Plus className="w-5 h-5" />
+          </button>
+        </div>
+      </div>
 
       <main className="pb-12">
-        <div className="w-full aspect-[16/9] bg-muted overflow-hidden">
-          <img src={getAttractionImage(slug)} alt={exp.nome} className="w-full h-full object-cover" />
-        </div>
 
         <div className="px-6 pt-8">
           <p className="text-xs tracking-widest text-muted-foreground uppercase mb-2">
@@ -216,21 +216,21 @@ const ActivityDetail = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="px-6 py-4 border-b border-border flex items-center justify-between">
-        <Link to={backPath} className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
-          <ChevronLeft className="w-4 h-4" />
-          Voltar
-        </Link>
-        <Button onClick={() => saveItem(activity.id, "activity", activity.title, false)} variant="outline" size="sm" className="gap-1.5 text-xs">
-          <Plus className="w-3 h-3" />
-          Salvar
-        </Button>
-      </header>
+      {/* Hero Image — full top */}
+      <div className="relative w-full aspect-[4/3] bg-muted overflow-hidden">
+        <img src={getAttractionImage(from || "")} alt={activity.title} className="w-full h-full object-cover" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-transparent" />
+        <div className="absolute top-0 left-0 right-0 px-4 pt-[env(safe-area-inset-top,12px)] pb-2 flex items-center justify-between z-10">
+          <Link to={backPath} className="w-9 h-9 rounded-full bg-black/30 backdrop-blur-md flex items-center justify-center text-white">
+            <ChevronLeft className="w-5 h-5" />
+          </Link>
+          <button onClick={() => saveItem(activity.id, "activity", activity.title, false)} className="w-9 h-9 rounded-full bg-black/30 backdrop-blur-md flex items-center justify-center text-white">
+            <Plus className="w-5 h-5" />
+          </button>
+        </div>
+      </div>
 
       <main className="pb-12">
-        <div className="w-full aspect-[16/9] bg-muted overflow-hidden">
-          <img src={getAttractionImage(from || "")} alt={activity.title} className="w-full h-full object-cover" />
-        </div>
 
         <div className="px-6 pt-8">
           <p className="text-xs tracking-widest text-muted-foreground uppercase mb-2">
