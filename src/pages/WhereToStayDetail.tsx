@@ -3,7 +3,8 @@ import { ChevronLeft } from "lucide-react";
 import HotelCard from "@/components/HotelCard";
 import { getNeighborhoodById } from "@/data/rio-neighborhoods";
 import RoteiroAccessLink from "@/components/RoteiroAccessLink";
-import { getHotelImage, getNeighborhoodHeroUrl } from "@/data/place-images";
+import { getHotelImage } from "@/data/place-images";
+import { useNeighborhoodHero } from "@/hooks/use-neighborhood-hero";
 import { useExternalHotels } from "@/hooks/use-external-hotels";
 import { useMemo } from "react";
 
@@ -44,6 +45,7 @@ const WhereToStayDetail = () => {
   const neighborhoodData = getNeighborhoodById(neighborhood || "");
   const name = neighborhoodData?.name || neighborhood || "Bairro";
   const description = neighborhoodDescriptions[neighborhood || ""] || `Descubra onde ficar em ${name}.`;
+  const { heroUrl } = useNeighborhoodHero("rio-de-janeiro", neighborhood || "", "Rio de Janeiro", name, getHotelImage(neighborhood || ""));
 
   const hotels = useMemo(() => {
     if (!externalHotels) return [];
@@ -86,7 +88,7 @@ const WhereToStayDetail = () => {
 
         <div className="w-full aspect-[16/9] bg-muted overflow-hidden">
           <img
-            src={getNeighborhoodHeroUrl("rio-de-janeiro", neighborhood || "", getHotelImage(neighborhood || ""))}
+            src={heroUrl}
             alt={`Onde ficar em ${name}`}
             className="w-full h-full object-cover"
             onError={(e) => {
