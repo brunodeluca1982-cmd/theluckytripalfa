@@ -46,71 +46,80 @@ serve(async (req) => {
       );
     }
 
-    // Max 25 origins x 25 destinations per request (Google limit)
-    if (origins.length > 25 || destinations.length > 25) {
-      return new Response(
-        JSON.stringify({ error: "Max 25 origins and 25 destinations per request" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    const originsParam = origins.map(o => `${o.lat},${o.lng}`).join("|");
-    const destsParam = destinations.map(d => `${d.lat},${d.lng}`).join("|");
-
-    const url = new URL("https://maps.googleapis.com/maps/api/distancematrix/json");
-    url.searchParams.set("origins", originsParam);
-    url.searchParams.set("destinations", destsParam);
-    url.searchParams.set("mode", "driving");
-    url.searchParams.set("departure_time", "now");
-    url.searchParams.set("traffic_model", "best_guess");
-    url.searchParams.set("language", "pt-BR");
-    url.searchParams.set("key", GOOGLE_MAPS_API_KEY);
-
-    const response = await fetch(url.toString());
-    const data = await response.json();
-
-    if (data.status !== "OK") {
-      console.error("Distance Matrix API error:", data.status, data.error_message);
-      return new Response(
-        JSON.stringify({ error: `Google API error: ${data.status}`, details: data.error_message }),
-        { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
+    // Google allows max 100 elements (origins × destinations) per request.
+    // We batch to stay within this limit.
+    const MAX_ELEMENTS = 100;
     const results: DistanceElement[] = [];
 
-    for (let i = 0; i < data.rows.length; i++) {
-      const row = data.rows[i];
-      for (let j = 0; j < row.elements.length; j++) {
-        const el = row.elements[j];
-        if (el.status === "OK") {
-          results.push({
-            originId: origins[i].id,
-            destinationId: destinations[j].id,
-            distanceMeters: el.distance.value,
-            distanceText: el.distance.text,
-            durationSeconds: el.duration.value,
-            durationText: el.duration.text,
-            durationInTrafficSeconds: el.duration_in_traffic?.value ?? null,
-            durationInTrafficText: el.duration_in_traffic?.text ?? null,
-          });
-        } else {
-          results.push({
-            originId: origins[i].id,
-            destinationId: destinations[j].id,
-            distanceMeters: -1,
-            distanceText: "N/A",
-            durationSeconds: -1,
-            durationText: "N/A",
-            durationInTrafficSeconds: null,
-            durationInTrafficText: null,
-          });
+    // Split origins into chunks so that chunk.length * destinations.length <= MAX_ELEMENTS
+    const originChunkSize = Math.max(1, Math.floor(MAX_ELEMENTS / Math.max(destinations.length, 1)));
+
+    for (let oStart = 0; oStart < origins.length; oStart += originChunkSize) {
+      const originSlice = origins.slice(oStart, oStart + originChunkSize);
+
+      // If a single origin still produces too many elements, also chunk destinations
+      const destChunkSize = Math.max(1, Math.floor(MAX_ELEMENTS / originSlice.length));
+
+      for (let dStart = 0; dStart < destinations.length; dStart += destChunkSize) {
+        const destSlice = destinations.slice(dStart, dStart + destChunkSize);
+
+        const originsParam = originSlice.map(o => `${o.lat},${o.lng}`).join("|");
+        const destsParam = destSlice.map(d => `${d.lat},${d.lng}`).join("|");
+
+        const url = new URL("https://maps.googleapis.com/maps/api/distancematrix/json");
+        url.searchParams.set("origins", originsParam);
+        url.searchParams.set("destinations", destsParam);
+        url.searchParams.set("mode", "driving");
+        url.searchParams.set("departure_time", "now");
+        url.searchParams.set("traffic_model", "best_guess");
+        url.searchParams.set("language", "pt-BR");
+        url.searchParams.set("key", GOOGLE_MAPS_API_KEY);
+
+        const response = await fetch(url.toString());
+        const data = await response.json();
+
+        if (data.status !== "OK") {
+          console.error("Distance Matrix API error:", data.status, data.error_message);
+          return new Response(
+            JSON.stringify({ error: `Google API error: ${data.status}`, details: data.error_message }),
+            { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+
+        for (let i = 0; i < data.rows.length; i++) {
+          const row = data.rows[i];
+          for (let j = 0; j < row.elements.length; j++) {
+            const el = row.elements[j];
+            if (el.status === "OK") {
+              results.push({
+                originId: originSlice[i].id,
+                destinationId: destSlice[j].id,
+                distanceMeters: el.distance.value,
+                distanceText: el.distance.text,
+                durationSeconds: el.duration.value,
+                durationText: el.duration.text,
+                durationInTrafficSeconds: el.duration_in_traffic?.value ?? null,
+                durationInTrafficText: el.duration_in_traffic?.text ?? null,
+              });
+            } else {
+              results.push({
+                originId: originSlice[i].id,
+                destinationId: destSlice[j].id,
+                distanceMeters: -1,
+                distanceText: "N/A",
+                durationSeconds: -1,
+                durationText: "N/A",
+                durationInTrafficSeconds: null,
+                durationInTrafficText: null,
+              });
+            }
+          }
         }
       }
     }
 
     return new Response(
-      JSON.stringify({ results, rowCount: data.rows.length }),
+      JSON.stringify({ results, rowCount: origins.length }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (e) {
