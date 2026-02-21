@@ -1,30 +1,25 @@
 import { Link, useParams } from "react-router-dom";
-import { ChevronLeft } from "lucide-react";
-import { getNeighborhoodById } from "@/data/rio-neighborhoods";
-import { activitiesByNeighborhood } from "@/data/what-to-do-data";
+import { ChevronLeft, Loader2, Clock, MapPin, Baby, Shield } from "lucide-react";
 import RoteiroAccessLink from "@/components/RoteiroAccessLink";
 import { getAttractionImage } from "@/data/place-images";
 import { GooglePlaceSearchSection } from "@/components/GooglePlaceSearchSection";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import type { PlaceResult } from "@/lib/search-places";
-
-/**
- * O QUE FAZER — NEIGHBORHOOD ACTIVITY LIST
- * 
- * PUBLIC LAYER - Lists activities for a neighborhood
- * 
- * SAVING BEHAVIOR: Save actions are NOT allowed on this page.
- * Users must navigate to individual activity detail pages to save.
- */
+import { useExternalExperiencias, normalizeNeighborhood } from "@/hooks/use-external-experiencias";
 
 const WhatToDoDetail = () => {
   const { neighborhood } = useParams<{ neighborhood: string }>();
-  
-  const neighborhoodData = getNeighborhoodById(neighborhood || "");
-  const name = neighborhoodData?.name || "Bairro";
-  const data = activitiesByNeighborhood[neighborhood || ""];
-  const activities = data?.activities || [];
+  const slug = neighborhood || "";
+
+  const { data: allExperiencias, isLoading } = useExternalExperiencias();
+
+  // Filter experiencias for this neighborhood
+  const experiencias = (allExperiencias || []).filter(
+    (e) => normalizeNeighborhood(e.bairro) === slug
+  );
+
+  const neighborhoodName = experiencias[0]?.bairro || slug;
 
   const handleAddToRoteiro = async (place: PlaceResult) => {
     const { error } = await supabase.from("roteiro_itens").insert({
@@ -50,7 +45,6 @@ const WhatToDoDetail = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header - No page-level save button */}
       <header className="px-6 py-4 border-b border-border flex items-center justify-between">
         <Link
           to="/o-que-fazer"
@@ -62,64 +56,83 @@ const WhatToDoDetail = () => {
         <RoteiroAccessLink />
       </header>
 
-      {/* Content */}
       <main className="pb-12">
-        {/* Title */}
         <div className="px-6 pt-8 pb-6">
           <h1 className="text-4xl font-serif font-semibold text-foreground leading-tight">
-            O que fazer em {name}
+            O que fazer em {neighborhoodName}
           </h1>
         </div>
 
-        {/* Hero Image - Full Width */}
         <div className="w-full aspect-[16/9] bg-muted overflow-hidden">
-          <img 
-            src={getAttractionImage(neighborhood || "")} 
-            alt={`O que fazer em ${name}`}
+          <img
+            src={getAttractionImage(slug)}
+            alt={`O que fazer em ${neighborhoodName}`}
             className="w-full h-full object-cover"
           />
         </div>
 
-        {/* Activities */}
         <div className="px-6 pt-8">
-          {activities.length > 0 ? (
+          {isLoading ? (
+            <div className="flex items-center justify-center py-16">
+              <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+            </div>
+          ) : experiencias.length > 0 ? (
             <div className="space-y-8">
-              {activities.map((activity) => (
+              {experiencias.map((exp) => (
                 <Link
-                  key={activity.id}
-                  to={`/atividade/${activity.id}?from=${neighborhood}`}
+                  key={exp.id}
+                  to={`/atividade/${exp.id}?from=${slug}`}
                   className="block border-b border-border pb-8 last:border-b-0 hover:bg-muted/30 transition-colors -mx-2 px-2 rounded"
                 >
-                  {/* Thumbnail Image */}
                   <div className="w-full aspect-[16/9] bg-muted/50 rounded overflow-hidden mb-4">
-                    <img 
-                      src={activity.mediaUrl || getAttractionImage(neighborhood || "")} 
-                      alt={activity.title}
+                    <img
+                      src={getAttractionImage(slug)}
+                      alt={exp.nome}
                       className="w-full h-full object-cover"
                       loading="lazy"
                     />
                   </div>
-                  
-                  {/* Category */}
+
                   <p className="text-xs tracking-widest text-muted-foreground uppercase mb-2">
-                    {activity.category}
+                    {exp.categoria}
                   </p>
-                  
-                  {/* Title */}
-                  <h2 className="text-2xl font-serif font-medium text-foreground mb-4">
-                    {activity.title}
+
+                  <h2 className="text-2xl font-serif font-medium text-foreground mb-2">
+                    {exp.nome}
                   </h2>
-                  
-                  {/* Description */}
+
+                  {/* Metadata pills */}
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {exp.duracao && (
+                      <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+                        <Clock className="w-3 h-3" /> {exp.duracao}
+                      </span>
+                    )}
+                    {exp.vibe && (
+                      <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+                        {exp.vibe}
+                      </span>
+                    )}
+                    {exp.com_criancas && (
+                      <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+                        <Baby className="w-3 h-3" /> Kids OK
+                      </span>
+                    )}
+                    {exp.seguro_mulher_sozinha && (
+                      <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+                        <Shield className="w-3 h-3" /> Safe solo
+                      </span>
+                    )}
+                  </div>
+
                   <div className="space-y-2 mb-4">
-                    {activity.description.split('\n').map((paragraph, index) => (
+                    {exp.meu_olhar.split("\n").map((paragraph, index) => (
                       <p key={index} className="text-base text-muted-foreground leading-relaxed">
                         {paragraph}
                       </p>
                     ))}
                   </div>
-                  
-                  {/* View indicator */}
+
                   <span className="text-xs text-muted-foreground/60">
                     Ver detalhes
                   </span>
@@ -133,11 +146,10 @@ const WhatToDoDetail = () => {
           )}
         </div>
 
-        {/* Google Places search section */}
         <div className="px-6 pt-8">
           <GooglePlaceSearchSection
             city="Rio de Janeiro"
-            bairro={name}
+            bairro={neighborhoodName}
             title="Outras opções (Google)"
             placeholder="Buscar atrações no Google..."
             onAddToRoteiro={handleAddToRoteiro}
@@ -145,10 +157,9 @@ const WhatToDoDetail = () => {
         </div>
       </main>
 
-      {/* Footer */}
       <footer className="px-6 py-8 border-t border-border">
         <p className="text-xs text-muted-foreground">
-          The Lucky Trip — {name}
+          The Lucky Trip — {neighborhoodName}
         </p>
       </footer>
     </div>

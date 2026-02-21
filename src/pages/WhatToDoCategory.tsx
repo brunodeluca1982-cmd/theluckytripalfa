@@ -1,8 +1,8 @@
 import { Link, useParams } from "react-router-dom";
-import { ChevronLeft } from "lucide-react";
-import { activitiesByNeighborhood } from "@/data/what-to-do-data";
+import { ChevronLeft, Loader2 } from "lucide-react";
 import { getAttractionImage } from "@/data/place-images";
 import RoteiroAccessLink from "@/components/RoteiroAccessLink";
+import { useExternalExperiencias, normalizeNeighborhood } from "@/hooks/use-external-experiencias";
 
 const CATEGORY_LABELS: Record<string, string> = {
   classico: "Clássico",
@@ -14,11 +14,11 @@ const CATEGORY_LABELS: Record<string, string> = {
 };
 
 const CATEGORY_ALIASES: Record<string, string[]> = {
-  classico: ["clássico", "classico", "experiência"],
+  classico: ["clássico", "classico", "experiência", "mirante", "urbano"],
   praia: ["praia"],
   cultura: ["cultura", "parque"],
-  aventura: ["aventura", "atividade ao ar livre"],
-  relax: ["relax", "relaxamento"],
+  aventura: ["aventura", "atividade ao ar livre", "trilha"],
+  relax: ["relax", "relaxamento", "natureza"],
   festa: ["festa", "baladas", "noite", "nightlife"],
 };
 
@@ -28,12 +28,14 @@ const WhatToDoCategory = () => {
   const label = CATEGORY_LABELS[cat] || cat;
   const aliases = CATEGORY_ALIASES[cat] || [cat];
 
-  // Gather all activities across neighborhoods matching the category
-  const matched = Object.values(activitiesByNeighborhood).flatMap((nh) =>
-    nh.activities
-      .filter((a) => aliases.some((alias) => a.category.toLowerCase().includes(alias)))
-      .map((a) => ({ ...a, neighborhoodId: nh.neighborhoodId, neighborhoodName: nh.neighborhoodName }))
-  );
+  const { data: experiencias, isLoading } = useExternalExperiencias();
+
+  const matched = (experiencias || [])
+    .filter((e) => aliases.some((alias) => e.categoria.toLowerCase().includes(alias)))
+    .map((e) => ({
+      ...e,
+      neighborhoodSlug: normalizeNeighborhood(e.bairro),
+    }));
 
   return (
     <div className="min-h-screen bg-background">
@@ -59,34 +61,40 @@ const WhatToDoCategory = () => {
         </div>
 
         <div className="px-6">
-          {matched.length > 0 ? (
+          {isLoading ? (
+            <div className="flex items-center justify-center py-16">
+              <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+            </div>
+          ) : matched.length > 0 ? (
             <div className="space-y-8">
-              {matched.map((activity) => (
+              {matched.map((exp) => (
                 <Link
-                  key={activity.id}
-                  to={`/atividade/${activity.id}?from=${activity.neighborhoodId}`}
+                  key={exp.id}
+                  to={`/atividade/${exp.id}?from=${exp.neighborhoodSlug}`}
                   className="block border-b border-border pb-8 last:border-b-0 hover:bg-muted/30 transition-colors -mx-2 px-2 rounded"
                 >
                   <div className="w-full aspect-[16/9] bg-muted/50 rounded overflow-hidden mb-4">
                     <img
-                      src={activity.mediaUrl || getAttractionImage(activity.neighborhoodId)}
-                      alt={activity.title}
+                      src={getAttractionImage(exp.neighborhoodSlug)}
+                      alt={exp.nome}
                       className="w-full h-full object-cover"
                       loading="lazy"
                     />
                   </div>
                   <p className="text-xs tracking-widest text-muted-foreground uppercase mb-1">
-                    {activity.neighborhoodName}
+                    {exp.bairro}
                   </p>
                   <h2 className="text-2xl font-serif font-medium text-foreground mb-3">
-                    {activity.title}
+                    {exp.nome}
                   </h2>
                   <p className="text-base text-muted-foreground leading-relaxed line-clamp-3">
-                    {activity.description.split("\n")[0]}
+                    {exp.meu_olhar.split("\n")[0]}
                   </p>
-                  <span className="text-xs text-muted-foreground/60 mt-2 inline-block">
-                    Ver detalhes
-                  </span>
+                  {exp.vibe && (
+                    <span className="inline-block mt-2 text-[10px] tracking-widest uppercase text-muted-foreground/70">
+                      {exp.vibe}
+                    </span>
+                  )}
                 </Link>
               ))}
             </div>

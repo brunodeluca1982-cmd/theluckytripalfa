@@ -1,21 +1,23 @@
 import { Link, useParams, useSearchParams } from "react-router-dom";
-import { ChevronLeft, Plus } from "lucide-react";
+import { ChevronLeft, Plus, Clock, Baby, Shield, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useItemSave } from "@/hooks/use-item-save";
 import { activitiesByNeighborhood, cityLevelActivities, Activity } from "@/data/what-to-do-data";
 import { guideActivities } from "@/data/rio-guide-data";
 import { getAttractionImage } from "@/data/place-images";
+import { useExternalExperiencias, normalizeNeighborhood } from "@/hooks/use-external-experiencias";
+import type { ExternalExperiencia } from "@/hooks/use-external-experiencias";
 
 /**
  * ACTIVITY DETAIL PAGE
  * 
- * Individual detail view for a single activity.
- * Each activity has its own unique URL.
- * 
- * SAVING SCOPE: Only this individual activity can be saved (item level).
+ * Resolves activity from:
+ * 1. External Supabase (experiencias table) — primary source
+ * 2. Static what-to-do-data — fallback
+ * 3. Guide activities — last resort
  */
 
-// Mapping from guide data IDs to what-to-do-data IDs (for items with different IDs)
+// Mapping from guide data IDs to what-to-do-data IDs
 const guideIdToWhatToDoId: Record<string, string> = {
   "praia-ipanema": "praia-ipanema",
   "por-sol-arpoador": "por-do-sol-arpoador",
@@ -41,101 +43,169 @@ const guideIdToWhatToDoId: Record<string, string> = {
   "bondinho-st": "bondinho-st",
 };
 
-// Helper to find activity by ID across all neighborhoods, city-level activities, AND guide data
-const findActivityById = (id: string): { activity: Activity; neighborhoodName: string; neighborhoodId: string } | null => {
-  // Try guide ID mapping first
+// Static fallback finder
+const findStaticActivityById = (id: string): { activity: Activity; neighborhoodName: string; neighborhoodId: string } | null => {
   const mappedId = guideIdToWhatToDoId[id] || id;
-  
-  // Debug log to verify which ID is being searched
-  console.log('[ActivityDetail] Searching for activity with id:', id, '-> mapped to:', mappedId);
-  
-  // First, search in neighborhood activities
+
   for (const [neighborhoodId, data] of Object.entries(activitiesByNeighborhood)) {
     const activity = data.activities.find(a => a.id === mappedId);
-    if (activity) {
-      console.log('[ActivityDetail] Found activity in neighborhood:', neighborhoodId, activity.title);
-      return {
-        activity,
-        neighborhoodName: data.neighborhoodName,
-        neighborhoodId,
-      };
-    }
+    if (activity) return { activity, neighborhoodName: data.neighborhoodName, neighborhoodId };
   }
-  
-  // Second, search in city-level activities
+
   const cityActivity = cityLevelActivities.find(a => a.id === mappedId);
   if (cityActivity) {
-    console.log('[ActivityDetail] Found city-level activity:', cityActivity.title);
-    // Convert city-level activity to full Activity format
-    const fullActivity: Activity = {
-      id: cityActivity.id,
-      title: cityActivity.title,
-      category: "Experiência Icônica",
-      description: cityActivity.description,
-    };
     return {
-      activity: fullActivity,
+      activity: { id: cityActivity.id, title: cityActivity.title, category: "Experiência Icônica", description: cityActivity.description },
       neighborhoodName: "Rio de Janeiro",
       neighborhoodId: "city",
     };
   }
-  
-  // Third, search in guide activities (fallback for items not in what-to-do-data)
+
   const guideActivity = guideActivities.find(a => a.id === id || a.id === mappedId);
   if (guideActivity) {
-    console.log('[ActivityDetail] Found guide activity:', guideActivity.name);
-    // Convert guide activity to full Activity format
-    const fullActivity: Activity = {
-      id: guideActivity.id,
-      title: guideActivity.name,
-      category: guideActivity.category,
-      description: guideActivity.description,
-    };
     return {
-      activity: fullActivity,
+      activity: { id: guideActivity.id, title: guideActivity.name, category: guideActivity.category, description: guideActivity.description },
       neighborhoodName: guideActivity.neighborhood,
-      neighborhoodId: guideActivity.neighborhood.toLowerCase().replace(/\s+/g, '-'),
+      neighborhoodId: guideActivity.neighborhood.toLowerCase().replace(/\s+/g, "-"),
     };
   }
-  
-  console.log('[ActivityDetail] Activity not found for id:', id, '(mapped:', mappedId, ')');
+
   return null;
+};
+
+/** Render for an external experiencia */
+const ExternalActivityView = ({ exp, backPath }: { exp: ExternalExperiencia; backPath: string }) => {
+  const { saveItem } = useItemSave();
+  const slug = normalizeNeighborhood(exp.bairro);
+
+  return (
+    <div className="min-h-screen bg-background">
+      <header className="px-6 py-4 border-b border-border flex items-center justify-between">
+        <Link to={backPath} className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
+          <ChevronLeft className="w-4 h-4" />
+          Voltar
+        </Link>
+        <Button onClick={() => saveItem(exp.id, "activity", exp.nome, false)} variant="outline" size="sm" className="gap-1.5 text-xs">
+          <Plus className="w-3 h-3" />
+          Salvar
+        </Button>
+      </header>
+
+      <main className="pb-12">
+        <div className="w-full aspect-[16/9] bg-muted overflow-hidden">
+          <img src={getAttractionImage(slug)} alt={exp.nome} className="w-full h-full object-cover" />
+        </div>
+
+        <div className="px-6 pt-8">
+          <p className="text-xs tracking-widest text-muted-foreground uppercase mb-2">
+            {exp.categoria} • {exp.bairro}
+          </p>
+
+          <h1 className="text-4xl font-serif font-semibold text-foreground leading-tight mb-4">
+            {exp.nome}
+          </h1>
+
+          {/* Metadata pills */}
+          <div className="flex flex-wrap gap-2 mb-6">
+            {exp.duracao && (
+              <span className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-muted text-muted-foreground">
+                <Clock className="w-3 h-3" /> {exp.duracao}
+              </span>
+            )}
+            {exp.melhor_horario && (
+              <span className="text-xs px-2.5 py-1 rounded-full bg-muted text-muted-foreground">
+                🕐 {exp.melhor_horario}
+              </span>
+            )}
+            {exp.vibe && (
+              <span className="text-xs px-2.5 py-1 rounded-full bg-muted text-muted-foreground">
+                ✨ {exp.vibe}
+              </span>
+            )}
+            {exp.com_criancas && (
+              <span className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-muted text-muted-foreground">
+                <Baby className="w-3 h-3" /> Kids OK
+              </span>
+            )}
+            {exp.seguro_mulher_sozinha && (
+              <span className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-muted text-muted-foreground">
+                <Shield className="w-3 h-3" /> Safe solo
+              </span>
+            )}
+            {exp.precisa_reserva && (
+              <span className="text-xs px-2.5 py-1 rounded-full bg-accent text-accent-foreground">
+                📋 Reserva necessária
+              </span>
+            )}
+          </div>
+
+          <div className="space-y-2 mb-6">
+            {exp.meu_olhar.split("\n").map((paragraph, index) => (
+              <p key={index} className="text-base text-muted-foreground leading-relaxed">
+                {paragraph}
+              </p>
+            ))}
+          </div>
+
+          {exp.google_maps_url && (
+            <a href={exp.google_maps_url} target="_blank" rel="noopener noreferrer" className="text-sm text-muted-foreground hover:text-foreground transition-colors underline">
+              Ver no Google Maps
+            </a>
+          )}
+        </div>
+      </main>
+
+      <footer className="px-6 py-8 border-t border-border">
+        <p className="text-xs text-muted-foreground">The Lucky Trip — {exp.bairro}</p>
+      </footer>
+    </div>
+  );
 };
 
 const ActivityDetail = () => {
   const { id } = useParams<{ id: string }>();
   const [searchParams] = useSearchParams();
   const { saveItem } = useItemSave();
-  
-  const result = findActivityById(id || "");
+
+  const { data: experiencias, isLoading } = useExternalExperiencias();
+
   const from = searchParams.get("from");
   const backPath = from === "city" ? "/o-que-fazer" : from ? `/o-que-fazer/${from}` : "/o-que-fazer";
 
+  // 1. Try external experiencias first (by UUID)
+  const externalMatch = (experiencias || []).find((e) => e.id === id);
+  if (externalMatch) {
+    return <ExternalActivityView exp={externalMatch} backPath={backPath} />;
+  }
+
+  // 2. Still loading external? Show spinner
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  // 3. Static fallback
+  const result = findStaticActivityById(id || "");
+
   if (!result) {
-    console.log('[ActivityDetail] Rendering not-found state for id:', id);
     return (
       <div className="min-h-screen bg-background">
-        {/* Header */}
         <header className="px-6 py-4 border-b border-border">
-          <Link
-            to="/o-que-fazer"
-            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-          >
+          <Link to="/o-que-fazer" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
             <ChevronLeft className="w-4 h-4" />
             Voltar
           </Link>
         </header>
-        
-        {/* Error State */}
         <div className="flex flex-col items-center justify-center px-6 py-16">
           <p className="text-lg text-foreground font-medium mb-2">Atividade não encontrada</p>
           <p className="text-sm text-muted-foreground mb-6 text-center">
             Esta atividade pode ter sido removida ou o link está incorreto.
           </p>
           <Button asChild variant="outline">
-            <Link to="/o-que-fazer">
-              Voltar para O Que Fazer
-            </Link>
+            <Link to="/o-que-fazer">Voltar para O Que Fazer</Link>
           </Button>
         </div>
       </div>
@@ -144,116 +214,55 @@ const ActivityDetail = () => {
 
   const { activity, neighborhoodName } = result;
 
-  const handleSave = () => {
-    saveItem(activity.id, "activity", activity.title, false);
-  };
-
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
       <header className="px-6 py-4 border-b border-border flex items-center justify-between">
-        <Link
-          to={backPath}
-          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-        >
+        <Link to={backPath} className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
           <ChevronLeft className="w-4 h-4" />
           Voltar
         </Link>
-        <Button
-          onClick={handleSave}
-          variant="outline"
-          size="sm"
-          className="gap-1.5 text-xs"
-        >
+        <Button onClick={() => saveItem(activity.id, "activity", activity.title, false)} variant="outline" size="sm" className="gap-1.5 text-xs">
           <Plus className="w-3 h-3" />
           Salvar
         </Button>
       </header>
 
-      {/* Content */}
       <main className="pb-12">
-        {/* Hero Image */}
         <div className="w-full aspect-[16/9] bg-muted overflow-hidden">
-          <img 
-            src={getAttractionImage(from || "")} 
-            alt={activity.title}
-            className="w-full h-full object-cover"
-          />
+          <img src={getAttractionImage(from || "")} alt={activity.title} className="w-full h-full object-cover" />
         </div>
 
-        {/* Activity Info */}
         <div className="px-6 pt-8">
-          {/* Category */}
           <p className="text-xs tracking-widest text-muted-foreground uppercase mb-2">
             {activity.category} • {neighborhoodName}
           </p>
-          
-          {/* Title */}
           <h1 className="text-4xl font-serif font-semibold text-foreground leading-tight mb-4">
             {activity.title}
           </h1>
-          
-          {/* Price */}
-          {activity.price && (
-            <p className="text-sm text-muted-foreground mb-4">{activity.price}</p>
-          )}
-          
-          {/* Description */}
+          {activity.price && <p className="text-sm text-muted-foreground mb-4">{activity.price}</p>}
           <div className="space-y-2 mb-6">
-            {activity.description.split('\n').map((paragraph, index) => (
-              <p key={index} className="text-base text-muted-foreground leading-relaxed">
-                {paragraph}
-              </p>
+            {activity.description.split("\n").map((paragraph, index) => (
+              <p key={index} className="text-base text-muted-foreground leading-relaxed">{paragraph}</p>
             ))}
           </div>
-          
-          {/* Metadata */}
           <div className="space-y-2 text-sm text-muted-foreground mb-6">
             {activity.googleMaps && (
-              <p>
-                <a 
-                  href={activity.googleMaps} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="hover:text-foreground transition-colors underline"
-                >
-                  Ver no Google Maps
-                </a>
-              </p>
+              <p><a href={activity.googleMaps} target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors underline">Ver no Google Maps</a></p>
             )}
             {activity.instagram && (
-              <p>
-                <a 
-                  href={`https://instagram.com/${activity.instagram.replace('@', '')}`}
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="hover:text-foreground transition-colors"
-                >
-                  {activity.instagram}
-                </a>
-              </p>
+              <p><a href={`https://instagram.com/${activity.instagram.replace("@", "")}`} target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">{activity.instagram}</a></p>
             )}
           </div>
-          
-          {/* Actions */}
           {activity.externalLink && (
-            <a 
-              href={activity.externalLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-block py-2 px-4 bg-primary text-primary-foreground rounded-lg text-sm hover:opacity-90 transition-opacity"
-            >
+            <a href={activity.externalLink} target="_blank" rel="noopener noreferrer" className="inline-block py-2 px-4 bg-primary text-primary-foreground rounded-lg text-sm hover:opacity-90 transition-opacity">
               Reservar / Saber mais
             </a>
           )}
         </div>
       </main>
 
-      {/* Footer */}
       <footer className="px-6 py-8 border-t border-border">
-        <p className="text-xs text-muted-foreground">
-          The Lucky Trip — {neighborhoodName}
-        </p>
+        <p className="text-xs text-muted-foreground">The Lucky Trip — {neighborhoodName}</p>
       </footer>
     </div>
   );

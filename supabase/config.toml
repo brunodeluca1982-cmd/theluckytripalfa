@@ -26,3 +26,6 @@ verify_jwt = false
 
 [functions.distance-matrix]
 verify_jwt = false
+
+[functions.external-experiencias]
+verify_jwt = false
