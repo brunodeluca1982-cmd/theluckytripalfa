@@ -79,7 +79,7 @@ serve(async (req) => {
       if (!item_id || typeof item_id !== 'string' || item_id.length > 100) {
         return errorResponse('Invalid item_id', 400);
       }
-      if (!item_type || !['hotel', 'restaurant', 'attraction', 'block'].includes(item_type as string)) {
+      if (!item_type || !['hotel', 'restaurant', 'attraction', 'block', 'bairro_hero'].includes(item_type as string)) {
         return errorResponse('Invalid item_type', 400);
       }
       if (!place_query || typeof place_query !== 'string' || place_query.length > 300) {
