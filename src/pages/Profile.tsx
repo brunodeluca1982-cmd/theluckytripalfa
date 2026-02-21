@@ -1,21 +1,14 @@
 import { Link } from "react-router-dom";
-import { BookmarkCheck, Calculator, BookOpen, CreditCard, Settings, MessageCircle } from "lucide-react";
+import { BookmarkCheck, Calculator, BookOpen, CreditCard, Settings, MessageCircle, User } from "lucide-react";
+import { motion } from "framer-motion";
+import { useTripDraft } from "@/hooks/use-trip-draft";
+import { getDestination } from "@/data/destinations-database";
+import { cn } from "@/lib/utils";
+import rioHeroFallback from "@/assets/highlights/rio-de-janeiro-hero.jpg";
 
 /**
- * PROFILE — PERSONAL MANAGEMENT HUB
- * 
- * STRUCTURAL LOCK:
- * This screen is the user's personal space,
- * separate from destination exploration.
- * 
- * RESERVED MODULES (structure only, no logic):
- * 1. Meu Roteiro - saved items shortcut
- * 2. Divisão de Gastos - future split functionality
- * 3. Diário de Viagem - future memory/diary feature
- * 4. Assinatura - account/plan overview
- * 5. Configurações - account settings
- * 
- * No destination content appears here.
+ * PROFILE — Hero/Glass redesign
+ * Matches the iOS premium pattern used across the app.
  */
 
 interface ProfileModule {
@@ -72,52 +65,73 @@ const profileModules: ProfileModule[] = [
 ];
 
 const Profile = () => {
-  return (
-    <div className="min-h-screen bg-background pb-20">
-      {/* Header */}
-      <header className="px-6 pt-12 pb-8">
-        <h1 className="text-4xl font-serif font-semibold text-foreground leading-tight">
-          Perfil
-        </h1>
-        <p className="text-sm text-muted-foreground mt-2">
-          Seu espaço pessoal
-        </p>
-      </header>
+  const { draft } = useTripDraft();
+  const destination = draft.destinationId ? getDestination(draft.destinationId) : null;
+  const heroImage = destination?.imageUrl || draft.destinationImageUrl || rioHeroFallback;
 
-      {/* Profile Modules */}
-      <main className="px-6">
-        <div className="space-y-3">
-          {profileModules.map((module) => {
+  return (
+    <div className="relative min-h-screen pb-24">
+      {/* Hero background */}
+      <div
+        className="fixed inset-0 z-0 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: `url(${heroImage})` }}
+      />
+      <div className="fixed inset-0 z-0 bg-gradient-to-t from-black/85 via-black/50 to-black/30" />
+      <div className="fixed inset-0 z-0 backdrop-blur-[2px]" />
+
+      {/* Content */}
+      <div className="relative z-10 px-5 pt-14 pb-8">
+        {/* Header */}
+        <header className="mb-8">
+          <div className="flex items-center gap-2 mb-1">
+            <User className="w-5 h-5 text-white/80" />
+            <h1 className="text-2xl font-serif font-medium text-white tracking-tight">
+              Perfil
+            </h1>
+          </div>
+          <p className="text-sm text-white/60 font-light">
+            Seu espaço pessoal
+          </p>
+        </header>
+
+        {/* Glass card with modules */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/15 p-4 space-y-3"
+        >
+          {profileModules.map((module, i) => {
             const Icon = module.icon;
             return (
-              <Link
+              <motion.div
                 key={module.id}
-                to={module.path}
-                className="flex items-center gap-4 p-4 bg-card border border-border rounded-lg hover:bg-accent/50 transition-colors"
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.15 + i * 0.05 }}
               >
-                <div className="flex-shrink-0 w-10 h-10 rounded-full bg-muted flex items-center justify-center">
-                  <Icon className="w-5 h-5 text-muted-foreground" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h2 className="text-base font-medium text-foreground">
-                    {module.label}
-                  </h2>
-                  <p className="text-sm text-muted-foreground">
-                    {module.description}
-                  </p>
-                </div>
-              </Link>
+                <Link
+                  to={module.path}
+                  className="flex items-center gap-3.5 p-4 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10 hover:bg-white/10 transition-all active:scale-[0.98]"
+                >
+                  <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0">
+                    <Icon className="w-4.5 h-4.5 text-white/90" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium text-white">{module.label}</p>
+                    <p className="text-xs text-white/50 mt-0.5">{module.description}</p>
+                  </div>
+                </Link>
+              </motion.div>
             );
           })}
-        </div>
-      </main>
+        </motion.div>
 
-      {/* Footer */}
-      <footer className="px-6 py-8 mt-8">
-        <p className="text-xs text-muted-foreground text-center">
+        {/* Footer */}
+        <p className="text-[10px] text-white/30 text-center mt-8">
           The Lucky Trip
         </p>
-      </footer>
+      </div>
     </div>
   );
 };
