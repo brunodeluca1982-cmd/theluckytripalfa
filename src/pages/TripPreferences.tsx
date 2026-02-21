@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTripDraft, PriceStyle } from "@/hooks/use-trip-draft";
 import { format } from "date-fns";
@@ -21,12 +21,12 @@ interface TripStyleOption {
 }
 
 const tripStyleOptions: TripStyleOption[] = [
-  { id: 'gastronomia', label: 'Gastronomia', imageUrl: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400' },
-  { id: 'natureza', label: 'Natureza', imageUrl: 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=400' },
-  { id: 'cultura', label: 'Cultura', imageUrl: 'https://images.unsplash.com/photo-1518998053901-5348d3961a04?w=400' },
-  { id: 'aventura', label: 'Aventura', imageUrl: 'https://images.unsplash.com/photo-1551632811-561732d1e306?w=400' },
-  { id: 'relaxamento', label: 'Relaxamento', imageUrl: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=400' },
-  { id: 'festa', label: 'Festa', imageUrl: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=400' },
+  { id: 'gastronomia', label: 'Gastronomia', imageUrl: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&q=80' },
+  { id: 'natureza', label: 'Natureza', imageUrl: 'https://images.unsplash.com/photo-1433086966358-54859d0ed716?w=400&q=80' },
+  { id: 'cultura', label: 'Cultura', imageUrl: 'https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?w=400&q=80' },
+  { id: 'aventura', label: 'Aventura', imageUrl: 'https://images.unsplash.com/photo-1530488562579-7c1dd2e6667b?w=400&q=80' },
+  { id: 'relaxamento', label: 'Relaxamento', imageUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400&q=80' },
+  { id: 'festa', label: 'Festa', imageUrl: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=400&q=80' },
 ];
 
 const TripPreferences = () => {
@@ -98,19 +98,19 @@ const TripPreferences = () => {
           </div>
 
           {/* Style grid */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-3 gap-2.5">
             {tripStyleOptions.map((style, index) => {
               const isSelected = draft.tripStyles.includes(style.id);
 
               return (
                 <motion.button
                   key={style.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.05 }}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: index * 0.03 }}
                   onClick={() => toggleTripStyle(style.id)}
                   className={cn(
-                    "relative aspect-[4/3] rounded-2xl overflow-hidden transition-all",
+                    "relative aspect-square rounded-xl overflow-hidden transition-all",
                     isSelected
                       ? "ring-2 ring-white ring-offset-2 ring-offset-transparent"
                       : "ring-0"
@@ -118,21 +118,19 @@ const TripPreferences = () => {
                 >
                   <img src={style.imageUrl} alt={style.label} className="absolute inset-0 w-full h-full object-cover" />
                   <div className={cn(
-                    "absolute inset-0 transition-colors",
-                    isSelected ? "bg-primary/40" : "bg-black/30"
+                    "absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent transition-colors",
+                    isSelected && "from-primary/60 via-primary/20 to-transparent"
                   )} />
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-white font-semibold text-lg drop-shadow-lg">{style.label}</span>
+                  <div className="absolute bottom-0 left-0 right-0 p-2">
+                    <span className="text-white text-xs font-medium leading-tight truncate">{style.label}</span>
                   </div>
                   {isSelected && (
                     <motion.div
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
-                      className="absolute top-3 right-3 w-6 h-6 rounded-full bg-white flex items-center justify-center"
+                      className="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-white flex items-center justify-center"
                     >
-                      <svg className="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                      </svg>
+                      <Check className="w-3 h-3 text-primary" />
                     </motion.div>
                   )}
                 </motion.button>
