@@ -397,8 +397,9 @@ const AutoRoteiroV2 = () => {
               </Button>
               <Button
                 onClick={() => {
+                  const roteiroId = `${draft.destinationId}-auto`;
                   toast({ title: "Roteiro salvo!", description: `${result.totalItemsPlaced} itens confirmados.` });
-                  navigate("/meu-roteiro");
+                  navigate(`/meu-roteiro/resultado?roteiro_id=${encodeURIComponent(roteiroId)}`);
                 }}
                 className="flex-1 rounded-xl gap-2"
               >

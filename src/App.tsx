@@ -54,6 +54,7 @@ import IACriarRoteiro from "./pages/ia/IACriarRoteiro";
 import IAMelhorarRoteiro from "./pages/ia/IAMelhorarRoteiro";
 import IALuckyTrip from "./pages/ia/IALuckyTrip";
 import RoteiroFinal from "./pages/RoteiroFinal";
+import RoteiroResultado from "./pages/RoteiroResultado";
 import NotFound from "./pages/NotFound";
 import AdminEventos from "./pages/AdminEventos";
 import { SpotifyPlayerProvider } from "@/contexts/SpotifyPlayerContext";
@@ -166,6 +167,7 @@ const App = () => {
                   <Route path="/meu-roteiro/decisao" element={<ItineraryDecision />} />
                   <Route path="/meu-roteiro/automatico" element={<AutomaticItinerary />} />
                   <Route path="/meu-roteiro/manual" element={<ManualItinerary />} />
+                  <Route path="/meu-roteiro/resultado" element={<RoteiroResultado />} />
                   <Route path="/favoritos" element={<Favoritos />} />
                   <Route path="/planejar/:destinationId" element={<RoteiroPlanner />} />
                   

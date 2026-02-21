@@ -4,6 +4,7 @@ import RestaurantCard from "@/components/RestaurantCard";
 import { getNeighborhoodById } from "@/data/rio-neighborhoods";
 import RoteiroAccessLink from "@/components/RoteiroAccessLink";
 import { getRestaurantImage } from "@/data/place-images";
+import { useNeighborhoodHero } from "@/hooks/use-neighborhood-hero";
 import { useExternalRestaurants, normalizeNeighborhood, generateRestaurantSlug } from "@/hooks/use-external-restaurants";
 import { useMemo } from "react";
 import { GooglePlaceSearchSection } from "@/components/GooglePlaceSearchSection";
@@ -64,6 +65,7 @@ const WhereToEatDetail = () => {
   const neighborhoodData = getNeighborhoodById(neighborhood || "");
   const name = neighborhoodData?.name || neighborhood || "Bairro";
   const description = neighborhoodDescriptions[neighborhood || ""] || `Descubra onde comer em ${name}.`;
+  const { heroUrl } = useNeighborhoodHero("rio-de-janeiro", neighborhood || "", "Rio de Janeiro", name, getRestaurantImage(neighborhood || ""));
 
   const from = searchParams.get("from");
   const backPath = from === "map" ? "/eat-map-view" : "/eat-map-view";
@@ -107,7 +109,7 @@ const WhereToEatDetail = () => {
 
         <div className="w-full aspect-[16/9] bg-muted overflow-hidden">
           <img
-            src={getRestaurantImage(neighborhood || "")}
+            src={heroUrl}
             alt={`Onde comer em ${name}`}
             className="w-full h-full object-cover"
           />

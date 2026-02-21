@@ -2,6 +2,7 @@ import { ChevronLeft, ExternalLink, Instagram } from "lucide-react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { getNeighborhoodById } from "@/data/rio-neighborhoods";
 import { getRestaurantImage } from "@/data/place-images";
+import { useNeighborhoodHero } from "@/hooks/use-neighborhood-hero";
 
 interface Restaurant {
   id: string;
@@ -40,6 +41,8 @@ const NeighborhoodDetailSheet = ({
   restaurants,
 }: NeighborhoodDetailSheetProps) => {
   const neighborhood = neighborhoodId ? getNeighborhoodById(neighborhoodId) : null;
+  const neighborhoodName = neighborhood?.name || neighborhoodId || "";
+  const { heroUrl } = useNeighborhoodHero("rio-de-janeiro", neighborhoodId || "", "Rio de Janeiro", neighborhoodName, getRestaurantImage(neighborhoodId || ""));
 
   const filteredRestaurants = restaurants.filter(
     (r) => r.neighborhood === neighborhoodId
@@ -69,7 +72,7 @@ const NeighborhoodDetailSheet = ({
             {/* Hero Image */}
             <div className="w-full h-48 bg-muted overflow-hidden border-b border-border">
               <img
-                src={getRestaurantImage(neighborhoodId || "")}
+                src={heroUrl}
                 alt={`Onde comer em ${neighborhood?.name || neighborhoodId}`}
                 className="w-full h-full object-cover"
               />
