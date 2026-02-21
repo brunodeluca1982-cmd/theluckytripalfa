@@ -1,8 +1,10 @@
-import { ChevronLeft, ExternalLink, Instagram } from "lucide-react";
+import { ChevronLeft, ExternalLink, Instagram, ChevronRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { getNeighborhoodById } from "@/data/rio-neighborhoods";
 import { getRestaurantImage } from "@/data/place-images";
 import { useNeighborhoodHero } from "@/hooks/use-neighborhood-hero";
+import { generateRestaurantSlug } from "@/hooks/use-external-restaurants";
 
 interface Restaurant {
   id: string;
@@ -40,6 +42,7 @@ const NeighborhoodDetailSheet = ({
   neighborhoodId,
   restaurants,
 }: NeighborhoodDetailSheetProps) => {
+  const navigate = useNavigate();
   const neighborhood = neighborhoodId ? getNeighborhoodById(neighborhoodId) : null;
   const neighborhoodName = neighborhood?.name || neighborhoodId || "";
   const { heroUrl } = useNeighborhoodHero("rio-de-janeiro", neighborhoodId || "", "Rio de Janeiro", neighborhoodName, getRestaurantImage(neighborhoodId || ""));
@@ -91,15 +94,22 @@ const NeighborhoodDetailSheet = ({
 
               {filteredRestaurants.length > 0 ? (
                 <div className="space-y-6">
-                  {filteredRestaurants.map((restaurant) => (
-                    <div
+                  {filteredRestaurants.map((restaurant) => {
+                    const slug = generateRestaurantSlug(restaurant.name);
+                    return (
+                    <button
                       key={restaurant.id}
-                      className="pb-6 border-b border-border last:border-0"
+                      onClick={() => {
+                        onOpenChange(false);
+                        navigate(`/restaurante/${slug}?from=${neighborhoodId || ''}`);
+                      }}
+                      className="w-full text-left pb-6 border-b border-border last:border-0 hover:bg-muted/30 transition-colors rounded -mx-2 px-2 pt-2"
                     >
                       <div className="flex items-start justify-between gap-3 mb-2">
                         <h3 className="text-lg font-medium text-foreground">
                           {restaurant.name}
                         </h3>
+                        <ChevronRight className="w-4 h-4 text-muted-foreground/50 mt-1 flex-shrink-0" />
                       </div>
 
                       {restaurant.category && (
@@ -116,30 +126,33 @@ const NeighborhoodDetailSheet = ({
 
                       <div className="flex items-center gap-4">
                         {restaurant.mapsLink && (
-                          <a
-                            href={restaurant.mapsLink}
-                            target="_blank"
-                            rel="noopener noreferrer"
+                          <span
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              window.open(restaurant.mapsLink, '_blank');
+                            }}
                             className="inline-flex items-center gap-1.5 text-xs text-primary hover:text-primary/80 transition-colors"
                           >
                             <ExternalLink className="w-3.5 h-3.5" />
                             Google Maps
-                          </a>
+                          </span>
                         )}
                         {restaurant.instagram && (
-                          <a
-                            href={`https://instagram.com/${restaurant.instagram.replace('@', '')}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
+                          <span
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              window.open(`https://instagram.com/${restaurant.instagram!.replace('@', '')}`, '_blank');
+                            }}
                             className="inline-flex items-center gap-1.5 text-xs text-primary hover:text-primary/80 transition-colors"
                           >
                             <Instagram className="w-3.5 h-3.5" />
                             {restaurant.instagram}
-                          </a>
+                          </span>
                         )}
                       </div>
-                    </div>
-                  ))}
+                    </button>
+                    );
+                  })}
                 </div>
               ) : (
                 <p className="text-sm text-muted-foreground text-center py-8">
