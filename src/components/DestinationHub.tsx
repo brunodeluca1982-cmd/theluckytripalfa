@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
-import { ChevronLeft, MapPin, Bed, Utensils, Compass, Sparkles, Play, Music } from "lucide-react";
+import { ChevronLeft, MapPin, Bed, Utensils, Compass, Sparkles, Clapperboard, Music } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useCallback } from "react";
 import { clearVideoSeen } from "@/pages/DestinationVideoIntro";
@@ -97,7 +97,7 @@ const DestinationHub = ({ destinationId, name, country, backgroundImage, actions
             className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/15 backdrop-blur-sm border border-white/20 text-white/80 hover:bg-white/25 hover:text-white transition-colors"
             aria-label="Replay intro video"
           >
-            <Play className="w-4 h-4" />
+            <Clapperboard className="w-4 h-4" />
           </button>
           <button
             onClick={handleMusicTap}
