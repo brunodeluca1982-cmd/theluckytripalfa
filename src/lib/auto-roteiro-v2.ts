@@ -84,6 +84,7 @@ export interface SlotItem {
   lng?: number;
   travelFromPrevMinutes?: number;
   travelFromPrevText?: string;
+  travelFromPrevMeters?: number;
 }
 
 export interface DayPlan {
@@ -801,6 +802,8 @@ export async function generateAutomaticItineraryAsync(
           if (!slot) continue;
 
           if (prevSlot && prevSlot.lat && prevSlot.lng && slot.lat && slot.lng) {
+            const key = `${prevSlot.id}->${slot.id}`;
+            const distResult = distanceMap.get(key);
             const minutes = getTravelMinutes(
               prevSlot.id,
               slot.id,
@@ -809,6 +812,7 @@ export async function generateAutomaticItineraryAsync(
               { lat: slot.lat, lng: slot.lng }
             );
             slot.travelFromPrevMinutes = minutes;
+            slot.travelFromPrevMeters = distResult?.distanceMeters ?? Math.round(haversineKm({ lat: prevSlot.lat, lng: prevSlot.lng }, { lat: slot.lat, lng: slot.lng }) * 1000);
             slot.travelFromPrevText = minutes < 60
               ? `${minutes} min`
               : `${Math.floor(minutes / 60)}h${minutes % 60 > 0 ? `${minutes % 60}min` : ""}`;
