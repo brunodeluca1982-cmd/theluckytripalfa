@@ -30,7 +30,7 @@ export const curatedDestinations: Destination[] = [
     name: 'São Paulo',
     country: 'Brasil',
     region: 'Sudeste',
-    imageUrl: 'https://images.unsplash.com/photo-1578002580281-516e14a9070c?w=600&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1543059080-f9b1272213d5?w=600&q=80',
     available: false,
   },
   {
