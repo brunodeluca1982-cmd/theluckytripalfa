@@ -263,6 +263,29 @@ const RoteiroFinal = () => {
             (não inclui hospedagem e passagens aéreas)
           </p>
         </div>
+
+        {/* WhatsApp Concierge */}
+        <div className="mt-4 rounded-[20px] bg-white/60 dark:bg-white/10 backdrop-blur-md border border-white/30 dark:border-white/10 shadow-[0_2px_16px_-4px_rgba(0,0,0,0.06)] p-[18px]">
+          <h3 className="text-sm font-semibold text-foreground">
+            Refine seu roteiro com nosso Concierge
+          </h3>
+          <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+            Atendimento direto e personalizado para ajustar hotéis, reservas e experiências.
+          </p>
+          <button
+            onClick={() => {
+              console.log("whatsapp_concierge_clicked");
+              window.open(
+                "https://wa.me/5521998102132?text=Ol%C3%A1%20vim%20pelo%20The%20Lucky%20Trip%20e%20quero%20refinar%20meu%20roteiro",
+                "_blank",
+                "noopener,noreferrer"
+              );
+            }}
+            className="mt-3 w-full h-12 rounded-full bg-primary text-primary-foreground text-sm font-semibold transition-all active:scale-[0.97] hover:opacity-90"
+          >
+            Falar com Concierge no WhatsApp →
+          </button>
+        </div>
       </main>
 
       {/* Bottom Button - positioned above bottom nav with safe area */}
