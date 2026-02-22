@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, Utensils, Sun, Camera, Mountain, Music, Clock, Moon, MapPin, Car, Footprints } from "lucide-react";
+import { motion } from "framer-motion";
 import { getValidatedLocation } from "@/data/validated-locations";
 import { useWeatherIcons, getTripDayDate } from "@/hooks/use-weather-icons";
 import rioHero from "@/assets/highlights/rio-de-janeiro-hero.jpg";
@@ -284,29 +285,51 @@ const RoteiroFinal = () => {
 
       {/* 3 — Day blocks */}
       <div className="px-4 mt-6 space-y-5">
-        {tripData.days.map((day) => (
-          <DayBlock key={day.day} day={day} tripStartDate={tripStartDate} weatherMap={weatherMap} />
+        {tripData.days.map((day, i) => (
+          <motion.div
+            key={day.day}
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.15 * i, ease: [0.25, 0.46, 0.45, 0.94] }}
+          >
+            <DayBlock day={day} tripStartDate={tripStartDate} weatherMap={weatherMap} />
+          </motion.div>
         ))}
       </div>
 
       {/* Trip total */}
-      <div className="mx-4 mt-5 rounded-2xl bg-primary/5 border border-primary/15 px-5 py-4">
+      <motion.div
+        className="mx-4 mt-5 rounded-2xl bg-primary/5 border border-primary/15 px-5 py-4"
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.15 * tripData.days.length + 0.1 }}
+      >
         <p className="text-sm font-semibold text-foreground">Total estimado: R$ {tripTotal}</p>
         <p className="text-[11px] text-muted-foreground mt-1">(não inclui hospedagem e passagens aéreas)</p>
-      </div>
+      </motion.div>
 
       {/* 4 — Curator Note */}
-      <div className="px-4 mt-5">
+      <motion.div
+        className="px-4 mt-5"
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.15 * tripData.days.length + 0.25 }}
+      >
         <CuratorNote />
-      </div>
+      </motion.div>
 
       {/* 5 — Concierge CTA */}
-      <div className="px-4 mt-4">
+      <motion.div
+        className="px-4 mt-4"
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.15 * tripData.days.length + 0.4 }}
+      >
         <ConciergeCTA onContact={() => {
           console.log("whatsapp_concierge_clicked");
           navigate("/wa");
         }} />
-      </div>
+      </motion.div>
 
       {/* Bottom action */}
       <div className="fixed bottom-safe-cta left-0 right-0 p-4 bg-background/95 backdrop-blur-sm border-t border-border z-40">
