@@ -23,6 +23,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { SlotItemPhoto } from "@/components/roteiro/SlotItemPhoto";
 import type { PlaceResult } from "@/lib/search-places";
+import { resolveHotelRoute } from "@/lib/hotel-slug";
 
 const slotConfig: Record<SlotKind, { label: string; icon: React.ElementType; color: string; suggestedTime: string }> = {
   morning: { label: "Manhã", icon: Sun, color: "text-amber-500", suggestedTime: "09:00" },
@@ -44,7 +45,7 @@ function getItemDetailRoute(slot: SlotItem): string | null {
     slot.slotKind === "lunch" || (slot.slotKind === "evening" && !slot.tags.includes("festa"))
   ) return `/restaurante/${id}`;
   if (cat.includes("samba") || cat.includes("show") || cat.includes("balada") || cat.includes("festa") || slot.tags.includes("festa")) return `/atividade/${id}`;
-  if (cat.includes("hotel") || cat.includes("pousada") || cat.includes("hostel")) return `/hotel/${id}`;
+  if (cat.includes("hotel") || cat.includes("pousada") || cat.includes("hostel")) return resolveHotelRoute(id, "rio-de-janeiro");
   return `/atividade/${id}`;
 }
 
@@ -331,7 +332,7 @@ const AutoRoteiroV2 = () => {
                 </div>
                 <div
                   className="flex items-start gap-3 cursor-pointer hover:bg-primary/5 rounded-lg p-2 -m-1 transition-colors"
-                  onClick={() => navigate(`/hotel/${result.recommendedHotel!.id}`)}
+                  onClick={() => navigate(resolveHotelRoute(result.recommendedHotel!.id, "rio-de-janeiro", result.recommendedHotel!.neighborhood))}
                 >
                   <SlotItemPhoto
                     itemId={result.recommendedHotel.id}
