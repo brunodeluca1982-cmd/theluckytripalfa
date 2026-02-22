@@ -1,5 +1,7 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { ChevronLeft } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 /**
  * DESTINOS PAGE
@@ -14,6 +16,7 @@ interface Destination {
   country: string;
   available: boolean;
   path: string;
+  imageUrl: string;
 }
 
 const destinations: Destination[] = [
@@ -23,6 +26,7 @@ const destinations: Destination[] = [
     country: "Brasil",
     available: true,
     path: "/destino/rio-de-janeiro/intro",
+    imageUrl: "https://images.unsplash.com/photo-1483729558449-99ef09a8c325?w=800",
   },
   {
     id: "sao-paulo",
@@ -30,6 +34,7 @@ const destinations: Destination[] = [
     country: "Brasil",
     available: false,
     path: "/destino/sao-paulo",
+    imageUrl: "https://images.unsplash.com/photo-1543059080-f9b1272213d5?w=600",
   },
   {
     id: "lisboa",
@@ -37,10 +42,29 @@ const destinations: Destination[] = [
     country: "Portugal",
     available: false,
     path: "/destino/lisboa",
+    imageUrl: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600",
   },
 ];
 
+const CardImage = ({ src, alt }: { src: string; alt: string }) => {
+  const [loaded, setLoaded] = useState(false);
+  return (
+    <>
+      {!loaded && <Skeleton className="absolute inset-0 w-full h-full rounded-none" />}
+      <img
+        src={src}
+        alt={alt}
+        className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${loaded ? "opacity-100" : "opacity-0"}`}
+        loading="lazy"
+        onLoad={() => setLoaded(true)}
+      />
+    </>
+  );
+};
+
 const Destinos = () => {
+  const [featured, ...rest] = destinations;
+
   return (
     <div className="min-h-screen bg-background pb-20">
       {/* Header */}
@@ -53,29 +77,64 @@ const Destinos = () => {
         </h1>
       </header>
 
-      {/* Destinations List */}
+      {/* Destinations Grid */}
       <main className="px-6">
-        <div className="space-y-3">
-          {destinations.map((destination) => (
+        {/* Featured Card */}
+        <Link
+          to={featured.available ? featured.path : "#"}
+          className={`block relative overflow-hidden rounded-[18px] h-[190px] md:h-[220px] ${
+            !featured.available ? "opacity-50 cursor-not-allowed" : ""
+          }`}
+          onClick={(e) => !featured.available && e.preventDefault()}
+        >
+          <CardImage src={featured.imageUrl} alt={featured.name} />
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{ background: "linear-gradient(to bottom, transparent 60%, rgba(0,0,0,0.55) 100%)" }}
+          />
+          {/* Tag pill */}
+          <span
+            className="absolute top-3 left-3 text-[11px] font-medium text-white px-2.5 py-1 rounded-full"
+            style={{ background: "rgba(255,255,255,0.18)" }}
+          >
+            Em destaque
+          </span>
+          {/* Text */}
+          <div className="absolute bottom-3 left-3.5 z-10">
+            <h2 className="text-xl font-serif font-bold text-white drop-shadow-md leading-tight">
+              {featured.name}
+            </h2>
+            <p className="text-xs text-white/80 mt-0.5">
+              Cidade · {featured.country}
+            </p>
+          </div>
+        </Link>
+
+        {/* Grid Cards */}
+        <div className="grid grid-cols-2 mt-4" style={{ gap: 14 }}>
+          {rest.map((dest) => (
             <Link
-              key={destination.id}
-              to={destination.available ? destination.path : "#"}
-              className={`block py-4 px-6 bg-card border rounded-lg transition-colors ${
-                destination.available
-                  ? "border-border hover:bg-accent cursor-pointer"
-                  : "border-border/50 opacity-50 cursor-not-allowed"
+              key={dest.id}
+              to={dest.available ? dest.path : "#"}
+              className={`block relative overflow-hidden rounded-[18px] ${
+                !dest.available ? "opacity-50 cursor-not-allowed" : ""
               }`}
-              onClick={(e) => !destination.available && e.preventDefault()}
+              style={{ aspectRatio: "4/5" }}
+              onClick={(e) => !dest.available && e.preventDefault()}
             >
-              <p className="text-xs text-muted-foreground uppercase tracking-wide">
-                {destination.country}
-              </p>
-              <h2 className="text-lg font-serif font-medium text-foreground">
-                {destination.name}
-              </h2>
-              {!destination.available && (
-                <span className="text-xs text-muted-foreground">Em breve</span>
-              )}
+              <CardImage src={dest.imageUrl} alt={dest.name} />
+              <div
+                className="absolute inset-0 pointer-events-none"
+                style={{ background: "linear-gradient(to bottom, transparent 60%, rgba(0,0,0,0.55) 100%)" }}
+              />
+              <div className="absolute bottom-3 left-3 z-10">
+                <h2 className="text-base font-serif font-bold text-white drop-shadow-md leading-tight">
+                  {dest.name}
+                </h2>
+                <p className="text-[11px] text-white/80 mt-0.5">
+                  Cidade · {dest.country}
+                </p>
+              </div>
             </Link>
           ))}
         </div>
