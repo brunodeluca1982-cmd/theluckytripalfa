@@ -89,30 +89,30 @@ const WhereToEatDetail = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="px-6 py-4 border-b border-border flex items-center justify-between">
-        <Link
-          to={backPath}
-          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <ChevronLeft className="w-4 h-4" />
-          Voltar
-        </Link>
-        <RoteiroAccessLink />
-      </header>
+      {/* Hero Image — photo-first */}
+      <div className="relative w-full aspect-[4/3] bg-muted overflow-hidden">
+        <img
+          src={heroUrl}
+          alt={`Onde comer em ${name}`}
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-transparent" />
+        <div className="absolute top-0 left-0 right-0 px-4 pt-[env(safe-area-inset-top,12px)] pb-2 flex items-center justify-between z-10">
+          <Link
+            to={backPath}
+            className="w-9 h-9 rounded-full bg-black/30 backdrop-blur-md flex items-center justify-center text-white"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </Link>
+          <RoteiroAccessLink />
+        </div>
+      </div>
 
       <main className="pb-12">
         <div className="px-6 pt-8 pb-6">
           <h1 className="text-4xl font-serif font-semibold text-foreground leading-tight">
             Onde comer em {name}
           </h1>
-        </div>
-
-        <div className="w-full aspect-[16/9] bg-muted overflow-hidden">
-          <img
-            src={heroUrl}
-            alt={`Onde comer em ${name}`}
-            className="w-full h-full object-cover"
-          />
         </div>
 
         <div className="px-6 pt-8 pb-10">
