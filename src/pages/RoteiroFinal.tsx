@@ -1,40 +1,61 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, Utensils, Sun, Camera, Mountain, Music, Clock, Moon, MapPin, Car, Footprints } from "lucide-react";
+import { ChevronLeft, Utensils, Sun, Camera, Mountain, Music, Clock, Moon, MapPin, Car, Footprints, CalendarDays, Users, Hotel, Gauge, MapPinned, ListChecks } from "lucide-react";
 import { motion } from "framer-motion";
 import { getValidatedLocation } from "@/data/validated-locations";
 import { useWeatherIcons, getTripDayDate } from "@/hooks/use-weather-icons";
-import rioHero from "@/assets/highlights/rio-de-janeiro-hero.jpg";
 
-/* ─── Sub-components ─── */
+/* ─── Animation helpers ─── */
 
-const HeroHeader = ({ destination, onBack }: { destination: string; onBack: () => void }) => (
-  <div className="relative w-full h-72 overflow-hidden">
-    <img src={rioHero} alt={destination} className="absolute inset-0 w-full h-full object-cover scale-105 blur-[2px]" />
-    <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/40 to-black/70" />
+const fadeUp = (delay = 0) => ({
+  initial: { opacity: 0, y: 18 } as const,
+  animate: { opacity: 1, y: 0 } as const,
+  transition: { duration: 0.45, delay, ease: [0.25, 0.46, 0.45, 0.94] as [number, number, number, number] },
+});
+
+/* ─── 1. Clean Header ─── */
+
+const CleanHeader = ({ destination, onBack }: { destination: string; onBack: () => void }) => (
+  <header className="px-4 pt-5 pb-6 bg-background border-b border-border">
     <button
       onClick={onBack}
-      className="absolute top-5 left-4 z-10 p-2 rounded-full bg-white/15 backdrop-blur-md border border-white/20"
+      className="mb-4 flex items-center gap-1.5 text-muted-foreground text-sm hover:text-foreground transition-colors"
       aria-label="Voltar"
     >
-      <ChevronLeft className="w-5 h-5 text-white" />
+      <ChevronLeft className="w-4 h-4" />
+      <span>Voltar</span>
     </button>
-    <div className="absolute bottom-6 left-5 right-5 z-10">
-      <p className="text-white/70 text-xs tracking-[0.2em] uppercase font-sans mb-1">The Lucky Trip</p>
-      <h1 className="text-3xl font-serif font-semibold text-white leading-tight">{destination}</h1>
-      <p className="text-white/60 text-sm font-sans mt-1 italic">Roteiro personalizado para você</p>
+    <h1 className="text-2xl font-serif font-semibold text-foreground leading-tight">{destination}</h1>
+    <p className="text-sm text-muted-foreground mt-1">Roteiro organizado para sua viagem</p>
+  </header>
+);
+
+/* ─── 2. Executive Summary ─── */
+
+const ExecutiveSummary = ({ dates, totalDays, pace, mainRegion, travelers, hotel }: {
+  dates: string; totalDays: number; pace: string; mainRegion: string; travelers: string; hotel: string;
+}) => (
+  <div className="mx-4 mt-5 rounded-xl bg-muted/40 border border-border/60 p-5">
+    <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.15em] mb-3">Resumo do roteiro</p>
+    <div className="grid grid-cols-2 gap-y-3.5 gap-x-4">
+      <SummaryItem icon={<CalendarDays className="w-3.5 h-3.5" />} label="Datas" value={dates} />
+      <SummaryItem icon={<Clock className="w-3.5 h-3.5" />} label="Duração" value={`${totalDays} dias`} />
+      <SummaryItem icon={<Gauge className="w-3.5 h-3.5" />} label="Ritmo" value={pace} />
+      <SummaryItem icon={<MapPinned className="w-3.5 h-3.5" />} label="Região principal" value={mainRegion} />
+      <SummaryItem icon={<Users className="w-3.5 h-3.5" />} label="Viajantes" value={travelers} />
+      <SummaryItem icon={<Hotel className="w-3.5 h-3.5" />} label="Hospedagem" value={hotel} />
     </div>
   </div>
 );
 
-const TripSummaryBar = ({ dates, travelers, hotelName, hotelNeighborhood }: {
-  dates: string; travelers: string; hotelName: string; hotelNeighborhood: string;
-}) => (
-  <div className="mx-4 -mt-5 relative z-20 rounded-2xl bg-white/60 dark:bg-white/10 backdrop-blur-xl border border-white/40 dark:border-white/10 shadow-sm px-5 py-4">
-    <div className="flex flex-wrap gap-x-5 gap-y-2 text-xs text-foreground/70">
-      <div><span className="font-medium text-foreground">Datas</span><br />{dates}</div>
-      <div><span className="font-medium text-foreground">Viajantes</span><br />{travelers}</div>
-      <div><span className="font-medium text-foreground">Hotel</span><br />{hotelName} · {hotelNeighborhood}</div>
+const SummaryItem = ({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) => (
+  <div className="flex items-start gap-2">
+    <div className="w-5 h-5 rounded-md bg-muted flex items-center justify-center flex-shrink-0 text-muted-foreground mt-0.5">
+      {icon}
+    </div>
+    <div className="min-w-0">
+      <p className="text-[10px] text-muted-foreground uppercase tracking-wide">{label}</p>
+      <p className="text-xs font-medium text-foreground leading-snug">{value}</p>
     </div>
   </div>
 );
@@ -42,13 +63,13 @@ const TripSummaryBar = ({ dates, travelers, hotelName, hotelNeighborhood }: {
 /* ─── Icon helpers ─── */
 
 const iconMap: Record<string, { icon: React.ReactNode; bg: string }> = {
-  meal:      { icon: <Utensils className="w-4 h-4 text-orange-600/80" />, bg: "bg-orange-100 dark:bg-orange-900/30" },
-  sunset:    { icon: <Sun className="w-4 h-4 text-amber-600/80" />,      bg: "bg-amber-100 dark:bg-amber-900/30" },
-  landmark:  { icon: <Camera className="w-4 h-4 text-primary" />,        bg: "bg-primary/10" },
-  nature:    { icon: <Mountain className="w-4 h-4 text-green-600/80" />,  bg: "bg-green-100 dark:bg-green-900/30" },
-  nightlife: { icon: <Music className="w-4 h-4 text-purple-600/80" />,    bg: "bg-purple-100 dark:bg-purple-900/30" },
-  departure: { icon: <Clock className="w-4 h-4 text-primary" />,         bg: "bg-primary/10" },
-  activity:  { icon: <MapPin className="w-4 h-4 text-primary" />,        bg: "bg-primary/10" },
+  meal:      { icon: <Utensils className="w-3.5 h-3.5 text-orange-600/80" />, bg: "bg-orange-50 dark:bg-orange-900/20" },
+  sunset:    { icon: <Sun className="w-3.5 h-3.5 text-amber-600/80" />,      bg: "bg-amber-50 dark:bg-amber-900/20" },
+  landmark:  { icon: <Camera className="w-3.5 h-3.5 text-primary" />,        bg: "bg-primary/8" },
+  nature:    { icon: <Mountain className="w-3.5 h-3.5 text-green-600/80" />,  bg: "bg-green-50 dark:bg-green-900/20" },
+  nightlife: { icon: <Music className="w-3.5 h-3.5 text-purple-600/80" />,    bg: "bg-purple-50 dark:bg-purple-900/20" },
+  departure: { icon: <Clock className="w-3.5 h-3.5 text-muted-foreground" />, bg: "bg-muted/60" },
+  activity:  { icon: <MapPin className="w-3.5 h-3.5 text-primary" />,        bg: "bg-primary/8" },
 };
 
 const getIconData = (t: string) => iconMap[t] ?? iconMap.activity;
@@ -59,7 +80,7 @@ const blockLabels: Record<string, { label: string; icon: React.ReactNode }> = {
   evening:   { label: "Noite",  icon: <Moon className="w-3 h-3 text-indigo-400" /> },
 };
 
-/* ─── Day Block ─── */
+/* ─── 3. Day Block ─── */
 
 interface DayActivity {
   time: string;
@@ -84,22 +105,31 @@ interface DayData {
   costs: { food: number; activities: number; transport: number; total: number };
 }
 
+const formatDayDate = (startDate: Date, dayNum: number) => {
+  const d = new Date(startDate);
+  d.setDate(d.getDate() + dayNum - 1);
+  return d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" });
+};
+
 const DayBlock = ({ day, tripStartDate, weatherMap }: {
   day: DayData; tripStartDate: Date; weatherMap: Record<string, { icon: string; label?: string }>;
 }) => {
   let currentBlock = "";
   const isoDate = getTripDayDate(tripStartDate, day.day);
   const w = weatherMap[isoDate];
+  const dateStr = formatDayDate(tripStartDate, day.day);
 
   return (
-    <section className="rounded-2xl bg-card/80 backdrop-blur-sm border border-border/60 overflow-hidden">
+    <section className="rounded-xl bg-card border border-border/70 overflow-hidden">
       {/* Day header */}
-      <div className="px-5 pt-5 pb-3 border-b border-border/40">
-        <div className="flex items-baseline gap-2">
-          <h2 className="text-xl font-serif font-semibold text-foreground">Dia {day.day}</h2>
-          {w && <span className="text-sm opacity-70">{w.icon}</span>}
+      <div className="px-5 pt-5 pb-3 border-b border-border/50">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-lg font-semibold text-foreground">Dia {day.day}</h2>
+            <p className="text-xs text-muted-foreground mt-0.5">{dateStr} · {day.title.replace(/^Dia \d+ — /, "")}</p>
+          </div>
+          {w && <span className="text-base">{w.icon}</span>}
         </div>
-        <p className="text-xs text-muted-foreground mt-0.5">{day.title.replace(/^Dia \d+ — /, "")}</p>
       </div>
 
       {/* Activities */}
@@ -113,26 +143,26 @@ const DayBlock = ({ day, tripStartDate, weatherMap }: {
           return (
             <div key={idx}>
               {showBlock && bl && (
-                <div className="flex items-center gap-2 pt-4 pb-1.5">
+                <div className="flex items-center gap-2 pt-5 pb-1.5 border-t border-border/30 mt-2 first:mt-0 first:border-0">
                   {bl.icon}
                   <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.15em]">{bl.label}</span>
                 </div>
               )}
 
               {isTransport ? (
-                <div className="flex items-center gap-3 py-1.5 opacity-50">
+                <div className="flex items-center gap-3 py-1.5 opacity-45">
                   <span className="w-11 text-[11px] tabular-nums text-muted-foreground">{a.time}</span>
-                  <div className="w-6 h-6 rounded-md bg-muted/40 flex items-center justify-center">
+                  <div className="w-5 h-5 rounded flex items-center justify-center">
                     {a.mode === "walking"
-                      ? <Footprints className="w-3.5 h-3.5 text-muted-foreground" />
-                      : <Car className="w-3.5 h-3.5 text-muted-foreground" />}
+                      ? <Footprints className="w-3 h-3 text-muted-foreground" />
+                      : <Car className="w-3 h-3 text-muted-foreground" />}
                   </div>
                   <p className="text-[11px] text-muted-foreground flex-1">{a.from} → {a.to} · {a.duration}</p>
                 </div>
               ) : (
                 <div className="flex items-start gap-3 py-2.5">
                   <span className="w-11 text-[11px] tabular-nums text-muted-foreground pt-0.5">{a.time}</span>
-                  <div className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 ${getIconData(a.icon || "activity").bg}`}>
+                  <div className={`w-6 h-6 rounded-md flex items-center justify-center flex-shrink-0 ${getIconData(a.icon || "activity").bg}`}>
                     {getIconData(a.icon || "activity").icon}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -147,42 +177,71 @@ const DayBlock = ({ day, tripStartDate, weatherMap }: {
       </div>
 
       {/* Cost footer */}
-      <div className="px-5 py-4 bg-muted/30 border-t border-border/40">
-        <div className="flex flex-wrap gap-2 text-[11px]">
-          <span className="bg-orange-100 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300 px-2.5 py-1 rounded-full">Alimentação R$ {day.costs.food}</span>
-          <span className="bg-primary/10 text-primary px-2.5 py-1 rounded-full">Atividades R$ {day.costs.activities}</span>
-          <span className="bg-muted text-muted-foreground px-2.5 py-1 rounded-full">Transporte R$ {day.costs.transport}</span>
+      <div className="px-5 py-3.5 bg-muted/25 border-t border-border/40">
+        <div className="flex items-center justify-between">
+          <div className="flex flex-wrap gap-2 text-[10px]">
+            <span className="text-muted-foreground">Alimentação R${day.costs.food}</span>
+            <span className="text-muted-foreground">·</span>
+            <span className="text-muted-foreground">Atividades R${day.costs.activities}</span>
+            <span className="text-muted-foreground">·</span>
+            <span className="text-muted-foreground">Transporte R${day.costs.transport}</span>
+          </div>
+          <p className="text-xs font-semibold text-foreground whitespace-nowrap">R$ {day.costs.total}</p>
         </div>
-        <p className="text-sm font-semibold text-foreground mt-2">Total do dia: R$ {day.costs.total}</p>
       </div>
     </section>
   );
 };
 
-/* ─── Curator Note ─── */
+/* ─── 4. Logistics Block ─── */
+
+const LogisticsBlock = ({ neighborhoods }: { neighborhoods: string[] }) => (
+  <div className="rounded-xl bg-muted/30 border border-border/60 px-5 py-5">
+    <div className="flex items-center gap-2 mb-3">
+      <ListChecks className="w-4 h-4 text-muted-foreground" />
+      <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.15em]">Organização prática</p>
+    </div>
+    <ul className="space-y-2 text-sm text-foreground/80">
+      <li className="flex items-start gap-2">
+        <span className="text-muted-foreground mt-1">•</span>
+        <span>Priorize deslocamentos pela manhã cedo, quando o trânsito é menor.</span>
+      </li>
+      <li className="flex items-start gap-2">
+        <span className="text-muted-foreground mt-1">•</span>
+        <span>Bairros envolvidos: {neighborhoods.join(", ")}.</span>
+      </li>
+      <li className="flex items-start gap-2">
+        <span className="text-muted-foreground mt-1">•</span>
+        <span>Reservas recomendadas para restaurantes com ícone de refeição, especialmente no jantar.</span>
+      </li>
+    </ul>
+  </div>
+);
+
+/* ─── 5. Curator Note (objective) ─── */
 
 const CuratorNote = () => (
-  <div className="rounded-2xl bg-accent/40 dark:bg-accent/20 border border-border/40 px-5 py-5">
-    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-[0.15em] mb-2">Nota do Curador</p>
-    <p className="text-sm text-foreground/80 italic leading-relaxed font-serif">
-      "Esse roteiro equilibra experiência local com ritmo confortável — manhãs ativas, tardes livres para improvisar e noites em endereços que valem cada minuto. Ajuste à vontade; o melhor roteiro é o que você faz seu."
+  <div className="rounded-xl bg-muted/25 border border-border/50 px-5 py-4">
+    <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.15em] mb-2">Observação do Curador</p>
+    <p className="text-sm text-foreground/75 leading-relaxed">
+      Esse roteiro prioriza deslocamentos curtos e experiências com melhor custo-benefício. Os horários sugeridos consideram tempo de deslocamento real. Ajuste conforme necessário.
     </p>
   </div>
 );
 
-/* ─── Concierge CTA ─── */
+/* ─── 6. Refinement CTA ─── */
 
-const ConciergeCTA = ({ onContact }: { onContact: () => void }) => (
-  <div className="rounded-2xl bg-white/60 dark:bg-white/10 backdrop-blur-md border border-white/30 dark:border-white/10 shadow-sm px-5 py-5">
-    <p className="text-sm font-semibold text-foreground">Quer ajustar algo?</p>
+const RefinementCTA = ({ onContact }: { onContact: () => void }) => (
+  <div className="rounded-xl bg-card border border-border/60 px-5 py-4">
+    <p className="text-sm font-medium text-foreground">Precisa ajustar algo específico?</p>
     <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-      Posso refinar hotéis, horários e reservas — atendimento direto e personalizado.
+      Posso revisar hotéis, horários e encaixes do roteiro.
     </p>
     <button
       onClick={onContact}
-      className="mt-3 w-full h-11 rounded-full bg-foreground text-background text-sm font-medium transition-all active:scale-[0.97] hover:opacity-90"
+      className="mt-3 w-full h-10 rounded-lg border border-border bg-muted/40 text-foreground text-sm font-medium transition-all active:scale-[0.98] hover:bg-muted/70"
     >
-      Falar com Concierge →
+      Solicitar ajuste
     </button>
   </div>
 );
@@ -199,7 +258,7 @@ const RoteiroFinal = () => {
   // --- Static demo data (unchanged logic) ---
   const tripData = {
     destination: "Rio de Janeiro",
-    dates: "15 Jan → 18 Jan 2025",
+    dates: "15/01/2025 — 18/01/2025",
     travelers: "2 adultos, 1 criança",
     hotel: {
       id: "fasano",
@@ -270,28 +329,34 @@ const RoteiroFinal = () => {
 
   const tripTotal = tripData.days.reduce((s, d) => s + d.costs.total, 0);
 
+  // Extract unique neighborhoods from all activities
+  const allNeighborhoods = Array.from(new Set(
+    tripData.days.flatMap(d => d.activities.filter(a => a.neighborhood).map(a => a.neighborhood!))
+  ));
+
+  const dayCount = tripData.days.length;
+
   return (
     <div className="min-h-screen bg-background pb-32">
-      {/* 1 — Hero */}
-      <HeroHeader destination={tripData.destination} onBack={() => navigate("/")} />
+      {/* 1 — Clean Header */}
+      <CleanHeader destination={tripData.destination} onBack={() => navigate("/")} />
 
-      {/* 2 — Summary bar */}
-      <TripSummaryBar
-        dates={tripData.dates}
-        travelers={tripData.travelers}
-        hotelName={tripData.hotel.name}
-        hotelNeighborhood={tripData.hotel.neighborhood}
-      />
+      {/* 2 — Executive Summary */}
+      <motion.div {...fadeUp(0.05)}>
+        <ExecutiveSummary
+          dates={tripData.dates}
+          totalDays={dayCount}
+          pace="Moderado"
+          mainRegion="Zona Sul"
+          travelers={tripData.travelers}
+          hotel={`${tripData.hotel.name} · ${tripData.hotel.neighborhood}`}
+        />
+      </motion.div>
 
       {/* 3 — Day blocks */}
-      <div className="px-4 mt-6 space-y-5">
+      <div className="px-4 mt-6 space-y-4">
         {tripData.days.map((day, i) => (
-          <motion.div
-            key={day.day}
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.15 * i, ease: [0.25, 0.46, 0.45, 0.94] }}
-          >
+          <motion.div key={day.day} {...fadeUp(0.1 + 0.12 * i)}>
             <DayBlock day={day} tripStartDate={tripStartDate} weatherMap={weatherMap} />
           </motion.div>
         ))}
@@ -299,33 +364,28 @@ const RoteiroFinal = () => {
 
       {/* Trip total */}
       <motion.div
-        className="mx-4 mt-5 rounded-2xl bg-primary/5 border border-primary/15 px-5 py-4"
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.15 * tripData.days.length + 0.1 }}
+        className="mx-4 mt-4 rounded-xl bg-muted/30 border border-border/50 px-5 py-3.5 flex items-center justify-between"
+        {...fadeUp(0.1 + 0.12 * dayCount + 0.05)}
       >
-        <p className="text-sm font-semibold text-foreground">Total estimado: R$ {tripTotal}</p>
-        <p className="text-[11px] text-muted-foreground mt-1">(não inclui hospedagem e passagens aéreas)</p>
+        <div>
+          <p className="text-sm font-semibold text-foreground">Total estimado: R$ {tripTotal}</p>
+          <p className="text-[10px] text-muted-foreground mt-0.5">Não inclui hospedagem e passagens aéreas</p>
+        </div>
       </motion.div>
 
-      {/* 4 — Curator Note */}
-      <motion.div
-        className="px-4 mt-5"
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.15 * tripData.days.length + 0.25 }}
-      >
+      {/* 4 — Logistics */}
+      <motion.div className="px-4 mt-5" {...fadeUp(0.1 + 0.12 * dayCount + 0.15)}>
+        <LogisticsBlock neighborhoods={allNeighborhoods} />
+      </motion.div>
+
+      {/* 5 — Curator Note */}
+      <motion.div className="px-4 mt-4" {...fadeUp(0.1 + 0.12 * dayCount + 0.25)}>
         <CuratorNote />
       </motion.div>
 
-      {/* 5 — Concierge CTA */}
-      <motion.div
-        className="px-4 mt-4"
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.15 * tripData.days.length + 0.4 }}
-      >
-        <ConciergeCTA onContact={() => {
+      {/* 6 — Refinement CTA */}
+      <motion.div className="px-4 mt-4" {...fadeUp(0.1 + 0.12 * dayCount + 0.35)}>
+        <RefinementCTA onContact={() => {
           console.log("whatsapp_concierge_clicked");
           navigate("/wa");
         }} />
@@ -333,7 +393,7 @@ const RoteiroFinal = () => {
 
       {/* Bottom action */}
       <div className="fixed bottom-safe-cta left-0 right-0 p-4 bg-background/95 backdrop-blur-sm border-t border-border z-40">
-        <Button onClick={() => navigate("/")} variant="outline" className="w-full h-14 text-lg font-semibold rounded-2xl">
+        <Button onClick={() => navigate("/")} variant="outline" className="w-full h-12 text-base font-medium rounded-xl">
           Voltar ao app
         </Button>
       </div>
