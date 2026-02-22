@@ -1,5 +1,6 @@
+import { useState, useCallback, useRef, useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
-import { ChevronLeft, Loader2 } from "lucide-react";
+import { ChevronLeft, Loader2, MapPin } from "lucide-react";
 import RoteiroAccessLink from "@/components/RoteiroAccessLink";
 import {
   useExternalExperiencias,
@@ -8,6 +9,9 @@ import {
 } from "@/hooks/use-external-experiencias";
 import { usePlacePhoto, buildPlaceQuery } from "@/hooks/use-place-photo";
 import { getAttractionImage } from "@/data/place-images";
+import CategoryMapPreview from "@/components/category-map/CategoryMapPreview";
+import ExpandedMapSheet from "@/components/category-map/ExpandedMapSheet";
+import { useItemCoordinates, type MapItem } from "@/components/category-map/useItemCoordinates";
 
 /* ───── Category labels ───── */
 const CATEGORY_LABELS: Record<string, string> = {
@@ -49,14 +53,12 @@ const CATEGORY_FILTERS: Record<string, (e: ExternalExperiencia) => boolean> = {
   aventura: (e) => {
     const cat = normalizeStr(e.categoria);
     if (["aventura", "caminhada"].includes(cat)) return true;
-    // Natureza with high effort → adventure
     if (cat === "natureza" && e.nivel_esforco >= 2) return true;
     return false;
   },
   relax: (e) => {
     const cat = normalizeStr(e.categoria);
     if (["relax", "relaxamento"].includes(cat)) return true;
-    // Natureza with low effort → relax (gardens, light parks)
     if (cat === "natureza" && e.nivel_esforco <= 1) return true;
     return false;
   },
@@ -70,7 +72,19 @@ const CATEGORY_FILTERS: Record<string, (e: ExternalExperiencia) => boolean> = {
 
 /* ───── Per-item photo card ───── */
 
-function CategoryItemCard({ exp }: { exp: ExternalExperiencia & { neighborhoodSlug: string } }) {
+function CategoryItemCard({
+  exp,
+  isHighlighted,
+  onViewOnMap,
+  hasCoords,
+  cardRef,
+}: {
+  exp: ExternalExperiencia & { neighborhoodSlug: string };
+  isHighlighted: boolean;
+  onViewOnMap: () => void;
+  hasCoords: boolean;
+  cardRef?: React.Ref<HTMLDivElement>;
+}) {
   const placeQuery = buildPlaceQuery(exp.nome, exp.bairro);
   const { photoUrl, isLoading: photoLoading } = usePlacePhoto(
     exp.id,
@@ -82,38 +96,57 @@ function CategoryItemCard({ exp }: { exp: ExternalExperiencia & { neighborhoodSl
   const heroImage = photoUrl || fallbackImage;
 
   return (
-    <Link
-      to={`/atividade/${exp.id}?from=${exp.neighborhoodSlug}`}
-      className="block border-b border-border pb-8 last:border-b-0 hover:bg-muted/30 transition-colors -mx-2 px-2 rounded"
+    <div
+      ref={cardRef}
+      className={`block border-b border-border pb-8 last:border-b-0 transition-colors -mx-2 px-2 rounded ${
+        isHighlighted
+          ? "bg-primary/5 ring-1 ring-primary/20"
+          : ""
+      }`}
     >
-      <div className="w-full aspect-[16/9] bg-muted/50 rounded overflow-hidden mb-4 relative">
-        {photoLoading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-muted/30 z-10">
-            <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
-          </div>
+      <Link
+        to={`/atividade/${exp.id}?from=${exp.neighborhoodSlug}`}
+        className="block hover:bg-muted/30 transition-colors rounded"
+      >
+        <div className="w-full aspect-[16/9] bg-muted/50 rounded overflow-hidden mb-4 relative">
+          {photoLoading && (
+            <div className="absolute inset-0 flex items-center justify-center bg-muted/30 z-10">
+              <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+            </div>
+          )}
+          <img
+            src={heroImage}
+            alt={exp.nome}
+            className="w-full h-full object-cover"
+            loading="lazy"
+          />
+        </div>
+        <p className="text-xs tracking-widest text-muted-foreground uppercase mb-1">
+          {exp.bairro}
+        </p>
+        <h2 className="text-2xl font-serif font-medium text-foreground mb-3">
+          {exp.nome}
+        </h2>
+        <p className="text-base text-muted-foreground leading-relaxed line-clamp-3">
+          {exp.meu_olhar.split("\n")[0]}
+        </p>
+        {exp.vibe && (
+          <span className="inline-block mt-2 text-[10px] tracking-widest uppercase text-muted-foreground/70">
+            {exp.vibe}
+          </span>
         )}
-        <img
-          src={heroImage}
-          alt={exp.nome}
-          className="w-full h-full object-cover"
-          loading="lazy"
-        />
-      </div>
-      <p className="text-xs tracking-widest text-muted-foreground uppercase mb-1">
-        {exp.bairro}
-      </p>
-      <h2 className="text-2xl font-serif font-medium text-foreground mb-3">
-        {exp.nome}
-      </h2>
-      <p className="text-base text-muted-foreground leading-relaxed line-clamp-3">
-        {exp.meu_olhar.split("\n")[0]}
-      </p>
-      {exp.vibe && (
-        <span className="inline-block mt-2 text-[10px] tracking-widest uppercase text-muted-foreground/70">
-          {exp.vibe}
-        </span>
+      </Link>
+
+      {hasCoords && (
+        <button
+          onClick={onViewOnMap}
+          className="mt-3 inline-flex items-center gap-1.5 text-xs text-primary hover:text-primary/80 transition-colors"
+        >
+          <MapPin className="w-3.5 h-3.5" />
+          Ver no mapa
+        </button>
       )}
-    </Link>
+    </div>
   );
 }
 
@@ -134,6 +167,45 @@ const WhatToDoCategory = () => {
       ...e,
       neighborhoodSlug: normalizeNeighborhood(e.bairro),
     }));
+
+  const mapItems = useItemCoordinates(matched);
+  const coordsSet = new Set(mapItems.map((m) => m.id));
+
+  const [mapSheetOpen, setMapSheetOpen] = useState(false);
+  const [focusItemId, setFocusItemId] = useState<string | null>(null);
+  const [highlightedId, setHighlightedId] = useState<string | null>(null);
+  const cardRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+
+  // Clear highlight after a few seconds
+  useEffect(() => {
+    if (!highlightedId) return;
+    const t = setTimeout(() => setHighlightedId(null), 3000);
+    return () => clearTimeout(t);
+  }, [highlightedId]);
+
+  const handleViewOnMap = useCallback((id: string) => {
+    setFocusItemId(id);
+    setMapSheetOpen(true);
+  }, []);
+
+  const handleMapSelectItem = useCallback((id: string) => {
+    setHighlightedId(id);
+  }, []);
+
+  const handleSheetClose = useCallback(() => {
+    setMapSheetOpen(false);
+    setFocusItemId(null);
+
+    // Auto-scroll to highlighted card when sheet closes
+    if (highlightedId) {
+      const el = cardRefs.current.get(highlightedId);
+      if (el) {
+        setTimeout(() => {
+          el.scrollIntoView({ behavior: "smooth", block: "center" });
+        }, 350);
+      }
+    }
+  }, [highlightedId]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -164,11 +236,31 @@ const WhatToDoCategory = () => {
               <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
             </div>
           ) : matched.length > 0 ? (
-            <div className="space-y-8">
-              {matched.map((exp) => (
-                <CategoryItemCard key={exp.id} exp={exp} />
-              ))}
-            </div>
+            <>
+              <CategoryMapPreview
+                items={mapItems}
+                onOpen={() => {
+                  setFocusItemId(null);
+                  setMapSheetOpen(true);
+                }}
+              />
+
+              <div className="space-y-8">
+                {matched.map((exp) => (
+                  <CategoryItemCard
+                    key={exp.id}
+                    exp={exp}
+                    isHighlighted={highlightedId === exp.id}
+                    hasCoords={coordsSet.has(exp.id)}
+                    onViewOnMap={() => handleViewOnMap(exp.id)}
+                    cardRef={(el) => {
+                      if (el) cardRefs.current.set(exp.id, el);
+                      else cardRefs.current.delete(exp.id);
+                    }}
+                  />
+                ))}
+              </div>
+            </>
           ) : (
             <p className="text-base text-muted-foreground">
               Sem sugestões por aqui ainda.
@@ -182,6 +274,15 @@ const WhatToDoCategory = () => {
           The Lucky Trip — {label}
         </p>
       </footer>
+
+      <ExpandedMapSheet
+        open={mapSheetOpen}
+        onClose={handleSheetClose}
+        categoryLabel={label}
+        items={mapItems}
+        focusItemId={focusItemId}
+        onSelectItem={handleMapSelectItem}
+      />
     </div>
   );
 };
