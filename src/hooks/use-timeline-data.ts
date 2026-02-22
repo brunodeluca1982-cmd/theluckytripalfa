@@ -133,23 +133,12 @@ export const useTimelineData = ({
         travelBlocks.push(null);
       }
 
-      // Simple weather hints per day (mock — replace with backend data when available)
-      const weatherOptions = [
-        { icon: "☀️", label: "Ensolarado" },
-        { icon: "⛅", label: "Parcialmente nublado" },
-        { icon: "☁️", label: "Nublado" },
-        { icon: "🌧️", label: "Chuva leve" },
-      ];
-      const weather = weatherOptions[dayNum % weatherOptions.length];
-
       days.push({
         dayNumber: dayNum,
         activities,
         travelBlocks,
         hasIssues: issueCount > 0,
         issueCount,
-        weatherIcon: weather.icon,
-        weatherLabel: weather.label,
       });
     }
 

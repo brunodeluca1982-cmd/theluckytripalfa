@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, MapPin, Utensils, Sun, Camera, Mountain, Music, Car, Footprints, Clock, Moon } from "lucide-react";
 import { getValidatedLocation } from "@/data/validated-locations";
+import { useWeatherIcons, getTripDayDate } from "@/hooks/use-weather-icons";
 
 /**
  * ROTEIRO FINAL - Static template for finalized itinerary
@@ -11,6 +12,9 @@ import { getValidatedLocation } from "@/data/validated-locations";
 
 const RoteiroFinal = () => {
   const navigate = useNavigate();
+  // Rio center coords for weather
+  const weatherMap = useWeatherIcons({ lat: -22.9068, lon: -43.1729 });
+  const tripStartDate = new Date("2025-01-15"); // matches tripData.dates
 
   // Static demo data for Rio 3 days with validated locations
   // All places referenced here must exist in validated-locations.ts
@@ -157,7 +161,20 @@ const RoteiroFinal = () => {
             
             return (
               <div key={day.day} className="bg-card rounded-2xl p-4 border border-border">
-                <h2 className="font-semibold text-foreground text-lg mb-4">{day.title}</h2>
+                <h2 className="font-semibold text-foreground text-lg mb-4">
+                  {day.title}
+                  {(() => {
+                    const isoDate = getTripDayDate(tripStartDate, day.day);
+                    const w = weatherMap[isoDate];
+                    if (!w) return null;
+                    return (
+                      <span className="ml-1.5 text-sm font-normal opacity-80">
+                        {w.icon}
+                        {w.label && <span className="ml-1 text-xs opacity-70">{w.label}</span>}
+                      </span>
+                    );
+                  })()}
+                </h2>
                 
                 <div className="space-y-1">
                   {day.activities.map((activity, idx) => {
