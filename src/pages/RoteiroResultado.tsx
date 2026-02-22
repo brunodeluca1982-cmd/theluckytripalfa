@@ -129,7 +129,7 @@ const RoteiroResultado = () => {
             >
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-foreground">Refinar no WhatsApp</p>
-                <p className="text-xs text-muted-foreground">Eu ajusto seu roteiro em 5 minutos com você.</p>
+                <p className="text-xs text-muted-foreground">Falo com o Concierge The Lucky Trip e ajusto seu roteiro com você.</p>
               </div>
               <WhatsAppIcon />
             </a>
@@ -202,7 +202,7 @@ const RoteiroResultado = () => {
               className="flex items-center justify-center gap-2 w-full py-3 rounded-xl border border-border bg-card hover:bg-accent transition-colors text-sm font-medium text-foreground"
             >
               <WhatsAppIcon />
-              Falar com Concierge no WhatsApp
+              Falar com o Concierge The Lucky Trip no WhatsApp
             </a>
           </div>
         )}
