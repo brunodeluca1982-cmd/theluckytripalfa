@@ -275,11 +275,8 @@ const RoteiroFinal = () => {
           <button
             onClick={() => {
               console.log("whatsapp_concierge_clicked");
-              window.open(
-                "https://wa.me/5521998102132?text=Ol%C3%A1%20vim%20pelo%20The%20Lucky%20Trip%20e%20quero%20refinar%20meu%20roteiro",
-                "_blank",
-                "noopener,noreferrer"
-              );
+              window.location.href =
+                "https://wa.me/5521998102132?text=Ol%C3%A1%20vim%20pelo%20The%20Lucky%20Trip%20e%20quero%20refinar%20meu%20roteiro";
             }}
             className="mt-3 w-full h-12 rounded-full bg-primary text-primary-foreground text-sm font-semibold transition-all active:scale-[0.97] hover:opacity-90"
           >
