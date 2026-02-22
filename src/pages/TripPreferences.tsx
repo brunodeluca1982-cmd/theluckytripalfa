@@ -1,3 +1,4 @@
+import { useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ChevronLeft, ChevronRight, Check } from "lucide-react";
@@ -32,6 +33,12 @@ const tripStyleOptions: TripStyleOption[] = [
 const TripPreferences = () => {
   const navigate = useNavigate();
   const { draft, toggleTripStyle, setPriceStyle, tripDays, isDestinationSelected } = useTripDraft();
+  const priceStyleRef = useRef<HTMLDivElement>(null);
+  const ctaRef = useRef<HTMLDivElement>(null);
+
+  const scrollTo = useCallback((ref: React.RefObject<HTMLDivElement | null>, delay = 300) => {
+    setTimeout(() => ref.current?.scrollIntoView({ behavior: "smooth", block: "center" }), delay);
+  }, []);
 
   if (!isDestinationSelected) {
     navigate('/meu-roteiro', { replace: true });
@@ -108,7 +115,7 @@ const TripPreferences = () => {
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: index * 0.03 }}
-                  onClick={() => toggleTripStyle(style.id)}
+                  onClick={() => { toggleTripStyle(style.id); scrollTo(priceStyleRef); }}
                   className={cn(
                     "relative aspect-square rounded-xl overflow-hidden transition-all",
                     isSelected
@@ -139,7 +146,7 @@ const TripPreferences = () => {
           </div>
 
           {/* Price style — glass panel */}
-          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/15">
+          <div ref={priceStyleRef} className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/15">
             <p className="text-sm text-white/60 mb-3 text-center">
               Estilo de viagem <span className="text-xs">(opcional)</span>
             </p>
@@ -149,7 +156,7 @@ const TripPreferences = () => {
                 return (
                   <button
                     key={option.value}
-                    onClick={() => setPriceStyle(option.value)}
+                    onClick={() => { setPriceStyle(option.value); scrollTo(ctaRef); }}
                     className={cn(
                       "flex-1 max-w-[100px] py-3 px-2 rounded-xl border transition-all text-center",
                       isSelected
@@ -167,7 +174,7 @@ const TripPreferences = () => {
         </main>
 
         {/* Fixed CTA */}
-        <div className="fixed bottom-safe-cta left-0 right-0 p-4 z-40">
+        <div ref={ctaRef} className="fixed bottom-safe-cta left-0 right-0 p-4 z-40">
           <div className="bg-black/40 backdrop-blur-md rounded-2xl p-3 border border-white/10">
             <Button
               onClick={handleContinue}
