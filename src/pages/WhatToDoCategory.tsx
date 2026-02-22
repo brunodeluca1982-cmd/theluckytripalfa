@@ -22,9 +22,10 @@ const CATEGORY_LABELS: Record<string, string> = {
 /* ───── Smart filter: maps UI category → filter function ───── */
 
 const CLASSIC_NAMES = [
-  "pão de açúcar", "cristo redentor", "corcovado", "jardim botânico",
-  "lagoa rodrigo de freitas", "escadaria selarón", "arcos da lapa",
-  "maracanã", "museu do amanhã", "aquário do rio", "mureta da urca",
+  "pao de acucar", "cristo redentor", "corcovado", "jardim botanico",
+  "lagoa rodrigo de freitas", "escadaria selaron", "arcos da lapa",
+  "maracana", "museu do amanha", "aquario do rio", "mureta da urca",
+  "por do sol no arpoador",
 ];
 
 function normalizeStr(s: string) {
@@ -35,7 +36,9 @@ const CATEGORY_FILTERS: Record<string, (e: ExternalExperiencia) => boolean> = {
   classicos: (e) => {
     const cat = normalizeStr(e.categoria);
     const nome = normalizeStr(e.nome);
+    const vibe = normalizeStr(e.vibe || "");
     if (["mirante", "urbano"].includes(cat)) return true;
+    if (vibe.includes("classico do rio")) return true;
     return CLASSIC_NAMES.some((c) => nome.includes(c));
   },
   praias: (e) => normalizeStr(e.categoria) === "praia",
