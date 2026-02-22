@@ -37,6 +37,8 @@ interface DayData {
   travelBlocks: (TravelInfo | null)[];
   hasIssues: boolean;
   issueCount: number;
+  weatherIcon?: string;
+  weatherLabel?: string;
 }
 
 interface MultiDayTimelineProps {
@@ -93,9 +95,19 @@ const DayTimelineColumn = ({
             <span className="text-sm font-bold text-primary">{dayData.dayNumber}</span>
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-foreground">Dia {dayData.dayNumber}</h3>
+            <h3 className="text-sm font-semibold text-foreground">
+              Dia {dayData.dayNumber}
+              {dayData.weatherIcon && (
+                <span className="ml-1.5 text-xs font-normal opacity-80">
+                  {dayData.weatherIcon}
+                </span>
+              )}
+            </h3>
             <p className="text-[10px] text-muted-foreground">
               {dayData.activities.length} {dayData.activities.length === 1 ? 'atividade' : 'atividades'}
+              {dayData.weatherLabel && (
+                <span className="ml-1 opacity-70">· {dayData.weatherLabel}</span>
+              )}
             </p>
           </div>
         </div>
