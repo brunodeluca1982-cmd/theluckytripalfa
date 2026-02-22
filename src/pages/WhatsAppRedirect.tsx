@@ -5,7 +5,11 @@ const WA_URL =
 
 const WhatsAppRedirect = () => {
   useEffect(() => {
-    window.location.replace(WA_URL);
+    try {
+      window.top!.location.href = WA_URL;
+    } catch {
+      window.location.href = WA_URL;
+    }
   }, []);
 
   return (
