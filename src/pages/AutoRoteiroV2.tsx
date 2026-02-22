@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { ChevronLeft, Loader2, MapPin, Utensils, Sun, Moon, Coffee, ChevronRight, Check, RefreshCw, Plus, Car, Footprints, Clock, Hotel, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTripDraft } from "@/hooks/use-trip-draft";
+import { useWeatherIcons, getTripDayDate } from "@/hooks/use-weather-icons";
 import { buildWhatsAppUrl } from "@/lib/whatsapp-concierge";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -53,6 +54,7 @@ const AutoRoteiroV2 = () => {
   const [result, setResult] = useState<GeneratorResult | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [showAddPlace, setShowAddPlace] = useState(false);
+  const weatherMap = useWeatherIcons({ destinationId: draft.destinationId });
 
   const days = Math.max(1, tripDays);
 
@@ -401,7 +403,21 @@ const AutoRoteiroV2 = () => {
                 >
                   {/* Day header */}
                   <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-base font-semibold text-foreground">Dia {day.dayIndex}</h3>
+                    <h3 className="text-base font-semibold text-foreground">
+                      Dia {day.dayIndex}
+                      {(() => {
+                        if (!draft.arrivalAt) return null;
+                        const isoDate = getTripDayDate(draft.arrivalAt, day.dayIndex);
+                        const w = weatherMap[isoDate];
+                        if (!w) return null;
+                        return (
+                          <span className="ml-1.5 text-sm font-normal opacity-80">
+                            {w.icon}
+                            {w.label && <span className="ml-1 text-xs opacity-70">{w.label}</span>}
+                          </span>
+                        );
+                      })()}
+                    </h3>
                     <div className="flex items-center gap-2">
                       {day.totalTravelMinutes > 0 && (
                         <span className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
