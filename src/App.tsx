@@ -4,6 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import WhatsAppRedirect from "./pages/WhatsAppRedirect";
 import SplashScreen from "@/components/SplashScreen";
 import MainLayout from "@/components/MainLayout";
 import Index from "./pages/Index";
@@ -118,6 +119,7 @@ const App = () => {
           <Routes>
             {/* Standalone pages (no app shell) */}
             <Route path="/roteiro/rio-3-dias-final" element={<RoteiroFinal />} />
+            <Route path="/wa" element={<WhatsAppRedirect />} />
             <Route path="/admin-eventos" element={<AdminEventos />} />
             
             {/* App pages (with bottom navigation) */}
