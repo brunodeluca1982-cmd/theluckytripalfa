@@ -2,7 +2,7 @@
  * WhatsApp Concierge — single source of truth for wa.me links.
  */
 
-const WA_PHONE = "5511999999999";
+const WA_PHONE = "5521998102132";
 const WA_BASE = `https://wa.me/${WA_PHONE}`;
 
 export interface WhatsAppContext {
@@ -11,7 +11,7 @@ export interface WhatsAppContext {
 }
 
 export function buildWhatsAppUrl(ctx?: WhatsAppContext): string {
-  let msg = "Olá Quero ajuda para refinar meu roteiro no The Lucky Trip.";
+  let msg = "Olá Concierge The Lucky Trip, quero ajuda para refinar meu roteiro.";
 
   if (ctx?.destino) {
     msg += ` Meu destino é ${ctx.destino}`;

@@ -153,7 +153,7 @@ const IAAssistant = () => {
       ? [
           {
             id: "whatsapp",
-            label: "Falar com Concierge",
+            label: "Falar com o Concierge The Lucky Trip",
             description: "Refinamos seu roteiro em 5 minutos pelo WhatsApp.",
             icon: MessageCircle,
             isWhatsApp: true,
