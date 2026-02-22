@@ -199,18 +199,16 @@ const HotelDetail = () => {
                 </a>
               </p>
             )}
-            {siteUrl && (
-              <p>
-                <a
-                  href={siteUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:text-foreground transition-colors underline"
-                >
-                  Site oficial
-                </a>
-              </p>
-            )}
+            <p>
+              <a
+                href="https://tidd.ly/4kOcJUx"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-foreground transition-colors underline"
+              >
+                Reserve aqui
+              </a>
+            </p>
           </div>
         </div>
       </main>
