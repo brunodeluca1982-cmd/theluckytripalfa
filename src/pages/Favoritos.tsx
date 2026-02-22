@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Input } from "@/components/ui/input";
 import { useSavedItems, type SavedItemRecord } from "@/hooks/use-saved-items";
 import { toast } from "@/hooks/use-toast";
+import { resolveHotelRoute } from "@/lib/hotel-slug";
 
 const typeIcons: Record<string, React.ReactNode> = {
   block: <PartyPopper className="w-4 h-4" />,
@@ -35,7 +36,7 @@ const filterOptions: { value: FilterType; label: string }[] = [
 
 function getDetailRoute(item: SavedItemRecord): string | null {
   switch (item.type) {
-    case "hotel": return `/hotel/${item.id}`;
+    case "hotel": return resolveHotelRoute(item.id, "rio-de-janeiro");
     case "restaurant": return `/restaurante/${item.id}`;
     case "activity": return `/atividade/${item.id}`;
     default: return null;
