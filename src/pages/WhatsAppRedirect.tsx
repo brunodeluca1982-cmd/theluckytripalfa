@@ -1,22 +1,24 @@
 import { useEffect } from "react";
 
-const WA_URL =
-  "https://api.whatsapp.com/send?phone=5521998102132&text=Ol%C3%A1%2C%20vim%20pelo%20The%20Lucky%20Trip%20e%20quero%20refinar%20meu%20roteiro";
+const MSG = "Olá, vim pelo The Lucky Trip e quero refinar meu roteiro";
+const PHONE = "5521998102132";
+const URL_APP = `whatsapp://send?phone=${PHONE}&text=${encodeURIComponent(MSG)}`;
+const URL_WEB = `https://api.whatsapp.com/send?phone=${PHONE}&text=${encodeURIComponent(MSG)}`;
 
 const WhatsAppRedirect = () => {
   useEffect(() => {
-    try {
-      window.top!.location.href = WA_URL;
-    } catch {
-      window.location.href = WA_URL;
-    }
+    window.location.href = URL_APP;
+    const t = setTimeout(() => {
+      window.location.href = URL_WEB;
+    }, 800);
+    return () => clearTimeout(t);
   }, []);
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center gap-3 bg-background text-foreground">
       <p className="text-lg font-medium">Abrindo WhatsApp...</p>
       <a
-        href={WA_URL}
+        href={URL_WEB}
         target="_blank"
         rel="noopener noreferrer"
         className="text-sm text-primary underline"
