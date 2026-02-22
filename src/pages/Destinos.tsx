@@ -79,10 +79,10 @@ const Destinos = () => {
 
       {/* Destinations Grid */}
       <main className="px-6">
-        {/* Featured Card */}
+      {/* Featured Card */}
         <Link
           to={featured.available ? featured.path : "#"}
-          className={`block relative overflow-hidden rounded-[18px] h-[190px] md:h-[220px] ${
+          className={`block relative overflow-hidden rounded-[22px] h-[210px] md:h-[240px] shadow-[0_2px_12px_-4px_rgba(0,0,0,0.08)] ${
             !featured.available ? "opacity-50 cursor-not-allowed" : ""
           }`}
           onClick={(e) => !featured.available && e.preventDefault()}
@@ -90,33 +90,25 @@ const Destinos = () => {
           <CardImage src={featured.imageUrl} alt={featured.name} />
           <div
             className="absolute inset-0 pointer-events-none"
-            style={{ background: "linear-gradient(to bottom, transparent 60%, rgba(0,0,0,0.55) 100%)" }}
+            style={{ background: "linear-gradient(to bottom, transparent 55%, rgba(0,0,0,0.35) 100%)" }}
           />
-          {/* Tag pill */}
-          <span
-            className="absolute top-3 left-3 text-[11px] font-medium text-white px-2.5 py-1 rounded-full"
-            style={{ background: "rgba(255,255,255,0.18)" }}
-          >
-            Em destaque
-          </span>
-          {/* Text */}
-          <div className="absolute bottom-3 left-3.5 z-10">
-            <h2 className="text-xl font-serif font-bold text-white drop-shadow-md leading-tight">
+          <div className="absolute bottom-4 left-4 z-10">
+            <h2 className="text-xl font-serif font-bold text-white leading-tight">
               {featured.name}
             </h2>
-            <p className="text-xs text-white/80 mt-0.5">
+            <p className="text-xs text-white/75 mt-0.5">
               Cidade · {featured.country}
             </p>
           </div>
         </Link>
 
         {/* Grid Cards */}
-        <div className="grid grid-cols-2 mt-4" style={{ gap: 14 }}>
+        <div className="grid grid-cols-2 mt-3.5" style={{ gap: 12 }}>
           {rest.map((dest) => (
             <Link
               key={dest.id}
               to={dest.available ? dest.path : "#"}
-              className={`block relative overflow-hidden rounded-[18px] ${
+              className={`block relative overflow-hidden rounded-[22px] shadow-[0_2px_12px_-4px_rgba(0,0,0,0.08)] ${
                 !dest.available ? "opacity-50 cursor-not-allowed" : ""
               }`}
               style={{ aspectRatio: "4/5" }}
@@ -125,13 +117,13 @@ const Destinos = () => {
               <CardImage src={dest.imageUrl} alt={dest.name} />
               <div
                 className="absolute inset-0 pointer-events-none"
-                style={{ background: "linear-gradient(to bottom, transparent 60%, rgba(0,0,0,0.55) 100%)" }}
+                style={{ background: "linear-gradient(to bottom, transparent 55%, rgba(0,0,0,0.35) 100%)" }}
               />
-              <div className="absolute bottom-3 left-3 z-10">
-                <h2 className="text-base font-serif font-bold text-white drop-shadow-md leading-tight">
+              <div className="absolute bottom-3.5 left-3.5 z-10">
+                <h2 className="text-base font-serif font-bold text-white leading-tight">
                   {dest.name}
                 </h2>
-                <p className="text-[11px] text-white/80 mt-0.5">
+                <p className="text-[11px] text-white/75 mt-0.5">
                   Cidade · {dest.country}
                 </p>
               </div>
