@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight, Check, MapPin, Calendar as CalendarIcon } from "lucide-react";
@@ -19,9 +19,18 @@ const MeuRoteiro = () => {
   const [arrivalOpen, setArrivalOpen] = useState(false);
   const [departureOpen, setDepartureOpen] = useState(false);
 
+  const datesSectionRef = useRef<HTMLDivElement>(null);
+  const ctaRef = useRef<HTMLDivElement>(null);
+
   const datesValid = draft.arrivalAt !== null && draft.departureAt !== null && draft.departureAt >= draft.arrivalAt;
   const showDateError = draft.arrivalAt && draft.departureAt && draft.departureAt < draft.arrivalAt;
   const canContinue = isDestinationSelected && datesValid;
+
+  const scrollToRef = useCallback((ref: React.RefObject<HTMLDivElement | null>, delay = 350) => {
+    setTimeout(() => {
+      ref.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, delay);
+  }, []);
 
   const handleSelectDestination = (destination: Destination) => {
     if (!destination.available) {
@@ -29,6 +38,12 @@ const MeuRoteiro = () => {
       return;
     }
     setDestination(destination.id, destination.name, destination.id, destination.imageUrl || '');
+    // Auto-advance: scroll to dates and open arrival calendar
+    // Use longer delay to allow AnimatePresence to render the dates section
+    setTimeout(() => {
+      datesSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      setTimeout(() => setArrivalOpen(true), 400);
+    }, 450);
   };
 
   const handleArrivalSelect = (date: Date | undefined) => {
@@ -38,6 +53,8 @@ const MeuRoteiro = () => {
       if (draft.departureAt && draft.departureAt < date) {
         setDeparture(null, '');
       }
+      // Auto-advance: open departure calendar after a brief pause
+      setTimeout(() => setDepartureOpen(true), 300);
     }
   };
 
@@ -45,6 +62,8 @@ const MeuRoteiro = () => {
     if (date) {
       setDeparture(date, draft.departureTime || '');
       setDepartureOpen(false);
+      // Auto-advance: scroll to CTA
+      scrollToRef(ctaRef, 300);
     }
   };
 
@@ -160,6 +179,7 @@ const MeuRoteiro = () => {
           <AnimatePresence>
             {isDestinationSelected && (
               <motion.section
+                ref={datesSectionRef}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 20 }}
@@ -260,7 +280,7 @@ const MeuRoteiro = () => {
         </main>
 
         {/* Fixed CTA */}
-        <div className="fixed bottom-safe-cta left-0 right-0 p-4 z-40">
+        <div ref={ctaRef} className="fixed bottom-safe-cta left-0 right-0 p-4 z-40">
           <div className="bg-black/40 backdrop-blur-md rounded-2xl p-3 border border-white/10">
             <Button
               onClick={handleContinue}
