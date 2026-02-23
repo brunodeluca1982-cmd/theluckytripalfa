@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import SearchField from "@/components/home/SearchField";
 import PartnersSection from "@/components/home/PartnersSection";
 import HighlightsCarousel from "@/components/home/HighlightsCarousel";
@@ -7,6 +8,8 @@ import BrandLogo from "@/components/home/BrandLogo";
 import { Button } from "@/components/ui/button";
 
 const Index = () => {
+  const [searchParams] = useSearchParams();
+  const isDebug = searchParams.get("debug") === "1";
   const [testResult, setTestResult] = useState<any[] | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -39,17 +42,19 @@ const Index = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-background pb-20">
-      {/* TEMP: Testar Supabase */}
-      <div className="px-6 pt-4">
-        <Button onClick={handleTestSupabase} disabled={loading} size="sm" variant="outline">
-          {loading ? "Buscando..." : "Testar Supabase"}
-        </Button>
-        {testResult && (
-          <pre className="mt-2 p-3 bg-muted rounded text-xs overflow-auto max-h-48">
-            {JSON.stringify(testResult, null, 2)}
-          </pre>
-        )}
-      </div>
+      {/* DEBUG: Testar Supabase — only with ?debug=1 */}
+      {isDebug && (
+        <div className="px-6 pt-4">
+          <Button onClick={handleTestSupabase} disabled={loading} size="sm" variant="outline">
+            {loading ? "Buscando..." : "Testar Supabase"}
+          </Button>
+          {testResult && (
+            <pre className="mt-2 p-3 bg-muted rounded text-xs overflow-auto max-h-48">
+              {JSON.stringify(testResult, null, 2)}
+            </pre>
+          )}
+        </div>
+      )}
 
       {/* 1) BRAND HEADER */}
       <header className="px-6 pt-12 pb-6 text-center">

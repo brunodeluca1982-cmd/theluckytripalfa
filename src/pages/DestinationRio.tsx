@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import DestinationHub, { MapPin, Bed, Utensils, Compass, Sparkles } from "@/components/DestinationHub";
 import { Button } from "@/components/ui/button";
 import rioHeroImage from "@/assets/highlights/rio-hero-carnaval.jpg";
@@ -57,6 +58,8 @@ const rioActions = [
 ];
 
 const DestinationRio = () => {
+  const [searchParams] = useSearchParams();
+  const isDebug = searchParams.get("debug") === "1";
   const [testResult, setTestResult] = useState<any[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [geocodeResult, setGeocodeResult] = useState<any | null>(null);
@@ -146,24 +149,28 @@ const DestinationRio = () => {
 
   return (
     <div className="relative">
-      {/* TEMP TEST BUTTONS */}
-      <div className="absolute top-4 left-4 z-50 flex gap-2 flex-wrap items-start">
-        <Button onClick={handleTest} disabled={loading} size="sm" variant="outline" className="bg-background/80 backdrop-blur-sm">
-          {loading ? "Buscando..." : "Testar Supabase"}
-        </Button>
-        <Button onClick={handleTestGeocode} disabled={geocodeLoading} size="sm" variant="outline" className="bg-background/80 backdrop-blur-sm">
-          {geocodeLoading ? "Geocoding..." : "Testar Geocode"}
-        </Button>
-      </div>
-      {testResult && (
-        <pre className="absolute top-14 left-4 z-50 p-3 bg-background/90 backdrop-blur-sm rounded text-xs overflow-auto max-h-48 max-w-72">
-          {JSON.stringify(testResult, null, 2)}
-        </pre>
-      )}
-      {geocodeResult && (
-        <pre className="absolute top-14 right-4 z-50 p-3 bg-background/90 backdrop-blur-sm rounded text-xs overflow-auto max-h-64 max-w-80">
-          {JSON.stringify(geocodeResult, null, 2)}
-        </pre>
+      {/* DEBUG BUTTONS — only visible with ?debug=1 */}
+      {isDebug && (
+        <>
+          <div className="absolute top-4 left-4 z-50 flex gap-2 flex-wrap items-start">
+            <Button onClick={handleTest} disabled={loading} size="sm" variant="outline" className="bg-background/80 backdrop-blur-sm">
+              {loading ? "Buscando..." : "Testar Supabase"}
+            </Button>
+            <Button onClick={handleTestGeocode} disabled={geocodeLoading} size="sm" variant="outline" className="bg-background/80 backdrop-blur-sm">
+              {geocodeLoading ? "Geocoding..." : "Testar Geocode"}
+            </Button>
+          </div>
+          {testResult && (
+            <pre className="absolute top-14 left-4 z-50 p-3 bg-background/90 backdrop-blur-sm rounded text-xs overflow-auto max-h-48 max-w-72">
+              {JSON.stringify(testResult, null, 2)}
+            </pre>
+          )}
+          {geocodeResult && (
+            <pre className="absolute top-14 right-4 z-50 p-3 bg-background/90 backdrop-blur-sm rounded text-xs overflow-auto max-h-64 max-w-80">
+              {JSON.stringify(geocodeResult, null, 2)}
+            </pre>
+          )}
+        </>
       )}
       <DestinationHub
         destinationId="rio-de-janeiro"
