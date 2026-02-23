@@ -1,3 +1,4 @@
+// batch-geocode v2
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
@@ -7,12 +8,6 @@ const corsHeaders = {
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? '';
 const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY') ?? '';
-
-/**
- * Reuses the EXACT same pipeline as the "Testar Geocode" button:
- *   1. Fetch experiencias from external-experiencias
- *   2. For each: places-autocomplete → places-details → extract lat/lng
- */
 
 interface GeoResult {
   id: string;
@@ -27,11 +22,9 @@ async function geocodeOne(exp: { id: string; nome: string; bairro?: string; cida
   const base: GeoResult = { id: exp.id, nome: exp.nome, lat: null, lng: null, geocode_status: 'error' };
 
   try {
-    // Build query — same logic as the button
     const parts = [exp.nome, exp.bairro, exp.cidade, 'Brasil'].filter(Boolean);
     const q = parts.join(' ');
 
-    // Step 1: places-autocomplete
     const autoUrl = `${SUPABASE_URL}/functions/v1/places-autocomplete?input=${encodeURIComponent(q)}&city=${encodeURIComponent(exp.cidade || 'Rio de Janeiro')}`;
     const autoResp = await fetch(autoUrl, {
       headers: { apikey: SUPABASE_ANON_KEY },
@@ -47,7 +40,6 @@ async function geocodeOne(exp: { id: string; nome: string; bairro?: string; cida
       return { ...base, geocode_status: 'not_found', error: 'No place_id in first prediction' };
     }
 
-    // Step 2: places-details
     const detUrl = `${SUPABASE_URL}/functions/v1/places-details?place_id=${encodeURIComponent(placeId)}`;
     const detResp = await fetch(detUrl, {
       headers: { apikey: SUPABASE_ANON_KEY },
@@ -77,11 +69,9 @@ serve(async (req) => {
   }
 
   try {
-    // Parse optional limit (default 5 to avoid rate limits)
     const url = new URL(req.url);
-    const limit = Math.min(parseInt(url.searchParams.get('limit') || '5', 10), 20);
+    const limit = Math.min(parseInt(url.searchParams.get('limit') || '5', 10), 50);
 
-    // 1. Fetch all experiencias
     const expResp = await fetch(`${SUPABASE_URL}/functions/v1/external-experiencias`, {
       headers: {
         Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
@@ -97,17 +87,14 @@ serve(async (req) => {
       });
     }
 
-    // Take up to `limit` items (in production, filter by geocode_status='pending')
     const toProcess = allExp.slice(0, limit);
 
-    // 2. Geocode each sequentially (avoid rate limit spikes)
     const results: GeoResult[] = [];
     for (const exp of toProcess) {
       const result = await geocodeOne(exp);
       console.log(`Geocode ${exp.id} (${exp.nome}): status=${result.geocode_status} lat=${result.lat} lng=${result.lng}`);
       results.push(result);
 
-      // Small delay between calls to respect rate limits
       if (toProcess.indexOf(exp) < toProcess.length - 1) {
         await new Promise(r => setTimeout(r, 500));
       }
