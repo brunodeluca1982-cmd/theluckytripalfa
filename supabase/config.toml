@@ -30,5 +30,5 @@ verify_jwt = false
 [functions.external-experiencias]
 verify_jwt = false
 
-[functions.batch-geocode]
+[functions.geocode-batch]
 verify_jwt = false
