@@ -16,7 +16,9 @@ import { useItemCoordinates, type MapItem } from "@/components/category-map/useI
 /* ───── Category labels ───── */
 const CATEGORY_LABELS: Record<string, string> = {
   classicos: "Clássicos",
+  classico: "Clássicos",
   praias: "Praias",
+  praia: "Praias",
   cultura: "Cultura",
   aventura: "Aventura",
   relax: "Relax",
@@ -36,16 +38,22 @@ function normalizeStr(s: string) {
   return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 }
 
+const classicosFilter = (e: ExternalExperiencia) => {
+  const cat = normalizeStr(e.categoria);
+  const nome = normalizeStr(e.nome);
+  const vibe = normalizeStr(e.vibe || "");
+  if (["mirante", "urbano"].includes(cat)) return true;
+  if (vibe.includes("classico do rio")) return true;
+  return CLASSIC_NAMES.some((c) => nome.includes(c));
+};
+
+const praiasFilter = (e: ExternalExperiencia) => normalizeStr(e.categoria) === "praia";
+
 const CATEGORY_FILTERS: Record<string, (e: ExternalExperiencia) => boolean> = {
-  classicos: (e) => {
-    const cat = normalizeStr(e.categoria);
-    const nome = normalizeStr(e.nome);
-    const vibe = normalizeStr(e.vibe || "");
-    if (["mirante", "urbano"].includes(cat)) return true;
-    if (vibe.includes("classico do rio")) return true;
-    return CLASSIC_NAMES.some((c) => nome.includes(c));
-  },
-  praias: (e) => normalizeStr(e.categoria) === "praia",
+  classicos: classicosFilter,
+  classico: classicosFilter,
+  praias: praiasFilter,
+  praia: praiasFilter,
   cultura: (e) => {
     const cat = normalizeStr(e.categoria);
     return cat.includes("cultur") || cat.includes("museu") || cat.includes("teatro");
