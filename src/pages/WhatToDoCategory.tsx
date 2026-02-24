@@ -12,6 +12,8 @@ import { getAttractionImage } from "@/data/place-images";
 import CategoryMapPreview from "@/components/category-map/CategoryMapPreview";
 import ExpandedMapSheet from "@/components/category-map/ExpandedMapSheet";
 import { useItemCoordinates, type MapItem } from "@/components/category-map/useItemCoordinates";
+import { resolveExperienceCoords, getCachedCoords } from "@/lib/geo/resolveExperienceCoords";
+import { toast } from "sonner";
 
 /* ───── Category labels ───── */
 const CATEGORY_LABELS: Record<string, string> = {
@@ -103,6 +105,24 @@ function CategoryItemCard({
   const fallbackImage = getAttractionImage(exp.neighborhoodSlug);
   const heroImage = photoUrl || fallbackImage;
 
+  // Background-resolve coords so "Ver no mapa" appears when ready
+  const [coordReady, setCoordReady] = useState(hasCoords);
+  useEffect(() => {
+    if (hasCoords) { setCoordReady(true); return; }
+    let cancelled = false;
+    resolveExperienceCoords({
+      id: exp.id,
+      nome: exp.nome,
+      bairro: exp.bairro,
+      cidade: exp.cidade,
+      lat: (exp as any).lat,
+      lng: (exp as any).lng,
+    }).then((c) => {
+      if (!cancelled && c) setCoordReady(true);
+    });
+    return () => { cancelled = true; };
+  }, [exp.id, hasCoords]);
+
   return (
     <div
       ref={cardRef}
@@ -145,7 +165,7 @@ function CategoryItemCard({
         )}
       </Link>
 
-      {hasCoords && (
+      {coordReady && (
         <button
           onClick={onViewOnMap}
           className="mt-3 inline-flex items-center gap-1.5 text-xs text-primary hover:text-primary/80 transition-colors"
@@ -191,10 +211,24 @@ const WhatToDoCategory = () => {
     return () => clearTimeout(t);
   }, [highlightedId]);
 
-  const handleViewOnMap = useCallback((id: string) => {
+  const handleViewOnMap = useCallback(async (id: string) => {
+    const item = matched.find((m) => m.id === id);
+    if (!item) return;
+    const coord = await resolveExperienceCoords({
+      id: item.id,
+      nome: item.nome,
+      bairro: item.bairro,
+      cidade: item.cidade,
+      lat: (item as any).lat,
+      lng: (item as any).lng,
+    });
+    if (!coord) {
+      toast("Localização não encontrada");
+      return;
+    }
     setFocusItemId(id);
     setMapSheetOpen(true);
-  }, []);
+  }, [matched]);
 
   const handleMapSelectItem = useCallback((id: string) => {
     setHighlightedId(id);

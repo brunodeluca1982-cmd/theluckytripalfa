@@ -1,6 +1,9 @@
-import { useMemo } from "react";
-import { VALIDATED_NEIGHBORHOODS } from "@/lib/location-validation";
-import { VALIDATED_LOCATIONS } from "@/data/validated-locations";
+import { useState, useEffect, useRef } from "react";
+import {
+  resolveExperienceCoords,
+  getCachedCoords,
+  type GeoCoord,
+} from "@/lib/geo/resolveExperienceCoords";
 import type { ExternalExperiencia } from "@/hooks/use-external-experiencias";
 
 export interface MapItem {
@@ -13,58 +16,84 @@ export interface MapItem {
 }
 
 /**
- * Resolves coordinates for experiencias using:
- * 1. VALIDATED_LOCATIONS by normalized name
- * 2. VALIDATED_NEIGHBORHOODS centroid by bairro (with jitter to avoid overlap)
+ * Asynchronously resolves coordinates for a list of experiencias.
+ * Returns only items with valid coords, keyed by id.
+ * Re-renders as coords resolve progressively.
  */
-function normalizeKey(s: string): string {
-  return s
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/\s+/g, "-")
-    .replace(/[^a-z0-9-]/g, "");
-}
-
-function resolveCoords(
-  exp: ExternalExperiencia,
-  index: number
-): { lat: number; lng: number } | null {
-  // Try validated locations by normalized name
-  const key = normalizeKey(exp.nome);
-  const validated = VALIDATED_LOCATIONS[key];
-  if (validated) return { lat: validated.lat, lng: validated.lng };
-
-  // Try neighborhood centroid with deterministic jitter
-  const nh = VALIDATED_NEIGHBORHOODS[exp.bairro];
-  if (nh) {
-    // Small jitter so markers in same neighborhood don't stack
-    const jitter = (index % 7 - 3) * 0.0008;
-    const jitter2 = ((index * 3) % 5 - 2) * 0.0006;
-    return { lat: nh.lat + jitter, lng: nh.lng + jitter2 };
-  }
-
-  return null;
-}
-
 export function useItemCoordinates(
   items: (ExternalExperiencia & { neighborhoodSlug: string })[]
 ): MapItem[] {
-  return useMemo(() => {
-    const result: MapItem[] = [];
-    items.forEach((item, i) => {
-      const coords = resolveCoords(item, i);
-      if (coords) {
-        result.push({
+  const [mapItems, setMapItems] = useState<MapItem[]>([]);
+  const batchRef = useRef(0);
+
+  useEffect(() => {
+    if (!items.length) {
+      setMapItems([]);
+      return;
+    }
+
+    const batch = ++batchRef.current;
+
+    // Start with any already-cached results
+    const initial: MapItem[] = [];
+    const toResolve: (ExternalExperiencia & { neighborhoodSlug: string })[] = [];
+
+    items.forEach((item) => {
+      const cached = getCachedCoords(item.id);
+      if (cached) {
+        initial.push({
           id: item.id,
           nome: item.nome,
           bairro: item.bairro,
-          lat: coords.lat,
-          lng: coords.lng,
+          lat: cached.lat,
+          lng: cached.lng,
           neighborhoodSlug: item.neighborhoodSlug,
         });
+      } else {
+        toResolve.push(item);
       }
     });
-    return result;
+
+    setMapItems(initial);
+
+    // Resolve remaining in parallel (batched to avoid rate limits)
+    const BATCH_SIZE = 5;
+    let resolved = [...initial];
+
+    (async () => {
+      for (let i = 0; i < toResolve.length; i += BATCH_SIZE) {
+        if (batch !== batchRef.current) return; // stale
+
+        const chunk = toResolve.slice(i, i + BATCH_SIZE);
+        const results = await Promise.all(
+          chunk.map(async (item): Promise<MapItem | null> => {
+            const coord = await resolveExperienceCoords({
+              id: item.id,
+              nome: item.nome,
+              bairro: item.bairro,
+              cidade: item.cidade,
+              lat: (item as any).lat,
+              lng: (item as any).lng,
+            });
+            if (!coord) return null;
+            return {
+              id: item.id,
+              nome: item.nome,
+              bairro: item.bairro,
+              lat: coord.lat,
+              lng: coord.lng,
+              neighborhoodSlug: item.neighborhoodSlug,
+            };
+          })
+        );
+
+        if (batch !== batchRef.current) return; // stale
+        const valid = results.filter(Boolean) as MapItem[];
+        resolved = [...resolved, ...valid];
+        setMapItems([...resolved]);
+      }
+    })();
   }, [items]);
+
+  return mapItems;
 }
