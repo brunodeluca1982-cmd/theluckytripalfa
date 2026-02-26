@@ -27,6 +27,8 @@ export default function LeafletPreviewMap({ items }: Props) {
     if (!containerRef.current || mapRef.current) return;
 
     const map = L.map(containerRef.current, {
+      center: [-22.9068, -43.1729],
+      zoom: 12,
       zoomControl: false,
       attributionControl: false,
       dragging: false,
@@ -36,8 +38,14 @@ export default function LeafletPreviewMap({ items }: Props) {
     });
 
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      maxZoom: 18,
+      attribution: '&copy; OpenStreetMap contributors',
+      maxZoom: 19,
     }).addTo(map);
+
+    // Force size recalculation after container is visible
+    requestAnimationFrame(() => {
+      map.invalidateSize();
+    });
 
     const bounds = L.latLngBounds([]);
     items.forEach((item) => {
