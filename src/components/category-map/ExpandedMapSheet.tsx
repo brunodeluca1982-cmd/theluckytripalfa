@@ -57,13 +57,21 @@ export default function ExpandedMapSheet({
       if (mapRef.current || !mapContainerRef.current) return;
 
       const map = L.map(mapContainerRef.current, {
+        center: [-22.9068, -43.1729],
+        zoom: 12,
         zoomControl: true,
         attributionControl: false,
       });
 
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        maxZoom: 18,
+        attribution: '&copy; OpenStreetMap contributors',
+        maxZoom: 19,
       }).addTo(map);
+
+      // Force size recalculation after sheet animation
+      requestAnimationFrame(() => {
+        map.invalidateSize();
+      });
 
       const bounds = L.latLngBounds([]);
       const markers = new Map<string, L.CircleMarker>();
