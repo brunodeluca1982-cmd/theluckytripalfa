@@ -76,7 +76,7 @@ const findStaticActivityById = (id: string): { activity: Activity; neighborhoodN
 
 /** Resolve storage media URL for an experiencia */
 function getStorageMediaUrl(exp: ExternalExperiencia): { url: string; type: "video" | "image" } | null {
-  const BUCKET = "experiencias-media";
+  const BUCKET = "experiencia_media";
   if (exp.hero_video_path) {
     const { data } = supabase.storage.from(BUCKET).getPublicUrl(exp.hero_video_path);
     return { url: data.publicUrl, type: "video" };
@@ -93,6 +93,11 @@ const ExternalActivityView = ({ exp, backPath }: { exp: ExternalExperiencia; bac
   const { saveItem } = useItemSave();
   const slug = normalizeNeighborhood(exp.bairro);
   const media = getStorageMediaUrl(exp);
+  const [searchParams] = useSearchParams();
+
+  if (searchParams.get("debug") === "1") {
+    console.log({ hero_video_path: exp.hero_video_path, publicUrl: media?.url ?? null });
+  }
 
   return (
     <div className="min-h-screen bg-background">
