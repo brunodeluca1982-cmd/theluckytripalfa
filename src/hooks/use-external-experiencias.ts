@@ -20,6 +20,8 @@ export interface ExternalExperiencia {
   vibe: string | null;
   ativo: boolean;
   created_at: string;
+  hero_video_path: string | null;
+  hero_image_path: string | null;
 }
 
 const URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/external-experiencias`;
