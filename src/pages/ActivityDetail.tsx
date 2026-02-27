@@ -8,6 +8,8 @@ import { getAttractionImage } from "@/data/place-images";
 import { useExternalExperiencias, normalizeNeighborhood } from "@/hooks/use-external-experiencias";
 import type { ExternalExperiencia } from "@/hooks/use-external-experiencias";
 import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
+import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
 
 /**
  * ACTIVITY DETAIL PAGE
@@ -74,51 +76,65 @@ const findStaticActivityById = (id: string): { activity: Activity; neighborhoodN
   return null;
 };
 
-/** Resolve storage media URL for an experiencia */
-function getStorageMediaUrl(exp: ExternalExperiencia): { url: string; type: "video" | "image" } | null {
-  const BUCKET = "experiencia_media";
-  if (exp.hero_video_path) {
-    const { data } = supabase.storage.from(BUCKET).getPublicUrl(exp.hero_video_path);
-    return { url: data.publicUrl, type: "video" };
-  }
-  if (exp.hero_image_path) {
-    const { data } = supabase.storage.from(BUCKET).getPublicUrl(exp.hero_image_path);
-    return { url: data.publicUrl, type: "image" };
-  }
-  return null;
+interface MediaRow { type: "image" | "video"; url: string }
+
+function useExperienciaMedia(experienciaId: string | undefined) {
+  return useQuery({
+    queryKey: ["experiencia-media", experienciaId],
+    queryFn: async (): Promise<MediaRow[]> => {
+      if (!experienciaId) return [];
+      const { data, error } = await supabase
+        .from("experiencia_media")
+        .select("type, url")
+        .eq("experiencia_id", experienciaId)
+        .order("ordem", { ascending: true });
+      if (error) throw error;
+      return (data ?? []) as MediaRow[];
+    },
+    enabled: !!experienciaId,
+    staleTime: 5 * 60 * 1000,
+  });
 }
 
 /** Render for an external experiencia */
 const ExternalActivityView = ({ exp, backPath }: { exp: ExternalExperiencia; backPath: string }) => {
   const { saveItem } = useItemSave();
   const slug = normalizeNeighborhood(exp.bairro);
-  const media = getStorageMediaUrl(exp);
+  const { data: mediaList } = useExperienciaMedia(exp.id);
   const [searchParams] = useSearchParams();
 
   if (searchParams.get("debug") === "1") {
-    console.log({ hero_video_path: exp.hero_video_path, publicUrl: media?.url ?? null });
+    console.log({ experiencia_id: exp.id, mediaList: mediaList ?? [] });
   }
+
+  const hasMedia = mediaList && mediaList.length > 0;
 
   return (
     <div className="min-h-screen bg-background">
       {/* Hero — full top */}
       <div className="relative w-full aspect-[4/3] bg-muted overflow-hidden">
-        {media?.type === "video" ? (
-          <video
-            src={media.url}
-            autoPlay
-            muted
-            loop
-            playsInline
-            preload="metadata"
-            className="w-full h-full object-cover"
-          />
+        {hasMedia && mediaList.length > 1 ? (
+          <Carousel className="w-full h-full" opts={{ loop: true }}>
+            <CarouselContent className="ml-0 h-full">
+              {mediaList.map((m, i) => (
+                <CarouselItem key={i} className="pl-0 h-full">
+                  {m.type === "video" ? (
+                    <video src={m.url} autoPlay muted loop playsInline preload="metadata" className="w-full h-full object-cover" />
+                  ) : (
+                    <img src={m.url} alt={exp.nome} className="w-full h-full object-cover" />
+                  )}
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+          </Carousel>
+        ) : hasMedia ? (
+          mediaList[0].type === "video" ? (
+            <video src={mediaList[0].url} autoPlay muted loop playsInline preload="metadata" className="w-full h-full object-cover" />
+          ) : (
+            <img src={mediaList[0].url} alt={exp.nome} className="w-full h-full object-cover" />
+          )
         ) : (
-          <img
-            src={media?.type === "image" ? media.url : getAttractionImage(slug)}
-            alt={exp.nome}
-            className="w-full h-full object-cover"
-          />
+          <img src={getAttractionImage(slug)} alt={exp.nome} className="w-full h-full object-cover" />
         )}
         <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-transparent" />
         <div className="absolute top-0 left-0 right-0 px-4 pt-[env(safe-area-inset-top,12px)] pb-2 flex items-center justify-between z-10">
