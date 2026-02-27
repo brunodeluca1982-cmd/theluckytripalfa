@@ -7,6 +7,7 @@ import { guideActivities } from "@/data/rio-guide-data";
 import { getAttractionImage } from "@/data/place-images";
 import { useExternalExperiencias, normalizeNeighborhood } from "@/hooks/use-external-experiencias";
 import type { ExternalExperiencia } from "@/hooks/use-external-experiencias";
+import { supabase } from "@/integrations/supabase/client";
 
 /**
  * ACTIVITY DETAIL PAGE
@@ -73,16 +74,47 @@ const findStaticActivityById = (id: string): { activity: Activity; neighborhoodN
   return null;
 };
 
+/** Resolve storage media URL for an experiencia */
+function getStorageMediaUrl(exp: ExternalExperiencia): { url: string; type: "video" | "image" } | null {
+  const BUCKET = "experiencias-media";
+  if (exp.hero_video_path) {
+    const { data } = supabase.storage.from(BUCKET).getPublicUrl(exp.hero_video_path);
+    return { url: data.publicUrl, type: "video" };
+  }
+  if (exp.hero_image_path) {
+    const { data } = supabase.storage.from(BUCKET).getPublicUrl(exp.hero_image_path);
+    return { url: data.publicUrl, type: "image" };
+  }
+  return null;
+}
+
 /** Render for an external experiencia */
 const ExternalActivityView = ({ exp, backPath }: { exp: ExternalExperiencia; backPath: string }) => {
   const { saveItem } = useItemSave();
   const slug = normalizeNeighborhood(exp.bairro);
+  const media = getStorageMediaUrl(exp);
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Hero Image — full top */}
+      {/* Hero — full top */}
       <div className="relative w-full aspect-[4/3] bg-muted overflow-hidden">
-        <img src={getAttractionImage(slug)} alt={exp.nome} className="w-full h-full object-cover" />
+        {media?.type === "video" ? (
+          <video
+            src={media.url}
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="metadata"
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <img
+            src={media?.type === "image" ? media.url : getAttractionImage(slug)}
+            alt={exp.nome}
+            className="w-full h-full object-cover"
+          />
+        )}
         <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-transparent" />
         <div className="absolute top-0 left-0 right-0 px-4 pt-[env(safe-area-inset-top,12px)] pb-2 flex items-center justify-between z-10">
           <Link to={backPath} className="w-9 h-9 rounded-full bg-black/30 backdrop-blur-md flex items-center justify-center text-white">
