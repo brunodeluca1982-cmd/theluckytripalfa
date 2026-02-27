@@ -307,6 +307,33 @@ export type Database = {
         }
         Relationships: []
       }
+      experiencia_media: {
+        Row: {
+          created_at: string
+          experiencia_id: string
+          id: string
+          ordem: number
+          type: string
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          experiencia_id: string
+          id?: string
+          ordem?: number
+          type: string
+          url: string
+        }
+        Update: {
+          created_at?: string
+          experiencia_id?: string
+          id?: string
+          ordem?: number
+          type?: string
+          url?: string
+        }
+        Relationships: []
+      }
       place_photos: {
         Row: {
           created_at: string
