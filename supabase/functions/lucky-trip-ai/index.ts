@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -23,6 +24,18 @@ DISCIPLINA DE FONTE
 - Toda afirmação factual deve ser rastreável a um campo existente no app (name, date_iso, start_time_24h, address, vibe_one_word, how_to_get_there, music_style, structure, my_take, etc.).
 - Se um campo está ausente, mostre "—" (travessão) exatamente e não elabore.
 - Nunca reescreva descrições longas em "conteúdo novo". Normalize formatação (quebras de linha/títulos) mas mantenha o texto em português como está.
+
+═══════════════════════════════════════════
+BANCO DE DADOS DISPONÍVEL
+═══════════════════════════════════════════
+Você recebe no campo "database" do contexto os dados reais das seguintes tabelas:
+- experiencias: atividades, passeios, atrações (campos: nome, bairro, cidade, categoria, meu_olhar, instagram, etc.)
+- restaurantes: restaurantes curados (campos: nome, bairro, cidade, categoria, meu_olhar, preco_medio, instagram, etc.)
+- hoteis: hotéis curados (campos: nome, bairro, cidade, meu_olhar, preco_medio_diaria, instagram, etc.)
+- eventos: eventos ativos do app
+- evento_itens: itens de eventos (blocos de carnaval, etc.)
+
+IMPORTANTE: Quando o usuário perguntar sobre lugares, restaurantes, hotéis ou experiências, busque APENAS nos dados do campo "database" que você recebeu. Estes são os dados reais do banco de dados do app.
 
 ═══════════════════════════════════════════
 IDIOMA
@@ -92,6 +105,49 @@ ESTILO DE OUTPUT
 - Nunca apresente algo como certo a menos que exista nos dados do app.
 - Para roteiros, use formato: 🕓 [hora] — [atividade] ([bairro])`;
 
+// Fetch all curated data from external Supabase
+async function fetchExternalData() {
+  const EXTERNAL_URL = "https://lsibzflaaqzvtzjlvrxw.supabase.co";
+  const EXTERNAL_KEY = Deno.env.get("EXTERNAL_SUPABASE_ANON_KEY");
+  if (!EXTERNAL_KEY) {
+    console.warn("EXTERNAL_SUPABASE_ANON_KEY not set, skipping external data");
+    return { experiencias: [], restaurantes: [], hoteis: [] };
+  }
+
+  const ext = createClient(EXTERNAL_URL, EXTERNAL_KEY);
+
+  const [expRes, restRes, hotelRes] = await Promise.all([
+    ext.from("experiencias").select("nome, bairro, cidade, categoria, meu_olhar, instagram, vibe, tags, endereco").eq("ativo", true).order("nome").limit(500),
+    ext.from("restaurantes").select("nome, bairro, cidade, categoria, meu_olhar, instagram, preco_medio, endereco, tipo_cozinha").eq("ativo", true).order("nome").limit(500),
+    ext.from("hoteis").select("nome, bairro, cidade, meu_olhar, instagram, preco_medio_diaria, endereco, categoria").eq("ativo", true).order("nome").limit(200),
+  ]);
+
+  return {
+    experiencias: expRes.data || [],
+    restaurantes: restRes.data || [],
+    hoteis: hotelRes.data || [],
+  };
+}
+
+// Fetch events from the main Supabase project
+async function fetchEventData() {
+  const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
+  const SUPABASE_KEY = Deno.env.get("SUPABASE_ANON_KEY");
+  if (!SUPABASE_URL || !SUPABASE_KEY) return { eventos: [], evento_itens: [] };
+
+  const client = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  const [evtRes, itensRes] = await Promise.all([
+    client.from("eventos").select("titulo, slug, descricao_curta, data_inicio, data_fim, destino").eq("ativo", true).limit(20),
+    client.from("evento_itens").select("titulo, tipo, bairro, local_nome, google_maps_url, descricao, tags, data_inicio, data_fim").eq("ativo", true).limit(500),
+  ]);
+
+  return {
+    eventos: evtRes.data || [],
+    evento_itens: itensRes.data || [],
+  };
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -103,8 +159,24 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
+    // Fetch real database content in parallel
+    const [externalData, eventData] = await Promise.all([
+      fetchExternalData(),
+      fetchEventData(),
+    ]);
+
+    const database = {
+      ...externalData,
+      ...eventData,
+    };
+
     // Build context-aware system message
     let systemMessage = SYSTEM_PROMPT;
+
+    // Inject database content
+    systemMessage += `\n\nBANCO DE DADOS DO APP (dados reais):\n${JSON.stringify(database, null, 0)}`;
+
+    // Inject user context (saved items, preferences, etc.)
     if (context) {
       systemMessage += `\n\nCONTEXTO DO USUÁRIO:\n${JSON.stringify(context, null, 2)}`;
     }
