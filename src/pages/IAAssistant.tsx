@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
-import { Sparkles, Send, MapPin, Loader2, BookmarkCheck } from "lucide-react";
+import { Sparkles, Send, MapPin, Loader2, BookmarkCheck, Trees, UtensilsCrossed, Landmark, Coffee, Zap } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import ReactMarkdown from "react-markdown";
 import { Button } from "@/components/ui/button";
@@ -21,6 +21,14 @@ const SUGGESTION_CHIPS = [
   "Onde ver o pôr do sol?",
   "Sugira restaurantes em Ipanema",
   "Monte minha viagem",
+];
+
+const QUICK_ACTIONS = [
+  { label: "Mais natureza", icon: Trees, prompt: "Ajuste o roteiro para incluir mais natureza, praias e atividades ao ar livre" },
+  { label: "Mais gastronomia", icon: UtensilsCrossed, prompt: "Ajuste o roteiro priorizando restaurantes e experiências gastronômicas" },
+  { label: "Mais cultura", icon: Landmark, prompt: "Ajuste o roteiro priorizando museus, galerias e atrações culturais" },
+  { label: "Viagem mais relaxada", icon: Coffee, prompt: "Ajuste o roteiro para um ritmo mais tranquilo com menos deslocamentos" },
+  { label: "Viagem mais intensa", icon: Zap, prompt: "Ajuste o roteiro para um ritmo mais acelerado com mais atividades por dia" },
 ];
 
 function getSavedCount(): number {
@@ -355,28 +363,61 @@ const IAAssistant = () => {
 
         {/* Chat messages */}
         <AnimatePresence initial={false}>
-          {messages.map((msg, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
-            >
-              <div
-                className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
-                  msg.role === "user"
-                    ? "bg-white/20 backdrop-blur-md border border-white/20 text-white rounded-br-md"
-                    : "bg-white/10 backdrop-blur-xl border border-white/15 text-white/90 rounded-bl-md"
-                }`}
-              >
-                {msg.role === "assistant" ? (
-                  <AssistantMessage content={msg.content} />
-                ) : (
-                  msg.content
+          {messages.map((msg, i) => {
+            const isLastAssistantMessage = msg.role === "assistant" && i === messages.length - 1;
+            const showQuickActions = isLastAssistantMessage && !isLoading;
+
+            return (
+              <div key={i}>
+                <motion.div
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+                >
+                  <div
+                    className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
+                      msg.role === "user"
+                        ? "bg-white/20 backdrop-blur-md border border-white/20 text-white rounded-br-md"
+                        : "bg-white/10 backdrop-blur-xl border border-white/15 text-white/90 rounded-bl-md"
+                    }`}
+                  >
+                    {msg.role === "assistant" ? (
+                      <AssistantMessage content={msg.content} />
+                    ) : (
+                      msg.content
+                    )}
+                  </div>
+                </motion.div>
+
+                {/* Quick action buttons below last assistant message */}
+                {showQuickActions && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 }}
+                    className="mt-3 px-1"
+                  >
+                    <div className="flex flex-wrap gap-2">
+                      {QUICK_ACTIONS.map((action) => {
+                        const Icon = action.icon;
+                        return (
+                          <button
+                            key={action.label}
+                            onClick={() => sendMessage(action.prompt)}
+                            disabled={isLoading}
+                            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-xs font-medium text-white/80 hover:bg-white/20 transition-all active:scale-[0.97] disabled:opacity-40"
+                          >
+                            <Icon className="w-3.5 h-3.5" />
+                            {action.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </motion.div>
                 )}
               </div>
-            </motion.div>
-          ))}
+            );
+          })}
         </AnimatePresence>
 
         {/* Typing indicator */}
