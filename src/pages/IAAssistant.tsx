@@ -33,28 +33,38 @@ function getSavedCount(): number {
 
 function getUserContext() {
   try {
-    const savedItems = JSON.parse(localStorage.getItem("saved-items") || "[]");
+    // "draft-roteiro" is the primary save mechanism (use-item-save hook)
     const draftRoteiro = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+    // "saved-items" is the secondary normalized layer (use-saved-items hook)
+    const savedItems = JSON.parse(localStorage.getItem("saved-items") || "[]");
+    
+    // Build a unified summary of what the user saved — prioritize draft-roteiro as it's the main flow
+    const draftSummary = draftRoteiro.map((i: any) => ({
+      title: i.title,
+      type: i.type,
+      destination: i.destinationName || "Rio de Janeiro",
+    }));
+    const savedSummary = savedItems.map((i: any) => ({
+      title: i.title,
+      type: i.type,
+      neighborhood: i.neighborhood_full || i.neighborhood_short,
+      date: i.date_iso,
+      time: i.start_time_24h,
+      priority: i.priority,
+      rsvp: i.rsvp,
+    }));
+
     return {
-      saved_items: savedItems,
-      saved_items_count: savedItems.length,
-      saved_items_summary: savedItems.map((i: any) => ({
-        title: i.title,
-        type: i.type,
-        neighborhood: i.neighborhood_full || i.neighborhood_short,
-        date: i.date_iso,
-        time: i.start_time_24h,
-        priority: i.priority,
-        rsvp: i.rsvp,
-      })),
-      draft_roteiro: draftRoteiro,
-      itinerary_draft: JSON.parse(localStorage.getItem("itinerary_draft") || "[]"),
+      minha_viagem_items: draftSummary,
+      minha_viagem_count: draftRoteiro.length,
+      saved_items_normalized: savedSummary,
+      saved_items_normalized_count: savedItems.length,
       travel_dates: JSON.parse(localStorage.getItem("trip-dates") || "null"),
       user_preferences: JSON.parse(localStorage.getItem("trip-preferences") || "null"),
       selected_city: "Rio de Janeiro",
     };
   } catch {
-    return { saved_items: [], saved_items_count: 0, saved_items_summary: [], draft_roteiro: [], itinerary_draft: [], travel_dates: null, user_preferences: null, selected_city: "Rio de Janeiro" };
+    return { minha_viagem_items: [], minha_viagem_count: 0, saved_items_normalized: [], saved_items_normalized_count: 0, travel_dates: null, user_preferences: null, selected_city: "Rio de Janeiro" };
   }
 }
 
@@ -141,7 +151,8 @@ const IAAssistant = () => {
       const savedItems = JSON.parse(localStorage.getItem("draft-roteiro") || "[]");
       const count = savedItems.length;
       if (count > 0) {
-        const prompt = `Monte um roteiro organizado por dia usando os ${count} lugares que eu salvei em Minha Viagem. Complete com sugestões do app.`;
+        const titles = savedItems.map((i: any) => i.title).slice(0, 10).join(", ");
+        const prompt = `Monte um roteiro organizado por dia usando os ${count} lugares que eu salvei em Minha Viagem (${titles}). Complete o roteiro com sugestões do app para os momentos do dia que faltarem.`;
         setTimeout(() => sendMessageRef.current?.(prompt), 300);
       }
     }
