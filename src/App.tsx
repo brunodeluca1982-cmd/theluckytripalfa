@@ -23,6 +23,7 @@ import WhatToDo from "./pages/WhatToDo";
 import WhatToDoDetail from "./pages/WhatToDoDetail";
 import WhatToDoCategory from "./pages/WhatToDoCategory";
 import MeuRoteiro from "./pages/MeuRoteiro";
+import MinhaViagem from "./pages/MinhaViagem";
 import TripGroup from "./pages/TripGroup";
 import TripDates from "./pages/TripDates";
 import TripPreferences from "./pages/TripPreferences";
