@@ -88,7 +88,7 @@ function AssistantMessage({ content }: { content: string }) {
     </div>
   );
 }
-
+const IAAssistant = () => {
 
   const navigate = useNavigate();
   const { draft } = useTripDraft();
