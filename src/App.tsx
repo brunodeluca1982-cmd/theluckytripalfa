@@ -163,6 +163,7 @@ const App = () => {
                   <Route path="/como-chegar" element={<HowToGetThere />} />
                   
                   {/* Meu Roteiro */}
+                  <Route path="/minha-viagem" element={<MinhaViagem />} />
                   <Route path="/meu-roteiro" element={<MeuRoteiro />} />
                   <Route path="/meu-roteiro/grupo" element={<Navigate to="/meu-roteiro/datas" replace />} />
                   <Route path="/meu-roteiro/datas" element={<TripDates />} />
