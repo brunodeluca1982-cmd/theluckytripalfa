@@ -245,6 +245,9 @@ const IAAssistant = () => {
     }
   }, [messages, isLoading]);
 
+  // Keep ref in sync for auto-trigger
+  sendMessageRef.current = sendMessage;
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     sendMessage(input);
