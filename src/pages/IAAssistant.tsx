@@ -151,7 +151,8 @@ const IAAssistant = () => {
       const savedItems = JSON.parse(localStorage.getItem("draft-roteiro") || "[]");
       const count = savedItems.length;
       if (count > 0) {
-        const prompt = `Monte um roteiro organizado por dia usando os ${count} lugares que eu salvei em Minha Viagem. Complete com sugestões do app.`;
+        const titles = savedItems.map((i: any) => i.title).slice(0, 10).join(", ");
+        const prompt = `Monte um roteiro organizado por dia usando os ${count} lugares que eu salvei em Minha Viagem (${titles}). Complete o roteiro com sugestões do app para os momentos do dia que faltarem.`;
         setTimeout(() => sendMessageRef.current?.(prompt), 300);
       }
     }
