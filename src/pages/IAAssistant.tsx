@@ -1,9 +1,10 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Sparkles, Send, MapPin, Loader2, BookmarkCheck } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import ReactMarkdown from "react-markdown";
 import { Button } from "@/components/ui/button";
+import PlaceCardList from "@/components/chat/PlaceCardList";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import rioHeroFallback from "@/assets/highlights/rio-de-janeiro-hero.jpg";
