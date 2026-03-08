@@ -131,6 +131,22 @@ const IAAssistant = () => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages]);
 
+  // Auto-trigger organize from "Minha Viagem"
+  const sendMessageRef = useRef<((text: string) => void) | null>(null);
+  useEffect(() => {
+    if (autoTriggered.current) return;
+    if (searchParams.get("action") === "organize" && messages.length === 0 && sendMessageRef.current) {
+      autoTriggered.current = true;
+      setSearchParams({}, { replace: true });
+      const savedItems = JSON.parse(localStorage.getItem("draft-roteiro") || "[]");
+      const count = savedItems.length;
+      if (count > 0) {
+        const prompt = `Monte um roteiro organizado por dia usando os ${count} lugares que eu salvei em Minha Viagem. Complete com sugestões do app.`;
+        setTimeout(() => sendMessageRef.current?.(prompt), 300);
+      }
+    }
+  });
+
   const sendMessage = useCallback(async (text: string) => {
     if (!text.trim() || isLoading) return;
 
