@@ -281,9 +281,7 @@ const IAAssistant = () => {
                 }`}
               >
                 {msg.role === "assistant" ? (
-                  <div className="prose prose-sm prose-invert max-w-none [&>p]:mb-2 [&>ul]:mb-2 [&>ol]:mb-2 [&_a]:text-white/80 [&_a]:underline">
-                    <ReactMarkdown>{msg.content}</ReactMarkdown>
-                  </div>
+                  <AssistantMessage content={msg.content} />
                 ) : (
                   msg.content
                 )}
