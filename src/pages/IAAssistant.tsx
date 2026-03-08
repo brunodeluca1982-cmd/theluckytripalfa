@@ -23,6 +23,14 @@ const SUGGESTION_CHIPS = [
   "Monte minha viagem",
 ];
 
+const QUICK_ACTIONS = [
+  { label: "Mais natureza", icon: Trees, prompt: "Ajuste o roteiro para incluir mais natureza, praias e atividades ao ar livre" },
+  { label: "Mais gastronomia", icon: UtensilsCrossed, prompt: "Ajuste o roteiro priorizando restaurantes e experiências gastronômicas" },
+  { label: "Mais cultura", icon: Landmark, prompt: "Ajuste o roteiro priorizando museus, galerias e atrações culturais" },
+  { label: "Viagem mais relaxada", icon: Coffee, prompt: "Ajuste o roteiro para um ritmo mais tranquilo com menos deslocamentos" },
+  { label: "Viagem mais intensa", icon: Zap, prompt: "Ajuste o roteiro para um ritmo mais acelerado com mais atividades por dia" },
+];
+
 function getSavedCount(): number {
   try {
     return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]").length;
