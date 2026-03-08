@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { Sparkles, Send, MapPin, Loader2, BookmarkCheck } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import ReactMarkdown from "react-markdown";
@@ -104,11 +104,13 @@ function AssistantMessage({ content }: { content: string }) {
 const IAAssistant = () => {
 
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { draft } = useTripDraft();
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [savedCount, setSavedCount] = useState(getSavedCount);
+  const autoTriggered = useRef(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // Resolve hero image
@@ -128,6 +130,22 @@ const IAAssistant = () => {
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages]);
+
+  // Auto-trigger organize from "Minha Viagem"
+  const sendMessageRef = useRef<((text: string) => void) | null>(null);
+  useEffect(() => {
+    if (autoTriggered.current) return;
+    if (searchParams.get("action") === "organize" && messages.length === 0 && sendMessageRef.current) {
+      autoTriggered.current = true;
+      setSearchParams({}, { replace: true });
+      const savedItems = JSON.parse(localStorage.getItem("draft-roteiro") || "[]");
+      const count = savedItems.length;
+      if (count > 0) {
+        const prompt = `Monte um roteiro organizado por dia usando os ${count} lugares que eu salvei em Minha Viagem. Complete com sugestões do app.`;
+        setTimeout(() => sendMessageRef.current?.(prompt), 300);
+      }
+    }
+  });
 
   const sendMessage = useCallback(async (text: string) => {
     if (!text.trim() || isLoading) return;
@@ -226,6 +244,9 @@ const IAAssistant = () => {
       setIsLoading(false);
     }
   }, [messages, isLoading]);
+
+  // Keep ref in sync for auto-trigger
+  sendMessageRef.current = sendMessage;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
