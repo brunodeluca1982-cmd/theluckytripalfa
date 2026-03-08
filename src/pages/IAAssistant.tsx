@@ -104,11 +104,13 @@ function AssistantMessage({ content }: { content: string }) {
 const IAAssistant = () => {
 
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { draft } = useTripDraft();
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [savedCount, setSavedCount] = useState(getSavedCount);
+  const autoTriggered = useRef(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // Resolve hero image
