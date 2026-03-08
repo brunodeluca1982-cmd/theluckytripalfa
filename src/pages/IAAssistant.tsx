@@ -33,15 +33,28 @@ function getSavedCount(): number {
 
 function getUserContext() {
   try {
+    const savedItems = JSON.parse(localStorage.getItem("saved-items") || "[]");
+    const draftRoteiro = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
     return {
-      saved_items: JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]"),
+      saved_items: savedItems,
+      saved_items_count: savedItems.length,
+      saved_items_summary: savedItems.map((i: any) => ({
+        title: i.title,
+        type: i.type,
+        neighborhood: i.neighborhood_full || i.neighborhood_short,
+        date: i.date_iso,
+        time: i.start_time_24h,
+        priority: i.priority,
+        rsvp: i.rsvp,
+      })),
+      draft_roteiro: draftRoteiro,
       itinerary_draft: JSON.parse(localStorage.getItem("itinerary_draft") || "[]"),
       travel_dates: JSON.parse(localStorage.getItem("trip-dates") || "null"),
       user_preferences: JSON.parse(localStorage.getItem("trip-preferences") || "null"),
       selected_city: "Rio de Janeiro",
     };
   } catch {
-    return { saved_items: [], itinerary_draft: [], travel_dates: null, user_preferences: null, selected_city: "Rio de Janeiro" };
+    return { saved_items: [], saved_items_count: 0, saved_items_summary: [], draft_roteiro: [], itinerary_draft: [], travel_dates: null, user_preferences: null, selected_city: "Rio de Janeiro" };
   }
 }
 
