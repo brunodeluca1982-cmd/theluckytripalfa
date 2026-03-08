@@ -97,7 +97,7 @@ export const useItemSave = () => {
   }, [location.pathname]);
 
   const goToRoteiro = useCallback(() => {
-    navigate('/meu-roteiro');
+    navigate('/minha-viagem');
   }, [navigate]);
 
   const saveItem = useCallback((

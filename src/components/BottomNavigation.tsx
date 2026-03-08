@@ -29,7 +29,7 @@ interface NavItem {
 const navItems: NavItem[] = [
   { id: "home", label: "Home", icon: Home, path: "/" },
   { id: "destinos", label: "Destinos", icon: Map, path: "/destinos" },
-  { id: "roteiro", label: "Meu Roteiro", icon: BookmarkCheck, path: "/meu-roteiro" },
+  { id: "roteiro", label: "Minha Viagem", icon: BookmarkCheck, path: "/minha-viagem" },
   { id: "ia", label: "IA", icon: Sparkles, path: "/ia" },
   { id: "perfil", label: "Perfil", icon: User, path: "/perfil" },
 ];

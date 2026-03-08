@@ -23,6 +23,7 @@ import WhatToDo from "./pages/WhatToDo";
 import WhatToDoDetail from "./pages/WhatToDoDetail";
 import WhatToDoCategory from "./pages/WhatToDoCategory";
 import MeuRoteiro from "./pages/MeuRoteiro";
+import MinhaViagem from "./pages/MinhaViagem";
 import TripGroup from "./pages/TripGroup";
 import TripDates from "./pages/TripDates";
 import TripPreferences from "./pages/TripPreferences";
@@ -162,6 +163,7 @@ const App = () => {
                   <Route path="/como-chegar" element={<HowToGetThere />} />
                   
                   {/* Meu Roteiro */}
+                  <Route path="/minha-viagem" element={<MinhaViagem />} />
                   <Route path="/meu-roteiro" element={<MeuRoteiro />} />
                   <Route path="/meu-roteiro/grupo" element={<Navigate to="/meu-roteiro/datas" replace />} />
                   <Route path="/meu-roteiro/datas" element={<TripDates />} />
