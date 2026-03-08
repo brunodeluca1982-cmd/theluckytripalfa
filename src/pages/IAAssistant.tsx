@@ -45,7 +45,51 @@ function getUserContext() {
   }
 }
 
-const IAAssistant = () => {
+/** Parse assistant content, splitting ```places JSON blocks from regular markdown */
+function AssistantMessage({ content }: { content: string }) {
+  const parts = useMemo(() => {
+    const regex = /```places\s*\n([\s\S]*?)```/g;
+    const result: { type: "text" | "places"; value: string }[] = [];
+    let lastIndex = 0;
+    let match: RegExpExecArray | null;
+
+    while ((match = regex.exec(content)) !== null) {
+      if (match.index > lastIndex) {
+        result.push({ type: "text", value: content.slice(lastIndex, match.index) });
+      }
+      result.push({ type: "places", value: match[1].trim() });
+      lastIndex = match.index + match[0].length;
+    }
+    if (lastIndex < content.length) {
+      result.push({ type: "text", value: content.slice(lastIndex) });
+    }
+    return result;
+  }, [content]);
+
+  return (
+    <div className="space-y-2">
+      {parts.map((part, i) => {
+        if (part.type === "places") {
+          try {
+            const items = JSON.parse(part.value);
+            if (Array.isArray(items) && items.length > 0) {
+              return <PlaceCardList key={i} items={items} />;
+            }
+          } catch {
+            /* fallback to text */
+          }
+        }
+        return (
+          <div key={i} className="prose prose-sm prose-invert max-w-none [&>p]:mb-2 [&>ul]:mb-2 [&>ol]:mb-2 [&_a]:text-white/80 [&_a]:underline">
+            <ReactMarkdown>{part.value}</ReactMarkdown>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+
   const navigate = useNavigate();
   const { draft } = useTripDraft();
   const [messages, setMessages] = useState<Msg[]>([]);
