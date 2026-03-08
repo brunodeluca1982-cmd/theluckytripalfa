@@ -1,9 +1,10 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Sparkles, Send, MapPin, Loader2, BookmarkCheck } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import ReactMarkdown from "react-markdown";
 import { Button } from "@/components/ui/button";
+import PlaceCardList from "@/components/chat/PlaceCardList";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import rioHeroFallback from "@/assets/highlights/rio-de-janeiro-hero.jpg";
@@ -44,7 +45,51 @@ function getUserContext() {
   }
 }
 
+/** Parse assistant content, splitting ```places JSON blocks from regular markdown */
+function AssistantMessage({ content }: { content: string }) {
+  const parts = useMemo(() => {
+    const regex = /```places\s*\n([\s\S]*?)```/g;
+    const result: { type: "text" | "places"; value: string }[] = [];
+    let lastIndex = 0;
+    let match: RegExpExecArray | null;
+
+    while ((match = regex.exec(content)) !== null) {
+      if (match.index > lastIndex) {
+        result.push({ type: "text", value: content.slice(lastIndex, match.index) });
+      }
+      result.push({ type: "places", value: match[1].trim() });
+      lastIndex = match.index + match[0].length;
+    }
+    if (lastIndex < content.length) {
+      result.push({ type: "text", value: content.slice(lastIndex) });
+    }
+    return result;
+  }, [content]);
+
+  return (
+    <div className="space-y-2">
+      {parts.map((part, i) => {
+        if (part.type === "places") {
+          try {
+            const items = JSON.parse(part.value);
+            if (Array.isArray(items) && items.length > 0) {
+              return <PlaceCardList key={i} items={items} />;
+            }
+          } catch {
+            /* fallback to text */
+          }
+        }
+        return (
+          <div key={i} className="prose prose-sm prose-invert max-w-none [&>p]:mb-2 [&>ul]:mb-2 [&>ol]:mb-2 [&_a]:text-white/80 [&_a]:underline">
+            <ReactMarkdown>{part.value}</ReactMarkdown>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
 const IAAssistant = () => {
+
   const navigate = useNavigate();
   const { draft } = useTripDraft();
   const [messages, setMessages] = useState<Msg[]>([]);
@@ -280,9 +325,7 @@ const IAAssistant = () => {
                 }`}
               >
                 {msg.role === "assistant" ? (
-                  <div className="prose prose-sm prose-invert max-w-none [&>p]:mb-2 [&>ul]:mb-2 [&>ol]:mb-2 [&_a]:text-white/80 [&_a]:underline">
-                    <ReactMarkdown>{msg.content}</ReactMarkdown>
-                  </div>
+                  <AssistantMessage content={msg.content} />
                 ) : (
                   msg.content
                 )}

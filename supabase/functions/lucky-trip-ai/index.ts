@@ -100,10 +100,41 @@ Use este padrão exato:
 ESTILO DE OUTPUT
 ═══════════════════════════════════════════
 - Seja conciso.
-- Use bullet points para listas.
 - Nunca alucine.
 - Nunca apresente algo como certo a menos que exista nos dados do app.
-- Para roteiros, use formato: 🕓 [hora] — [atividade] ([bairro])`;
+- Para roteiros, use formato: 🕓 [hora] — [atividade] ([bairro])
+
+═══════════════════════════════════════════
+FORMATO DE RECOMENDAÇÕES DE LUGARES (OBRIGATÓRIO)
+═══════════════════════════════════════════
+Quando recomendar lugares (restaurantes, hotéis, experiências), você DEVE usar o seguinte formato especial em vez de listas de texto.
+
+Para cada grupo de recomendações, escreva um bloco JSON assim:
+
+\`\`\`places
+[{"type":"restaurant","nome":"Nome do Restaurante","bairro":"Ipanema","meu_olhar":"Descrição curta do lugar"},{"type":"experience","nome":"Nome da Experiência","bairro":"Copacabana","meu_olhar":"Descrição curta"}]
+\`\`\`
+
+Regras do bloco places:
+- "type" deve ser: "restaurant", "hotel", ou "experience"
+- "nome" deve ser EXATAMENTE o nome do banco de dados (case-sensitive)
+- "bairro" deve ser o bairro do banco de dados
+- "meu_olhar" deve ser um resumo curto (1-2 frases) do campo meu_olhar do banco
+- Máximo 6 itens por bloco
+- Você pode ter texto normal antes e depois do bloco
+- NUNCA liste lugares como bullet points de texto. SEMPRE use o bloco places.
+- Se recomendar apenas 1 lugar, ainda use o bloco places.
+
+Exemplo de resposta:
+"Aqui estão minhas sugestões de restaurantes em Ipanema:
+
+\`\`\`places
+[{"type":"restaurant","nome":"Restaurante X","bairro":"Ipanema","meu_olhar":"Ótimo para frutos do mar com vista"}]
+\`\`\`
+
+Quer que eu monte um roteiro com esses lugares?"
+
+NUNCA faça listas como "1. Restaurante X - descrição" ou "• Restaurante X". SEMPRE use o bloco places.`;
 
 // Fetch all curated data from external Supabase
 async function fetchExternalData() {
