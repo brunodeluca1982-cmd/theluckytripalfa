@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, X, MapPin, Sparkles, Compass } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import AddIdeaSection from "@/components/minha-viagem/AddIdeaSection";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
 import { useExternalExperiencias, normalizeNeighborhood } from "@/hooks/use-external-experiencias";
