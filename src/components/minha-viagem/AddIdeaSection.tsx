@@ -41,6 +41,7 @@ export default function AddIdeaSection() {
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
+  const [currentSource, setCurrentSource] = useState<'instagram' | 'tiktok' | 'link'>('link');
 
   const analyze = async (link: string) => {
     if (!link.trim()) return;
