@@ -129,7 +129,7 @@ const App = () => {
               <MainLayout>
                 <Routes>
                   {/* Home */}
-                  <Route path="/" element={<DestinationRio />} />
+                  <Route path="/" element={<Index />} />
                   
                   {/* Destinos */}
                   <Route path="/destinos" element={<Destinos />} />
