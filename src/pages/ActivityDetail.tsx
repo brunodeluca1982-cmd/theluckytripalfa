@@ -1,5 +1,5 @@
 import { Link, useParams, useSearchParams } from "react-router-dom";
-import { ChevronLeft, Plus, Clock, Baby, Shield, Loader2 } from "lucide-react";
+import { ChevronLeft, Plus, Clock, Baby, Shield, Loader2, Bookmark } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useItemSave } from "@/hooks/use-item-save";
 import { activitiesByNeighborhood, cityLevelActivities, Activity } from "@/data/what-to-do-data";
@@ -10,6 +10,7 @@ import type { ExternalExperiencia } from "@/hooks/use-external-experiencias";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
+import { useEffect, useState } from "react";
 
 /**
  * ACTIVITY DETAIL PAGE
