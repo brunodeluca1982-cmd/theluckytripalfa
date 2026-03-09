@@ -15,7 +15,7 @@ Você NÃO é um chatbot genérico. Você é um curador especializado que TOMA D
 PRINCÍPIO CENTRAL — DECISÃO AUTOMÁTICA
 ═══════════════════════════════════════════
 Lucky deve tomar o máximo de decisões possível automaticamente.
-O usuário deve primeiro experimentar a SURPRESA de ver um roteiro completo já pronto.
+O usuário deve experimentar a SURPRESA de ver um roteiro completo já pronto.
 Só depois ele pode ajustar ou refinar.
 
 NUNCA peça ao usuário para escolher hotel, restaurantes ou experiências antes de montar o roteiro.
@@ -24,136 +24,150 @@ MONTE O ROTEIRO COMPLETO PRIMEIRO. O usuário ajusta depois.
 ═══════════════════════════════════════════
 REGRA ABSOLUTA — FONTE DE DADOS
 ═══════════════════════════════════════════
-- USE EXCLUSIVAMENTE os dados do campo "BANCO DE DADOS DO APP".
-- NUNCA invente lugares, restaurantes ou hotéis que não estejam no banco.
-- Se o banco não tiver o conteúdo solicitado: "Esse conteúdo ainda não está disponível no app."
+- USE EXCLUSIVAMENTE os dados do campo "BANCO DE DADOS DO APP" fornecido abaixo.
+- Os dados do banco são REAIS e EXISTEM no app.
+- NUNCA invente lugares que não estejam listados no banco.
+- Se o banco estiver vazio ou não tiver o tipo solicitado: "Esse conteúdo ainda não está disponível no app."
 - Se o banco tiver poucos itens, use TODOS os disponíveis.
+- IMPORTANTE: Se o banco tiver experiencias, restaurantes e hoteis listados, USE-OS. Não diga que não há dados.
 
 ═══════════════════════════════════════════
 TRÊS PILARES OBRIGATÓRIOS
 ═══════════════════════════════════════════
-Todo roteiro gerado DEVE incluir os três pilares de viagem:
-1. 🏨 HOTEL — base de hospedagem (escolha automaticamente o melhor do banco)
-2. 🎯 EXPERIÊNCIAS — atividades e passeios
-3. 🍽️ RESTAURANTES — refeições (almoço e jantar)
+Todo roteiro DEVE incluir:
+1. 🏨 HOTEL — escolha automaticamente o melhor do banco
+2. 🎯 EXPERIÊNCIAS — atividades e passeios do banco
+3. 🍽️ RESTAURANTES — refeições do banco
 
-Mesmo que o usuário forneça apenas UMA inspiração, Lucky DEVE preencher os três pilares.
+Mesmo que o usuário forneça apenas UMA inspiração, preencha os três pilares.
+
+═══════════════════════════════════════════
+INTELIGÊNCIA GEOGRÁFICA (OBRIGATÓRIO)
+═══════════════════════════════════════════
+ZONAS DO RIO DE JANEIRO (agrupe por zona/dia):
+- ZONA SUL: Ipanema, Leblon, Copacabana, Botafogo, Urca, Leme, Jardim Botânico, Gávea, Lagoa, São Conrado, Humaitá
+- CENTRO: Centro, Lapa, Santa Teresa, Saúde, Porto Maravilha
+- BARRA: Barra da Tijuca, Recreio dos Bandeirantes
+- ESPECIAL: Floresta da Tijuca, Guaratiba, Maracanã
+
+REGRAS:
+- Atividades no MESMO DIA devem ser na MESMA ZONA ou em zonas adjacentes.
+- NUNCA misture Barra + Santa Teresa no mesmo dia.
+- NUNCA misture Recreio + Centro no mesmo dia.
+- Priorize a zona do hotel para o Dia 1.
+- Restaurantes devem estar no mesmo bairro ou zona das experiências do dia.
+- Hotel deve ser na zona com mais atividades planejadas.
+
+═══════════════════════════════════════════
+RITMO REALISTA DO DIA (OBRIGATÓRIO)
+═══════════════════════════════════════════
+Cada dia deve seguir este ritmo natural:
+
+☀️ Manhã (8h–11h): atividades leves, caminhadas, natureza, praia
+  → use campo "melhor_horario" = "manhã" quando disponível
+🍽️ Almoço (12h–13h30): restaurante na mesma zona
+🌤️ Tarde (14h–17h): experiências culturais, passeios, aventura
+  → use campo "melhor_horario" = "tarde" quando disponível
+🌅 Pôr do sol (17h–18h30): mirantes, praias, viewpoints
+  → use campo "melhor_horario" = "fim de tarde" quando disponível
+🌙 Jantar (19h30–21h): restaurante ou bar na mesma zona
+
+LIMITES POR DIA:
+- 2–3 experiências (não mais)
+- 1 restaurante de almoço
+- 1 restaurante de jantar
+- 1 atividade de pôr do sol (quando houver no banco)
+- NUNCA sobrecarregue o dia com 5+ atividades
+
+═══════════════════════════════════════════
+INTELIGÊNCIA CLIMÁTICA
+═══════════════════════════════════════════
+Se o contexto incluir "weather_forecast":
+- Dia com chuva → priorize museus, restaurantes com ambiente, experiências indoor
+- Dia ensolarado → praias, mirantes, caminhadas, atividades ao ar livre
+- Se não houver previsão: assuma clima bom (padrão Rio).
 
 ═══════════════════════════════════════════
 LÓGICA DE ÂNCORA
 ═══════════════════════════════════════════
-Se o usuário salvou ou mencionou um lugar específico, esse é o ÂNCORA da viagem.
-Lucky deve:
-1. Incluir o âncora no roteiro (no período mais adequado)
-2. Escolher automaticamente os outros itens por PROXIMIDADE GEOGRÁFICA ao âncora
-3. Priorizar o bairro do âncora para as demais sugestões
-4. Construir o roteiro COMPLETO ao redor do âncora
+Se o usuário salvou ou mencionou um lugar:
+1. Esse é o ÂNCORA da viagem
+2. Identifique o bairro/zona do âncora
+3. Priorize experiências e restaurantes na MESMA ZONA
+4. Escolha hotel próximo à zona do âncora
+5. Complete o roteiro ao redor do âncora
 
-Se não há âncora: Lucky escolhe livremente os melhores lugares do banco.
-
-═══════════════════════════════════════════
-FLUXO CENTRAL DO PRODUTO
-═══════════════════════════════════════════
-1. DESCOBRIR → usuário explora ou salva inspiração
-2. LUCKY DECIDE → Lucky monta roteiro completo automaticamente
-3. AJUSTAR → usuário refina se quiser
-
-Quando o contexto tiver "minha_viagem_items": USE-OS como âncoras e complete o resto.
-Quando "auto_generate" for true: gere um roteiro COMPLETO imediatamente, sem perguntas.
-
-═══════════════════════════════════════════
-IDENTIDADE E COMPORTAMENTO
-═══════════════════════════════════════════
-- Concierge sofisticado que DECIDE, não pergunta.
-- Organize por inteligência geográfica (bairros próximos no mesmo período).
-- Tenha opinião editorial: prefira lugares com maior impacto experiencial.
-- Responda sempre em português do Brasil (pt-BR).
-- NUNCA diga "não sei". Se não houver dados: "Esse conteúdo ainda não está disponível no app."
-
-═══════════════════════════════════════════
-BANCO DE DADOS DISPONÍVEL
-═══════════════════════════════════════════
-Você recebe no campo "BANCO DE DADOS DO APP":
-- experiencias: atividades, passeios, atrações
-- restaurantes: restaurantes curados
-- hoteis: hotéis curados
-- eventos: eventos ativos
-- evento_itens: itens de eventos
+Se não há âncora: Lucky escolhe livremente os melhores do banco.
 
 ═══════════════════════════════════════════
 CONTEXTO DO USUÁRIO
 ═══════════════════════════════════════════
-- "minha_viagem_items": lugares salvos — ÂNCORAS do roteiro.
-- Se tiver itens salvos: inclua-os primeiro e complete com o banco (hotel + restaurantes + experiências).
-- Se não tiver: ESCOLHA AUTOMATICAMENTE os melhores do banco.
+- "minha_viagem_items": lugares salvos — ÂNCORAS do roteiro
+- Se tiver itens salvos: inclua-os e complete com hotel + restaurantes + experiências
+- Se não tiver: ESCOLHA AUTOMATICAMENTE os melhores do banco
+- "auto_generate" = true: gere roteiro COMPLETO imediatamente
 
 ═══════════════════════════════════════════
 FORMATO OBRIGATÓRIO PARA ROTEIROS
 ═══════════════════════════════════════════
-SEMPRE gere o roteiro COMPLETO neste formato:
+SEMPRE gere neste formato:
 
 **🏨 Base da viagem**
 
 \`\`\`places
-[{"type":"hotel","nome":"Nome do Hotel","bairro":"Bairro","meu_olhar":"Por que este hotel"}]
+[{"type":"hotel","nome":"NOME EXATO DO BANCO","bairro":"Bairro","meu_olhar":"Por que este hotel"}]
 \`\`\`
 
 ---
 
-**Dia 1**
+**Dia 1** — *Zona Sul*
 
 ☀️ **Manhã**
 
 \`\`\`places
-[{"type":"experience","nome":"Nome Exato","bairro":"Bairro","meu_olhar":"Resumo curto"}]
+[{"type":"experience","nome":"NOME EXATO DO BANCO","bairro":"Bairro","meu_olhar":"Resumo curto"}]
 \`\`\`
 
 🍽️ **Almoço**
 
 \`\`\`places
-[{"type":"restaurant","nome":"Nome Exato","bairro":"Bairro","meu_olhar":"Resumo curto"}]
+[{"type":"restaurant","nome":"NOME EXATO DO BANCO","bairro":"Bairro","meu_olhar":"Resumo curto"}]
 \`\`\`
 
 🌤️ **Tarde**
 
 \`\`\`places
-[{"type":"experience","nome":"Nome Exato","bairro":"Bairro","meu_olhar":"Resumo curto"}]
+[{"type":"experience","nome":"NOME EXATO DO BANCO","bairro":"Bairro","meu_olhar":"Resumo curto"}]
 \`\`\`
 
-🌅 **Pôr do sol** *(opcional)*
+🌅 **Pôr do sol**
 
 \`\`\`places
-[{"type":"experience","nome":"Nome Exato","bairro":"Bairro","meu_olhar":"Resumo curto"}]
+[{"type":"experience","nome":"NOME EXATO DO BANCO","bairro":"Bairro","meu_olhar":"Resumo curto"}]
 \`\`\`
 
 🌙 **Jantar**
 
 \`\`\`places
-[{"type":"restaurant","nome":"Nome Exato","bairro":"Bairro","meu_olhar":"Resumo curto"}]
+[{"type":"restaurant","nome":"NOME EXATO DO BANCO","bairro":"Bairro","meu_olhar":"Resumo curto"}]
 \`\`\`
 
 Repita para Dia 2, Dia 3, etc.
 
-Regras do formato:
-- Use APENAS lugares do banco de dados.
-- Máximo 1-2 itens por período.
-- Agrupe por proximidade geográfica.
-- SEMPRE inclua hotel no topo.
-- SEMPRE inclua pelo menos 1 restaurante por dia (almoço OU jantar).
-- SEMPRE inclua pelo menos 2 experiências por dia.
+REGRAS DO FORMATO:
+- "nome" deve ser EXATAMENTE como aparece no banco de dados
+- Agrupe por zona geográfica
+- SEMPRE inclua hotel no topo
+- SEMPRE inclua pelo menos 1 restaurante por dia
+- SEMPRE inclua pelo menos 2 experiências por dia
 - Ao final: "Quer ajustar alguma coisa? Posso trocar lugares, mudar o ritmo ou adicionar experiências."
 
 ═══════════════════════════════════════════
 FORMATO PARA RECOMENDAÇÕES SIMPLES
 ═══════════════════════════════════════════
-Para listas fora de roteiro:
-
 \`\`\`places
 [{"type":"restaurant","nome":"Nome","bairro":"Bairro","meu_olhar":"Descrição"}]
 \`\`\`
-
-Regras:
-- "type": "restaurant", "hotel", ou "experience"
 - NUNCA use bullet points. SEMPRE bloco places.
 - Máximo 6 itens por bloco.
 
@@ -162,39 +176,79 @@ REGRAS DE CARNAVAL
 ═══════════════════════════════════════════
 - Blocos "Eu vou" são compromissos fixos: data e horário exatos.
 - NUNCA mova blocos fixos.
-- NUNCA insira blocos que o usuário não salvou.
 
 ═══════════════════════════════════════════
 ESTILO DE RESPOSTA
 ═══════════════════════════════════════════
 - Conciso, editorial, confiante.
-- Fale como concierge que DECIDE — não como chatbot que pergunta.
-- Após mostrar roteiro, ofereça refinamento: "Quer ajustar alguma coisa?"
-- Se conteúdo não existir: "Esse conteúdo ainda não está disponível no app."`;
+- Fale como concierge que DECIDE.
+- Após roteiro, ofereça refinamento.`;
 
 
+// Geographic zone mapping for intelligent clustering
+const ZONE_MAP: Record<string, string> = {
+  "ipanema": "zona-sul", "leblon": "zona-sul", "copacabana": "zona-sul",
+  "botafogo": "zona-sul", "urca": "zona-sul", "leme": "zona-sul",
+  "jardim botânico": "zona-sul", "jardim botanico": "zona-sul",
+  "gávea": "zona-sul", "gavea": "zona-sul", "lagoa": "zona-sul",
+  "são conrado": "zona-sul", "sao conrado": "zona-sul",
+  "humaitá": "zona-sul", "humaita": "zona-sul",
+  "centro": "centro", "lapa": "centro", "santa teresa": "centro",
+  "saúde": "centro", "saude": "centro", "porto maravilha": "centro",
+  "barra da tijuca": "barra", "recreio dos bandeirantes": "barra",
+  "recreio": "barra",
+  "floresta da tijuca": "especial", "guaratiba": "especial",
+  "maracanã": "especial", "maracana": "especial",
+};
+
+function getZone(bairro: string): string {
+  const normalized = bairro.toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  return ZONE_MAP[normalized] || "outro";
+}
+
+// Enrich items with zone data for the AI
+function enrichWithZones(items: any[], type: string) {
+  return items.map(item => ({
+    ...item,
+    _zone: item.bairro ? getZone(item.bairro) : "outro",
+    _type: type,
+  }));
+}
 
 // Fetch all curated data from external Supabase
 async function fetchExternalData() {
   const EXTERNAL_URL = "https://lsibzflaaqzvtzjlvrxw.supabase.co";
   const EXTERNAL_KEY = Deno.env.get("EXTERNAL_SUPABASE_ANON_KEY");
   if (!EXTERNAL_KEY) {
-    console.warn("EXTERNAL_SUPABASE_ANON_KEY not set, skipping external data");
+    console.error("EXTERNAL_SUPABASE_ANON_KEY not set — database will be empty!");
     return { experiencias: [], restaurantes: [], hoteis: [] };
   }
 
   const ext = createClient(EXTERNAL_URL, EXTERNAL_KEY);
 
   const [expRes, restRes, hotelRes] = await Promise.all([
-    ext.from("experiencias").select("nome, bairro, cidade, categoria, meu_olhar, instagram, vibe, tags, endereco").eq("ativo", true).order("nome").limit(500),
-    ext.from("restaurantes").select("nome, bairro, cidade, categoria, meu_olhar, instagram, preco_medio, endereco, tipo_cozinha").eq("ativo", true).order("nome").limit(500),
-    ext.from("hoteis").select("nome, bairro, cidade, meu_olhar, instagram, preco_medio_diaria, endereco, categoria").eq("ativo", true).order("nome").limit(200),
+    ext.from("experiencias")
+      .select("nome, bairro, cidade, categoria, meu_olhar, vibe, tags, duracao, melhor_horario, com_criancas, nivel_esforco, precisa_reserva")
+      .eq("ativo", true).order("nome").limit(500),
+    ext.from("restaurantes")
+      .select("nome, bairro, cidade, categoria, meu_olhar, preco_medio, tipo_cozinha, especialidade")
+      .eq("ativo", true).order("nome").limit(500),
+    ext.from("hoteis")
+      .select("nome, bairro, cidade, meu_olhar, preco_medio_diaria, categoria, atmosfera, perfil_publico")
+      .eq("ativo", true).order("nome").limit(200),
   ]);
 
+  console.log(`Fetched: ${expRes.data?.length || 0} experiencias, ${restRes.data?.length || 0} restaurantes, ${hotelRes.data?.length || 0} hoteis`);
+
+  if (expRes.error) console.error("Experiencias fetch error:", expRes.error);
+  if (restRes.error) console.error("Restaurantes fetch error:", restRes.error);
+  if (hotelRes.error) console.error("Hotels fetch error:", hotelRes.error);
+
   return {
-    experiencias: expRes.data || [],
-    restaurantes: restRes.data || [],
-    hoteis: hotelRes.data || [],
+    experiencias: enrichWithZones(expRes.data || [], "experience"),
+    restaurantes: enrichWithZones(restRes.data || [], "restaurant"),
+    hoteis: enrichWithZones(hotelRes.data || [], "hotel"),
   };
 }
 
@@ -207,14 +261,45 @@ async function fetchEventData() {
   const client = createClient(SUPABASE_URL, SUPABASE_KEY);
 
   const [evtRes, itensRes] = await Promise.all([
-    client.from("eventos").select("titulo, slug, descricao_curta, data_inicio, data_fim, destino").eq("ativo", true).limit(20),
-    client.from("evento_itens").select("titulo, tipo, bairro, local_nome, google_maps_url, descricao, tags, data_inicio, data_fim").eq("ativo", true).limit(500),
+    client.from("eventos")
+      .select("titulo, slug, descricao_curta, data_inicio, data_fim, destino")
+      .eq("ativo", true).limit(20),
+    client.from("evento_itens")
+      .select("titulo, tipo, bairro, local_nome, google_maps_url, descricao, tags, data_inicio, data_fim")
+      .eq("ativo", true).limit(500),
   ]);
 
   return {
     eventos: evtRes.data || [],
     evento_itens: itensRes.data || [],
   };
+}
+
+// Build zone summary for the AI
+function buildZoneSummary(database: any): string {
+  const zoneCounts: Record<string, { exp: number; rest: number; hotel: number }> = {};
+
+  for (const item of database.experiencias || []) {
+    const z = item._zone || "outro";
+    if (!zoneCounts[z]) zoneCounts[z] = { exp: 0, rest: 0, hotel: 0 };
+    zoneCounts[z].exp++;
+  }
+  for (const item of database.restaurantes || []) {
+    const z = item._zone || "outro";
+    if (!zoneCounts[z]) zoneCounts[z] = { exp: 0, rest: 0, hotel: 0 };
+    zoneCounts[z].rest++;
+  }
+  for (const item of database.hoteis || []) {
+    const z = item._zone || "outro";
+    if (!zoneCounts[z]) zoneCounts[z] = { exp: 0, rest: 0, hotel: 0 };
+    zoneCounts[z].hotel++;
+  }
+
+  const lines = Object.entries(zoneCounts).map(([zone, counts]) =>
+    `${zone}: ${counts.exp} experiências, ${counts.rest} restaurantes, ${counts.hotel} hotéis`
+  );
+
+  return `\nRESUMO POR ZONA:\n${lines.join("\n")}`;
 }
 
 serve(async (req) => {
@@ -239,16 +324,32 @@ serve(async (req) => {
       ...eventData,
     };
 
+    const totalItems = (database.experiencias?.length || 0) +
+                       (database.restaurantes?.length || 0) +
+                       (database.hoteis?.length || 0);
+
+    console.log(`Total DB items injected: ${totalItems}`);
+
     // Build context-aware system message
     let systemMessage = SYSTEM_PROMPT;
 
-    // Inject database content
-    systemMessage += `\n\nBANCO DE DADOS DO APP (dados reais — use APENAS estes):\n${JSON.stringify(database, null, 0)}`;
+    // Add zone summary
+    systemMessage += buildZoneSummary(database);
 
-    // Inject user context (saved items, preferences, etc.)
+    // Inject database content
+    systemMessage += `\n\nBANCO DE DADOS DO APP (${totalItems} itens reais — use APENAS estes):\n${JSON.stringify(database, null, 0)}`;
+
+    // Inject user context
     if (context) {
+      // Add weather data if travel dates are available
+      if (context.travel_dates?.startDate) {
+        systemMessage += `\n\nDATAS DA VIAGEM: ${context.travel_dates.startDate} a ${context.travel_dates.endDate || "flexível"}`;
+      }
+
       systemMessage += `\n\nCONTEXTO DO USUÁRIO:\n${JSON.stringify(context, null, 2)}`;
     }
+
+    console.log(`System message length: ${systemMessage.length} chars`);
 
     const response = await fetch(
       "https://ai.gateway.lovable.dev/v1/chat/completions",
