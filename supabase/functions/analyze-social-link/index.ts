@@ -7,6 +7,45 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+/** Try to extract OG/meta info from an Instagram or TikTok page */
+async function scrapePageMeta(url: string): Promise<{
+  title: string;
+  description: string;
+  siteName: string;
+}> {
+  const defaults = { title: "", description: "", siteName: "" };
+  try {
+    const resp = await fetch(url, {
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
+        Accept: "text/html",
+      },
+      redirect: "follow",
+    });
+    if (!resp.ok) return defaults;
+
+    const html = await resp.text();
+
+    const ogTitle = html.match(/<meta[^>]*property="og:title"[^>]*content="([^"]*)"/) ||
+      html.match(/<meta[^>]*content="([^"]*)"[^>]*property="og:title"/);
+    const ogDesc = html.match(/<meta[^>]*property="og:description"[^>]*content="([^"]*)"/) ||
+      html.match(/<meta[^>]*content="([^"]*)"[^>]*property="og:description"/);
+    const ogSite = html.match(/<meta[^>]*property="og:site_name"[^>]*content="([^"]*)"/) ||
+      html.match(/<meta[^>]*content="([^"]*)"[^>]*property="og:site_name"/);
+    const titleTag = html.match(/<title[^>]*>([^<]*)<\/title>/i);
+
+    return {
+      title: ogTitle?.[1] || titleTag?.[1] || "",
+      description: ogDesc?.[1] || "",
+      siteName: ogSite?.[1] || "",
+    };
+  } catch (e) {
+    console.error("scrapePageMeta error:", e);
+    return defaults;
+  }
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -21,7 +60,12 @@ serve(async (req) => {
       );
     }
 
-    // 1. Fetch curated data from external Supabase
+    // 1. Scrape page metadata
+    console.log("Scraping metadata for:", url);
+    const meta = await scrapePageMeta(url);
+    console.log("Metadata:", JSON.stringify(meta));
+
+    // 2. Fetch curated data from external Supabase
     const EXTERNAL_URL = "https://lsibzflaaqzvtzjlvrxw.supabase.co";
     const EXTERNAL_KEY = Deno.env.get("EXTERNAL_SUPABASE_ANON_KEY");
     if (!EXTERNAL_KEY) {
@@ -43,14 +87,13 @@ serve(async (req) => {
     const restaurantes = restRes.data || [];
     const hoteis = hotelRes.data || [];
 
-    // Build a compact catalog for the AI
     const catalog = [
       ...experiencias.map((e: any) => `EXP|${e.id}|${e.nome}|${e.bairro}|${e.categoria}|${e.vibe || ""}|${e.meu_olhar?.slice(0, 80) || ""}`),
       ...restaurantes.map((r: any) => `REST|${r.id}|${r.nome}|${r.bairro}|${r.categoria}|${r.tipo_cozinha || ""}|${r.meu_olhar?.slice(0, 80) || ""}`),
       ...hoteis.map((h: any) => `HOTEL|${h.id}|${h.nome}|${h.bairro}|${h.categoria || ""}||${h.meu_olhar?.slice(0, 80) || ""}`),
     ].join("\n");
 
-    // 2. Use AI to analyze the link and match against catalog
+    // 3. Use AI to analyze the link + scraped metadata
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
       return new Response(
@@ -59,12 +102,24 @@ serve(async (req) => {
       );
     }
 
-    const systemPrompt = `You are a travel content analyzer for Rio de Janeiro. 
-The user will give you a social media URL (Instagram, TikTok, etc).
+    const metaContext = [
+      meta.title && `Page title: "${meta.title}"`,
+      meta.description && `Description/caption: "${meta.description}"`,
+      meta.siteName && `Source: ${meta.siteName}`,
+    ].filter(Boolean).join("\n");
 
-Based on the URL structure (location tags, hashtags in URL, username context), identify what place, activity, or experience the post is about.
+    const systemPrompt = `You are a travel content analyzer for Rio de Janeiro.
+The user will give you a social media URL and any metadata we could extract from the page.
 
-Then match it against the CATALOG below and return 2-5 matching items from the catalog.
+SCRAPED METADATA:
+${metaContext || "No metadata could be extracted. Analyze based on URL structure only."}
+
+Based on the URL structure, metadata, caption text, hashtags, and location tags, identify:
+1. What place, activity, or experience the post is about
+2. The neighborhood or area in Rio de Janeiro
+3. The type of activity (beach, restaurant, nightlife, viewpoint, culture, etc.)
+
+Then match it against the CATALOG below and return 2-5 matching items.
 
 CATALOG FORMAT: TYPE|ID|NAME|NEIGHBORHOOD|CATEGORY|EXTRA|DESCRIPTION
 ${catalog}
@@ -72,14 +127,21 @@ ${catalog}
 RULES:
 - ONLY return items that exist in the catalog above
 - Match by neighborhood, activity type, vibe, or theme
-- If the URL mentions a beach → match beach experiences
+- If the content mentions a beach → match beach experiences
 - If it mentions food/restaurant → match restaurants
 - If it mentions a specific neighborhood → prioritize that area
-- Return results as JSON array
+- The "interpretation" field should be a clear, friendly sentence in Portuguese describing what the inspiration is about
+- Include the detected location and activity type in the interpretation
 
 OUTPUT FORMAT (strict JSON, no markdown):
 {
-  "interpretation": "Brief description of what the link seems to be about",
+  "interpretation": "Pôr do sol no Arpoador — mirante e experiência ao ar livre em Ipanema",
+  "detected": {
+    "location": "Arpoador",
+    "city": "Rio de Janeiro",
+    "activity": "sunset viewpoint",
+    "neighborhood": "Ipanema"
+  },
   "suggestions": [
     {
       "type": "experience" | "restaurant" | "hotel",
@@ -114,7 +176,18 @@ OUTPUT FORMAT (strict JSON, no markdown):
                 properties: {
                   interpretation: {
                     type: "string",
-                    description: "Brief description of what the link is about",
+                    description: "Friendly sentence in Portuguese describing the travel inspiration",
+                  },
+                  detected: {
+                    type: "object",
+                    properties: {
+                      location: { type: "string" },
+                      city: { type: "string" },
+                      activity: { type: "string" },
+                      neighborhood: { type: "string" },
+                    },
+                    required: ["location", "city", "activity"],
+                    additionalProperties: false,
                   },
                   suggestions: {
                     type: "array",
@@ -132,7 +205,7 @@ OUTPUT FORMAT (strict JSON, no markdown):
                     },
                   },
                 },
-                required: ["interpretation", "suggestions"],
+                required: ["interpretation", "detected", "suggestions"],
                 additionalProperties: false,
               },
             },
@@ -165,8 +238,7 @@ OUTPUT FORMAT (strict JSON, no markdown):
 
     const aiData = await aiResponse.json();
 
-    // Extract from tool call response
-    let result = { interpretation: "", suggestions: [] };
+    let result: any = { interpretation: "", detected: null, suggestions: [] };
     const toolCall = aiData.choices?.[0]?.message?.tool_calls?.[0];
     if (toolCall?.function?.arguments) {
       try {
@@ -184,6 +256,13 @@ OUTPUT FORMAT (strict JSON, no markdown):
     ]);
 
     result.suggestions = (result.suggestions || []).filter((s: any) => validIds.has(s.id));
+
+    // Include scraped metadata in response for frontend display
+    result.meta = {
+      title: meta.title,
+      description: meta.description,
+      siteName: meta.siteName,
+    };
 
     return new Response(JSON.stringify(result), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
