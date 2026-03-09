@@ -49,6 +49,7 @@ export interface SavedItem {
   destinationName: string;
   source?: 'instagram' | 'tiktok' | 'link';
   sourceLabel?: string;
+  sourceUrl?: string;
   neighborhood?: string;
 }
 
