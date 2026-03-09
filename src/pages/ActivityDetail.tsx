@@ -327,11 +327,35 @@ const ActivityDetail = () => {
 
   const { activity, neighborhoodName } = result;
 
+  const staticMedia = slugMediaForStatic && slugMediaForStatic.length > 0 ? slugMediaForStatic : null;
+
   return (
     <div className="min-h-screen bg-black">
-      {/* Hero Image */}
+      {/* Hero */}
       <div className="relative w-full aspect-[4/3] bg-muted overflow-hidden">
-        <img src={getAttractionImage(from || "")} alt={activity.title} className="w-full h-full object-cover" />
+        {staticMedia && staticMedia.length > 1 ? (
+          <Carousel className="w-full h-full" opts={{ loop: true }}>
+            <CarouselContent className="ml-0 h-full">
+              {staticMedia.map((m, i) => (
+                <CarouselItem key={i} className="pl-0 h-full">
+                  {m.type === "video" ? (
+                    <video src={m.url} muted controls playsInline preload="metadata" className="w-full h-full object-cover" />
+                  ) : (
+                    <img src={m.url} alt={activity.title} className="w-full h-full object-cover" />
+                  )}
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+          </Carousel>
+        ) : staticMedia ? (
+          staticMedia[0].type === "video" ? (
+            <video src={staticMedia[0].url} muted controls playsInline preload="metadata" className="w-full h-full object-cover" />
+          ) : (
+            <img src={staticMedia[0].url} alt={activity.title} className="w-full h-full object-cover" />
+          )
+        ) : (
+          <img src={getAttractionImage(from || "")} alt={activity.title} className="w-full h-full object-cover" />
+        )}
         <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/40" />
         <div className="absolute top-0 left-0 right-0 px-4 pt-[env(safe-area-inset-top,12px)] pb-2 flex items-center z-10">
           <Link to={backPath} className="inline-flex items-center gap-1.5 text-sm text-white/90 font-medium">
