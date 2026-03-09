@@ -43,8 +43,58 @@ export default function AddIdeaSection() {
   const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
   const [currentSource, setCurrentSource] = useState<'instagram' | 'tiktok' | 'link'>('link');
 
+  const isInstagramLink = (link: string) => link.includes("instagram.com");
+  const isTikTokLink = (link: string) => link.includes("tiktok.com");
+
+  const saveDirectIdea = (link: string, source: 'instagram' | 'tiktok' | 'link') => {
+    const draft = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+    const ideaId = `idea-${Date.now()}`;
+
+    const sourceLabels: Record<string, string> = {
+      instagram: "Instagram",
+      tiktok: "TikTok",
+      link: "Link",
+    };
+
+    const titleLabels: Record<string, string> = {
+      instagram: "Ideia do Instagram",
+      tiktok: "Ideia do TikTok",
+      link: "Ideia salva",
+    };
+
+    draft.push({
+      id: ideaId,
+      type: "activity",
+      title: titleLabels[source],
+      savedAt: new Date().toISOString(),
+      isPremium: false,
+      destinationId: "rio-de-janeiro",
+      destinationName: "Rio de Janeiro",
+      source,
+      sourceLabel: sourceLabels[source],
+      sourceUrl: link,
+    });
+
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(draft));
+    window.dispatchEvent(new CustomEvent("roteiro-updated"));
+
+    toast({ title: "Ideia salva ✓", description: `${titleLabels[source]} adicionada à sua viagem.` });
+
+    setUrl("");
+    setIsOpen(false);
+    setResult(null);
+  };
+
   const analyze = async (link: string) => {
     if (!link.trim()) return;
+
+    // MVP: save Instagram/TikTok links directly as ideas
+    const detectedSource = isInstagramLink(link) ? 'instagram' : isTikTokLink(link) ? 'tiktok' : null;
+    if (detectedSource) {
+      saveDirectIdea(link, detectedSource);
+      return;
+    }
+
     setIsLoading(true);
     setResult(null);
 
