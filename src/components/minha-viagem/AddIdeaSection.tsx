@@ -103,6 +103,12 @@ export default function AddIdeaSection() {
       return;
     }
 
+    const sourceLabels: Record<string, string> = {
+      instagram: "Instagram",
+      tiktok: "TikTok",
+      link: "Link",
+    };
+
     draft.push({
       id: suggestion.id,
       type: typeToSavedType[suggestion.type],
@@ -111,6 +117,9 @@ export default function AddIdeaSection() {
       isPremium: false,
       destinationId: "rio-de-janeiro",
       destinationName: "Rio de Janeiro",
+      source: currentSource,
+      sourceLabel: sourceLabels[currentSource],
+      neighborhood: suggestion.bairro,
     });
 
     localStorage.setItem(STORAGE_KEY, JSON.stringify(draft));
