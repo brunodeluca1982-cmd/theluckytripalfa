@@ -15,6 +15,12 @@ function getUserContext() {
     const draftRoteiro = JSON.parse(localStorage.getItem("draft-roteiro") || "[]");
     const tripDates = JSON.parse(localStorage.getItem("trip-dates") || "{}");
     const preferences = JSON.parse(localStorage.getItem("user-preferences") || "{}");
+
+    // Resolve anchor zones from saved items
+    const anchorBairros = draftRoteiro
+      .map((i: any) => i.neighborhood)
+      .filter(Boolean);
+
     return {
       saved_items: savedItems,
       itinerary_draft: draftRoteiro,
@@ -24,9 +30,10 @@ function getUserContext() {
       user_preferences: preferences,
       selected_city: "Rio de Janeiro",
       auto_generate: draftRoteiro.length > 0,
+      anchor_neighborhoods: anchorBairros,
     };
   } catch {
-    return { selected_city: "Rio de Janeiro", minha_viagem_count: 0 };
+    return { selected_city: "Rio de Janeiro", minha_viagem_count: 0, auto_generate: false };
   }
 }
 
