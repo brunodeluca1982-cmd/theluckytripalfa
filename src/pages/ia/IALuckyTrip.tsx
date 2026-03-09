@@ -3,6 +3,8 @@ import { ChevronLeft, Send, Sparkles } from "lucide-react";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import ReactMarkdown from "react-markdown";
+import PlaceCardList from "@/components/chat/PlaceCardList";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
@@ -15,33 +17,131 @@ function getUserContext() {
     return {
       saved_items: savedItems,
       itinerary_draft: draftRoteiro,
+      minha_viagem_items: draftRoteiro,
+      minha_viagem_count: draftRoteiro.length,
       travel_dates: tripDates,
       user_preferences: preferences,
       selected_city: "Rio de Janeiro",
     };
   } catch {
-    return { selected_city: "Rio de Janeiro" };
+    return { selected_city: "Rio de Janeiro", minha_viagem_count: 0 };
   }
 }
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/lucky-trip-ai`;
 
 const exampleQueries = [
-  "Organize meu sábado no Rio",
+  "O que fazer no Rio em 3 dias?",
   "Qual o melhor bairro pra ficar no Rio?",
   "Sugira um roteiro gastronômico na Zona Sul",
   "O que fazer num dia de chuva?",
 ];
+
+/** Parse assistant content and render places blocks as PlaceCardList */
+function AssistantMessage({ content, onSave }: { content: string; onSave?: (name: string) => void }) {
+  const parts: Array<{ type: "text" | "places"; raw: string }> = [];
+  const regex = /```places\n([\s\S]*?)```/g;
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+
+  while ((match = regex.exec(content)) !== null) {
+    if (match.index > lastIndex) {
+      parts.push({ type: "text", raw: content.slice(lastIndex, match.index) });
+    }
+    parts.push({ type: "places", raw: match[1] });
+    lastIndex = match.index + match[0].length;
+  }
+  if (lastIndex < content.length) {
+    parts.push({ type: "text", raw: content.slice(lastIndex) });
+  }
+
+  return (
+    <div className="space-y-2">
+      {parts.map((part, i) => {
+        if (part.type === "places") {
+          try {
+            const items = JSON.parse(part.raw.trim());
+            if (Array.isArray(items) && items.length > 0) {
+              return (
+                <PlaceCardListWithCallback
+                  key={i}
+                  items={items}
+                  onSave={onSave}
+                />
+              );
+            }
+          } catch {
+            // fallback to text
+          }
+          return null;
+        }
+        if (!part.raw.trim()) return null;
+        return (
+          <div key={i} className="prose prose-sm max-w-none text-foreground [&_p]:text-foreground [&_strong]:text-foreground [&_em]:text-foreground/80 [&_li]:text-foreground [&_h1]:text-foreground [&_h2]:text-foreground [&_h3]:text-foreground">
+            <ReactMarkdown>{part.raw}</ReactMarkdown>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function PlaceCardListWithCallback({
+  items,
+  onSave,
+}: {
+  items: Array<{ type: string; nome: string; bairro: string; meu_olhar?: string }>;
+  onSave?: (name: string) => void;
+}) {
+  // Wrap PlaceCardList with save detection via storage events
+  useEffect(() => {
+    if (!onSave) return;
+    const handler = () => {
+      try {
+        const draft = JSON.parse(localStorage.getItem("draft-roteiro") || "[]");
+        const lastItem = draft[draft.length - 1];
+        if (lastItem?.title) onSave(lastItem.title);
+      } catch {}
+    };
+    window.addEventListener("roteiro-updated", handler);
+    return () => window.removeEventListener("roteiro-updated", handler);
+  }, [onSave]);
+
+  return (
+    <PlaceCardList
+      items={items.map((it) => ({
+        type: it.type as "restaurant" | "hotel" | "experience",
+        nome: it.nome,
+        bairro: it.bairro,
+        meu_olhar: it.meu_olhar,
+      }))}
+    />
+  );
+}
 
 const IALuckyTrip = () => {
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  // Track last saved item name to trigger acknowledgment
+  const pendingSaveRef = useRef<string | null>(null);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages]);
+
+  const handleSaveAck = useCallback((itemName: string) => {
+    if (pendingSaveRef.current === itemName) return; // already acked
+    pendingSaveRef.current = itemName;
+    const ackMsg: Msg = {
+      role: "assistant",
+      content: `Perfeito. Vou incluir **${itemName}** na sua viagem. Continue explorando e salve mais lugares — assim posso organizar um roteiro completo para você.`,
+    };
+    setMessages((prev) => [...prev, ackMsg]);
+    // Reset after short delay so next save can be acked
+    setTimeout(() => { pendingSaveRef.current = null; }, 2000);
+  }, []);
 
   const sendMessage = useCallback(async (text: string) => {
     if (!text.trim() || isLoading) return;
@@ -156,7 +256,7 @@ const IALuckyTrip = () => {
               <Sparkles className="w-6 h-6 text-primary" />
             </div>
             <p className="text-center text-foreground/80 leading-relaxed max-w-sm mb-8">
-              Pergunte sobre roteiros, restaurantes ou peça para organizar seu dia no Rio.
+              Descubra, salve e deixe o Lucky organizar sua viagem.
             </p>
             <div className="w-full max-w-sm space-y-2">
               <p className="text-xs text-muted-foreground uppercase tracking-wider mb-3 text-center">
@@ -180,15 +280,15 @@ const IALuckyTrip = () => {
             key={i}
             className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
           >
-            <div
-              className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap ${
-                msg.role === "user"
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted text-foreground"
-              }`}
-            >
-              {msg.content}
-            </div>
+            {msg.role === "user" ? (
+              <div className="max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed bg-primary text-primary-foreground">
+                {msg.content}
+              </div>
+            ) : (
+              <div className="max-w-[92%] rounded-2xl px-4 py-3 text-sm leading-relaxed bg-muted">
+                <AssistantMessage content={msg.content} onSave={handleSaveAck} />
+              </div>
+            )}
           </div>
         ))}
 
@@ -220,7 +320,7 @@ const IALuckyTrip = () => {
           </button>
         </div>
         <p className="text-[10px] text-muted-foreground/60 text-center mt-3">
-          Respostas baseadas em conteúdo curado e seus itens salvos
+          Salve os lugares que você gostar para eu organizar sua viagem.
         </p>
       </form>
     </div>
