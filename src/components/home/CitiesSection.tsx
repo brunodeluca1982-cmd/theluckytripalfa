@@ -33,7 +33,7 @@ const CitiesSection = () => {
   return (
     <section className="py-8 px-5">
       <h2 className="text-xs font-semibold tracking-[0.15em] uppercase text-primary mb-5">
-        Conheça as cidades mais buscadas
+        Viaje nos mais buscados
       </h2>
 
       <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide -mx-5 px-5">
