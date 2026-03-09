@@ -77,7 +77,8 @@ export default function AddIdeaSection() {
     setIsLoading(false);
   };
 
-  const handlePaste = (prefix?: string) => {
+  const handlePaste = (source: 'instagram' | 'tiktok' | 'link' = 'link') => {
+    setCurrentSource(source);
     navigator.clipboard.readText().then((text) => {
       if (text.trim()) {
         setUrl(text.trim());
