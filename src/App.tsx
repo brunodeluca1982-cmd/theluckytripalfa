@@ -17,6 +17,7 @@ import EatMapView from "./pages/EatMapView";
 import WhereToStayDetail from "./pages/WhereToStayDetail";
 import WhereToEatDetail from "./pages/WhereToEatDetail";
 import LuckyList from "./pages/LuckyList";
+import LuckyListNeighborhood from "./pages/LuckyListNeighborhood";
 import LuckyListDetail from "./pages/LuckyListDetail";
 import HowToGetThere from "./pages/HowToGetThere";
 import WhatToDo from "./pages/WhatToDo";
