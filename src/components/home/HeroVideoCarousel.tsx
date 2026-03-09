@@ -6,26 +6,26 @@ import { cn } from "@/lib/utils";
 
 interface HeroSlide {
   id: string;
-  videoUrl: string;
-  thumbnailUrl?: string;
+  slug: string;
+  videoUrl?: string;
+  imageUrl?: string;
   title: string;
   subtitle?: string;
   buttonLabel: string;
-  destinationSlug?: string;
-  permalink?: string;
 }
 
 const fallbackSlides: HeroSlide[] = [
   {
     id: "rio",
+    slug: "rio-de-janeiro",
     videoUrl: "/videos/rio-hero.mp4",
     title: "Rio de Janeiro",
     subtitle: "Brasil",
     buttonLabel: "Conferir agora",
-    destinationSlug: "rio-de-janeiro",
   },
   {
     id: "lisboa",
+    slug: "lisboa",
     videoUrl: "/videos/rio-hero.mp4",
     title: "Lisboa",
     subtitle: "Portugal",
@@ -33,6 +33,7 @@ const fallbackSlides: HeroSlide[] = [
   },
   {
     id: "paris",
+    slug: "paris",
     videoUrl: "/videos/rio-hero.mp4",
     title: "Paris",
     subtitle: "França",
@@ -49,36 +50,74 @@ const HeroVideoCarousel = () => {
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const navigate = useNavigate();
 
-  const { data: dbSlides } = useQuery({
-    queryKey: ["home-hero-items"],
+  // 1. Load experiences marked for home
+  const { data: experiences } = useQuery({
+    queryKey: ["home-experiences"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("home_hero_items")
-        .select("*")
+        .from("experiences")
+        .select("id, slug, title, subtitle, city, country")
         .eq("is_active", true)
         .eq("show_on_home", true)
         .order("sort_order", { ascending: true })
         .order("created_at", { ascending: false });
-
       if (error) throw error;
       return data;
     },
     staleTime: 5 * 60 * 1000,
   });
 
-  const heroSlides: HeroSlide[] =
-    dbSlides && dbSlides.length > 0
-      ? dbSlides.map((item) => ({
-          id: item.id,
-          videoUrl: item.video_url || "/videos/rio-hero.mp4",
-          thumbnailUrl: item.thumbnail_url ?? undefined,
-          title: item.title,
-          subtitle: item.subtitle ?? undefined,
-          buttonLabel: item.button_label,
-          destinationSlug: item.destination_slug ?? undefined,
-          permalink: item.permalink ?? undefined,
-        }))
-      : fallbackSlides;
+  // 2. Load all active media for those slugs
+  const slugs = experiences?.map((e) => e.slug) ?? [];
+  const { data: mediaRows } = useQuery({
+    queryKey: ["home-experience-media", slugs],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("experience_media")
+        .select("experience_slug, media_type, media_url")
+        .in("experience_slug", slugs)
+        .eq("is_active", true)
+        .order("sort_order", { ascending: true });
+      if (error) throw error;
+      return data;
+    },
+    enabled: slugs.length > 0,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  // 3. Build slides: match each experience with its best media
+  const heroSlides: HeroSlide[] = (() => {
+    if (!experiences || experiences.length === 0 || !mediaRows) return fallbackSlides;
+
+    const mediaBySlug = new Map<string, typeof mediaRows>();
+    for (const m of mediaRows) {
+      const arr = mediaBySlug.get(m.experience_slug) ?? [];
+      arr.push(m);
+      mediaBySlug.set(m.experience_slug, arr);
+    }
+
+    const slides: HeroSlide[] = [];
+    for (const exp of experiences) {
+      const media = mediaBySlug.get(exp.slug);
+      if (!media || media.length === 0) continue;
+
+      const video = media.find((m) => m.media_type === "video");
+      const image = media.find((m) => m.media_type === "image");
+      if (!video && !image) continue;
+
+      slides.push({
+        id: exp.id,
+        slug: exp.slug,
+        videoUrl: video?.media_url,
+        imageUrl: image?.media_url,
+        title: exp.title,
+        subtitle: exp.country || exp.city || exp.subtitle || undefined,
+        buttonLabel: "Conferir agora",
+      });
+    }
+
+    return slides.length > 0 ? slides : fallbackSlides;
+  })();
 
   const goTo = useCallback(
     (index: number) => {
@@ -115,35 +154,41 @@ const HeroVideoCarousel = () => {
   }, [current]);
 
   const handleSlideAction = (slide: HeroSlide) => {
-    if (slide.destinationSlug) {
-      navigate(`/destino/${slide.destinationSlug}/intro`);
-    } else if (slide.permalink) {
-      window.open(slide.permalink, "_blank");
-    } else {
-      navigate("/destinos");
-    }
+    navigate(`/experiencia/${slide.slug}`);
   };
 
   const slide = heroSlides[current];
 
   return (
     <section className="relative w-full aspect-[9/16] max-h-[75vh] overflow-hidden">
-      {/* Video layers */}
+      {/* Media layers */}
       {heroSlides.map((s, i) => (
-        <video
-          key={s.id}
-          ref={(el) => { videoRefs.current[i] = el; }}
-          src={s.videoUrl}
-          poster={s.thumbnailUrl}
-          muted
-          loop
-          playsInline
-          preload={i <= 1 ? "auto" : "none"}
-          className={cn(
-            "absolute inset-0 w-full h-full object-cover transition-opacity duration-500",
-            i === current ? "opacity-100 z-10" : "opacity-0 z-0"
-          )}
-        />
+        s.videoUrl ? (
+          <video
+            key={s.id}
+            ref={(el) => { videoRefs.current[i] = el; }}
+            src={s.videoUrl}
+            poster={s.imageUrl}
+            muted
+            loop
+            playsInline
+            preload={i <= 1 ? "auto" : "none"}
+            className={cn(
+              "absolute inset-0 w-full h-full object-cover transition-opacity duration-500",
+              i === current ? "opacity-100 z-10" : "opacity-0 z-0"
+            )}
+          />
+        ) : (
+          <img
+            key={s.id}
+            src={s.imageUrl}
+            alt={s.title}
+            className={cn(
+              "absolute inset-0 w-full h-full object-cover transition-opacity duration-500",
+              i === current ? "opacity-100 z-10" : "opacity-0 z-0"
+            )}
+          />
+        )
       ))}
 
       {/* Gradient overlays */}
@@ -178,12 +223,10 @@ const HeroVideoCarousel = () => {
 
       {/* Text overlay */}
       <div className="absolute bottom-0 left-0 right-0 z-30 flex flex-col items-center pb-8 px-6">
-        {/* Label */}
         <span className="px-4 py-1.5 rounded-full bg-primary/90 text-primary-foreground text-xs font-medium tracking-wide mb-4">
           Confira as novidades
         </span>
 
-        {/* Destination */}
         <h2 className="text-4xl font-serif font-medium text-white text-center leading-tight drop-shadow-lg">
           {slide.title}
         </h2>
@@ -191,7 +234,6 @@ const HeroVideoCarousel = () => {
           <p className="text-white/80 text-sm mt-1 mb-5">{slide.subtitle}</p>
         )}
 
-        {/* CTA */}
         <button
           onClick={() => handleSlideAction(slide)}
           className="w-full max-w-[280px] py-3.5 rounded-full bg-background text-foreground font-semibold text-base shadow-lg hover:opacity-90 transition-opacity mt-5"
@@ -208,9 +250,7 @@ const HeroVideoCarousel = () => {
               aria-label={`Slide ${i + 1}`}
               className={cn(
                 "w-2 h-2 rounded-full transition-all duration-300",
-                i === current
-                  ? "bg-white scale-110"
-                  : "bg-white/40"
+                i === current ? "bg-white scale-110" : "bg-white/40"
               )}
             />
           ))}

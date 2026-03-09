@@ -340,6 +340,60 @@ export type Database = {
         }
         Relationships: []
       }
+      experiences: {
+        Row: {
+          category: string | null
+          city: string | null
+          country: string | null
+          created_at: string
+          full_description: string | null
+          id: string
+          instagram_permalink: string | null
+          is_active: boolean
+          neighborhood: string | null
+          short_description: string | null
+          show_on_home: boolean
+          slug: string
+          sort_order: number
+          subtitle: string | null
+          title: string
+        }
+        Insert: {
+          category?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          full_description?: string | null
+          id?: string
+          instagram_permalink?: string | null
+          is_active?: boolean
+          neighborhood?: string | null
+          short_description?: string | null
+          show_on_home?: boolean
+          slug: string
+          sort_order?: number
+          subtitle?: string | null
+          title: string
+        }
+        Update: {
+          category?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          full_description?: string | null
+          id?: string
+          instagram_permalink?: string | null
+          is_active?: boolean
+          neighborhood?: string | null
+          short_description?: string | null
+          show_on_home?: boolean
+          slug?: string
+          sort_order?: number
+          subtitle?: string | null
+          title?: string
+        }
+        Relationships: []
+      }
       experiencia_media: {
         Row: {
           created_at: string
