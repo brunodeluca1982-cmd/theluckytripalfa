@@ -1,133 +1,109 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ChevronLeft } from "lucide-react";
-import { luckyListIntro, getLuckyListByNeighborhood } from "@/data/lucky-list-data";
 import luckyListHero from "@/assets/highlights/lucky-list-hero.jpg";
-import { useEventMode } from "@/contexts/EventModeContext";
-import { EventBanner } from "@/components/EventBanner";
-import { GooglePlaceSearchSection } from "@/components/GooglePlaceSearchSection";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "@/hooks/use-toast";
-import type { PlaceResult } from "@/lib/search-places";
+import { getLuckyListByNeighborhood } from "@/data/lucky-list-data";
+
+const NEIGHBORHOODS = [
+  { id: "copacabana", name: "Copacabana" },
+  { id: "ipanema", name: "Ipanema" },
+  { id: "leblon", name: "Leblon" },
+  { id: "botafogo", name: "Botafogo" },
+  { id: "flamengo", name: "Flamengo" },
+  { id: "barra-da-tijuca", name: "Barra da Tijuca" },
+  { id: "urca", name: "Urca" },
+  { id: "santa-teresa", name: "Santa Teresa" },
+  { id: "lapa", name: "Lapa" },
+  { id: "centro", name: "Centro" },
+];
 
 const LuckyList = () => {
+  const navigate = useNavigate();
   const groupedItems = getLuckyListByNeighborhood();
-  const neighborhoods = Object.keys(groupedItems);
-  const { evento } = useEventMode();
+  
+  // Filter to neighborhoods that have items
+  const availableNeighborhoods = NEIGHBORHOODS.filter(
+    (n) => groupedItems[n.name] && groupedItems[n.name].length > 0
+  );
 
-  const handleAddToRoteiro = async (place: PlaceResult) => {
-    const { error } = await supabase.from("roteiro_itens").insert({
-      roteiro_id: "rio-de-janeiro-draft",
-      source: "google",
-      ref_table: "places_cache",
-      place_id: place.placeId,
-      name: place.name,
-      address: place.address,
-      city: "Rio de Janeiro",
-      lat: place.lat,
-      lng: place.lng,
-      day_index: 1,
-      order_in_day: 0,
-    });
-    if (error) {
-      toast({ title: "Erro ao adicionar", description: "Tente novamente.", variant: "destructive" });
-    } else {
-      toast({ title: "Adicionado ao roteiro!", description: place.name });
-    }
-  };
+  // Also include "Fora do Mapa" if exists
+  const hasOutsideMap = groupedItems["Fora do Mapa"]?.length > 0;
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="px-6 py-4 border-b border-border">
+    <div className="min-h-screen flex flex-col">
+      {/* Hero background */}
+      <div
+        className="fixed inset-0 z-0 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: `url(${luckyListHero})` }}
+      />
+      <div className="fixed inset-0 z-0 bg-gradient-to-t from-black/90 via-black/60 to-black/40" />
+
+      {/* Header */}
+      <header className="relative z-10 px-5 pt-12 pb-4">
         <Link
           to="/destino/rio-de-janeiro"
-          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white hover:bg-white/20 transition-colors"
         >
-          <ChevronLeft className="w-4 h-4" />
-          Voltar
+          <ChevronLeft className="w-5 h-5" />
         </Link>
       </header>
 
-      <main className="pb-12">
-        <div className="px-6 pt-8 pb-6">
-          <h1 className="text-4xl font-serif font-semibold text-foreground leading-tight">
+      {/* Content */}
+      <main className="relative z-10 flex-1 px-5 pb-12">
+        {/* Hero text */}
+        <section className="pt-4 pb-10">
+          <h1 className="text-4xl font-serif font-semibold text-white leading-tight mb-4">
             The Lucky List
           </h1>
-          <p className="text-lg text-muted-foreground mt-2">
-            Rio de Janeiro
+          <p className="text-base text-white/70 leading-relaxed max-w-md">
+            Os endereços que não estão nos guias turísticos. Lugares exclusivos e segredos que só os locais (e nossos convidados) conhecem.
           </p>
-        </div>
+        </section>
 
-        <div className="w-full aspect-[16/9] bg-muted overflow-hidden">
-          <img
-            src={luckyListHero}
-            alt="Lucky List - Rio de Janeiro"
-            className="w-full h-full object-cover"
-          />
-        </div>
+        {/* Region selector */}
+        <section className="pt-6 pb-8">
+          <h2 className="text-xs tracking-[0.2em] text-white/50 uppercase mb-2">
+            Escolha a região
+          </h2>
+          <p className="text-sm text-white/60 leading-relaxed mb-6">
+            Nossos segredos estão divididos por bairro. Toque em uma área abaixo para revelar os locais exclusivos.
+          </p>
 
-        <div className="px-6 pt-8 pb-10">
-          {luckyListIntro.split('\n').map((paragraph, index) => (
-            <p key={index} className="text-base text-muted-foreground leading-relaxed mb-2 last:mb-0">
-              {paragraph}
-            </p>
-          ))}
-        </div>
-
-        <div className="mx-6 border-t border-border" />
-
-        {/* Event sponsor placement */}
-        <EventBanner placementKey="lucky_list_top" className="mx-6 mt-6" />
-
-        {/* Lucky List Items by Neighborhood */}
-        {neighborhoods.map((neighborhoodName) => (
-          <section key={neighborhoodName} className="px-6 pt-8">
-            <div className="mb-4">
-              <h2 className="text-xs tracking-widest text-muted-foreground uppercase mb-1">
-                {neighborhoodName}
-              </h2>
-              <p className="text-xs text-muted-foreground/60 italic">
-                Lucky List only — premium layer
-              </p>
-            </div>
-
-            <div className="space-y-4">
-              {groupedItems[neighborhoodName].map((item) => (
-                <Link
-                  key={item.id}
-                  to={`/lucky-list/${item.id}`}
-                  className="block p-4 bg-card border border-border rounded-lg hover:bg-accent/50 transition-colors"
+          <div className="space-y-3">
+            {availableNeighborhoods.map((neighborhood) => {
+              const itemCount = groupedItems[neighborhood.name]?.length || 0;
+              return (
+                <button
+                  key={neighborhood.id}
+                  onClick={() => navigate(`/lucky-list/bairro/${neighborhood.id}`)}
+                  className="w-full flex items-center justify-between px-5 py-4 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 text-white hover:bg-white/20 transition-all active:scale-[0.98]"
                 >
-                  <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">
-                    {item.category}
-                  </p>
-                  <h3 className="text-lg font-serif font-medium text-foreground mb-1">
-                    {item.title}
-                  </h3>
-                  <p className="text-sm text-muted-foreground">
-                    {item.teaser}
-                  </p>
-                </Link>
-              ))}
-            </div>
+                  <span className="text-base font-medium">{neighborhood.name}</span>
+                  <span className="text-sm text-white/50">
+                    {itemCount} {itemCount === 1 ? "lugar" : "lugares"}
+                  </span>
+                </button>
+              );
+            })}
 
-            <div className="mt-8 border-t border-border" />
-          </section>
-        ))}
-
-        {/* Google Places search */}
-        <div className="px-6 pt-8">
-          <GooglePlaceSearchSection
-            city="Rio de Janeiro"
-            title="Adicionar item do Google"
-            placeholder="Buscar lugares no Google..."
-            onAddToRoteiro={handleAddToRoteiro}
-          />
-        </div>
+            {hasOutsideMap && (
+              <button
+                onClick={() => navigate(`/lucky-list/bairro/fora-do-mapa`)}
+                className="w-full flex items-center justify-between px-5 py-4 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 text-white hover:bg-white/20 transition-all active:scale-[0.98]"
+              >
+                <span className="text-base font-medium">Fora do Mapa</span>
+                <span className="text-sm text-white/50">
+                  {groupedItems["Fora do Mapa"]?.length || 0} lugares
+                </span>
+              </button>
+            )}
+          </div>
+        </section>
       </main>
 
-      <footer className="px-6 py-8 border-t border-border">
-        <p className="text-xs text-muted-foreground">
-          The Lucky Trip — Rio de Janeiro
+      {/* Footer */}
+      <footer className="relative z-10 px-5 py-6 border-t border-white/10">
+        <p className="text-xs text-white/30 text-center">
+          The Lucky Trip — Conteúdo exclusivo
         </p>
       </footer>
     </div>

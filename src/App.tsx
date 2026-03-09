@@ -17,6 +17,7 @@ import EatMapView from "./pages/EatMapView";
 import WhereToStayDetail from "./pages/WhereToStayDetail";
 import WhereToEatDetail from "./pages/WhereToEatDetail";
 import LuckyList from "./pages/LuckyList";
+import LuckyListNeighborhood from "./pages/LuckyListNeighborhood";
 import LuckyListDetail from "./pages/LuckyListDetail";
 import HowToGetThere from "./pages/HowToGetThere";
 import WhatToDo from "./pages/WhatToDo";
@@ -157,6 +158,7 @@ const App = () => {
                   
                   {/* Lucky List */}
                   <Route path="/lucky-list" element={<LuckyList />} />
+                  <Route path="/lucky-list/bairro/:neighborhoodId" element={<LuckyListNeighborhood />} />
                   <Route path="/lucky-list/:id" element={<LuckyListDetail />} />
                   
                   {/* How to Get There */}
