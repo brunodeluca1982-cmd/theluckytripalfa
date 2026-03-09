@@ -58,11 +58,29 @@ function isExpSavedLocally(slug: string) {
   return draft.some((item: { id: string; type: string }) => item.id === slug && item.type === "activity");
 }
 
+function useLinkedInstagramPost(postId: string | null | undefined) {
+  return useQuery({
+    queryKey: ["instagram-post", postId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("imported_instagram_posts")
+        .select("permalink, caption, media_url, thumbnail_url, location_name")
+        .eq("id", postId!)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!postId,
+    staleTime: 10 * 60 * 1000,
+  });
+}
+
 const ExperienceDetail = () => {
   const { slug } = useParams<{ slug: string }>();
   const { saveItem } = useItemSave();
   const { data: exp, isLoading } = useExperience(slug);
   const { data: mediaList } = useExperienceMedia(slug);
+  const { data: igPost } = useLinkedInstagramPost(exp?.instagram_post_id);
   const [isSaved, setIsSaved] = useState(false);
 
   useEffect(() => {
