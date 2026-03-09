@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, X, MapPin, Sparkles, Compass, Users } from "lucide-react";
+import { ChevronLeft, X, MapPin, Sparkles, Compass, Users, Instagram, Link2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import AddIdeaSection from "@/components/minha-viagem/AddIdeaSection";
 import { Badge } from "@/components/ui/badge";
