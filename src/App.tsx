@@ -37,6 +37,7 @@ import RoteiroPlanner from "./pages/RoteiroPlanner";
 import RestaurantDetail from "./pages/RestaurantDetail";
 import HotelDetail from "./pages/HotelDetail";
 import ActivityDetail from "./pages/ActivityDetail";
+import ExperienceDetail from "./pages/ExperienceDetail";
 import Profile from "./pages/Profile";
 import DivisaoGastos from "./pages/profile/DivisaoGastos";
 import DiarioViagem from "./pages/profile/DiarioViagem";
