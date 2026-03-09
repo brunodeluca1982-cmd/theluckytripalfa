@@ -267,6 +267,7 @@ const ActivityDetail = () => {
   const { saveItem } = useItemSave();
 
   const { data: experiencias, isLoading } = useExternalExperiencias();
+  const { data: slugMediaForStatic } = useExperienceMediaBySlug(id);
 
   const from = searchParams.get("from");
   const backPath = from === "city" ? "/o-que-fazer" : from ? `/o-que-fazer/${from}` : "/o-que-fazer";
