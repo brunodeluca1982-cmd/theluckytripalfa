@@ -156,6 +156,7 @@ const App = () => {
                   <Route path="/o-que-fazer/categoria/:category" element={<WhatToDoCategory />} />
                   <Route path="/o-que-fazer/:neighborhood" element={<WhatToDoDetail />} />
                   <Route path="/atividade/:id" element={<ActivityDetail />} />
+                  <Route path="/experiencia/:slug" element={<ExperienceDetail />} />
                   
                   {/* Lucky List */}
                   <Route path="/lucky-list" element={<LuckyList />} />
