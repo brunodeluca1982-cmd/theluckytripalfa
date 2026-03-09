@@ -21,7 +21,7 @@ const PartnersCarousel = () => {
       </h2>
       <p className="text-muted-foreground text-sm leading-relaxed mb-6">
         Siga os passos de quem você admira. Tenha acesso aos roteiros
-        detalhados, segredos e dicas pessoais das nossas estrelas convidadas.
+        detalhados, segredos e dicas pessoais.
       </p>
 
       <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide -mx-5 px-5">
