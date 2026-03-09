@@ -349,6 +349,7 @@ export type Database = {
           full_description: string | null
           id: string
           instagram_permalink: string | null
+          instagram_post_id: string | null
           is_active: boolean
           neighborhood: string | null
           short_description: string | null
@@ -366,6 +367,7 @@ export type Database = {
           full_description?: string | null
           id?: string
           instagram_permalink?: string | null
+          instagram_post_id?: string | null
           is_active?: boolean
           neighborhood?: string | null
           short_description?: string | null
@@ -383,6 +385,7 @@ export type Database = {
           full_description?: string | null
           id?: string
           instagram_permalink?: string | null
+          instagram_post_id?: string | null
           is_active?: boolean
           neighborhood?: string | null
           short_description?: string | null
@@ -392,7 +395,15 @@ export type Database = {
           subtitle?: string | null
           title?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "experiences_instagram_post_id_fkey"
+            columns: ["instagram_post_id"]
+            isOneToOne: false
+            referencedRelation: "imported_instagram_posts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       experiencia_media: {
         Row: {
@@ -466,6 +477,54 @@ export type Database = {
           thumbnail_url?: string | null
           title?: string
           video_url?: string | null
+        }
+        Relationships: []
+      }
+      imported_instagram_posts: {
+        Row: {
+          caption: string | null
+          created_at: string
+          hashtags: string[] | null
+          id: string
+          instagram_media_id: string | null
+          location_name: string | null
+          media_type: string
+          media_url: string | null
+          permalink: string | null
+          status: string
+          thumbnail_url: string | null
+          timestamp: string | null
+          updated_at: string
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string
+          hashtags?: string[] | null
+          id?: string
+          instagram_media_id?: string | null
+          location_name?: string | null
+          media_type?: string
+          media_url?: string | null
+          permalink?: string | null
+          status?: string
+          thumbnail_url?: string | null
+          timestamp?: string | null
+          updated_at?: string
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string
+          hashtags?: string[] | null
+          id?: string
+          instagram_media_id?: string | null
+          location_name?: string | null
+          media_type?: string
+          media_url?: string | null
+          permalink?: string | null
+          status?: string
+          thumbnail_url?: string | null
+          timestamp?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
