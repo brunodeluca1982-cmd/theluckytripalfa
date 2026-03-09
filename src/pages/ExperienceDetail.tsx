@@ -1,5 +1,5 @@
 import { Link, useParams } from "react-router-dom";
-import { ChevronLeft, Bookmark, MapPin, Loader2 } from "lucide-react";
+import { ChevronLeft, Bookmark, MapPin, Loader2, Instagram } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useItemSave } from "@/hooks/use-item-save";
 import { supabase } from "@/integrations/supabase/client";
@@ -58,11 +58,29 @@ function isExpSavedLocally(slug: string) {
   return draft.some((item: { id: string; type: string }) => item.id === slug && item.type === "activity");
 }
 
+function useLinkedInstagramPost(postId: string | null | undefined) {
+  return useQuery({
+    queryKey: ["instagram-post", postId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("imported_instagram_posts")
+        .select("permalink, caption, media_url, thumbnail_url, location_name")
+        .eq("id", postId!)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!postId,
+    staleTime: 10 * 60 * 1000,
+  });
+}
+
 const ExperienceDetail = () => {
   const { slug } = useParams<{ slug: string }>();
   const { saveItem } = useItemSave();
   const { data: exp, isLoading } = useExperience(slug);
   const { data: mediaList } = useExperienceMedia(slug);
+  const { data: igPost } = useLinkedInstagramPost(exp?.instagram_post_id);
   const [isSaved, setIsSaved] = useState(false);
 
   useEffect(() => {
@@ -197,15 +215,28 @@ const ExperienceDetail = () => {
           {isSaved ? "Salvo" : "Salvar"}
         </button>
 
-        {/* Instagram link */}
-        {exp.instagram_permalink && (
+        {/* Instagram source badge */}
+        {igPost?.permalink && (
+          <a
+            href={igPost.permalink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 text-sm text-white/60 hover:text-white/90 transition-colors mb-3 px-3 py-2 rounded-full bg-white/5 border border-white/10"
+          >
+            <Instagram className="w-4 h-4" />
+            Inspirado por um post no Instagram
+          </a>
+        )}
+
+        {/* Instagram permalink fallback */}
+        {!igPost?.permalink && exp.instagram_permalink && (
           <a
             href={exp.instagram_permalink}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-2 text-sm text-white/50 hover:text-white/80 transition-colors"
           >
-            <MapPin className="w-4 h-4" />
+            <Instagram className="w-4 h-4" />
             Ver no Instagram
           </a>
         )}
