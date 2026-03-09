@@ -144,7 +144,7 @@ const ExternalActivityView = ({ exp, backPath }: { exp: ExternalExperiencia; bac
               {mediaList.map((m, i) => (
                 <CarouselItem key={i} className="pl-0 h-full">
                   {m.type === "video" ? (
-                    <video src={m.url} autoPlay muted loop playsInline preload="metadata" className="w-full h-full object-cover" />
+                    <video src={m.url} muted controls playsInline preload="metadata" className="w-full h-full object-cover" />
                   ) : (
                     <img src={m.url} alt={exp.nome} className="w-full h-full object-cover" />
                   )}
