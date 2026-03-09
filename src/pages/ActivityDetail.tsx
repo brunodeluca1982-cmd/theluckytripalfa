@@ -1,5 +1,5 @@
 import { Link, useParams, useSearchParams } from "react-router-dom";
-import { ChevronLeft, Plus, Clock, Baby, Shield, Loader2 } from "lucide-react";
+import { ChevronLeft, Plus, Clock, Baby, Shield, Loader2, Bookmark } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useItemSave } from "@/hooks/use-item-save";
 import { activitiesByNeighborhood, cityLevelActivities, Activity } from "@/data/what-to-do-data";
@@ -10,6 +10,7 @@ import type { ExternalExperiencia } from "@/hooks/use-external-experiencias";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
+import { useEffect, useState } from "react";
 
 /**
  * ACTIVITY DETAIL PAGE
@@ -47,27 +48,39 @@ const guideIdToWhatToDoId: Record<string, string> = {
 };
 
 // Static fallback finder
-const findStaticActivityById = (id: string): { activity: Activity; neighborhoodName: string; neighborhoodId: string } | null => {
+const findStaticActivityById = (
+  id: string
+): { activity: Activity; neighborhoodName: string; neighborhoodId: string } | null => {
   const mappedId = guideIdToWhatToDoId[id] || id;
 
   for (const [neighborhoodId, data] of Object.entries(activitiesByNeighborhood)) {
-    const activity = data.activities.find(a => a.id === mappedId);
+    const activity = data.activities.find((a) => a.id === mappedId);
     if (activity) return { activity, neighborhoodName: data.neighborhoodName, neighborhoodId };
   }
 
-  const cityActivity = cityLevelActivities.find(a => a.id === mappedId);
+  const cityActivity = cityLevelActivities.find((a) => a.id === mappedId);
   if (cityActivity) {
     return {
-      activity: { id: cityActivity.id, title: cityActivity.title, category: "Experiência Icônica", description: cityActivity.description },
+      activity: {
+        id: cityActivity.id,
+        title: cityActivity.title,
+        category: "Experiência Icônica",
+        description: cityActivity.description,
+      },
       neighborhoodName: "Rio de Janeiro",
       neighborhoodId: "city",
     };
   }
 
-  const guideActivity = guideActivities.find(a => a.id === id || a.id === mappedId);
+  const guideActivity = guideActivities.find((a) => a.id === id || a.id === mappedId);
   if (guideActivity) {
     return {
-      activity: { id: guideActivity.id, title: guideActivity.name, category: guideActivity.category, description: guideActivity.description },
+      activity: {
+        id: guideActivity.id,
+        title: guideActivity.name,
+        category: guideActivity.category,
+        description: guideActivity.description,
+      },
       neighborhoodName: guideActivity.neighborhood,
       neighborhoodId: guideActivity.neighborhood.toLowerCase().replace(/\s+/g, "-"),
     };
@@ -76,7 +89,10 @@ const findStaticActivityById = (id: string): { activity: Activity; neighborhoodN
   return null;
 };
 
-interface MediaRow { type: "image" | "video"; url: string }
+interface MediaRow {
+  type: "image" | "video";
+  url: string;
+}
 
 function useExperienciaMedia(experienciaId: string | undefined) {
   return useQuery({
@@ -96,12 +112,33 @@ function useExperienciaMedia(experienciaId: string | undefined) {
   });
 }
 
+function isActivitySavedLocally(activityId: string) {
+  const draft = JSON.parse(localStorage.getItem("draft-roteiro") || "[]");
+  return draft.some((item: { id: string; type: string }) => item.id === activityId && item.type === "activity");
+}
+
 /** Render for an external experiencia */
 const ExternalActivityView = ({ exp, backPath }: { exp: ExternalExperiencia; backPath: string }) => {
   const { saveItem } = useItemSave();
   const slug = normalizeNeighborhood(exp.bairro);
   const { data: mediaList } = useExperienciaMedia(exp.id);
   const [searchParams] = useSearchParams();
+
+  const [isSaved, setIsSaved] = useState(false);
+
+  useEffect(() => {
+    setIsSaved(isActivitySavedLocally(exp.id));
+  }, [exp.id]);
+
+  const handlePrimarySave = () => {
+    if (isSaved) {
+      saveItem(exp.id, "activity", exp.nome, false);
+      return;
+    }
+
+    const success = saveItem(exp.id, "activity", exp.nome, false);
+    if (success) setIsSaved(true);
+  };
 
   if (searchParams.get("debug") === "1") {
     console.log({ experiencia_id: exp.id, mediaList: mediaList ?? [] });
@@ -119,7 +156,15 @@ const ExternalActivityView = ({ exp, backPath }: { exp: ExternalExperiencia; bac
               {mediaList.map((m, i) => (
                 <CarouselItem key={i} className="pl-0 h-full">
                   {m.type === "video" ? (
-                    <video src={m.url} autoPlay muted loop playsInline preload="metadata" className="w-full h-full object-cover" />
+                    <video
+                      src={m.url}
+                      autoPlay
+                      muted
+                      loop
+                      playsInline
+                      preload="metadata"
+                      className="w-full h-full object-cover"
+                    />
                   ) : (
                     <img src={m.url} alt={exp.nome} className="w-full h-full object-cover" />
                   )}
@@ -129,7 +174,15 @@ const ExternalActivityView = ({ exp, backPath }: { exp: ExternalExperiencia; bac
           </Carousel>
         ) : hasMedia ? (
           mediaList[0].type === "video" ? (
-            <video src={mediaList[0].url} autoPlay muted loop playsInline preload="metadata" className="w-full h-full object-cover" />
+            <video
+              src={mediaList[0].url}
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="metadata"
+              className="w-full h-full object-cover"
+            />
           ) : (
             <img src={mediaList[0].url} alt={exp.nome} className="w-full h-full object-cover" />
           )
@@ -138,25 +191,28 @@ const ExternalActivityView = ({ exp, backPath }: { exp: ExternalExperiencia; bac
         )}
         <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-transparent" />
         <div className="absolute top-0 left-0 right-0 px-4 pt-[env(safe-area-inset-top,12px)] pb-2 flex items-center justify-between z-10">
-          <Link to={backPath} className="w-9 h-9 rounded-full bg-black/30 backdrop-blur-md flex items-center justify-center text-white">
+          <Link
+            to={backPath}
+            className="w-9 h-9 rounded-full bg-black/30 backdrop-blur-md flex items-center justify-center text-white"
+          >
             <ChevronLeft className="w-5 h-5" />
           </Link>
-          <button onClick={() => saveItem(exp.id, "activity", exp.nome, false)} className="w-9 h-9 rounded-full bg-black/30 backdrop-blur-md flex items-center justify-center text-white">
+          <button
+            onClick={() => saveItem(exp.id, "activity", exp.nome, false)}
+            className="w-9 h-9 rounded-full bg-black/30 backdrop-blur-md flex items-center justify-center text-white"
+          >
             <Plus className="w-5 h-5" />
           </button>
         </div>
       </div>
 
       <main className="pb-12">
-
         <div className="px-6 pt-8">
           <p className="text-xs tracking-widest text-muted-foreground uppercase mb-2">
             {exp.categoria} • {exp.bairro}
           </p>
 
-          <h1 className="text-4xl font-serif font-semibold text-foreground leading-tight mb-4">
-            {exp.nome}
-          </h1>
+          <h1 className="text-4xl font-serif font-semibold text-foreground leading-tight mb-4">{exp.nome}</h1>
 
           {/* Metadata pills */}
           <div className="flex flex-wrap gap-2 mb-6">
@@ -166,14 +222,10 @@ const ExternalActivityView = ({ exp, backPath }: { exp: ExternalExperiencia; bac
               </span>
             )}
             {exp.melhor_horario && (
-              <span className="text-xs px-2.5 py-1 rounded-full bg-muted text-muted-foreground">
-                🕐 {exp.melhor_horario}
-              </span>
+              <span className="text-xs px-2.5 py-1 rounded-full bg-muted text-muted-foreground">🕐 {exp.melhor_horario}</span>
             )}
             {exp.vibe && (
-              <span className="text-xs px-2.5 py-1 rounded-full bg-muted text-muted-foreground">
-                ✨ {exp.vibe}
-              </span>
+              <span className="text-xs px-2.5 py-1 rounded-full bg-muted text-muted-foreground">✨ {exp.vibe}</span>
             )}
             {exp.com_criancas && (
               <span className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-muted text-muted-foreground">
@@ -186,13 +238,11 @@ const ExternalActivityView = ({ exp, backPath }: { exp: ExternalExperiencia; bac
               </span>
             )}
             {exp.precisa_reserva && (
-              <span className="text-xs px-2.5 py-1 rounded-full bg-accent text-accent-foreground">
-                📋 Reserva necessária
-              </span>
+              <span className="text-xs px-2.5 py-1 rounded-full bg-accent text-accent-foreground">📋 Reserva necessária</span>
             )}
           </div>
 
-          <div className="space-y-2 mb-6">
+          <div className="space-y-2">
             {exp.meu_olhar.split("\n").map((paragraph, index) => (
               <p key={index} className="text-base text-muted-foreground leading-relaxed">
                 {paragraph}
@@ -200,8 +250,25 @@ const ExternalActivityView = ({ exp, backPath }: { exp: ExternalExperiencia; bac
             ))}
           </div>
 
+          {/* Primary "Salvar" button — positioned directly below description */}
+          <div className="mt-4 mb-6">
+            <Button
+              onClick={handlePrimarySave}
+              variant={isSaved ? "secondary" : "default"}
+              className="w-full h-14 rounded-full text-base font-semibold"
+            >
+              <Bookmark className="w-5 h-5" fill={isSaved ? "currentColor" : "none"} />
+              {isSaved ? "Salvo" : "Salvar"}
+            </Button>
+          </div>
+
           {exp.google_maps_url && (
-            <a href={exp.google_maps_url} target="_blank" rel="noopener noreferrer" className="text-sm text-muted-foreground hover:text-foreground transition-colors underline">
+            <a
+              href={exp.google_maps_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors underline"
+            >
               Ver no Google Maps
             </a>
           )}
@@ -225,8 +292,32 @@ const ActivityDetail = () => {
   const from = searchParams.get("from");
   const backPath = from === "city" ? "/o-que-fazer" : from ? `/o-que-fazer/${from}` : "/o-que-fazer";
 
-  // 1. Try external experiencias first (by UUID)
   const externalMatch = (experiencias || []).find((e) => e.id === id);
+  const result = findStaticActivityById(id || "");
+
+  const staticActivityId = result?.activity.id;
+  const staticActivityTitle = result?.activity.title;
+
+  const [isSaved, setIsSaved] = useState(false);
+
+  useEffect(() => {
+    if (!staticActivityId) return;
+    setIsSaved(isActivitySavedLocally(staticActivityId));
+  }, [staticActivityId]);
+
+  const handlePrimarySave = () => {
+    if (!staticActivityId || !staticActivityTitle) return;
+
+    if (isSaved) {
+      saveItem(staticActivityId, "activity", staticActivityTitle, false);
+      return;
+    }
+
+    const success = saveItem(staticActivityId, "activity", staticActivityTitle, false);
+    if (success) setIsSaved(true);
+  };
+
+  // 1. External experiencias (by UUID)
   if (externalMatch) {
     return <ExternalActivityView exp={externalMatch} backPath={backPath} />;
   }
@@ -241,13 +332,14 @@ const ActivityDetail = () => {
   }
 
   // 3. Static fallback
-  const result = findStaticActivityById(id || "");
-
   if (!result) {
     return (
       <div className="min-h-screen bg-background">
         <header className="px-6 py-4 border-b border-border">
-          <Link to="/o-que-fazer" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
+          <Link
+            to="/o-que-fazer"
+            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
             <ChevronLeft className="w-4 h-4" />
             Voltar
           </Link>
@@ -274,40 +366,83 @@ const ActivityDetail = () => {
         <img src={getAttractionImage(from || "")} alt={activity.title} className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-transparent" />
         <div className="absolute top-0 left-0 right-0 px-4 pt-[env(safe-area-inset-top,12px)] pb-2 flex items-center justify-between z-10">
-          <Link to={backPath} className="w-9 h-9 rounded-full bg-black/30 backdrop-blur-md flex items-center justify-center text-white">
+          <Link
+            to={backPath}
+            className="w-9 h-9 rounded-full bg-black/30 backdrop-blur-md flex items-center justify-center text-white"
+          >
             <ChevronLeft className="w-5 h-5" />
           </Link>
-          <button onClick={() => saveItem(activity.id, "activity", activity.title, false)} className="w-9 h-9 rounded-full bg-black/30 backdrop-blur-md flex items-center justify-center text-white">
+          <button
+            onClick={() => saveItem(activity.id, "activity", activity.title, false)}
+            className="w-9 h-9 rounded-full bg-black/30 backdrop-blur-md flex items-center justify-center text-white"
+          >
             <Plus className="w-5 h-5" />
           </button>
         </div>
       </div>
 
       <main className="pb-12">
-
         <div className="px-6 pt-8">
           <p className="text-xs tracking-widest text-muted-foreground uppercase mb-2">
             {activity.category} • {neighborhoodName}
           </p>
-          <h1 className="text-4xl font-serif font-semibold text-foreground leading-tight mb-4">
-            {activity.title}
-          </h1>
+          <h1 className="text-4xl font-serif font-semibold text-foreground leading-tight mb-4">{activity.title}</h1>
           {activity.price && <p className="text-sm text-muted-foreground mb-4">{activity.price}</p>}
-          <div className="space-y-2 mb-6">
+
+          <div className="space-y-2">
             {activity.description.split("\n").map((paragraph, index) => (
-              <p key={index} className="text-base text-muted-foreground leading-relaxed">{paragraph}</p>
+              <p key={index} className="text-base text-muted-foreground leading-relaxed">
+                {paragraph}
+              </p>
             ))}
           </div>
+
+          {/* Primary "Salvar" button — positioned directly below description */}
+          <div className="mt-4 mb-6">
+            <Button
+              onClick={handlePrimarySave}
+              variant={isSaved ? "secondary" : "default"}
+              className="w-full h-14 rounded-full text-base font-semibold"
+            >
+              <Bookmark className="w-5 h-5" fill={isSaved ? "currentColor" : "none"} />
+              {isSaved ? "Salvo" : "Salvar"}
+            </Button>
+          </div>
+
           <div className="space-y-2 text-sm text-muted-foreground mb-6">
             {activity.googleMaps && (
-              <p><a href={activity.googleMaps} target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors underline">Ver no Google Maps</a></p>
+              <p>
+                <a
+                  href={activity.googleMaps}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-foreground transition-colors underline"
+                >
+                  Ver no Google Maps
+                </a>
+              </p>
             )}
             {activity.instagram && (
-              <p><a href={`https://instagram.com/${activity.instagram.replace("@", "")}`} target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">{activity.instagram}</a></p>
+              <p>
+                <a
+                  href={`https://instagram.com/${activity.instagram.replace("@", "")}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-foreground transition-colors"
+                >
+                  {activity.instagram}
+                </a>
+              </p>
             )}
           </div>
+
           {activity.externalLink && (
-            <a href={activity.externalLink} target="_blank" rel="noopener noreferrer" className="inline-block py-2 px-4 bg-primary text-primary-foreground rounded-lg text-sm hover:opacity-90 transition-opacity">
+            <a
+              href={activity.externalLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block py-2 px-4 bg-primary text-primary-foreground rounded-lg text-sm hover:opacity-90 transition-opacity"
+            >
               Reservar / Saber mais
             </a>
           )}
