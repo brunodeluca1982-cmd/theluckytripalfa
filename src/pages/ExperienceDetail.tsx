@@ -1,5 +1,5 @@
 import { Link, useParams } from "react-router-dom";
-import { ChevronLeft, Bookmark, MapPin, Loader2 } from "lucide-react";
+import { ChevronLeft, Bookmark, MapPin, Loader2, Instagram } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useItemSave } from "@/hooks/use-item-save";
 import { supabase } from "@/integrations/supabase/client";
