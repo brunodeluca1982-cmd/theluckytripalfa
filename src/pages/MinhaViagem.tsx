@@ -156,7 +156,7 @@ const MinhaViagem = () => {
       {items.length > 0 && (
         <div className="fixed bottom-20 left-0 right-0 p-4 z-40">
           <Button
-            onClick={() => navigate("/ia?action=organize")}
+            onClick={() => navigate("/roteiro/rio-3-dias-final")}
             className="w-full h-14 text-base font-semibold rounded-xl gap-2"
           >
             <Sparkles className="w-5 h-5" />

@@ -190,7 +190,7 @@ const IACriarRoteiro = () => {
     // ─────────────────────────────────────────────────────────────────────────
     
     setTimeout(() => {
-      setStep('done');
+      navigate("/roteiro/rio-3-dias-final");
     }, 2000);
   };
 
