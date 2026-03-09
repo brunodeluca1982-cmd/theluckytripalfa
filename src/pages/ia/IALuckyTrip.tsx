@@ -1,10 +1,11 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ChevronLeft, Send, Sparkles } from "lucide-react";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
 import PlaceCardList from "@/components/chat/PlaceCardList";
+import TripItineraryPreview from "@/components/lucky/TripItineraryPreview";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
@@ -25,6 +26,15 @@ function getUserContext() {
     };
   } catch {
     return { selected_city: "Rio de Janeiro", minha_viagem_count: 0 };
+  }
+}
+
+function hasSavedPlaces(): boolean {
+  try {
+    const draft = JSON.parse(localStorage.getItem("draft-roteiro") || "[]");
+    return Array.isArray(draft) && draft.length > 0;
+  } catch {
+    return false;
   }
 }
 
@@ -62,17 +72,9 @@ function AssistantMessage({ content, onSave }: { content: string; onSave?: (name
           try {
             const items = JSON.parse(part.raw.trim());
             if (Array.isArray(items) && items.length > 0) {
-              return (
-                <PlaceCardListWithCallback
-                  key={i}
-                  items={items}
-                  onSave={onSave}
-                />
-              );
+              return <PlaceCardListWithCallback key={i} items={items} onSave={onSave} />;
             }
-          } catch {
-            // fallback to text
-          }
+          } catch { /* fallback */ }
           return null;
         }
         if (!part.raw.trim()) return null;
@@ -93,7 +95,6 @@ function PlaceCardListWithCallback({
   items: Array<{ type: string; nome: string; bairro: string; meu_olhar?: string }>;
   onSave?: (name: string) => void;
 }) {
-  // Wrap PlaceCardList with save detection via storage events
   useEffect(() => {
     if (!onSave) return;
     const handler = () => {
@@ -120,26 +121,38 @@ function PlaceCardListWithCallback({
 }
 
 const IALuckyTrip = () => {
+  const navigate = useNavigate();
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [hasTrip, setHasTrip] = useState(hasSavedPlaces);
   const scrollRef = useRef<HTMLDivElement>(null);
-  // Track last saved item name to trigger acknowledgment
   const pendingSaveRef = useRef<string | null>(null);
+
+  // Sync trip state
+  useEffect(() => {
+    const sync = () => setHasTrip(hasSavedPlaces());
+    window.addEventListener("storage", sync);
+    window.addEventListener("roteiro-updated", sync);
+    return () => {
+      window.removeEventListener("storage", sync);
+      window.removeEventListener("roteiro-updated", sync);
+    };
+  }, []);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages]);
 
   const handleSaveAck = useCallback((itemName: string) => {
-    if (pendingSaveRef.current === itemName) return; // already acked
+    if (pendingSaveRef.current === itemName) return;
     pendingSaveRef.current = itemName;
     const ackMsg: Msg = {
       role: "assistant",
       content: `Perfeito. Vou incluir **${itemName}** na sua viagem. Continue explorando e salve mais lugares — assim posso organizar um roteiro completo para você.`,
     };
     setMessages((prev) => [...prev, ackMsg]);
-    // Reset after short delay so next save can be acked
+    setHasTrip(true);
     setTimeout(() => { pendingSaveRef.current = null; }, 2000);
   }, []);
 
@@ -161,10 +174,7 @@ const IALuckyTrip = () => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
         },
-        body: JSON.stringify({
-          messages: allMessages,
-          context: getUserContext(),
-        }),
+        body: JSON.stringify({ messages: allMessages, context: getUserContext() }),
       });
 
       if (!resp.ok) {
@@ -241,22 +251,63 @@ const IALuckyTrip = () => {
           <ChevronLeft className="w-5 h-5" />
         </Link>
         <h1 className="text-xl font-serif font-medium text-foreground">
-          IA – Lucky Trip
+          Lucky
         </h1>
         <p className="text-xs tracking-[0.15em] text-muted-foreground uppercase mt-1">
-          Seu curador inteligente de viagem
+          Seu assistente de viagem
         </p>
       </header>
 
-      {/* Messages */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto px-5 py-6 space-y-4">
-        {messages.length === 0 && (
+      {/* Scrollable content */}
+      <div ref={scrollRef} className="flex-1 overflow-y-auto px-5 py-6 space-y-6">
+        {/* Itinerary preview — shown when user has saved places */}
+        {hasTrip && (
+          <TripItineraryPreview
+            onAdjust={() => sendMessage("Ajuste meu roteiro para um ritmo mais equilibrado")}
+            onAddExperiences={() => navigate("/destino/rio-de-janeiro")}
+          />
+        )}
+
+        {/* Chat messages */}
+        {messages.length > 0 && (
+          <div className="space-y-4">
+            {hasTrip && messages.length > 0 && (
+              <div className="border-t border-border pt-4">
+                <p className="text-[11px] text-muted-foreground uppercase tracking-wider mb-3">Conversa</p>
+              </div>
+            )}
+            {messages.map((msg, i) => (
+              <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+                {msg.role === "user" ? (
+                  <div className="max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed bg-primary text-primary-foreground">
+                    {msg.content}
+                  </div>
+                ) : (
+                  <div className="max-w-[92%] rounded-2xl px-4 py-3 text-sm leading-relaxed bg-muted">
+                    <AssistantMessage content={msg.content} onSave={handleSaveAck} />
+                  </div>
+                )}
+              </div>
+            ))}
+
+            {isLoading && messages[messages.length - 1]?.role !== "assistant" && (
+              <div className="flex justify-start">
+                <div className="bg-muted rounded-2xl px-4 py-3 text-sm text-muted-foreground">
+                  <span className="animate-pulse">Pensando...</span>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Empty state — no trip and no messages */}
+        {!hasTrip && messages.length === 0 && (
           <div className="flex flex-col items-center justify-center h-full">
             <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mb-6">
               <Sparkles className="w-6 h-6 text-primary" />
             </div>
             <p className="text-center text-foreground/80 leading-relaxed max-w-sm mb-8">
-              Descubra, salve e deixe o Lucky organizar sua viagem.
+              Salve lugares em Minha Viagem e eu organizo tudo pra você.
             </p>
             <div className="w-full max-w-sm space-y-2">
               <p className="text-xs text-muted-foreground uppercase tracking-wider mb-3 text-center">
@@ -274,31 +325,6 @@ const IALuckyTrip = () => {
             </div>
           </div>
         )}
-
-        {messages.map((msg, i) => (
-          <div
-            key={i}
-            className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
-          >
-            {msg.role === "user" ? (
-              <div className="max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed bg-primary text-primary-foreground">
-                {msg.content}
-              </div>
-            ) : (
-              <div className="max-w-[92%] rounded-2xl px-4 py-3 text-sm leading-relaxed bg-muted">
-                <AssistantMessage content={msg.content} onSave={handleSaveAck} />
-              </div>
-            )}
-          </div>
-        ))}
-
-        {isLoading && messages[messages.length - 1]?.role !== "assistant" && (
-          <div className="flex justify-start">
-            <div className="bg-muted rounded-2xl px-4 py-3 text-sm text-muted-foreground">
-              <span className="animate-pulse">Pensando...</span>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Input */}
@@ -307,7 +333,7 @@ const IALuckyTrip = () => {
           <Input
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Pergunte algo..."
+            placeholder="Pergunte algo ao Lucky..."
             className="flex-1 h-12 rounded-xl bg-muted/50 border-border"
             disabled={isLoading}
           />
@@ -320,7 +346,7 @@ const IALuckyTrip = () => {
           </button>
         </div>
         <p className="text-[10px] text-muted-foreground/60 text-center mt-3">
-          Salve os lugares que você gostar para eu organizar sua viagem.
+          Pergunte algo ao Lucky para refinar sua viagem.
         </p>
       </form>
     </div>
