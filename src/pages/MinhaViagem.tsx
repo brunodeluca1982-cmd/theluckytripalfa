@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, X, MapPin, Sparkles, Compass, Users } from "lucide-react";
+import { ChevronLeft, X, MapPin, Sparkles, Compass, Users, Instagram, Link2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import AddIdeaSection from "@/components/minha-viagem/AddIdeaSection";
 import { Badge } from "@/components/ui/badge";
@@ -150,13 +150,29 @@ const MinhaViagem = () => {
                       {item.title}
                     </p>
                     <p className="text-xs text-muted-foreground truncate">
-                      {getNeighborhood(item)}
+                      {item.neighborhood || getNeighborhood(item)}
                     </p>
-                    {typeLabels[item.type] && (
-                      <Badge variant="secondary" className="mt-1 text-[10px] px-1.5 py-0 h-4">
-                        {typeLabels[item.type]}
-                      </Badge>
-                    )}
+                    <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                      {typeLabels[item.type] && (
+                        <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4">
+                          {typeLabels[item.type]}
+                        </Badge>
+                      )}
+                      {item.source && (
+                        <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 gap-0.5">
+                          {item.source === 'instagram' ? (
+                            <Instagram className="w-2.5 h-2.5" />
+                          ) : item.source === 'tiktok' ? (
+                            <svg className="w-2.5 h-2.5" viewBox="0 0 24 24" fill="currentColor">
+                              <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.27 6.27 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.34-6.34V8.75a8.18 8.18 0 004.76 1.52V6.84a4.84 4.84 0 01-1-.15z" />
+                            </svg>
+                          ) : (
+                            <Link2 className="w-2.5 h-2.5" />
+                          )}
+                          {item.sourceLabel || item.source}
+                        </Badge>
+                      )}
+                    </div>
                   </div>
 
                   <button

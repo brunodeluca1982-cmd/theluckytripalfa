@@ -41,6 +41,7 @@ export default function AddIdeaSection() {
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
+  const [currentSource, setCurrentSource] = useState<'instagram' | 'tiktok' | 'link'>('link');
 
   const analyze = async (link: string) => {
     if (!link.trim()) return;
@@ -76,7 +77,8 @@ export default function AddIdeaSection() {
     setIsLoading(false);
   };
 
-  const handlePaste = (prefix?: string) => {
+  const handlePaste = (source: 'instagram' | 'tiktok' | 'link' = 'link') => {
+    setCurrentSource(source);
     navigator.clipboard.readText().then((text) => {
       if (text.trim()) {
         setUrl(text.trim());
@@ -101,6 +103,12 @@ export default function AddIdeaSection() {
       return;
     }
 
+    const sourceLabels: Record<string, string> = {
+      instagram: "Instagram",
+      tiktok: "TikTok",
+      link: "Link",
+    };
+
     draft.push({
       id: suggestion.id,
       type: typeToSavedType[suggestion.type],
@@ -109,6 +117,9 @@ export default function AddIdeaSection() {
       isPremium: false,
       destinationId: "rio-de-janeiro",
       destinationName: "Rio de Janeiro",
+      source: currentSource,
+      sourceLabel: sourceLabels[currentSource],
+      neighborhood: suggestion.bairro,
     });
 
     localStorage.setItem(STORAGE_KEY, JSON.stringify(draft));

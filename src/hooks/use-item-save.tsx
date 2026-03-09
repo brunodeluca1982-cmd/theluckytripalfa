@@ -47,6 +47,9 @@ export interface SavedItem {
   isPremium: boolean;
   destinationId: string;
   destinationName: string;
+  source?: 'instagram' | 'tiktok' | 'link';
+  sourceLabel?: string;
+  neighborhood?: string;
 }
 
 const STORAGE_KEY = 'draft-roteiro';
