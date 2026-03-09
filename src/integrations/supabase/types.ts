@@ -307,6 +307,39 @@ export type Database = {
         }
         Relationships: []
       }
+      experience_media: {
+        Row: {
+          created_at: string
+          experience_slug: string
+          id: string
+          is_active: boolean
+          media_type: string
+          media_url: string
+          sort_order: number
+          title: string | null
+        }
+        Insert: {
+          created_at?: string
+          experience_slug: string
+          id?: string
+          is_active?: boolean
+          media_type?: string
+          media_url: string
+          sort_order?: number
+          title?: string | null
+        }
+        Update: {
+          created_at?: string
+          experience_slug?: string
+          id?: string
+          is_active?: boolean
+          media_type?: string
+          media_url?: string
+          sort_order?: number
+          title?: string | null
+        }
+        Relationships: []
+      }
       experiencia_media: {
         Row: {
           created_at: string

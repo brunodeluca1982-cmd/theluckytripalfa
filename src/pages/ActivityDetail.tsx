@@ -64,7 +64,7 @@ const findStaticActivityById = (
   return null;
 };
 
-interface MediaRow { type: "image" | "video"; url: string; }
+interface MediaRow { type: "image" | "video"; url: string; title?: string; }
 
 function useExperienciaMedia(experienciaId: string | undefined) {
   return useQuery({
@@ -84,6 +84,29 @@ function useExperienciaMedia(experienciaId: string | undefined) {
   });
 }
 
+function useExperienceMediaBySlug(slug: string | undefined) {
+  return useQuery({
+    queryKey: ["experience-media-slug", slug],
+    queryFn: async (): Promise<MediaRow[]> => {
+      if (!slug) return [];
+      const { data, error } = await supabase
+        .from("experience_media")
+        .select("media_type, media_url, title")
+        .eq("experience_slug", slug)
+        .eq("is_active", true)
+        .order("sort_order", { ascending: true });
+      if (error) throw error;
+      return (data ?? []).map((r: any) => ({
+        type: r.media_type as "image" | "video",
+        url: r.media_url,
+        title: r.title,
+      }));
+    },
+    enabled: !!slug,
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
 function isActivitySavedLocally(activityId: string) {
   const draft = JSON.parse(localStorage.getItem("draft-roteiro") || "[]");
   return draft.some((item: { id: string; type: string }) => item.id === activityId && item.type === "activity");
@@ -93,8 +116,12 @@ function isActivitySavedLocally(activityId: string) {
 const ExternalActivityView = ({ exp, backPath }: { exp: ExternalExperiencia; backPath: string }) => {
   const { saveItem } = useItemSave();
   const slug = normalizeNeighborhood(exp.bairro);
-  const { data: mediaList } = useExperienciaMedia(exp.id);
+  const { data: legacyMedia } = useExperienciaMedia(exp.id);
+  const { data: slugMedia } = useExperienceMediaBySlug(exp.id);
   const [isSaved, setIsSaved] = useState(false);
+
+  // Merge: prefer slug-based media, fallback to legacy
+  const mediaList = (slugMedia && slugMedia.length > 0) ? slugMedia : legacyMedia;
 
   useEffect(() => {
     setIsSaved(isActivitySavedLocally(exp.id));
@@ -117,7 +144,7 @@ const ExternalActivityView = ({ exp, backPath }: { exp: ExternalExperiencia; bac
               {mediaList.map((m, i) => (
                 <CarouselItem key={i} className="pl-0 h-full">
                   {m.type === "video" ? (
-                    <video src={m.url} autoPlay muted loop playsInline preload="metadata" className="w-full h-full object-cover" />
+                    <video src={m.url} muted controls playsInline preload="metadata" className="w-full h-full object-cover" />
                   ) : (
                     <img src={m.url} alt={exp.nome} className="w-full h-full object-cover" />
                   )}
@@ -127,7 +154,7 @@ const ExternalActivityView = ({ exp, backPath }: { exp: ExternalExperiencia; bac
           </Carousel>
         ) : hasMedia ? (
           mediaList[0].type === "video" ? (
-            <video src={mediaList[0].url} autoPlay muted loop playsInline preload="metadata" className="w-full h-full object-cover" />
+            <video src={mediaList[0].url} muted controls playsInline preload="metadata" className="w-full h-full object-cover" />
           ) : (
             <img src={mediaList[0].url} alt={exp.nome} className="w-full h-full object-cover" />
           )
@@ -240,6 +267,7 @@ const ActivityDetail = () => {
   const { saveItem } = useItemSave();
 
   const { data: experiencias, isLoading } = useExternalExperiencias();
+  const { data: slugMediaForStatic } = useExperienceMediaBySlug(id);
 
   const from = searchParams.get("from");
   const backPath = from === "city" ? "/o-que-fazer" : from ? `/o-que-fazer/${from}` : "/o-que-fazer";
@@ -299,11 +327,35 @@ const ActivityDetail = () => {
 
   const { activity, neighborhoodName } = result;
 
+  const staticMedia = slugMediaForStatic && slugMediaForStatic.length > 0 ? slugMediaForStatic : null;
+
   return (
     <div className="min-h-screen bg-black">
-      {/* Hero Image */}
+      {/* Hero */}
       <div className="relative w-full aspect-[4/3] bg-muted overflow-hidden">
-        <img src={getAttractionImage(from || "")} alt={activity.title} className="w-full h-full object-cover" />
+        {staticMedia && staticMedia.length > 1 ? (
+          <Carousel className="w-full h-full" opts={{ loop: true }}>
+            <CarouselContent className="ml-0 h-full">
+              {staticMedia.map((m, i) => (
+                <CarouselItem key={i} className="pl-0 h-full">
+                  {m.type === "video" ? (
+                    <video src={m.url} muted controls playsInline preload="metadata" className="w-full h-full object-cover" />
+                  ) : (
+                    <img src={m.url} alt={activity.title} className="w-full h-full object-cover" />
+                  )}
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+          </Carousel>
+        ) : staticMedia ? (
+          staticMedia[0].type === "video" ? (
+            <video src={staticMedia[0].url} muted controls playsInline preload="metadata" className="w-full h-full object-cover" />
+          ) : (
+            <img src={staticMedia[0].url} alt={activity.title} className="w-full h-full object-cover" />
+          )
+        ) : (
+          <img src={getAttractionImage(from || "")} alt={activity.title} className="w-full h-full object-cover" />
+        )}
         <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/40" />
         <div className="absolute top-0 left-0 right-0 px-4 pt-[env(safe-area-inset-top,12px)] pb-2 flex items-center z-10">
           <Link to={backPath} className="inline-flex items-center gap-1.5 text-sm text-white/90 font-medium">
