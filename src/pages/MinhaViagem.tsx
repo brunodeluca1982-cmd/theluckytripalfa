@@ -149,9 +149,15 @@ const MinhaViagem = () => {
                     <p className="text-sm font-medium text-foreground truncate">
                       {item.title}
                     </p>
-                    <p className="text-xs text-muted-foreground truncate">
-                      {item.neighborhood || getNeighborhood(item)}
-                    </p>
+                    {(item as any).sourceUrl ? (
+                      <p className="text-xs text-muted-foreground truncate">
+                        {(item as any).sourceUrl}
+                      </p>
+                    ) : (
+                      <p className="text-xs text-muted-foreground truncate">
+                        {item.neighborhood || getNeighborhood(item)}
+                      </p>
+                    )}
                     <div className="flex items-center gap-1.5 mt-1 flex-wrap">
                       {typeLabels[item.type] && (
                         <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4">
