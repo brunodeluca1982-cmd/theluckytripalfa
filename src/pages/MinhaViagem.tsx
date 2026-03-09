@@ -161,13 +161,20 @@ const MinhaViagem = () => {
 
       {/* Fixed CTA */}
       {items.length > 0 && (
-        <div className="fixed bottom-20 left-0 right-0 p-4 z-40">
+        <div className="fixed bottom-20 left-0 right-0 p-4 z-40 space-y-2">
           <Button
             onClick={() => navigate("/roteiro/rio-3-dias-final")}
             className="w-full h-14 text-base font-semibold rounded-xl gap-2"
           >
             <Sparkles className="w-5 h-5" />
             Organizar com Lucky
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => navigate("/ia/criar-roteiro")}
+            className="w-full h-11 text-sm font-medium rounded-xl"
+          >
+            Criar roteiro
           </Button>
         </div>
       )}
