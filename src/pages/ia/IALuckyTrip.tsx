@@ -15,11 +15,26 @@ function getUserContext() {
     const draftRoteiro = JSON.parse(localStorage.getItem("draft-roteiro") || "[]");
     const tripDates = JSON.parse(localStorage.getItem("trip-dates") || "{}");
     const preferences = JSON.parse(localStorage.getItem("user-preferences") || "{}");
+    const weatherForecast = JSON.parse(localStorage.getItem("weather-forecast") || "null");
 
     // Resolve anchor zones from saved items
     const anchorBairros = draftRoteiro
       .map((i: any) => i.neighborhood)
       .filter(Boolean);
+
+    // Classify anchors by type for the context layer
+    const anchorsByType: Record<string, any[]> = {};
+    for (const item of draftRoteiro) {
+      const type = item.type || "unknown";
+      if (!anchorsByType[type]) anchorsByType[type] = [];
+      anchorsByType[type].push({
+        title: item.title,
+        type: item.type,
+        neighborhood: item.neighborhood,
+        source: item.source,
+        sourceLabel: item.sourceLabel,
+      });
+    }
 
     return {
       saved_items: savedItems,
@@ -28,9 +43,11 @@ function getUserContext() {
       minha_viagem_count: draftRoteiro.length,
       travel_dates: tripDates,
       user_preferences: preferences,
+      weather_forecast: weatherForecast,
       selected_city: "Rio de Janeiro",
       auto_generate: draftRoteiro.length > 0,
-      anchor_neighborhoods: anchorBairros,
+      anchor_neighborhoods: [...new Set(anchorBairros)],
+      anchors_by_type: anchorsByType,
     };
   } catch {
     return { selected_city: "Rio de Janeiro", minha_viagem_count: 0, auto_generate: false };
