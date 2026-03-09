@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, X, MapPin, Sparkles, Compass } from "lucide-react";
+import { ChevronLeft, X, MapPin, Sparkles, Compass, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import AddIdeaSection from "@/components/minha-viagem/AddIdeaSection";
 import { Badge } from "@/components/ui/badge";
@@ -112,6 +112,17 @@ const MinhaViagem = () => {
           </div>
         ) : (
           <div className="space-y-3">
+            {/* Invite friends button */}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => toast({ title: "Em breve!", description: "Convite para amigos estará disponível em breve." })}
+              className="w-full h-10 rounded-xl gap-2 text-sm font-medium"
+            >
+              <Users className="w-4 h-4" />
+              Convidar amigos
+            </Button>
+
             <p className="text-sm text-muted-foreground mb-2">
               {items.length} {items.length === 1 ? "lugar salvo" : "lugares salvos"}
             </p>
