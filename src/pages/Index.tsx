@@ -1,77 +1,18 @@
-import { useState } from "react";
-import { useSearchParams } from "react-router-dom";
-import SearchField from "@/components/home/SearchField";
-import PartnersSection from "@/components/home/PartnersSection";
-import HighlightsCarousel from "@/components/home/HighlightsCarousel";
-import DestinationsPortal from "@/components/home/DestinationsPortal";
-import BrandLogo from "@/components/home/BrandLogo";
-import { Button } from "@/components/ui/button";
+import HeroVideoCarousel from "@/components/home/HeroVideoCarousel";
+import CitiesSection from "@/components/home/CitiesSection";
+import PartnersCarousel from "@/components/home/PartnersCarousel";
 
 const Index = () => {
-  const [searchParams] = useSearchParams();
-  const isDebug = searchParams.get("debug") === "1";
-  const [testResult, setTestResult] = useState<any[] | null>(null);
-  const [loading, setLoading] = useState(false);
-
-  const handleTestSupabase = async () => {
-    setLoading(true);
-    setTestResult(null);
-    try {
-      const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/external-experiencias`;
-      const resp = await fetch(url, {
-        headers: {
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-          "Content-Type": "application/json",
-        },
-      });
-      const json = await resp.json();
-      const items = (json.experiencias || []).slice(0, 5).map((e: any) => ({
-        id: e.id,
-        nome: e.nome,
-        cidade: e.cidade,
-      }));
-      console.log("🧪 Testar Supabase — 5 experiências:", items);
-      setTestResult(items);
-    } catch (err) {
-      console.error("Erro ao testar Supabase:", err);
-      setTestResult([{ error: String(err) }]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
     <div className="min-h-screen flex flex-col bg-background pb-20">
-      {/* DEBUG: Testar Supabase — only with ?debug=1 */}
-      {isDebug && (
-        <div className="px-6 pt-4">
-          <Button onClick={handleTestSupabase} disabled={loading} size="sm" variant="outline">
-            {loading ? "Buscando..." : "Testar Supabase"}
-          </Button>
-          {testResult && (
-            <pre className="mt-2 p-3 bg-muted rounded text-xs overflow-auto max-h-48">
-              {JSON.stringify(testResult, null, 2)}
-            </pre>
-          )}
-        </div>
-      )}
+      {/* 1) HERO VIDEO CAROUSEL */}
+      <HeroVideoCarousel />
 
-      {/* 1) BRAND HEADER */}
-      <header className="px-6 pt-12 pb-6 text-center">
-        <BrandLogo />
-      </header>
+      {/* 2) CONHEÇA AS CIDADES MAIS BUSCADAS */}
+      <CitiesSection />
 
-      {/* 2) SEARCH / PROMPT FIELD */}
-      <SearchField />
-
-      {/* 3) PARTNERS ON TRIP */}
-      <PartnersSection />
-
-      {/* 4) HIGHLIGHTS CAROUSEL */}
-      <HighlightsCarousel />
-
-      {/* 5) DESTINATIONS PORTAL */}
-      <DestinationsPortal />
+      {/* 3) VIAJE COMO ELES */}
+      <PartnersCarousel />
     </div>
   );
 };
