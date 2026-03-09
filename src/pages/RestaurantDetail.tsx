@@ -1,37 +1,55 @@
 import { Link, useParams, useSearchParams } from "react-router-dom";
-import { ChevronLeft, Plus, ExternalLink, Instagram } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { ChevronLeft, Bookmark, MapPin, Instagram } from "lucide-react";
 import { useItemSave } from "@/hooks/use-item-save";
 import { getRestaurantImage } from "@/data/place-images";
 import { usePlacePhoto, buildPlaceQuery } from "@/hooks/use-place-photo";
-import { useExternalRestaurants, normalizeNeighborhood, generateRestaurantSlug } from "@/hooks/use-external-restaurants";
-import { useMemo } from "react";
+import {
+  useExternalRestaurants,
+  normalizeNeighborhood,
+  generateRestaurantSlug,
+} from "@/hooks/use-external-restaurants";
+import { useMemo, useState, useEffect } from "react";
 
-/**
- * RESTAURANT DETAIL PAGE
- * Uses exclusively external Supabase data. No static fallback.
- */
+function isRestaurantSaved(id: string) {
+  const draft = JSON.parse(localStorage.getItem("draft-roteiro") || "[]");
+  return draft.some(
+    (item: { id: string; type: string }) => item.id === id && item.type === "restaurant"
+  );
+}
 
 const RestaurantDetail = () => {
   const { id } = useParams<{ id: string }>();
   const [searchParams] = useSearchParams();
   const { saveItem } = useItemSave();
   const { data: externalRestaurants, isLoading } = useExternalRestaurants();
+  const [isSaved, setIsSaved] = useState(false);
 
   const restaurant = useMemo(() => {
     if (!externalRestaurants || !id) return null;
-    return externalRestaurants.find((r) => generateRestaurantSlug(r.nome) === id) || null;
+    return (
+      externalRestaurants.find((r) => generateRestaurantSlug(r.nome) === id) || null
+    );
   }, [externalRestaurants, id]);
+
+  useEffect(() => {
+    if (id) setIsSaved(isRestaurantSaved(id));
+  }, [id]);
 
   const from = searchParams.get("from");
   const backPath = from ? `/onde-comer/${from}` : "/eat-map-view";
 
   const neighborhoodSlug = restaurant ? normalizeNeighborhood(restaurant.bairro) : "";
-  const placeQuery = restaurant ? buildPlaceQuery(restaurant.nome, restaurant.bairro) : "";
+  const placeQuery = restaurant
+    ? buildPlaceQuery(restaurant.nome, restaurant.bairro)
+    : "";
   const { photoUrl, isLoading: photoLoading } = usePlacePhoto(
-    id || "", "restaurant", placeQuery, !!restaurant
+    id || "",
+    "restaurant",
+    placeQuery,
+    !!restaurant
   );
-  const heroImage = photoUrl || (restaurant ? getRestaurantImage(neighborhoodSlug) : "");
+  const heroImage =
+    photoUrl || (restaurant ? getRestaurantImage(neighborhoodSlug) : "");
 
   if (isLoading) {
     return (
@@ -56,19 +74,18 @@ const RestaurantDetail = () => {
 
   const handleSave = () => {
     saveItem(id || "", "restaurant", restaurant.nome, false);
+    setIsSaved(true);
   };
 
-  const cleanUrl = (url: string) => {
-    if (!url) return "";
-    return url.startsWith("http") ? url : `https://${url}`;
-  };
+  const cleanUrl = (url: string) =>
+    url?.startsWith("http") ? url : `https://${url}`;
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Hero Image — full top */}
+    <div className="min-h-screen bg-black">
+      {/* Hero Image */}
       <div className="relative w-full aspect-[4/3] bg-muted overflow-hidden">
         {photoLoading && !heroImage ? (
-          <div className="w-full h-full flex items-center justify-center">
+          <div className="w-full h-full flex items-center justify-center bg-muted">
             <div className="w-6 h-6 border-2 border-muted-foreground/30 border-t-muted-foreground/70 rounded-full animate-spin" />
           </div>
         ) : (
@@ -78,100 +95,93 @@ const RestaurantDetail = () => {
             className="w-full h-full object-cover"
           />
         )}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-transparent" />
-        <div className="absolute top-0 left-0 right-0 px-4 pt-[env(safe-area-inset-top,12px)] pb-2 flex items-center justify-between z-10">
+        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/40" />
+        <div className="absolute top-0 left-0 right-0 px-4 pt-[env(safe-area-inset-top,12px)] pb-2 flex items-center z-10">
           <Link
             to={backPath}
-            className="w-9 h-9 rounded-full bg-black/30 backdrop-blur-md flex items-center justify-center text-white"
+            className="inline-flex items-center gap-1.5 text-sm text-white/90 font-medium"
           >
-            <ChevronLeft className="w-5 h-5" />
+            <ChevronLeft className="w-4 h-4" />
+            Voltar
           </Link>
-          <button
-            onClick={handleSave}
-            className="w-9 h-9 rounded-full bg-black/30 backdrop-blur-md flex items-center justify-center text-white"
-          >
-            <Plus className="w-5 h-5" />
-          </button>
         </div>
       </div>
 
-      <main className="pb-12">
+      {/* Content — dark */}
+      <div className="relative bg-black/90 backdrop-blur-sm px-5 pt-7 pb-24">
 
-        {/* Restaurant Info */}
-        <div className="px-6 pt-8">
-          {/* Category & Neighborhood */}
-          <p className="text-xs tracking-widest text-muted-foreground uppercase mb-2">
-            {restaurant.categoria} • {restaurant.bairro}
-          </p>
-
-          {/* Title */}
-          <h1 className="text-4xl font-serif font-semibold text-foreground leading-tight mb-4">
-            {restaurant.nome}
-          </h1>
-
-          {/* Especialidade */}
-          {restaurant.especialidade && (
-            <p className="text-sm text-muted-foreground italic mb-4">
-              {restaurant.especialidade}
-            </p>
+        {/* Pills */}
+        <div className="flex flex-wrap gap-2 mb-5">
+          {restaurant.categoria && (
+            <span className="text-[11px] font-medium tracking-widest uppercase text-white/70 border border-white/20 rounded-full px-3 py-1">
+              {restaurant.categoria}
+            </span>
           )}
-
-          {/* Description (meu_olhar) */}
-          {restaurant.meu_olhar && (
-            <div className="space-y-2 mb-6">
-              {restaurant.meu_olhar.split('\n').map((paragraph, index) => (
-                <p key={index} className="text-base text-muted-foreground leading-relaxed">
-                  {paragraph}
-                </p>
-              ))}
-            </div>
-          )}
-
-          {/* Perfil público */}
-          {restaurant.perfil_publico && (
-            <p className="text-sm text-muted-foreground mb-6">
-              Perfil: {restaurant.perfil_publico}
-            </p>
-          )}
-
-          {/* Links */}
-          <div className="space-y-2 text-sm text-muted-foreground mb-6">
-            {restaurant.google_maps_url && (
-              <p>
-                <a
-                  href={cleanUrl(restaurant.google_maps_url)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 hover:text-foreground transition-colors"
-                >
-                  <ExternalLink className="w-3.5 h-3.5" />
-                  Ver no Google Maps
-                </a>
-              </p>
-            )}
-            {restaurant.instagram && (
-              <p>
-                <a
-                  href={`https://instagram.com/${restaurant.instagram.replace('@', '')}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 hover:text-foreground transition-colors"
-                >
-                  <Instagram className="w-3.5 h-3.5" />
-                  {restaurant.instagram}
-                </a>
-              </p>
-            )}
-          </div>
+          <span className="text-[11px] font-medium tracking-widest uppercase text-white/70 border border-white/20 rounded-full px-3 py-1">
+            {restaurant.bairro}
+          </span>
         </div>
-      </main>
 
-      {/* Footer */}
-      <footer className="px-6 py-8 border-t border-border">
-        <p className="text-xs text-muted-foreground">
+        {/* Title */}
+        <h1 className="text-4xl font-serif font-semibold text-white leading-tight mb-5">
+          {restaurant.nome}
+        </h1>
+
+        {/* Especialidade */}
+        {restaurant.especialidade && (
+          <p className="text-sm italic text-white/60 mb-5">{restaurant.especialidade}</p>
+        )}
+
+        {/* Description */}
+        {restaurant.meu_olhar && (
+          <div className="space-y-3 mb-6">
+            {restaurant.meu_olhar.split("\n").map((paragraph, index) => (
+              <p key={index} className="text-base text-white/75 leading-relaxed">
+                {paragraph}
+              </p>
+            ))}
+          </div>
+        )}
+
+        {/* Save button */}
+        <button
+          onClick={handleSave}
+          className="w-full h-14 rounded-full bg-white text-black font-semibold text-base flex items-center justify-center gap-2 mb-6 active:scale-[0.98] transition-transform"
+        >
+          <Bookmark className="w-5 h-5" fill={isSaved ? "currentColor" : "none"} />
+          {isSaved ? "Salvo" : "Salvar"}
+        </button>
+
+        {/* Secondary links */}
+        <div className="space-y-3">
+          {restaurant.google_maps_url && (
+            <a
+              href={cleanUrl(restaurant.google_maps_url)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 text-sm text-white/50 hover:text-white/80 transition-colors"
+            >
+              <MapPin className="w-4 h-4" />
+              Ver no Google Maps
+            </a>
+          )}
+          {restaurant.instagram && (
+            <a
+              href={`https://instagram.com/${restaurant.instagram.replace("@", "")}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 text-sm text-white/50 hover:text-white/80 transition-colors"
+            >
+              <Instagram className="w-4 h-4" />
+              {restaurant.instagram}
+            </a>
+          )}
+        </div>
+
+        <p className="text-xs text-white/20 mt-10">
           The Lucky Trip — {restaurant.bairro}
         </p>
-      </footer>
+      </div>
     </div>
   );
 };

@@ -1,20 +1,11 @@
 import { Link, useParams, useSearchParams } from "react-router-dom";
-import { ChevronLeft, Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { ChevronLeft, Bookmark, MapPin, Instagram } from "lucide-react";
 import { useItemSave } from "@/hooks/use-item-save";
 import { getHotelImage } from "@/data/place-images";
 import { usePlacePhoto, buildPlaceQuery } from "@/hooks/use-place-photo";
 import { useExternalHotels } from "@/hooks/use-external-hotels";
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
 
-/**
- * HOTEL DETAIL PAGE
- *
- * Renders hotel details exclusively from the external Supabase database.
- * No static/fallback data. No dollar-sign price indicators.
- */
-
-// Helper to generate slug from hotel name
 export const generateHotelSlug = (name: string): string => {
   return name
     .toLowerCase()
@@ -26,16 +17,26 @@ export const generateHotelSlug = (name: string): string => {
     .trim();
 };
 
+function isHotelSaved(id: string) {
+  const draft = JSON.parse(localStorage.getItem("draft-roteiro") || "[]");
+  return draft.some((item: { id: string; type: string }) => item.id === id && item.type === "hotel");
+}
+
 const HotelDetail = () => {
   const { id } = useParams<{ id: string }>();
   const [searchParams] = useSearchParams();
   const { saveItem } = useItemSave();
   const { data: externalHotels, isLoading } = useExternalHotels();
+  const [isSaved, setIsSaved] = useState(false);
 
   const hotel = useMemo(() => {
     if (!externalHotels || !id) return null;
     return externalHotels.find((h) => generateHotelSlug(h.nome) === id) || null;
   }, [externalHotels, id]);
+
+  useEffect(() => {
+    if (id) setIsSaved(isHotelSaved(id));
+  }, [id]);
 
   const from = searchParams.get("from");
   const getBackPath = () => {
@@ -54,14 +55,9 @@ const HotelDetail = () => {
   );
 
   const normalizeNeighborhood = (bairro: string) =>
-    bairro
-      .toLowerCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/\s+/g, "-");
+    bairro.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "-");
 
-  const heroImage =
-    photoUrl || (hotel ? getHotelImage(normalizeNeighborhood(hotel.bairro)) : "");
+  const heroImage = photoUrl || (hotel ? getHotelImage(normalizeNeighborhood(hotel.bairro)) : "");
 
   if (isLoading) {
     return (
@@ -76,9 +72,7 @@ const HotelDetail = () => {
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <p className="text-muted-foreground mb-4">Hotel não encontrado</p>
-          <Link to="/onde-ficar-rio" className="text-foreground underline">
-            Voltar
-          </Link>
+          <Link to="/onde-ficar-rio" className="text-foreground underline">Voltar</Link>
         </div>
       </div>
     );
@@ -86,6 +80,7 @@ const HotelDetail = () => {
 
   const handleSave = () => {
     saveItem(id || "", "hotel", hotel.nome, false);
+    setIsSaved(true);
   };
 
   const cleanUrl = (raw: string | null | undefined): string | null => {
@@ -95,130 +90,123 @@ const HotelDetail = () => {
   };
 
   const mapsUrl = cleanUrl(hotel.google_maps_url);
-  const siteUrl = cleanUrl(hotel.site_oficial);
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Hero Image — full top */}
+    <div className="min-h-screen bg-black">
+      {/* Hero Image */}
       <div className="relative w-full aspect-[4/3] bg-muted overflow-hidden">
         {photoLoading && !heroImage ? (
-          <div className="w-full h-full flex items-center justify-center">
+          <div className="w-full h-full flex items-center justify-center bg-muted">
             <div className="w-6 h-6 border-2 border-muted-foreground/30 border-t-muted-foreground/70 rounded-full animate-spin" />
           </div>
         ) : (
-          <img
-            src={heroImage}
-            alt={hotel.nome}
-            className="w-full h-full object-cover"
-          />
+          <img src={heroImage} alt={hotel.nome} className="w-full h-full object-cover" />
         )}
-        {/* Gradient for button legibility */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-transparent" />
-        {/* Overlay nav */}
+        {/* Top gradient */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/40" />
+        {/* Nav overlay */}
         <div className="absolute top-0 left-0 right-0 px-4 pt-[env(safe-area-inset-top,12px)] pb-2 flex items-center justify-between z-10">
           <Link
             to={backPath}
-            className="w-9 h-9 rounded-full bg-black/30 backdrop-blur-md flex items-center justify-center text-white"
+            className="inline-flex items-center gap-1.5 text-sm text-white/90 font-medium"
           >
-            <ChevronLeft className="w-5 h-5" />
+            <ChevronLeft className="w-4 h-4" />
+            Voltar
           </Link>
-          <button
-            onClick={handleSave}
-            className="w-9 h-9 rounded-full bg-black/30 backdrop-blur-md flex items-center justify-center text-white"
-          >
-            <Plus className="w-5 h-5" />
-          </button>
         </div>
       </div>
 
-      <main className="pb-12">
+      {/* Content — dark background matching reference */}
+      <div className="relative bg-black/90 backdrop-blur-sm px-5 pt-7 pb-24">
 
-        {/* Hotel Info */}
-        <div className="px-6 pt-8">
-          {/* Category */}
-          <p className="text-xs tracking-widest text-muted-foreground uppercase mb-2">
-            {hotel.categoria?.trim() || "Hotel"} • {hotel.bairro}
-          </p>
-
-          {/* Title */}
-          <h1 className="text-4xl font-serif font-semibold text-foreground leading-tight mb-4">
-            {hotel.nome}
-          </h1>
-
-          {/* Price — only real value, no symbols */}
-          {hotel.preco_medio_diaria && (
-            <p className="text-sm text-muted-foreground mb-4">
-              Diária média: R$ {hotel.preco_medio_diaria}
-            </p>
+        {/* Category + Neighborhood pills */}
+        <div className="flex flex-wrap gap-2 mb-5">
+          {hotel.categoria && (
+            <span className="text-[11px] font-medium tracking-widest uppercase text-white/70 border border-white/20 rounded-full px-3 py-1">
+              {hotel.categoria}
+            </span>
           )}
-
-          {/* Description (meu_olhar) */}
-          {hotel.meu_olhar && (
-            <div className="space-y-2 mb-6">
-              {hotel.meu_olhar.split("\n").map((paragraph, index) => (
-                <p
-                  key={index}
-                  className="text-base text-muted-foreground leading-relaxed"
-                >
-                  {paragraph}
-                </p>
-              ))}
-            </div>
-          )}
-
-          {/* Atmosfera */}
-          {hotel.atmosfera && (
-            <p className="text-sm italic text-muted-foreground/80 mb-6">
-              {hotel.atmosfera}
-            </p>
-          )}
-
-          {/* Metadata */}
-          <div className="space-y-2 text-sm text-muted-foreground mb-6">
-            {mapsUrl && (
-              <p>
-                <a
-                  href={mapsUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:text-foreground transition-colors underline"
-                >
-                  Ver no Google Maps
-                </a>
-              </p>
-            )}
-            {hotel.instagram && (
-              <p>
-                <a
-                  href={`https://instagram.com/${hotel.instagram.replace("@", "")}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:text-foreground transition-colors"
-                >
-                  {hotel.instagram}
-                </a>
-              </p>
-            )}
-            <p>
-              <a
-                href="https://tidd.ly/4kOcJUx"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-foreground transition-colors underline"
-              >
-                Reserve aqui
-              </a>
-            </p>
-          </div>
+          <span className="text-[11px] font-medium tracking-widest uppercase text-white/70 border border-white/20 rounded-full px-3 py-1">
+            {hotel.bairro}
+          </span>
         </div>
-      </main>
 
-      {/* Footer */}
-      <footer className="px-6 py-8 border-t border-border">
-        <p className="text-xs text-muted-foreground">
+        {/* Title */}
+        <h1 className="text-4xl font-serif font-semibold text-white leading-tight mb-5">
+          {hotel.nome}
+        </h1>
+
+        {/* Price */}
+        {hotel.preco_medio_diaria && (
+          <p className="text-sm text-white/60 mb-5">
+            Diária média: R$ {hotel.preco_medio_diaria}
+          </p>
+        )}
+
+        {/* Description */}
+        {hotel.meu_olhar && (
+          <div className="space-y-3 mb-6">
+            {hotel.meu_olhar.split("\n").map((paragraph, index) => (
+              <p key={index} className="text-base text-white/75 leading-relaxed">
+                {paragraph}
+              </p>
+            ))}
+          </div>
+        )}
+
+        {/* Atmosfera */}
+        {hotel.atmosfera && (
+          <p className="text-sm italic text-white/50 mb-6">{hotel.atmosfera}</p>
+        )}
+
+        {/* Save button — full width white */}
+        <button
+          onClick={handleSave}
+          className="w-full h-14 rounded-full bg-white text-black font-semibold text-base flex items-center justify-center gap-2 mb-6 active:scale-[0.98] transition-transform"
+        >
+          <Bookmark className="w-5 h-5" fill={isSaved ? "currentColor" : "none"} />
+          {isSaved ? "Salvo" : "Salvar"}
+        </button>
+
+        {/* Secondary links */}
+        <div className="space-y-3">
+          {mapsUrl && (
+            <a
+              href={mapsUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 text-sm text-white/50 hover:text-white/80 transition-colors"
+            >
+              <MapPin className="w-4 h-4" />
+              Ver no Google Maps
+            </a>
+          )}
+          {hotel.instagram && (
+            <a
+              href={`https://instagram.com/${hotel.instagram.replace("@", "")}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 text-sm text-white/50 hover:text-white/80 transition-colors"
+            >
+              <Instagram className="w-4 h-4" />
+              {hotel.instagram}
+            </a>
+          )}
+          <a
+            href="https://tidd.ly/4kOcJUx"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 text-sm text-white/50 hover:text-white/80 transition-colors"
+          >
+            Reserve aqui
+          </a>
+        </div>
+
+        {/* Footer */}
+        <p className="text-xs text-white/20 mt-10">
           The Lucky Trip — {hotel.bairro}
         </p>
-      </footer>
+      </div>
     </div>
   );
 };
