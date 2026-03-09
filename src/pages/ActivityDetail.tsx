@@ -104,6 +104,26 @@ const ExternalActivityView = ({ exp, backPath }: { exp: ExternalExperiencia; bac
   const { data: mediaList } = useExperienciaMedia(exp.id);
   const [searchParams] = useSearchParams();
 
+  const [isSaved, setIsSaved] = useState(false);
+
+  useEffect(() => {
+    const draft = JSON.parse(localStorage.getItem("draft-roteiro") || "[]");
+    const alreadySaved = draft.some(
+      (item: { id: string; type: string }) => item.id === exp.id && item.type === "activity"
+    );
+    setIsSaved(alreadySaved);
+  }, [exp.id]);
+
+  const handlePrimarySave = () => {
+    if (isSaved) {
+      saveItem(exp.id, "activity", exp.nome, false);
+      return;
+    }
+
+    const success = saveItem(exp.id, "activity", exp.nome, false);
+    if (success) setIsSaved(true);
+  };
+
   if (searchParams.get("debug") === "1") {
     console.log({ experiencia_id: exp.id, mediaList: mediaList ?? [] });
   }
