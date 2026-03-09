@@ -158,6 +158,7 @@ const App = () => {
                   
                   {/* Lucky List */}
                   <Route path="/lucky-list" element={<LuckyList />} />
+                  <Route path="/lucky-list/bairro/:neighborhoodId" element={<LuckyListNeighborhood />} />
                   <Route path="/lucky-list/:id" element={<LuckyListDetail />} />
                   
                   {/* How to Get There */}
