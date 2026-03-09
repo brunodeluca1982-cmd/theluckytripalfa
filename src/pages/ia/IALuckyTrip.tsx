@@ -23,6 +23,7 @@ function getUserContext() {
       travel_dates: tripDates,
       user_preferences: preferences,
       selected_city: "Rio de Janeiro",
+      auto_generate: draftRoteiro.length > 0,
     };
   } catch {
     return { selected_city: "Rio de Janeiro", minha_viagem_count: 0 };
