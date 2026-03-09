@@ -292,8 +292,32 @@ const ActivityDetail = () => {
   const from = searchParams.get("from");
   const backPath = from === "city" ? "/o-que-fazer" : from ? `/o-que-fazer/${from}` : "/o-que-fazer";
 
-  // 1. Try external experiencias first (by UUID)
   const externalMatch = (experiencias || []).find((e) => e.id === id);
+  const result = findStaticActivityById(id || "");
+
+  const staticActivityId = result?.activity.id;
+  const staticActivityTitle = result?.activity.title;
+
+  const [isSaved, setIsSaved] = useState(false);
+
+  useEffect(() => {
+    if (!staticActivityId) return;
+    setIsSaved(isActivitySavedLocally(staticActivityId));
+  }, [staticActivityId]);
+
+  const handlePrimarySave = () => {
+    if (!staticActivityId || !staticActivityTitle) return;
+
+    if (isSaved) {
+      saveItem(staticActivityId, "activity", staticActivityTitle, false);
+      return;
+    }
+
+    const success = saveItem(staticActivityId, "activity", staticActivityTitle, false);
+    if (success) setIsSaved(true);
+  };
+
+  // 1. External experiencias (by UUID)
   if (externalMatch) {
     return <ExternalActivityView exp={externalMatch} backPath={backPath} />;
   }
@@ -308,8 +332,6 @@ const ActivityDetail = () => {
   }
 
   // 3. Static fallback
-  const result = findStaticActivityById(id || "");
-
   if (!result) {
     return (
       <div className="min-h-screen bg-background">
@@ -336,22 +358,6 @@ const ActivityDetail = () => {
   }
 
   const { activity, neighborhoodName } = result;
-
-  const [isSaved, setIsSaved] = useState(false);
-
-  useEffect(() => {
-    setIsSaved(isActivitySavedLocally(activity.id));
-  }, [activity.id]);
-
-  const handlePrimarySave = () => {
-    if (isSaved) {
-      saveItem(activity.id, "activity", activity.title, false);
-      return;
-    }
-
-    const success = saveItem(activity.id, "activity", activity.title, false);
-    if (success) setIsSaved(true);
-  };
 
   return (
     <div className="min-h-screen bg-background">
