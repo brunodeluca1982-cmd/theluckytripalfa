@@ -104,6 +104,7 @@ const IACriarRoteiro = () => {
     
     // Build itinerary
     const itinerary: Record<number, any[]> = {};
+    const allGeneratedItems: any[] = [];
     
     for (let day = 1; day <= days; day++) {
       const dayItems: any[] = [];
@@ -117,7 +118,8 @@ const IACriarRoteiro = () => {
       if (priority && templateItems[priority as keyof typeof templateItems]) {
         const priorityItems = templateItems[priority as keyof typeof templateItems];
         const availableItems = priorityItems.filter(item => 
-          !dayItems.some(di => di.id === item.id)
+          !dayItems.some(di => di.id === item.id) &&
+          !allGeneratedItems.some(gi => gi.id === item.id)
         );
         while (dayItems.length < itemsPerDay && availableItems.length > 0) {
           const item = availableItems.shift();
@@ -131,7 +133,8 @@ const IACriarRoteiro = () => {
       }
       
       const beachItems = templateItems.praias.filter(item => 
-        !dayItems.some(di => di.id === item.id)
+        !dayItems.some(di => di.id === item.id) &&
+        !allGeneratedItems.some(gi => gi.id === item.id)
       );
       while (dayItems.length < itemsPerDay && beachItems.length > 0) {
         const item = beachItems.shift();
@@ -139,32 +142,52 @@ const IACriarRoteiro = () => {
       }
       
       itinerary[day] = dayItems;
+      allGeneratedItems.push(...dayItems);
     }
-    
-    // Group days into blocks for longer trips
-    const getBlocks = (totalDays: number): number[][] => {
-      if (totalDays <= 3) return [Array.from({ length: totalDays }, (_, i) => i + 1)];
-      if (totalDays === 5) return [[1, 2], [3, 4], [5]]; // 2+2+1
-      if (totalDays === 7) return [[1, 2, 3], [4, 5], [6, 7]]; // 3+2+2
-      return [Array.from({ length: totalDays }, (_, i) => i + 1)];
+
+    // ─── Converge into Minha Viagem (draft-roteiro) ──────────────────────────
+    // Transform generated items into SavedItem format so both flows
+    // (manual saves + criar roteiro) land in the same place.
+    const DRAFT_KEY = 'draft-roteiro';
+    const existing: any[] = (() => {
+      try { return JSON.parse(localStorage.getItem(DRAFT_KEY) || '[]'); }
+      catch { return []; }
+    })();
+
+    const categoryToType = (cat: string): string => {
+      if (cat === 'gastronomia') return 'restaurant';
+      if (cat === 'praias' || cat === 'natureza' || cat === 'cultura') return 'activity';
+      if (cat === 'vida-noturna') return 'nightlife';
+      return 'activity';
     };
 
-    const blocks = getBlocks(days);
-    
-    // Save to localStorage
-    const draft = {
+    const newItems = allGeneratedItems
+      .filter(item => !existing.some((e: any) => e.id === item.id))
+      .map(item => ({
+        id: item.id,
+        type: categoryToType(item.category),
+        title: item.title,
+        savedAt: new Date().toISOString(),
+        isPremium: false,
+        destinationId: 'rio-de-janeiro',
+        destinationName: 'Rio de Janeiro',
+      }));
+
+    const merged = [...existing, ...newItems];
+    localStorage.setItem(DRAFT_KEY, JSON.stringify(merged));
+    window.dispatchEvent(new CustomEvent('roteiro-updated'));
+
+    // Also keep legacy keys for backward compat
+    const legacyDraft = {
       destinationId: 'rio-de-janeiro',
       totalDays: days,
       items: itinerary,
-      blocks,
       status: 'rascunho',
       preferences: { style, company, neighborhood, priority },
       createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
     };
-    
-    localStorage.setItem('user-roteiro-rio-de-janeiro', JSON.stringify(draft));
-    localStorage.setItem('itinerary_draft', JSON.stringify(draft));
+    localStorage.setItem('user-roteiro-rio-de-janeiro', JSON.stringify(legacyDraft));
+    // ─────────────────────────────────────────────────────────────────────────
     
     setTimeout(() => {
       setStep('done');
@@ -423,23 +446,23 @@ const IACriarRoteiro = () => {
         {/* DONE */}
         {step === 'done' && (
           <div className="flex-1 flex flex-col items-center justify-center min-h-[400px]">
-            <div className="w-16 h-16 rounded-full bg-green-500/10 flex items-center justify-center mb-6">
-              <Check className="w-7 h-7 text-green-600" />
+            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-6">
+              <Check className="w-7 h-7 text-primary" />
             </div>
             <p className="text-lg text-foreground text-center font-medium mb-2">
-              Roteiro criado
+              Lugares adicionados à sua viagem
             </p>
             <p className="text-sm text-muted-foreground text-center max-w-xs mb-8">
-              Este é um ponto de partida. Você pode editar quando quiser.
+              Acesse Minha Viagem e peça para o Lucky organizar seu roteiro.
             </p>
 
             <div className="space-y-3 w-full max-w-xs">
               <Button
-                onClick={() => navigate("/meu-roteiro")}
+                onClick={() => navigate("/minha-viagem")}
                 className="w-full"
                 size="lg"
               >
-                Abrir no Meu Roteiro
+                Ver Minha Viagem
               </Button>
               <Button
                 onClick={() => navigate("/ia")}
@@ -447,7 +470,7 @@ const IACriarRoteiro = () => {
                 className="w-full"
                 size="lg"
               >
-                Voltar
+                Pedir ao Lucky para organizar
               </Button>
             </div>
           </div>
