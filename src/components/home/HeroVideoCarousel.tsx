@@ -1,36 +1,42 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 
 interface HeroSlide {
   id: string;
   videoUrl: string;
-  destinationName: string;
-  country: string;
-  path: string;
+  thumbnailUrl?: string;
+  title: string;
+  subtitle?: string;
+  buttonLabel: string;
+  destinationSlug?: string;
+  permalink?: string;
 }
 
-const heroSlides: HeroSlide[] = [
+const fallbackSlides: HeroSlide[] = [
   {
     id: "rio",
     videoUrl: "/videos/rio-hero.mp4",
-    destinationName: "Rio de Janeiro",
-    country: "Brasil",
-    path: "/destino/rio-de-janeiro/intro",
+    title: "Rio de Janeiro",
+    subtitle: "Brasil",
+    buttonLabel: "Conferir agora",
+    destinationSlug: "rio-de-janeiro",
   },
   {
     id: "lisboa",
     videoUrl: "/videos/rio-hero.mp4",
-    destinationName: "Lisboa",
-    country: "Portugal",
-    path: "/destinos",
+    title: "Lisboa",
+    subtitle: "Portugal",
+    buttonLabel: "Conferir agora",
   },
   {
     id: "paris",
     videoUrl: "/videos/rio-hero.mp4",
-    destinationName: "Paris",
-    country: "França",
-    path: "/destinos",
+    title: "Paris",
+    subtitle: "França",
+    buttonLabel: "Conferir agora",
   },
 ];
 
@@ -42,6 +48,37 @@ const HeroVideoCarousel = () => {
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const navigate = useNavigate();
+
+  const { data: dbSlides } = useQuery({
+    queryKey: ["home-hero-items"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("home_hero_items")
+        .select("*")
+        .eq("is_active", true)
+        .eq("show_on_home", true)
+        .order("sort_order", { ascending: true })
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      return data;
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const heroSlides: HeroSlide[] =
+    dbSlides && dbSlides.length > 0
+      ? dbSlides.map((item) => ({
+          id: item.id,
+          videoUrl: item.video_url || "/videos/rio-hero.mp4",
+          thumbnailUrl: item.thumbnail_url ?? undefined,
+          title: item.title,
+          subtitle: item.subtitle ?? undefined,
+          buttonLabel: item.button_label,
+          destinationSlug: item.destination_slug ?? undefined,
+          permalink: item.permalink ?? undefined,
+        }))
+      : fallbackSlides;
 
   const goTo = useCallback(
     (index: number) => {
@@ -62,7 +99,7 @@ const HeroVideoCarousel = () => {
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
     };
-  }, [current, goTo]);
+  }, [current, goTo, heroSlides.length]);
 
   // Play current video, pause others
   useEffect(() => {
@@ -77,6 +114,16 @@ const HeroVideoCarousel = () => {
     });
   }, [current]);
 
+  const handleSlideAction = (slide: HeroSlide) => {
+    if (slide.destinationSlug) {
+      navigate(`/destino/${slide.destinationSlug}/intro`);
+    } else if (slide.permalink) {
+      window.open(slide.permalink, "_blank");
+    } else {
+      navigate("/destinos");
+    }
+  };
+
   const slide = heroSlides[current];
 
   return (
@@ -87,6 +134,7 @@ const HeroVideoCarousel = () => {
           key={s.id}
           ref={(el) => { videoRefs.current[i] = el; }}
           src={s.videoUrl}
+          poster={s.thumbnailUrl}
           muted
           loop
           playsInline
@@ -137,16 +185,18 @@ const HeroVideoCarousel = () => {
 
         {/* Destination */}
         <h2 className="text-4xl font-serif font-medium text-white text-center leading-tight drop-shadow-lg">
-          {slide.destinationName}
+          {slide.title}
         </h2>
-        <p className="text-white/80 text-sm mt-1 mb-5">{slide.country}</p>
+        {slide.subtitle && (
+          <p className="text-white/80 text-sm mt-1 mb-5">{slide.subtitle}</p>
+        )}
 
         {/* CTA */}
         <button
-          onClick={() => navigate(slide.path)}
-          className="w-full max-w-[280px] py-3.5 rounded-full bg-background text-foreground font-semibold text-base shadow-lg hover:opacity-90 transition-opacity"
+          onClick={() => handleSlideAction(slide)}
+          className="w-full max-w-[280px] py-3.5 rounded-full bg-background text-foreground font-semibold text-base shadow-lg hover:opacity-90 transition-opacity mt-5"
         >
-          Conferir agora
+          {slide.buttonLabel}
         </button>
 
         {/* Dots */}

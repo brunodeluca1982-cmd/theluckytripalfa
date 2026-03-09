@@ -334,6 +334,54 @@ export type Database = {
         }
         Relationships: []
       }
+      home_hero_items: {
+        Row: {
+          button_label: string
+          created_at: string
+          destination_slug: string | null
+          id: string
+          instagram_media_id: string | null
+          is_active: boolean
+          permalink: string | null
+          show_on_home: boolean
+          sort_order: number
+          subtitle: string | null
+          thumbnail_url: string | null
+          title: string
+          video_url: string | null
+        }
+        Insert: {
+          button_label?: string
+          created_at?: string
+          destination_slug?: string | null
+          id?: string
+          instagram_media_id?: string | null
+          is_active?: boolean
+          permalink?: string | null
+          show_on_home?: boolean
+          sort_order?: number
+          subtitle?: string | null
+          thumbnail_url?: string | null
+          title: string
+          video_url?: string | null
+        }
+        Update: {
+          button_label?: string
+          created_at?: string
+          destination_slug?: string | null
+          id?: string
+          instagram_media_id?: string | null
+          is_active?: boolean
+          permalink?: string | null
+          show_on_home?: boolean
+          sort_order?: number
+          subtitle?: string | null
+          thumbnail_url?: string | null
+          title?: string
+          video_url?: string | null
+        }
+        Relationships: []
+      }
       place_photos: {
         Row: {
           created_at: string
