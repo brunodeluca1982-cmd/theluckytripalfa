@@ -89,7 +89,9 @@ const MinhaViagem = () => {
         </div>
       </header>
 
-      <main className="px-4 py-6">
+      <main className="px-4 py-6 space-y-6">
+        {/* Add Idea section — always visible */}
+        <AddIdeaSection />
         {items.length === 0 ? (
           <div className="flex flex-col items-center justify-center pt-20 text-center">
             <Compass className="w-10 h-10 text-muted-foreground/40 mb-4" />
