@@ -92,12 +92,19 @@ const MinhaViagem = () => {
         {items.length === 0 ? (
           <div className="flex flex-col items-center justify-center pt-20 text-center">
             <Compass className="w-10 h-10 text-muted-foreground/40 mb-4" />
-            <p className="text-lg font-medium text-foreground mb-1">Nenhum lugar salvo ainda</p>
+            <p className="text-lg font-medium text-foreground mb-1">Minha Viagem</p>
             <p className="text-sm text-muted-foreground mb-6 max-w-[260px]">
-              Explore os destinos e salve os lugares que você quer conhecer. Eles vão aparecer aqui.
+              Salve lugares ou crie um roteiro para começar sua viagem.
             </p>
-            <Button variant="outline" asChild>
-              <Link to="/destinos">Descobrir lugares</Link>
+            <Button
+              onClick={() => navigate("/ia/criar-roteiro")}
+              className="w-full max-w-[260px] h-12 text-base font-semibold rounded-xl gap-2 mb-3"
+            >
+              <Sparkles className="w-5 h-5" />
+              Criar roteiro
+            </Button>
+            <Button variant="outline" asChild className="w-full max-w-[260px]">
+              <Link to="/destinos">Explorar destinos</Link>
             </Button>
           </div>
         ) : (
@@ -154,13 +161,20 @@ const MinhaViagem = () => {
 
       {/* Fixed CTA */}
       {items.length > 0 && (
-        <div className="fixed bottom-20 left-0 right-0 p-4 z-40">
+        <div className="fixed bottom-20 left-0 right-0 p-4 z-40 space-y-2">
           <Button
             onClick={() => navigate("/roteiro/rio-3-dias-final")}
             className="w-full h-14 text-base font-semibold rounded-xl gap-2"
           >
             <Sparkles className="w-5 h-5" />
             Organizar com Lucky
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => navigate("/ia/criar-roteiro")}
+            className="w-full h-11 text-sm font-medium rounded-xl"
+          >
+            Criar roteiro
           </Button>
         </div>
       )}
