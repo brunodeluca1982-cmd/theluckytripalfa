@@ -42,9 +42,9 @@ function hasSavedPlaces(): boolean {
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/lucky-trip-ai`;
 
 const exampleQueries = [
-  "O que fazer no Rio em 3 dias?",
-  "Qual o melhor bairro pra ficar no Rio?",
-  "Sugira um roteiro gastronômico na Zona Sul",
+  "Monte um roteiro de 3 dias no Rio pra mim",
+  "Quero uma viagem focada em gastronomia",
+  "Roteiro relax com praia e natureza",
   "O que fazer num dia de chuva?",
 ];
 
