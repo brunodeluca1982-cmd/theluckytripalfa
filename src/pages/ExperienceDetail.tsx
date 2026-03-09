@@ -215,15 +215,28 @@ const ExperienceDetail = () => {
           {isSaved ? "Salvo" : "Salvar"}
         </button>
 
-        {/* Instagram link */}
-        {exp.instagram_permalink && (
+        {/* Instagram source badge */}
+        {igPost?.permalink && (
+          <a
+            href={igPost.permalink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 text-sm text-white/60 hover:text-white/90 transition-colors mb-3 px-3 py-2 rounded-full bg-white/5 border border-white/10"
+          >
+            <Instagram className="w-4 h-4" />
+            Inspirado por um post no Instagram
+          </a>
+        )}
+
+        {/* Instagram permalink fallback */}
+        {!igPost?.permalink && exp.instagram_permalink && (
           <a
             href={exp.instagram_permalink}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-2 text-sm text-white/50 hover:text-white/80 transition-colors"
           >
-            <MapPin className="w-4 h-4" />
+            <Instagram className="w-4 h-4" />
             Ver no Instagram
           </a>
         )}
