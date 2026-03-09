@@ -331,7 +331,7 @@ const IALuckyTrip = () => {
               <Sparkles className="w-6 h-6 text-primary" />
             </div>
             <p className="text-center text-foreground/80 leading-relaxed max-w-sm mb-8">
-              Salve lugares em Minha Viagem e eu organizo tudo pra você.
+              Peça e eu monto sua viagem completa — hotel, experiências e restaurantes, tudo decidido pra você.
             </p>
             <div className="w-full max-w-sm space-y-2">
               <p className="text-xs text-muted-foreground uppercase tracking-wider mb-3 text-center">
