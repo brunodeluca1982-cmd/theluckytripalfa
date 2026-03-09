@@ -446,23 +446,23 @@ const IACriarRoteiro = () => {
         {/* DONE */}
         {step === 'done' && (
           <div className="flex-1 flex flex-col items-center justify-center min-h-[400px]">
-            <div className="w-16 h-16 rounded-full bg-green-500/10 flex items-center justify-center mb-6">
-              <Check className="w-7 h-7 text-green-600" />
+            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-6">
+              <Check className="w-7 h-7 text-primary" />
             </div>
             <p className="text-lg text-foreground text-center font-medium mb-2">
-              Roteiro criado
+              Lugares adicionados à sua viagem
             </p>
             <p className="text-sm text-muted-foreground text-center max-w-xs mb-8">
-              Este é um ponto de partida. Você pode editar quando quiser.
+              Acesse Minha Viagem e peça para o Lucky organizar seu roteiro.
             </p>
 
             <div className="space-y-3 w-full max-w-xs">
               <Button
-                onClick={() => navigate("/meu-roteiro")}
+                onClick={() => navigate("/minha-viagem")}
                 className="w-full"
                 size="lg"
               >
-                Abrir no Meu Roteiro
+                Ver Minha Viagem
               </Button>
               <Button
                 onClick={() => navigate("/ia")}
@@ -470,7 +470,7 @@ const IACriarRoteiro = () => {
                 className="w-full"
                 size="lg"
               >
-                Voltar
+                Pedir ao Lucky para organizar
               </Button>
             </div>
           </div>
