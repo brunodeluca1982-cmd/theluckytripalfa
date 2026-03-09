@@ -1,30 +1,31 @@
 import { useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
+import brunImg from "@/assets/partners/bruno-de-luca.jpeg";
 
 const discoveries = [
   {
     id: "1",
-    imageUrl: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=400&q=80",
-    title: "Trilha secreta no Vidigal",
-    tag: "Natureza",
+    imageUrl: "https://images.unsplash.com/photo-1551632436-cbf8dd35adfa?w=400&q=80",
+    title: "Speakeasy do Leblon",
+    tag: "Noite",
   },
   {
     id: "2",
-    imageUrl: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&q=80",
-    title: "Restaurante escondido em Santa Teresa",
-    tag: "Gastronomia",
-  },
-  {
-    id: "3",
     imageUrl: "https://images.unsplash.com/photo-1533105079780-92b9be482077?w=400&q=80",
     title: "Pôr do sol no Arpoador",
     tag: "Experiência",
   },
   {
-    id: "4",
+    id: "3",
     imageUrl: "https://images.unsplash.com/photo-1551632436-cbf8dd35adfa?w=400&q=80",
-    title: "Bar de jazz no Leblon",
-    tag: "Noite",
+    title: "Jazz escondido em Ipanema",
+    tag: "Música",
+  },
+  {
+    id: "4",
+    imageUrl: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&q=80",
+    title: "Restaurante secreto em Santa Teresa",
+    tag: "Gastronomia",
   },
 ];
 
@@ -48,9 +49,11 @@ const DescobertasBruno = () => {
   return (
     <section className="py-8 px-5">
       <div className="flex items-center gap-3 mb-1">
-        <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
-          <span className="text-xs font-semibold text-primary">B</span>
-        </div>
+        <img
+          src={brunImg}
+          alt="Bruno de Luca"
+          className="w-8 h-8 rounded-full object-cover border border-border"
+        />
         <h2 className="text-xs font-semibold tracking-[0.15em] uppercase text-primary">
           Descobertas do Bruno
         </h2>

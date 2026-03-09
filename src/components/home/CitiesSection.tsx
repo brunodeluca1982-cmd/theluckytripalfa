@@ -10,7 +10,7 @@ import { curatedDestinations } from "@/data/destinations-database";
  */
 
 const featuredCities = curatedDestinations.filter((d) =>
-  ["rio-de-janeiro", "lisboa"].includes(d.id)
+  ["rio-de-janeiro", "lisboa", "sao-paulo"].includes(d.id)
 );
 
 const CityImage = ({ src, alt }: { src: string; alt: string }) => {
