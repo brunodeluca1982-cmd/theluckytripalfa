@@ -4,21 +4,21 @@ import { Skeleton } from "@/components/ui/skeleton";
 const ideas = [
   {
     id: "1",
-    imageUrl: "https://images.unsplash.com/photo-1518639192441-8fce0a366e2e?w=400&q=80",
-    title: "3 dias em Fernando de Noronha",
-    days: "3 dias",
+    imageUrl: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=400&q=80",
+    title: "Hotel boutique no Rio",
+    tag: "Hospedagem",
   },
   {
     id: "2",
-    imageUrl: "https://images.unsplash.com/photo-1588001832198-c15cff59b078?w=400&q=80",
-    title: "Weekend em Florianópolis",
-    days: "2 dias",
+    imageUrl: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=400&q=80",
+    title: "Passeio de barco na Baía",
+    tag: "Passeio",
   },
   {
     id: "3",
-    imageUrl: "https://images.unsplash.com/photo-1580610447943-1bfbef5efe07?w=400&q=80",
-    title: "4 dias em Salvador",
-    days: "4 dias",
+    imageUrl: "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400&q=80",
+    title: "Jantar especial em Ipanema",
+    tag: "Gastronomia",
   },
 ];
 
@@ -29,7 +29,7 @@ const MiniFerias = () => {
         Ideias para mini férias
       </h2>
       <p className="text-muted-foreground text-sm leading-relaxed mb-5">
-        Roteiros prontos para escapadas rápidas. Escolha, personalize e viaje.
+        Experiências únicas para escapadas rápidas. Escolha e viaje.
       </p>
 
       <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide -mx-5 px-5">
@@ -44,7 +44,7 @@ const MiniFerias = () => {
 const IdeaCard = ({ idea }: { idea: (typeof ideas)[number] }) => {
   const [loaded, setLoaded] = useState(false);
   return (
-    <button className="relative flex-shrink-0 w-[220px] aspect-[16/10] rounded-2xl overflow-hidden">
+    <button className="relative flex-shrink-0 w-[200px] aspect-[3/4] rounded-2xl overflow-hidden">
       {!loaded && <Skeleton className="absolute inset-0 w-full h-full rounded-none" />}
       <img
         src={idea.imageUrl}
@@ -53,10 +53,10 @@ const IdeaCard = ({ idea }: { idea: (typeof ideas)[number] }) => {
         loading="lazy"
         onLoad={() => setLoaded(true)}
       />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-      <div className="absolute top-2 right-2">
+      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+      <div className="absolute top-2 left-2">
         <span className="px-2 py-0.5 rounded-full bg-background/80 text-foreground text-[10px] font-medium">
-          {idea.days}
+          {idea.tag}
         </span>
       </div>
       <div className="absolute bottom-0 left-0 right-0 p-3">
