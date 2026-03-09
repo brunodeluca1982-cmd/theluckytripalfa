@@ -64,7 +64,7 @@ const findStaticActivityById = (
   return null;
 };
 
-interface MediaRow { type: "image" | "video"; url: string; }
+interface MediaRow { type: "image" | "video"; url: string; title?: string; }
 
 function useExperienciaMedia(experienciaId: string | undefined) {
   return useQuery({
@@ -80,6 +80,29 @@ function useExperienciaMedia(experienciaId: string | undefined) {
       return (data ?? []) as MediaRow[];
     },
     enabled: !!experienciaId,
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
+function useExperienceMediaBySlug(slug: string | undefined) {
+  return useQuery({
+    queryKey: ["experience-media-slug", slug],
+    queryFn: async (): Promise<MediaRow[]> => {
+      if (!slug) return [];
+      const { data, error } = await supabase
+        .from("experience_media")
+        .select("media_type, media_url, title")
+        .eq("experience_slug", slug)
+        .eq("is_active", true)
+        .order("sort_order", { ascending: true });
+      if (error) throw error;
+      return (data ?? []).map((r: any) => ({
+        type: r.media_type as "image" | "video",
+        url: r.media_url,
+        title: r.title,
+      }));
+    },
+    enabled: !!slug,
     staleTime: 5 * 60 * 1000,
   });
 }
