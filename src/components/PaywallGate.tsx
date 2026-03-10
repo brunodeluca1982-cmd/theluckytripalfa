@@ -72,7 +72,6 @@ export const GuidePaywallGate = ({ guideId, guideName, children, fallback }: Gui
   const [showPaywall, setShowPaywall] = useState(false);
   const [purchaseLoading, setPurchaseLoading] = useState(false);
   const navigate = useNavigate();
-  const navigate = useNavigate();
 
   if (isLoading) return null;
   if (isPremium || checkGuideAccess(guideId)) return <>{children}</>;

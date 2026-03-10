@@ -129,6 +129,7 @@ const App = () => {
             <Route path="/roteiro/rio-3-dias-final" element={<RoteiroFinal />} />
             <Route path="/purchase-success" element={<PurchaseSuccess />} />
             <Route path="/wa" element={<WhatsAppRedirect />} />
+            <Route path="/auth" element={<AuthPage />} />
             <Route path="/admin-eventos" element={<AdminEventos />} />
             
             {/* App pages (with bottom navigation) */}
