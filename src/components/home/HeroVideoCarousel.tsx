@@ -89,6 +89,7 @@ const HeroVideoCarousel = () => {
         title: exp.title,
         subtitle: exp.country || exp.city || exp.subtitle || undefined,
         buttonLabel: "Conferir agora",
+        destinationPath: (exp as any).home_destination_path ?? null,
       });
     }
 
