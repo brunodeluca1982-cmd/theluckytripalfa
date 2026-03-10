@@ -126,11 +126,7 @@ const HeroVideoCarousel = () => {
   }, [current]);
 
   const handleSlideAction = (slide: HeroSlide) => {
-    if (slide.destinationPath) {
-      navigate(slide.destinationPath);
-    } else {
-      navigate(`/experiencia/${slide.slug}`);
-    }
+    navigate(`/experiencia/${slide.slug}`);
   };
 
   if (heroSlides.length === 0) {
