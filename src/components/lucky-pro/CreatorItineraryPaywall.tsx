@@ -8,8 +8,6 @@ import { toast } from "sonner";
 import LuckyProPaywall from "@/components/lucky-pro/LuckyProPaywall";
 import { Progress } from "@/components/ui/progress";
 import { ReferenceItinerary } from "@/data/reference-itineraries";
-import { Progress } from "@/components/ui/progress";
-import { ReferenceItinerary } from "@/data/reference-itineraries";
 
 /** Premium creator IDs whose itineraries require purchase */
 export const PREMIUM_CREATOR_IDS = ["bruno-de-luca", "carolina-dieckmann"];

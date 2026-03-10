@@ -68,8 +68,10 @@ interface GuidePaywallGateProps {
 
 export const GuidePaywallGate = ({ guideId, guideName, children, fallback }: GuidePaywallGateProps) => {
   const { isPremium, isAuthenticated, isLoading, checkGuideAccess } = useSubscription();
+  const { redirectToAuth } = useAuthRedirect();
   const [showPaywall, setShowPaywall] = useState(false);
   const [purchaseLoading, setPurchaseLoading] = useState(false);
+  const navigate = useNavigate();
   const navigate = useNavigate();
 
   if (isLoading) return null;
