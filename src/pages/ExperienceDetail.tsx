@@ -137,7 +137,7 @@ const ExperienceDetail = () => {
               {mediaList.map((m, i) => (
                 <CarouselItem key={i} className="pl-0 h-full">
                   {m.type === "video" ? (
-                    <video src={m.url} controls playsInline preload="metadata" className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLVideoElement).style.display = 'none'; }} />
+                    <video src={m.url} controls playsInline muted preload="metadata" className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLVideoElement).style.display = 'none'; }} />
                   ) : (
                     <img src={m.url} alt={exp.title} className="w-full h-full object-cover" />
                   )}
