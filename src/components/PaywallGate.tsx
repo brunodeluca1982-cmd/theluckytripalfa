@@ -77,7 +77,7 @@ export const GuidePaywallGate = ({ guideId, guideName, children, fallback }: Gui
 
   const handlePurchase = async () => {
     if (!isAuthenticated) {
-      navigate('/perfil/assinatura');
+      redirectToAuth({ type: "buy_guide", payload: { guideId }, returnTo: window.location.pathname });
       setShowPaywall(false);
       return;
     }
