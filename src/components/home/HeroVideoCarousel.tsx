@@ -140,36 +140,19 @@ const HeroVideoCarousel = () => {
     <section className="relative w-full aspect-[9/16] max-h-[75vh] overflow-hidden">
       {/* Media layers */}
       {heroSlides.map((s, i) => (
-        s.videoUrl ? (
-          <video
-            key={s.id}
-            ref={(el) => { videoRefs.current[i] = el; }}
-            src={s.videoUrl}
-            poster={s.imageUrl}
-            muted
-            loop
-            playsInline
-            preload={i <= 1 ? "auto" : "none"}
-            onError={(e) => {
-              const el = e.target as HTMLVideoElement;
-              if (s.imageUrl) { el.style.display = 'none'; }
-            }}
-            className={cn(
-              "absolute inset-0 w-full h-full object-cover transition-opacity duration-500",
-              i === current ? "opacity-100 z-10" : "opacity-0 z-0"
-            )}
-          />
-        ) : (
-          <img
-            key={s.id}
-            src={s.imageUrl}
-            alt={s.title}
-            className={cn(
-              "absolute inset-0 w-full h-full object-cover transition-opacity duration-500",
-              i === current ? "opacity-100 z-10" : "opacity-0 z-0"
-            )}
-          />
-        )
+        <video
+          key={s.id}
+          ref={(el) => { videoRefs.current[i] = el; }}
+          src={s.videoUrl}
+          muted
+          loop
+          playsInline
+          preload={i <= 1 ? "auto" : "none"}
+          className={cn(
+            "absolute inset-0 w-full h-full object-cover transition-opacity duration-500",
+            i === current ? "opacity-100 z-10" : "opacity-0 z-0"
+          )}
+        />
       ))}
 
       {/* Gradient overlays */}
