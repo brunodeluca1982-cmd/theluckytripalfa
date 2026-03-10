@@ -48,6 +48,7 @@ import SuporteHumano from "./pages/profile/SuporteHumano";
 import SecondaryModuleDetail from "./pages/SecondaryModuleDetail";
 import PartnerProfile from "./pages/PartnerProfile";
 import PartnerRoteiro from "./pages/PartnerRoteiro";
+import AuthPage from "./pages/AuthPage";
 import IAAssistant from "./pages/IAAssistant";
 import IAChatPlaceholder from "./pages/ia/IAChatPlaceholder";
 import IACreateItinerary from "./pages/ia/IACreateItinerary";
