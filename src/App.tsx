@@ -60,6 +60,7 @@ import IAMelhorarRoteiro from "./pages/ia/IAMelhorarRoteiro";
 import IALuckyTrip from "./pages/ia/IALuckyTrip";
 import RoteiroFinal from "./pages/RoteiroFinal";
 import RoteiroResultado from "./pages/RoteiroResultado";
+import PurchaseSuccess from "./pages/PurchaseSuccess";
 import NotFound from "./pages/NotFound";
 import AdminEventos from "./pages/AdminEventos";
 import { SpotifyPlayerProvider } from "@/contexts/SpotifyPlayerContext";
