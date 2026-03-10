@@ -154,6 +154,10 @@ const HeroVideoCarousel = () => {
             loop
             playsInline
             preload={i <= 1 ? "auto" : "none"}
+            onError={(e) => {
+              const el = e.target as HTMLVideoElement;
+              if (s.imageUrl) { el.style.display = 'none'; }
+            }}
             className={cn(
               "absolute inset-0 w-full h-full object-cover transition-opacity duration-500",
               i === current ? "opacity-100 z-10" : "opacity-0 z-0"

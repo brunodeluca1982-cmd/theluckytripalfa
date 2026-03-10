@@ -147,7 +147,7 @@ const ExperienceDetail = () => {
           </Carousel>
         ) : hasMedia ? (
           mediaList[0].type === "video" ? (
-            <video src={mediaList[0].url} muted controls playsInline preload="metadata" className="w-full h-full object-cover" />
+            <video src={mediaList[0].url} controls playsInline preload="metadata" className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLVideoElement).style.display = 'none'; }} />
           ) : (
             <img src={mediaList[0].url} alt={exp.title} className="w-full h-full object-cover" />
           )
