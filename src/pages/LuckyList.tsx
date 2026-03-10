@@ -62,47 +62,69 @@ const LuckyList = () => {
           </p>
         </section>
 
-        {/* Region selector — gated */}
-        <PaywallGate featureId="lucky-list">
-          <section className="pt-6 pb-8">
-            <h2 className="text-xs tracking-[0.2em] text-white/50 uppercase mb-2">
-              Escolha a região
-            </h2>
-            <p className="text-sm text-white/60 leading-relaxed mb-6">
-              Nossos segredos estão divididos por bairro. Toque em uma área abaixo para revelar os locais exclusivos.
-            </p>
+        {/* Region selector — first 2 free, rest gated */}
+        <section className="pt-6 pb-8">
+          <h2 className="text-xs tracking-[0.2em] text-white/50 uppercase mb-2">
+            Escolha a região
+          </h2>
+          <p className="text-sm text-white/60 leading-relaxed mb-6">
+            Nossos segredos estão divididos por bairro. Toque em uma área abaixo para revelar os locais exclusivos.
+          </p>
 
-            <div className="space-y-3">
-              {availableNeighborhoods.map((neighborhood) => {
-                const itemCount = groupedItems[neighborhood.name]?.length || 0;
-                return (
-                  <button
-                    key={neighborhood.id}
-                    onClick={() => navigate(`/lucky-list/bairro/${neighborhood.id}`)}
-                    className="w-full flex items-center justify-between px-5 py-4 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 text-white hover:bg-white/20 transition-all active:scale-[0.98]"
-                  >
-                    <span className="text-base font-medium">{neighborhood.name}</span>
-                    <span className="text-sm text-white/50">
-                      {itemCount} {itemCount === 1 ? "lugar" : "lugares"}
-                    </span>
-                  </button>
-                );
-              })}
-
-              {hasOutsideMap && (
+          <div className="space-y-3">
+            {/* Free preview: first 2 neighborhoods */}
+            {availableNeighborhoods.slice(0, 2).map((neighborhood) => {
+              const itemCount = groupedItems[neighborhood.name]?.length || 0;
+              return (
                 <button
-                  onClick={() => navigate(`/lucky-list/bairro/fora-do-mapa`)}
+                  key={neighborhood.id}
+                  onClick={() => navigate(`/lucky-list/bairro/${neighborhood.id}`)}
                   className="w-full flex items-center justify-between px-5 py-4 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 text-white hover:bg-white/20 transition-all active:scale-[0.98]"
                 >
-                  <span className="text-base font-medium">Fora do Mapa</span>
+                  <span className="text-base font-medium">{neighborhood.name}</span>
                   <span className="text-sm text-white/50">
-                    {groupedItems["Fora do Mapa"]?.length || 0} lugares
+                    {itemCount} {itemCount === 1 ? "lugar" : "lugares"}
                   </span>
                 </button>
-              )}
-            </div>
-          </section>
-        </PaywallGate>
+              );
+            })}
+
+            {/* Premium: remaining neighborhoods */}
+            {availableNeighborhoods.length > 2 && (
+              <PaywallGate featureId="lucky-list">
+                <div className="space-y-3">
+                  {availableNeighborhoods.slice(2).map((neighborhood) => {
+                    const itemCount = groupedItems[neighborhood.name]?.length || 0;
+                    return (
+                      <button
+                        key={neighborhood.id}
+                        onClick={() => navigate(`/lucky-list/bairro/${neighborhood.id}`)}
+                        className="w-full flex items-center justify-between px-5 py-4 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 text-white hover:bg-white/20 transition-all active:scale-[0.98]"
+                      >
+                        <span className="text-base font-medium">{neighborhood.name}</span>
+                        <span className="text-sm text-white/50">
+                          {itemCount} {itemCount === 1 ? "lugar" : "lugares"}
+                        </span>
+                      </button>
+                    );
+                  })}
+
+                  {hasOutsideMap && (
+                    <button
+                      onClick={() => navigate(`/lucky-list/bairro/fora-do-mapa`)}
+                      className="w-full flex items-center justify-between px-5 py-4 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 text-white hover:bg-white/20 transition-all active:scale-[0.98]"
+                    >
+                      <span className="text-base font-medium">Fora do Mapa</span>
+                      <span className="text-sm text-white/50">
+                        {groupedItems["Fora do Mapa"]?.length || 0} lugares
+                      </span>
+                    </button>
+                  )}
+                </div>
+              </PaywallGate>
+            )}
+          </div>
+        </section>
       </main>
 
       {/* Footer */}
