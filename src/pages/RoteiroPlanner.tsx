@@ -29,6 +29,8 @@ import { getReferenceItinerariesForDestination, ReferenceItem } from "@/data/ref
 import { getDestination } from "@/data/destinations-database";
 import { PlaceData } from "@/components/roteiro/GooglePlacesAutocomplete";
 import { toast } from "@/hooks/use-toast";
+import { useSubscription } from "@/hooks/use-subscription";
+import { PaywallGate } from "@/components/PaywallGate";
 
 /**
  * ROTEIRO PLANNER — GAMIFIED ITINERARY EXPERIENCE
@@ -348,6 +350,7 @@ const RoteiroPlanner = () => {
         </div>
       </header>
 
+      <PaywallGate featureId="itinerary-editing">
       {/* Tabs Navigation */}
       <ItineraryTabs defaultValue="itinerary">
         {{
@@ -465,6 +468,7 @@ const RoteiroPlanner = () => {
           ),
         }}
       </ItineraryTabs>
+      </PaywallGate>
     </div>
   );
 };

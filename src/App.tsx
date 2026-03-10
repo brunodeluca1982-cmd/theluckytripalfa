@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { SubscriptionProvider } from "@/hooks/use-subscription";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -104,6 +105,7 @@ const App = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <SubscriptionProvider>
       <SpotifyPlayerProvider>
       <TooltipProvider>
         <Toaster />
@@ -214,6 +216,7 @@ const App = () => {
         <PersistentSpotifyPlayer />
       </TooltipProvider>
       </SpotifyPlayerProvider>
+      </SubscriptionProvider>
     </QueryClientProvider>
   );
 };
