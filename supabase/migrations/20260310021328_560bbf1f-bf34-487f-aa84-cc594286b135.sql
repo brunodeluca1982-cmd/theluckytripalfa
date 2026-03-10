@@ -1,0 +1,1 @@
+ALTER TABLE public.experiences ADD COLUMN home_destination_path text DEFAULT NULL;
