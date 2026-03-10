@@ -52,6 +52,7 @@ const LuckyProPaywall = ({ open, onClose }: LuckyProPaywallProps) => {
   const [selectedPlan, setSelectedPlan] = useState<PlanType>("yearly");
   const [loading, setLoading] = useState(false);
   const { isAuthenticated } = useSubscription();
+  const { redirectToAuth } = useAuthRedirect();
   const navigate = useNavigate();
 
   if (!open) return null;
