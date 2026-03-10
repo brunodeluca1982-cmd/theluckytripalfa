@@ -131,7 +131,11 @@ const HeroVideoCarousel = () => {
   }, [current]);
 
   const handleSlideAction = (slide: HeroSlide) => {
-    navigate(`/experiencia/${slide.slug}`);
+    if (slide.destinationPath) {
+      navigate(slide.destinationPath);
+    } else {
+      navigate(`/experiencia/${slide.slug}`);
+    }
   };
 
   if (heroSlides.length === 0) {
