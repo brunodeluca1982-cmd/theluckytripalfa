@@ -2,9 +2,12 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Lock, Crown, ShoppingBag, Sparkles, MapPin, Eye, EyeOff } from "lucide-react";
 import { useSubscription } from "@/hooks/use-subscription";
+import { useAuthRedirect } from "@/hooks/use-auth-redirect";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import LuckyProPaywall from "@/components/lucky-pro/LuckyProPaywall";
+import { Progress } from "@/components/ui/progress";
+import { ReferenceItinerary } from "@/data/reference-itineraries";
 import { Progress } from "@/components/ui/progress";
 import { ReferenceItinerary } from "@/data/reference-itineraries";
 
