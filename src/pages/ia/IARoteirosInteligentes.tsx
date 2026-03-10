@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { ChevronLeft, Route, Sparkles } from "lucide-react";
+import { PaywallGate } from "@/components/PaywallGate";
 
 /**
  * ROTEIROS INTELIGENTES — INFORMATIONAL SCREEN
