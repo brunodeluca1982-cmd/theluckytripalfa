@@ -105,6 +105,7 @@ const App = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <SubscriptionProvider>
       <SpotifyPlayerProvider>
       <TooltipProvider>
         <Toaster />
