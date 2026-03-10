@@ -80,13 +80,14 @@ const PartnerRoteiro = () => {
     </div>
   );
 
-  // Gate premium creators
+  // Gate premium creators with value-first preview
   if (isPremiumCreator(partnerId || "")) {
     return (
       <CreatorItineraryPaywall
         partnerId={partnerId || ""}
         partnerName={partner.name}
         partnerImageUrl={partner.imageUrl}
+        itinerary={itinerary}
       >
         {content}
       </CreatorItineraryPaywall>
