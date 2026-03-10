@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      access_levels: {
+        Row: {
+          created_at: string
+          expires_at: string | null
+          granted_at: string | null
+          id: string
+          level: string
+          source: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string | null
+          granted_at?: string | null
+          id?: string
+          level?: string
+          source?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string | null
+          granted_at?: string | null
+          id?: string
+          level?: string
+          source?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       evento_item_sponsored: {
         Row: {
           ativo: boolean
@@ -630,6 +663,75 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          email: string | null
+          full_name: string | null
+          id: string
+          stripe_customer_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id: string
+          stripe_customer_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          stripe_customer_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      purchases: {
+        Row: {
+          amount_paid: number
+          created_at: string
+          currency: string
+          guide_id: string
+          guide_name: string | null
+          id: string
+          status: string
+          stripe_checkout_session_id: string | null
+          stripe_payment_intent_id: string | null
+          user_id: string
+        }
+        Insert: {
+          amount_paid?: number
+          created_at?: string
+          currency?: string
+          guide_id: string
+          guide_name?: string | null
+          id?: string
+          status?: string
+          stripe_checkout_session_id?: string | null
+          stripe_payment_intent_id?: string | null
+          user_id: string
+        }
+        Update: {
+          amount_paid?: number
+          created_at?: string
+          currency?: string
+          guide_id?: string
+          guide_name?: string | null
+          id?: string
+          status?: string
+          stripe_checkout_session_id?: string | null
+          stripe_payment_intent_id?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       roteiro_itens: {
         Row: {
           address: string | null
@@ -687,6 +789,48 @@ export type Database = {
           source?: string
           time_slot?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      subscriptions: {
+        Row: {
+          cancel_at_period_end: boolean | null
+          created_at: string
+          current_period_end: string | null
+          current_period_start: string | null
+          id: string
+          plan_type: string
+          status: string
+          stripe_price_id: string | null
+          stripe_subscription_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          cancel_at_period_end?: boolean | null
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          plan_type?: string
+          status?: string
+          stripe_price_id?: string | null
+          stripe_subscription_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          cancel_at_period_end?: boolean | null
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          plan_type?: string
+          status?: string
+          stripe_price_id?: string | null
+          stripe_subscription_id?: string | null
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
