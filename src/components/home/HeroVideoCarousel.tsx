@@ -221,7 +221,7 @@ const HeroVideoCarousel = () => {
 
       {/* Header — logo + profile */}
       <header className="absolute top-0 left-0 right-0 z-30 flex items-center justify-between px-5 pt-12 pb-4">
-        <span className="font-serif text-3xl font-semibold text-white italic tracking-tight select-none drop-shadow-md">L.</span>
+        <img src={logoSymbol} alt="L." className="h-8 w-auto brightness-0 invert select-none drop-shadow-md" />
         <button
           onClick={() => navigate("/perfil")}
           className="w-10 h-10 rounded-full bg-primary flex items-center justify-center"

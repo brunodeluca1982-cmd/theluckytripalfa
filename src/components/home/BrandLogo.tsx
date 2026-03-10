@@ -1,9 +1,9 @@
+import logoSymbol from "@/assets/brand/logo-l-symbol.png";
+
 const BrandLogo = () => {
   return (
     <div className="flex flex-col items-center">
-      <span className="font-serif italic text-4xl font-semibold text-foreground leading-none tracking-tight select-none">
-        L.
-      </span>
+      <img src={logoSymbol} alt="L." className="h-10 w-auto select-none" />
       <span className="text-[10px] font-serif font-medium tracking-[0.2em] text-foreground uppercase mt-1.5">
         The Lucky Trip
       </span>
