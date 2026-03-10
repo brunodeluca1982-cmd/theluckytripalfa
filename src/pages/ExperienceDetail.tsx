@@ -141,13 +141,14 @@ const ExperienceDetail = () => {
             <video
               src={videos[0].url}
               poster={posterUrl}
-              controls
+              autoPlay
+              loop
               playsInline
               muted
+              controls
               preload="auto"
               className="w-full h-full object-cover"
               onError={(e) => {
-                // If video fails, hide it — poster image behind will show
                 (e.target as HTMLVideoElement).style.display = 'none';
               }}
             />
