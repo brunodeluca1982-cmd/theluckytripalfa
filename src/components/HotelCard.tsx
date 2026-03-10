@@ -20,8 +20,9 @@ const HotelCard = ({
 }: HotelCardProps) => {
   const detailUrl = slug ? `/hotel/${slug}?from=${neighborhood || ""}` : undefined;
   const placeQuery = buildPlaceQuery(name, neighborhood);
-  const { photoUrl, isLoading } = usePlacePhoto(slug || name, "hotel", placeQuery);
-  const displayImage = photoUrl || imageUrl;
+  const { photoUrl, isLoading } = usePlacePhoto(slug || name, "hotel", placeQuery, !imageUrl);
+  // Priority: 1) Supabase imageUrl (prop) → 2) Google Places photo → 3) none
+  const displayImage = imageUrl || photoUrl;
 
   const CardContent = () => (
     <>
