@@ -1,9 +1,9 @@
+import logoFull from "@/assets/brand/logo-the-lucky-trip.png";
+
 const BrandLogo = () => {
   return (
     <div className="flex flex-col items-center">
-      <h1 className="font-serif text-2xl font-medium tracking-tight text-foreground">
-        The Lucky Trip
-      </h1>
+      <img src={logoFull} alt="The Lucky Trip" className="h-16 w-auto" />
       <p className="text-[9px] tracking-[0.2em] text-muted-foreground uppercase mt-1">
         Inteligência Humana em Viagens
       </p>

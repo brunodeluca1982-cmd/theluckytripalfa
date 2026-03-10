@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import logoFull from "@/assets/brand/logo-the-lucky-trip.png";
 
 /**
  * SPLASH SCREEN — THE LUCKY TRIP
@@ -45,15 +46,13 @@ const SplashScreen = ({ onComplete }: SplashScreenProps) => {
     >
       {/* Brand Content */}
       <div
-        className={`text-center transition-all duration-700 ${
+        className={`text-center flex flex-col items-center transition-all duration-700 ${
           isExiting 
             ? "opacity-0 translate-y-2" 
             : "opacity-100 translate-y-0 animate-fade-in"
         }`}
       >
-        <h1 className="text-4xl font-serif font-medium text-foreground mb-3">
-          The Lucky Trip
-        </h1>
+        <img src={logoFull} alt="The Lucky Trip" className="h-24 w-auto mb-3" />
         <p className="text-xs tracking-[0.25em] text-muted-foreground uppercase">
           Inteligência Humana em Viagens
         </p>
