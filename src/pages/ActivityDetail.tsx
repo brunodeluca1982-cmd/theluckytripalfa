@@ -100,12 +100,10 @@ function isActivitySavedLocally(activityId: string) {
 const ExternalActivityView = ({ exp, backPath }: { exp: ExternalExperiencia; backPath: string }) => {
   const { saveItem } = useItemSave();
   const slug = normalizeNeighborhood(exp.bairro);
-  const { data: legacyMedia } = useExperienciaMedia(exp.id);
   const { data: slugMedia } = useExperienceMediaBySlug(exp.id);
   const [isSaved, setIsSaved] = useState(false);
 
-  // Merge: prefer slug-based media, fallback to legacy
-  const mediaList = (slugMedia && slugMedia.length > 0) ? slugMedia : legacyMedia;
+  const mediaList = slugMedia;
 
   useEffect(() => {
     setIsSaved(isActivitySavedLocally(exp.id));
