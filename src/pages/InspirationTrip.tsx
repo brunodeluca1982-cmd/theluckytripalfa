@@ -205,7 +205,7 @@ const InspirationTrip = () => {
                         <SlotItemPhoto
                           itemId={slot.id}
                           itemName={slot.name}
-                          itemNeighborhood={slot.neighborhood}
+                          neighborhood={slot.neighborhood}
                           source={slot.source}
                           className="w-full h-full object-cover"
                         />
