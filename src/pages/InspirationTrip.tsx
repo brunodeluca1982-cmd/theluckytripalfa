@@ -206,7 +206,7 @@ const InspirationTrip = () => {
                           itemId={slot.id}
                           itemName={slot.name}
                           neighborhood={slot.neighborhood}
-                          source={slot.source}
+                          slotKind={kind}
                           className="w-full h-full object-cover"
                         />
                       </div>
