@@ -468,6 +468,7 @@ const RoteiroPlanner = () => {
           ),
         }}
       </ItineraryTabs>
+      </PaywallGate>
     </div>
   );
 };
