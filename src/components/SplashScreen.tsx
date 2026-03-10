@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import logoFull from "@/assets/brand/logo-the-lucky-trip.png";
 
 /**
  * SPLASH SCREEN — THE LUCKY TRIP
@@ -22,12 +21,10 @@ const SplashScreen = ({ onComplete }: SplashScreenProps) => {
   const [isExiting, setIsExiting] = useState(false);
 
   useEffect(() => {
-    // Start exit animation after 1.5s
     const exitTimer = setTimeout(() => {
       setIsExiting(true);
     }, 1500);
 
-    // Complete transition after animation (1.5s + 0.5s fade)
     const completeTimer = setTimeout(() => {
       onComplete();
     }, 2000);
@@ -52,8 +49,15 @@ const SplashScreen = ({ onComplete }: SplashScreenProps) => {
             : "opacity-100 translate-y-0 animate-fade-in"
         }`}
       >
-        <img src={logoFull} alt="The Lucky Trip" className="h-24 w-auto mb-3" />
-        <p className="text-xs tracking-[0.25em] text-muted-foreground uppercase">
+        {/* Cursive L. symbol */}
+        <span className="font-serif italic text-7xl font-semibold text-foreground leading-none tracking-tight select-none">
+          L.
+        </span>
+        {/* Brand name */}
+        <span className="text-sm font-serif font-medium tracking-[0.25em] text-foreground uppercase mt-4">
+          The Lucky Trip
+        </span>
+        <p className="text-xs tracking-[0.25em] text-muted-foreground uppercase mt-3">
           Inteligência Humana em Viagens
         </p>
       </div>
