@@ -8,7 +8,7 @@ export function useAdminAuth() {
 
   useEffect(() => {
     const check = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+      const { data: { session } } = await (supabase.auth as any).getSession();
       if (!session?.user) {
         setIsAdmin(false);
         setIsLoading(false);
