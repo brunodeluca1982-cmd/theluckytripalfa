@@ -1,6 +1,7 @@
 import { ReactNode, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSubscription } from '@/hooks/use-subscription';
+import { useAuthRedirect } from '@/hooks/use-auth-redirect';
 import { Lock, Sparkles, ShoppingBag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
