@@ -25,7 +25,7 @@ const HeroVideoCarousel = () => {
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const navigate = useNavigate();
 
-  const HERO_SLUGS = ["cristo-redentor", "museu-do-amanha"];
+  const HERO_SLUGS = ["cristo-redentor", "museu-do-amanha", "praia-de-ipanema"];
 
   // 1. Load only the two hero experiences
   const { data: experiences } = useQuery({
