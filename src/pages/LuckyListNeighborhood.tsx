@@ -23,6 +23,14 @@ const NEIGHBORHOOD_MAP: Record<string, string> = {
 
 const FREE_ITEM_COUNT = 2;
 
+/** Truncate text at a word boundary near maxLen, ending with "…" */
+const truncateTitle = (text: string, maxLen = 45): string => {
+  if (text.length <= maxLen) return text;
+  const truncated = text.slice(0, maxLen);
+  const lastSpace = truncated.lastIndexOf(" ");
+  return (lastSpace > 20 ? truncated.slice(0, lastSpace) : truncated) + "…";
+};
+
 const LuckyListNeighborhood = () => {
   const { neighborhoodId } = useParams<{ neighborhoodId: string }>();
   const navigate = useNavigate();
@@ -49,10 +57,6 @@ const LuckyListNeighborhood = () => {
   const lockedItems = items.slice(FREE_ITEM_COUNT);
   const canAccessAll = isPremium || isLoading;
 
-  const handleLockedTap = (title: string) => {
-    setLockedItem(title);
-  };
-
   return (
     <div className="min-h-screen flex flex-col">
       {/* Hero background */}
@@ -72,22 +76,27 @@ const LuckyListNeighborhood = () => {
       {/* Content */}
       <main className="relative z-10 flex-1 px-5 pb-12">
         {/* Title */}
-        <section className="pt-4 pb-6 text-center">
+        <section className="pt-4 pb-2 text-center">
           <h1 className="text-4xl font-serif font-semibold text-white leading-tight">
             {neighborhoodName}
           </h1>
           <p className="text-xs tracking-[0.15em] text-white/40 uppercase mt-2">The Lucky List</p>
         </section>
 
-        {/* Progress bar */}
+        {/* Progress indicator */}
         {!canAccessAll && (
-          <div className="mb-6 flex items-center gap-3 px-1">
-            <p className="text-xs text-[hsl(40,60%,50%)]">
-              ✦ {FREE_ITEM_COUNT} de {items.length} segredos disponíveis
-            </p>
-            <div className="flex-1 h-1 rounded-full bg-white/10 overflow-hidden">
+          <div className="my-5 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 px-4 py-3">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-xs font-medium text-[hsl(40,60%,50%)]">
+                ✦ {FREE_ITEM_COUNT} de {items.length} segredos revelados
+              </p>
+              <p className="text-[10px] text-white/30 uppercase tracking-wider">
+                {Math.round((FREE_ITEM_COUNT / items.length) * 100)}%
+              </p>
+            </div>
+            <div className="h-1.5 rounded-full bg-white/10 overflow-hidden">
               <div
-                className="h-full rounded-full bg-[hsl(40,60%,50%)]"
+                className="h-full rounded-full bg-gradient-to-r from-[hsl(40,60%,45%)] to-[hsl(40,70%,55%)] transition-all duration-500"
                 style={{ width: `${(FREE_ITEM_COUNT / items.length) * 100}%` }}
               />
             </div>
@@ -123,41 +132,38 @@ const LuckyListNeighborhood = () => {
           ))}
         </section>
 
-        {/* Locked items */}
+        {/* Locked items — blurred curiosity gap */}
         {lockedItems.length > 0 && !canAccessAll && (
           <section className="space-y-4 mt-4">
             {lockedItems.map((item) => (
               <button
                 key={item.id}
-                onClick={() => handleLockedTap(item.title)}
-                className="w-full text-left rounded-2xl overflow-hidden bg-white/5 backdrop-blur-sm border border-[hsl(40,60%,50%)]/20 relative"
+                onClick={() => setLockedItem(item.title)}
+                className="w-full text-left rounded-2xl overflow-hidden bg-white/[0.03] backdrop-blur-sm border border-[hsl(40,60%,50%)]/15 relative group"
               >
+                {/* Blurred image */}
                 {item.image_url && (
                   <div className="h-40 bg-cover bg-center relative" style={{ backgroundImage: `url(${item.image_url})` }}>
-                    <div className="absolute inset-0 backdrop-blur-md bg-black/40" />
+                    <div className="absolute inset-0 backdrop-blur-lg bg-black/50" />
                   </div>
                 )}
-                <div className="p-5 relative">
-                  <span className="inline-block text-[10px] tracking-[0.15em] uppercase text-[hsl(40,60%,50%)] bg-[hsl(40,60%,50%)]/10 rounded-full px-2.5 py-1 mb-3">
+                <div className="p-5">
+                  <span className="inline-block text-[10px] tracking-[0.15em] uppercase text-[hsl(40,60%,50%)]/60 bg-[hsl(40,60%,50%)]/5 rounded-full px-2.5 py-1 mb-3">
                     {item.category}
                   </span>
-                  <h3 className="text-base font-bold text-white uppercase tracking-wide mb-2">
-                    {item.title}
+                  {/* Curiosity gap — truncated title */}
+                  <h3 className="text-base font-bold text-white/70 uppercase tracking-wide mb-2">
+                    {truncateTitle(item.title)}
                   </h3>
-                  <p className="text-sm text-white/40 leading-relaxed line-clamp-2 blur-[3px]">
+                  {/* Blurred teaser */}
+                  <p className="text-sm text-white/30 leading-relaxed line-clamp-2 blur-[4px] select-none">
                     {item.teaser}
                   </p>
-                  {/* Blur overlay text */}
-                  <div className="absolute inset-x-5 bottom-12 text-center">
-                    <p className="text-xs text-[hsl(40,60%,50%)]/70">
-                      Continue lendo com Lucky Pro. Esses endereços...
-                    </p>
-                  </div>
                 </div>
                 {/* Unlock CTA */}
                 <div className="px-5 pb-5">
-                  <div className="w-full py-3 rounded-xl border border-[hsl(40,60%,50%)]/40 flex items-center justify-center gap-2 text-[hsl(40,60%,50%)] text-sm font-medium">
-                    <Lock className="w-4 h-4" />
+                  <div className="w-full py-3 rounded-xl border border-[hsl(40,60%,50%)]/30 flex items-center justify-center gap-2 text-[hsl(40,60%,50%)] text-sm font-medium group-hover:bg-[hsl(40,60%,50%)]/10 transition-colors">
+                    <Lock className="w-3.5 h-3.5" />
                     Desbloquear
                   </div>
                 </div>

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { X, Crown, Map, Sparkles, Download, Users, Heart } from "lucide-react";
+import { X, Crown, Map, Sparkles, Download, Users, Heart, Check } from "lucide-react";
 import { useSubscription } from "@/hooks/use-subscription";
 import { supabase } from "@/integrations/supabase/client";
 import { STRIPE_CONFIG, type PlanType } from "@/data/stripe-config";
@@ -12,16 +12,39 @@ interface LuckyProPaywallProps {
 }
 
 const FEATURES = [
-  { icon: Map, label: "The Lucky List completa", desc: "127 segredos exclusivos por cidade, por bairro" },
-  { icon: Sparkles, label: "Melhorar roteiro com IA", desc: "Deixe a IA refinar seu roteiro com curadoria Lucky" },
-  { icon: Download, label: "Acesso offline", desc: "Leve seus roteiros para qualquer lugar sem internet" },
-  { icon: Users, label: "Colaboração em tempo real", desc: "Planeje viagens em grupo sem limites" },
-  { icon: Heart, label: "Salvar locais ilimitados", desc: "Monte sua lista de favoritos sem restrições" },
+  { icon: Map, label: "The Lucky List completa", desc: "127 segredos exclusivos por cidade" },
+  { icon: Sparkles, label: "Melhorar roteiro com IA", desc: "Deixe a IA refinar seu roteiro" },
+  { icon: Download, label: "Acesso offline", desc: "Leve seus roteiros para qualquer lugar" },
+  { icon: Users, label: "Colaboração em tempo real", desc: "Planeje viagens em grupo" },
+  { icon: Heart, label: "Salvar locais ilimitados", desc: "Sem restrições de favoritos" },
 ];
 
-const PLANS: { key: PlanType; label: string; savings?: string }[] = [
-  { key: "monthly", label: "Mensal" },
-  { key: "yearly", label: "Anual", savings: "Economize 40%" },
+interface PlanOption {
+  key: PlanType;
+  label: string;
+  price: string;
+  sublabel?: string;
+  badge?: string;
+}
+
+const PLANS: PlanOption[] = [
+  {
+    key: "yearly",
+    label: "Anual",
+    price: "R$ 97/ano",
+    sublabel: "≈ R$ 8 por mês",
+    badge: "Melhor valor",
+  },
+  {
+    key: "monthly",
+    label: "Mensal",
+    price: "R$ 29,90/mês",
+  },
+  {
+    key: "weekly",
+    label: "Semanal",
+    price: "R$ 9,90/semana",
+  },
 ];
 
 const LuckyProPaywall = ({ open, onClose }: LuckyProPaywallProps) => {
@@ -32,14 +55,6 @@ const LuckyProPaywall = ({ open, onClose }: LuckyProPaywallProps) => {
 
   if (!open) return null;
 
-  const plan = STRIPE_CONFIG.prices[selectedPlan];
-  const displayPrice = selectedPlan === "yearly"
-    ? `R$ ${(plan.amount / 1200).toFixed(2).replace(".", ",")}/mês`
-    : `R$ ${(plan.amount / 100).toFixed(2).replace(".", ",")}/mês`;
-  const subtext = selectedPlan === "yearly"
-    ? `Cobrado anualmente · R$ ${(plan.amount / 100).toFixed(2).replace(".", ",")}/ano`
-    : undefined;
-
   const handleCheckout = async () => {
     if (!isAuthenticated) {
       navigate("/perfil/assinatura");
@@ -49,6 +64,7 @@ const LuckyProPaywall = ({ open, onClose }: LuckyProPaywallProps) => {
 
     setLoading(true);
     try {
+      const plan = STRIPE_CONFIG.prices[selectedPlan];
       const { data, error } = await supabase.functions.invoke("create-checkout", {
         body: { priceId: plan.id },
       });
@@ -64,9 +80,9 @@ const LuckyProPaywall = ({ open, onClose }: LuckyProPaywallProps) => {
   return (
     <div className="fixed inset-0 z-50 flex flex-col">
       {/* Background */}
-      <div className="absolute inset-0 bg-gradient-to-b from-[hsl(30,20%,18%)] via-[hsl(30,15%,12%)] to-[hsl(30,10%,8%)]" />
+      <div className="absolute inset-0 bg-gradient-to-b from-[hsl(30,20%,16%)] via-[hsl(30,15%,10%)] to-[hsl(30,10%,6%)]" />
 
-      {/* Close button */}
+      {/* Close */}
       <button
         onClick={onClose}
         className="absolute top-4 right-4 z-10 w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white/60 hover:text-white transition-colors"
@@ -75,9 +91,9 @@ const LuckyProPaywall = ({ open, onClose }: LuckyProPaywallProps) => {
       </button>
 
       {/* Content */}
-      <div className="relative z-10 flex-1 overflow-y-auto flex flex-col items-center px-6 pt-16 pb-8">
-        {/* Crown icon */}
-        <div className="w-16 h-16 rounded-full border-2 border-[hsl(40,60%,50%)] flex items-center justify-center mb-6">
+      <div className="relative z-10 flex-1 overflow-y-auto flex flex-col items-center px-6 pt-14 pb-8">
+        {/* Crown */}
+        <div className="w-16 h-16 rounded-full border-2 border-[hsl(40,60%,50%)]/40 flex items-center justify-center mb-5">
           <Crown className="w-7 h-7 text-[hsl(40,60%,50%)]" />
         </div>
 
@@ -85,69 +101,90 @@ const LuckyProPaywall = ({ open, onClose }: LuckyProPaywallProps) => {
         <h1 className="text-3xl font-serif font-semibold text-white text-center mb-2">
           Lucky Pro
         </h1>
-        <p className="text-sm text-[hsl(40,40%,65%)] text-center mb-10">
-          Viaje com quem realmente conhece
+        <p className="text-sm text-[hsl(40,40%,65%)] text-center mb-8">
+          O Rio que o Google não mostra
         </p>
 
         {/* Features */}
-        <div className="w-full max-w-sm space-y-5 mb-10">
+        <div className="w-full max-w-sm space-y-4 mb-8">
           {FEATURES.map((f) => (
             <div key={f.label} className="flex items-start gap-3">
-              <f.icon className="w-5 h-5 text-white/60 mt-0.5 flex-shrink-0" />
+              <div className="w-8 h-8 rounded-lg bg-[hsl(40,60%,50%)]/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <f.icon className="w-4 h-4 text-[hsl(40,60%,50%)]" />
+              </div>
               <div>
                 <p className="text-sm font-medium text-white">{f.label}</p>
-                <p className="text-xs text-white/50">{f.desc}</p>
+                <p className="text-xs text-white/40">{f.desc}</p>
               </div>
             </div>
           ))}
         </div>
 
-        {/* Plan toggle */}
-        <div className="w-full max-w-sm bg-white/5 rounded-xl p-1 flex mb-6">
-          {PLANS.map((p) => (
-            <button
-              key={p.key}
-              onClick={() => setSelectedPlan(p.key)}
-              className={`flex-1 py-3 rounded-lg text-sm font-medium transition-all relative ${
-                selectedPlan === p.key
-                  ? "bg-white text-[hsl(30,10%,10%)]"
-                  : "text-white/60 hover:text-white/80"
-              }`}
-            >
-              {p.label}
-              {p.savings && selectedPlan === p.key && (
-                <span className="absolute -top-2 right-2 text-[10px] bg-[hsl(40,60%,50%)] text-[hsl(30,10%,10%)] px-2 py-0.5 rounded-full font-semibold">
-                  {p.savings}
-                </span>
-              )}
-            </button>
-          ))}
-        </div>
+        {/* Plan selector — psychological anchoring */}
+        <div className="w-full max-w-sm space-y-3 mb-6">
+          {PLANS.map((p) => {
+            const isSelected = selectedPlan === p.key;
+            return (
+              <button
+                key={p.key}
+                onClick={() => setSelectedPlan(p.key)}
+                className={`w-full rounded-xl border px-4 py-3.5 flex items-center gap-3 transition-all ${
+                  isSelected
+                    ? "border-[hsl(40,60%,50%)] bg-[hsl(40,60%,50%)]/10"
+                    : "border-white/10 bg-white/[0.03] hover:bg-white/5"
+                }`}
+              >
+                {/* Radio */}
+                <div
+                  className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-colors ${
+                    isSelected
+                      ? "border-[hsl(40,60%,50%)] bg-[hsl(40,60%,50%)]"
+                      : "border-white/20"
+                  }`}
+                >
+                  {isSelected && <Check className="w-3 h-3 text-[hsl(30,10%,10%)]" />}
+                </div>
 
-        {/* Price display */}
-        <div className="text-center mb-2">
-          <p className="text-3xl font-bold text-white">
-            {displayPrice}
-          </p>
-          {subtext && (
-            <p className="text-xs text-white/40 mt-1">{subtext}</p>
-          )}
+                {/* Label + price */}
+                <div className="flex-1 text-left">
+                  <div className="flex items-center gap-2">
+                    <span className={`text-sm font-semibold ${isSelected ? "text-white" : "text-white/70"}`}>
+                      {p.label}
+                    </span>
+                    {p.badge && (
+                      <span className="text-[10px] font-semibold bg-[hsl(40,60%,50%)] text-[hsl(30,10%,10%)] px-2 py-0.5 rounded-full">
+                        {p.badge}
+                      </span>
+                    )}
+                  </div>
+                  {p.sublabel && (
+                    <p className="text-[11px] text-[hsl(40,60%,50%)]/60 mt-0.5">{p.sublabel}</p>
+                  )}
+                </div>
+
+                {/* Price */}
+                <span className={`text-sm font-bold ${isSelected ? "text-white" : "text-white/50"}`}>
+                  {p.price}
+                </span>
+              </button>
+            );
+          })}
         </div>
 
         {/* CTA */}
         <button
           onClick={handleCheckout}
           disabled={loading}
-          className="w-full max-w-sm mt-6 py-4 rounded-xl bg-[hsl(40,60%,50%)] text-[hsl(30,10%,10%)] font-semibold text-base hover:bg-[hsl(40,60%,55%)] transition-colors disabled:opacity-50"
+          className="w-full max-w-sm py-4 rounded-xl bg-[hsl(40,60%,50%)] text-[hsl(30,10%,10%)] font-semibold text-base hover:bg-[hsl(40,60%,55%)] active:scale-[0.98] transition-all disabled:opacity-50"
         >
-          {loading ? "Processando..." : "Começar agora"}
+          {loading ? "Processando..." : "Desbloquear Lucky Pro"}
         </button>
 
         <p className="text-[11px] text-white/30 text-center mt-3">
-          7 dias grátis · Cancele quando quiser
+          Cancele quando quiser.
         </p>
 
-        <div className="flex items-center gap-2 mt-3 text-[11px] text-white/25">
+        <div className="flex items-center gap-2 mt-4 text-[11px] text-white/20">
           <span>Restaurar compra</span>
           <span>·</span>
           <span>Termos</span>
