@@ -7,6 +7,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '
 import { PREMIUM_FEATURES, STRIPE_CONFIG, type PremiumFeatureId } from '@/data/stripe-config';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import LuckyProPaywall from '@/components/lucky-pro/LuckyProPaywall';
 
 interface PaywallGateProps {
   featureId: PremiumFeatureId;
@@ -15,26 +16,16 @@ interface PaywallGateProps {
 }
 
 /**
- * Wraps premium content. Shows paywall sheet when non-premium user tries to access.
+ * Wraps premium content. Shows Lucky Pro paywall when non-premium user tries to access.
  */
 export const PaywallGate = ({ featureId, children, fallback }: PaywallGateProps) => {
   const { isPremium, isAuthenticated, isLoading } = useSubscription();
   const [showPaywall, setShowPaywall] = useState(false);
-  const navigate = useNavigate();
 
   if (isLoading) return null;
   if (isPremium) return <>{children}</>;
 
   const feature = PREMIUM_FEATURES.find(f => f.id === featureId);
-
-  const handleAction = () => {
-    if (!isAuthenticated) {
-      navigate('/perfil/assinatura?from=' + featureId);
-    } else {
-      navigate('/perfil/assinatura');
-    }
-    setShowPaywall(false);
-  };
 
   return (
     <>
@@ -58,65 +49,9 @@ export const PaywallGate = ({ featureId, children, fallback }: PaywallGateProps)
         </button>
       )}
 
-      <Sheet open={showPaywall} onOpenChange={setShowPaywall}>
-        <SheetContent side="bottom" className="rounded-t-2xl">
-          <SheetHeader className="text-left">
-            <SheetTitle className="flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-primary" />
-              {feature?.label || 'Acesso Premium'}
-            </SheetTitle>
-            <SheetDescription>
-              {feature?.description || 'Desbloqueie todo o conteúdo com uma assinatura.'}
-            </SheetDescription>
-          </SheetHeader>
-
-          <div className="py-6 space-y-4">
-            <div className="space-y-2">
-              {PREMIUM_FEATURES.map(f => (
-                <div key={f.id} className="flex items-center gap-2 text-sm">
-                  <Sparkles className="w-3.5 h-3.5 text-primary flex-shrink-0" />
-                  <span className="text-foreground">{f.label}</span>
-                </div>
-              ))}
-            </div>
-
-            <Button onClick={handleAction} className="w-full" size="lg">
-              {isAuthenticated ? 'Ver planos' : 'Criar conta e desbloquear'}
-            </Button>
-
-            <button
-              onClick={() => setShowPaywall(false)}
-              className="w-full text-center text-xs text-muted-foreground py-2"
-            >
-              Agora não
-            </button>
-          </div>
-        </SheetContent>
-      </Sheet>
+      <LuckyProPaywall open={showPaywall} onClose={() => setShowPaywall(false)} />
     </>
   );
-};
-
-/**
- * Simple hook-based paywall check for inline usage
- */
-export const usePaywallCheck = (featureId: PremiumFeatureId) => {
-  const { isPremium, isAuthenticated } = useSubscription();
-  const navigate = useNavigate();
-  const [showPaywall, setShowPaywall] = useState(false);
-
-  const checkAccess = (): boolean => {
-    if (isPremium) return true;
-    setShowPaywall(true);
-    return false;
-  };
-
-  const goToPlans = () => {
-    navigate('/perfil/assinatura');
-    setShowPaywall(false);
-  };
-
-  return { hasAccess: isPremium, checkAccess, showPaywall, setShowPaywall, goToPlans, isAuthenticated };
 };
 
 /**
