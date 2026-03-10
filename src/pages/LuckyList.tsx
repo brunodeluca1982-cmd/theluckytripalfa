@@ -20,6 +20,7 @@ const NEIGHBORHOODS = [
 
 const LuckyList = () => {
   const navigate = useNavigate();
+  const { isPremium } = useSubscription();
   const groupedItems = getLuckyListByNeighborhood();
   
   // Filter to neighborhoods that have items
