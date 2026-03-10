@@ -380,6 +380,24 @@ export default function AddIdeaSection() {
             {/* Actions */}
             <div className="flex gap-2 pt-1">
               <Button
+                size="sm"
+                onClick={() => {
+                  navigate("/inspiracao-trip", {
+                    state: {
+                      anchor: {
+                        ...result,
+                        sourceUrl: analyzedUrl,
+                        source: currentSource,
+                      },
+                    },
+                  });
+                }}
+                className="h-9 rounded-xl gap-1.5 text-xs"
+              >
+                <Route className="w-3.5 h-3.5" />
+                Gerar roteiro
+              </Button>
+              <Button
                 variant="outline"
                 size="sm"
                 onClick={() => {
@@ -389,7 +407,7 @@ export default function AddIdeaSection() {
                   setSavedIds(new Set());
                   setAnalyzedUrl("");
                 }}
-                className="h-8 rounded-lg text-xs"
+                className="h-9 rounded-xl text-xs"
               >
                 Nova ideia
               </Button>
