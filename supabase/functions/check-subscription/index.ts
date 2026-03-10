@@ -72,7 +72,7 @@ serve(async (req) => {
       // Map price to plan type
       if (priceId === "price_1T9XZ6J2w2OK6FGMPG0Yx3t8") planType = "weekly";
       else if (priceId === "price_1T9XcNJ2w2OK6FGMJN565MWx") planType = "monthly";
-      else if (priceId === "price_1T9XcNJ2w2OK6FGM4ZtNrpMO") planType = "yearly";
+      else if (priceId === "price_1T9YqIJ2w2OK6FGMSod2kUak") planType = "yearly";
 
       // Update access_levels to premium
       await supabaseClient.from('access_levels').upsert({
