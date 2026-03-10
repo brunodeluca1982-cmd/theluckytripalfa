@@ -58,6 +58,7 @@ import IAPerguntar from "./pages/ia/IAPerguntar";
 import IACriarRoteiro from "./pages/ia/IACriarRoteiro";
 import IAMelhorarRoteiro from "./pages/ia/IAMelhorarRoteiro";
 import IALuckyTrip from "./pages/ia/IALuckyTrip";
+import InspirationTrip from "./pages/InspirationTrip";
 import RoteiroFinal from "./pages/RoteiroFinal";
 import RoteiroResultado from "./pages/RoteiroResultado";
 import PurchaseSuccess from "./pages/PurchaseSuccess";
@@ -181,6 +182,7 @@ const App = () => {
                   <Route path="/meu-roteiro/manual" element={<ManualItinerary />} />
                   <Route path="/meu-roteiro/resultado" element={<RoteiroResultado />} />
                   <Route path="/favoritos" element={<Favoritos />} />
+                  <Route path="/inspiracao-trip" element={<InspirationTrip />} />
                   <Route path="/planejar/:destinationId" element={<RoteiroPlanner />} />
                   
                   {/* Profile */}
