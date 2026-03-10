@@ -59,10 +59,34 @@ const HeroVideoCarousel = () => {
     staleTime: 5 * 60 * 1000,
   });
 
-  // 3. Build slides — prefer video, fallback to image, skip if neither
+  // 2b. Fallback: load Google Places photos for slugs missing Supabase media
+  const slugsMissingMedia = (() => {
+    if (!experiences || !mediaRows) return [];
+    const slugsWithMedia = new Set(mediaRows.map((m) => m.experience_slug));
+    return experiences.filter((e) => !slugsWithMedia.has(e.slug)).map((e) => e.slug);
+  })();
+
+  const { data: placePhotos } = useQuery({
+    queryKey: ["home-hero-place-photos", slugsMissingMedia],
+    queryFn: async () => {
+      if (slugsMissingMedia.length === 0) return [];
+      const { data, error } = await supabase
+        .from("place_photos")
+        .select("item_id, photo_url, photo_source")
+        .in("item_id", slugsMissingMedia)
+        .not("photo_url", "is", null);
+      if (error) throw error;
+      return data;
+    },
+    enabled: slugsMissingMedia.length > 0,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  // 3. Build slides — Supabase media first, then place_photos fallback
   const heroSlides: HeroSlide[] = (() => {
     if (!experiences || !mediaRows) return [];
 
+    // Priority 1: Supabase experience_media (exact slug match)
     const mediaBySlug = new Map<string, { video?: string; image?: string }>();
     for (const m of mediaRows) {
       const entry = mediaBySlug.get(m.experience_slug) ?? {};
@@ -71,16 +95,30 @@ const HeroVideoCarousel = () => {
       mediaBySlug.set(m.experience_slug, entry);
     }
 
+    // Priority 2: Google Places photos (from place_photos table)
+    const placePhotoBySlug = new Map<string, string>();
+    if (placePhotos) {
+      for (const p of placePhotos) {
+        if (p.photo_url && !placePhotoBySlug.has(p.item_id)) {
+          placePhotoBySlug.set(p.item_id, p.photo_url);
+        }
+      }
+    }
+
     const slides: HeroSlide[] = [];
     for (const exp of experiences) {
       const media = mediaBySlug.get(exp.slug);
-      if (!media || (!media.video && !media.image)) continue;
+      const hasSupabaseMedia = media && (media.video || media.image);
+      const fallbackPhoto = placePhotoBySlug.get(exp.slug);
+
+      // Skip if no media from any source
+      if (!hasSupabaseMedia && !fallbackPhoto) continue;
 
       slides.push({
         id: exp.id,
         slug: exp.slug,
-        videoUrl: media.video,
-        imageUrl: media.image,
+        videoUrl: hasSupabaseMedia ? media.video : undefined,
+        imageUrl: hasSupabaseMedia ? (media.image || media.video) : fallbackPhoto,
         title: exp.title,
         subtitle: exp.city || exp.country || exp.subtitle || undefined,
         buttonLabel: "Conferir agora",
