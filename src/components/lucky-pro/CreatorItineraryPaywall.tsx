@@ -60,7 +60,7 @@ const CreatorItineraryPaywall = ({
 
   const handlePurchase = async () => {
     if (!isAuthenticated) {
-      navigate("/perfil/assinatura");
+      redirectToAuth({ type: "buy_creator_itinerary", payload: { partnerId }, returnTo: window.location.pathname });
       return;
     }
     setPurchaseLoading(true);

@@ -98,7 +98,11 @@ export const GuidePaywallGate = ({ guideId, guideName, children, fallback }: Gui
   };
 
   const handleSubscribe = () => {
-    navigate('/perfil/assinatura');
+    if (!isAuthenticated) {
+      redirectToAuth({ type: "open_lucky_pro_paywall", returnTo: window.location.pathname });
+    } else {
+      navigate('/perfil/assinatura');
+    }
     setShowPaywall(false);
   };
 

@@ -59,7 +59,7 @@ const LuckyProPaywall = ({ open, onClose }: LuckyProPaywallProps) => {
 
   const handleCheckout = async () => {
     if (!isAuthenticated) {
-      navigate("/perfil/assinatura");
+      redirectToAuth({ type: "open_lucky_pro_paywall", returnTo: window.location.pathname });
       onClose();
       return;
     }
