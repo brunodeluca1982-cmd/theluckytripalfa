@@ -38,6 +38,7 @@ const CreatorItineraryPaywall = ({
   children,
 }: CreatorItineraryPaywallProps) => {
   const { isPremium, isAuthenticated, isLoading, checkGuideAccess } = useSubscription();
+  const { redirectToAuth } = useAuthRedirect();
   const [purchaseLoading, setPurchaseLoading] = useState(false);
   const [showLuckyPro, setShowLuckyPro] = useState(false);
   const navigate = useNavigate();
