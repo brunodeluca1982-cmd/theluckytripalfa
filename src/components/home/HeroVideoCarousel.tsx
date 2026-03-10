@@ -132,6 +132,12 @@ const HeroVideoCarousel = () => {
     navigate(`/experiencia/${slide.slug}`);
   };
 
+  if (heroSlides.length === 0) {
+    return (
+      <section className="relative w-full aspect-[9/16] max-h-[75vh] overflow-hidden bg-muted" />
+    );
+  }
+
   const slide = heroSlides[current];
 
   return (
