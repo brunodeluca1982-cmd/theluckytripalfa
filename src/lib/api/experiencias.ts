@@ -2,7 +2,7 @@ import { useExternalExperiencias, type ExternalExperiencia } from "@/hooks/use-e
 
 /**
  * Wrapper around useExternalExperiencias with filtering and fallback.
- * Never returns undefined — always an array.
+ * Now reads from the canonical `experiences` table.
  */
 export function useExperiencias(filters?: {
   cidade?: string;

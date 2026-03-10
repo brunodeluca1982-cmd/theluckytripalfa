@@ -66,23 +66,7 @@ const findStaticActivityById = (
 
 interface MediaRow { type: "image" | "video"; url: string; title?: string; }
 
-function useExperienciaMedia(experienciaId: string | undefined) {
-  return useQuery({
-    queryKey: ["experiencia-media", experienciaId],
-    queryFn: async (): Promise<MediaRow[]> => {
-      if (!experienciaId) return [];
-      const { data, error } = await supabase
-        .from("experiencia_media")
-        .select("type, url")
-        .eq("experiencia_id", experienciaId)
-        .order("ordem", { ascending: true });
-      if (error) throw error;
-      return (data ?? []) as MediaRow[];
-    },
-    enabled: !!experienciaId,
-    staleTime: 5 * 60 * 1000,
-  });
-}
+// Legacy useExperienciaMedia removed — all media comes from experience_media table
 
 function useExperienceMediaBySlug(slug: string | undefined) {
   return useQuery({
@@ -116,12 +100,10 @@ function isActivitySavedLocally(activityId: string) {
 const ExternalActivityView = ({ exp, backPath }: { exp: ExternalExperiencia; backPath: string }) => {
   const { saveItem } = useItemSave();
   const slug = normalizeNeighborhood(exp.bairro);
-  const { data: legacyMedia } = useExperienciaMedia(exp.id);
   const { data: slugMedia } = useExperienceMediaBySlug(exp.id);
   const [isSaved, setIsSaved] = useState(false);
 
-  // Merge: prefer slug-based media, fallback to legacy
-  const mediaList = (slugMedia && slugMedia.length > 0) ? slugMedia : legacyMedia;
+  const mediaList = slugMedia;
 
   useEffect(() => {
     setIsSaved(isActivitySavedLocally(exp.id));
