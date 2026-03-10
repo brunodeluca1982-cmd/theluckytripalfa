@@ -32,7 +32,7 @@ const HeroVideoCarousel = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("experiences")
-        .select("id, slug, title, subtitle, city, country")
+        .select("id, slug, title, subtitle, city, country, home_destination_path")
         .eq("is_active", true)
         .eq("show_on_home", true)
         .order("sort_order", { ascending: true })
