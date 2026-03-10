@@ -2,6 +2,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { ChevronLeft } from "lucide-react";
 import luckyListHero from "@/assets/highlights/lucky-list-hero.jpg";
 import { getLuckyListByNeighborhood } from "@/data/lucky-list-data";
+import { useSubscription } from "@/hooks/use-subscription";
+import { PaywallGate } from "@/components/PaywallGate";
 
 const NEIGHBORHOODS = [
   { id: "copacabana", name: "Copacabana" },
