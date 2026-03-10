@@ -1,4 +1,4 @@
-import logoSymbol from "@/assets/brand/logo-l-symbol.png";
+import logoSymbol from "@/assets/brand/logo-l-transparent.png";
 
 const BrandLogo = () => {
   return (
