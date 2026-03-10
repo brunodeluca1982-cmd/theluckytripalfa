@@ -3,6 +3,7 @@ import logoSymbol from "@/assets/brand/logo-l-transparent.png";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useSubscription } from "@/hooks/use-subscription";
 import { cn } from "@/lib/utils";
 
 interface HeroSlide {
@@ -25,6 +26,7 @@ const HeroVideoCarousel = () => {
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const navigate = useNavigate();
+  const { isAuthenticated } = useSubscription();
 
   const HERO_SLUGS = ["cristo-redentor", "museu-do-amanha", "praia-de-ipanema"];
 
@@ -223,7 +225,7 @@ const HeroVideoCarousel = () => {
       <header className="absolute top-0 left-0 right-0 z-30 flex items-center justify-between px-5 pt-12 pb-4">
         <img src={logoSymbol} alt="L." className="h-8 w-auto brightness-0 invert select-none drop-shadow-md" />
         <button
-          onClick={() => navigate("/perfil")}
+          onClick={() => navigate(isAuthenticated ? "/perfil" : "/auth")}
           className="w-10 h-10 rounded-full bg-primary flex items-center justify-center"
           aria-label="Perfil"
         >
