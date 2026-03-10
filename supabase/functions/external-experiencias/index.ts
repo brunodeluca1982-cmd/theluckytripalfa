@@ -33,9 +33,9 @@ serve(async (req) => {
     }
 
     let query = externalClient
-      .from("experiencias")
+      .from("experiences")
       .select("*", { count: "exact" })
-      .eq("ativo", true);
+      .eq("is_active", true);
 
     if (filters.cidade) query = query.eq("cidade", filters.cidade);
     if (filters.bairro) query = query.eq("bairro", filters.bairro);
