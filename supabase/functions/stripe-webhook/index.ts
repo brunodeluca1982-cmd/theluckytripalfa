@@ -64,6 +64,7 @@ serve(async (req) => {
         break;
       }
 
+      case "customer.subscription.created":
       case "customer.subscription.updated":
       case "customer.subscription.deleted": {
         const subscription = event.data.object as Stripe.Subscription;
@@ -112,6 +113,43 @@ serve(async (req) => {
         }, { onConflict: 'user_id' });
 
         logStep(`Subscription ${event.type}`, { userId, status: subscription.status, isActive });
+        break;
+      }
+
+      case "invoice.payment_failed": {
+        const invoice = event.data.object as Stripe.Invoice;
+        const customerEmail = typeof invoice.customer === 'string' 
+          ? (await stripe.customers.retrieve(invoice.customer) as Stripe.Customer).email
+          : null;
+        
+        if (!customerEmail) { logStep("No customer email on failed invoice"); break; }
+
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('email', customerEmail)
+          .limit(1);
+
+        if (!profiles || profiles.length === 0) { logStep("No profile for failed invoice"); break; }
+        const userId = profiles[0].id;
+
+        // Mark subscription as past_due/inactive
+        if (invoice.subscription) {
+          await supabase.from('subscriptions').update({
+            status: 'past_due',
+            updated_at: new Date().toISOString(),
+          }).eq('stripe_subscription_id', invoice.subscription as string);
+        }
+
+        // Downgrade access
+        await supabase.from('access_levels').upsert({
+          user_id: userId,
+          level: 'free',
+          source: 'payment_failed',
+          updated_at: new Date().toISOString(),
+        }, { onConflict: 'user_id' });
+
+        logStep("Invoice payment failed — access downgraded", { userId });
         break;
       }
 
