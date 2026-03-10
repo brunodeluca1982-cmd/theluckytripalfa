@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Home, Map, BookmarkCheck, Sparkles, User } from "lucide-react";
+import { Home, Search, Route, BookmarkCheck, User } from "lucide-react";
 import { useEffect, useState } from "react";
 
 /**
