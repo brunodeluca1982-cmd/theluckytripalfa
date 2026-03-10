@@ -26,70 +26,65 @@ const HeroVideoCarousel = () => {
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const navigate = useNavigate();
 
-  // 1. Load experiences marked for home
+  const HERO_SLUGS = ["cristo-redentor", "museu-do-amanha"];
+
+  // 1. Load only the two hero experiences
   const { data: experiences } = useQuery({
-    queryKey: ["home-experiences"],
+    queryKey: ["home-hero-experiences", HERO_SLUGS],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("experiences")
-        .select("id, slug, title, subtitle, city, country, home_destination_path")
-        .eq("is_active", true)
-        .eq("show_on_home", true)
-        .order("sort_order", { ascending: true })
-        .order("created_at", { ascending: false });
-      if (error) throw error;
-      return data;
-    },
-    staleTime: 5 * 60 * 1000,
-  });
-
-  // 2. Load all active media for those slugs
-  const slugs = experiences?.map((e) => e.slug) ?? [];
-  const { data: mediaRows } = useQuery({
-    queryKey: ["home-experience-media", slugs],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("experience_media")
-        .select("experience_slug, media_type, media_url")
-        .in("experience_slug", slugs)
+        .select("id, slug, title, subtitle, city, country")
+        .in("slug", HERO_SLUGS)
         .eq("is_active", true)
         .order("sort_order", { ascending: true });
       if (error) throw error;
       return data;
     },
-    enabled: slugs.length > 0,
     staleTime: 5 * 60 * 1000,
   });
 
-  // 3. Build slides: match each experience with its best media
-  const heroSlides: HeroSlide[] = (() => {
-    if (!experiences || experiences.length === 0 || !mediaRows) return [];
+  // 2. Load only active videos for those slugs
+  const { data: mediaRows } = useQuery({
+    queryKey: ["home-hero-media", HERO_SLUGS],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("experience_media")
+        .select("experience_slug, media_type, media_url")
+        .in("experience_slug", HERO_SLUGS)
+        .eq("media_type", "video")
+        .eq("is_active", true)
+        .order("sort_order", { ascending: true });
+      if (error) throw error;
+      return data;
+    },
+    staleTime: 5 * 60 * 1000,
+  });
 
-    const mediaBySlug = new Map<string, typeof mediaRows>();
+  // 3. Build slides — skip any experience without its own active video
+  const heroSlides: HeroSlide[] = (() => {
+    if (!experiences || !mediaRows) return [];
+
+    const videoBySlug = new Map<string, string>();
     for (const m of mediaRows) {
-      const arr = mediaBySlug.get(m.experience_slug) ?? [];
-      arr.push(m);
-      mediaBySlug.set(m.experience_slug, arr);
+      if (!videoBySlug.has(m.experience_slug)) {
+        videoBySlug.set(m.experience_slug, m.media_url);
+      }
     }
 
     const slides: HeroSlide[] = [];
     for (const exp of experiences) {
-      const media = mediaBySlug.get(exp.slug);
-      if (!media || media.length === 0) continue;
-
-      const video = media.find((m) => m.media_type === "video");
-      const image = media.find((m) => m.media_type === "image");
-      if (!video && !image) continue;
+      const videoUrl = videoBySlug.get(exp.slug);
+      if (!videoUrl) continue; // skip if no own video
 
       slides.push({
         id: exp.id,
         slug: exp.slug,
-        videoUrl: video?.media_url,
-        imageUrl: image?.media_url,
+        videoUrl,
         title: exp.title,
-        subtitle: exp.country || exp.city || exp.subtitle || undefined,
+        subtitle: exp.city || exp.country || exp.subtitle || undefined,
         buttonLabel: "Conferir agora",
-        destinationPath: (exp as any).home_destination_path ?? null,
+        destinationPath: null,
       });
     }
 
