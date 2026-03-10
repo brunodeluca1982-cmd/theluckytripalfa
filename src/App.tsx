@@ -182,6 +182,7 @@ const App = () => {
                   <Route path="/meu-roteiro/manual" element={<ManualItinerary />} />
                   <Route path="/meu-roteiro/resultado" element={<RoteiroResultado />} />
                   <Route path="/favoritos" element={<Favoritos />} />
+                  <Route path="/inspiracao-trip" element={<InspirationTrip />} />
                   <Route path="/planejar/:destinationId" element={<RoteiroPlanner />} />
                   
                   {/* Profile */}
