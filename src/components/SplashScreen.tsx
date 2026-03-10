@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import logoSymbol from "@/assets/brand/logo-l-symbol.png";
 
 /**
  * SPLASH SCREEN — THE LUCKY TRIP
@@ -49,9 +50,10 @@ const SplashScreen = ({ onComplete }: SplashScreenProps) => {
             : "opacity-100 translate-y-0 animate-fade-in"
         }`}
       >
-        {/* Cursive L. symbol */}
-        <span className="font-serif italic text-7xl font-semibold text-foreground leading-none tracking-tight select-none">
-          L.
+        <img src={logoSymbol} alt="L." className="h-20 w-auto select-none" />
+        {/* Brand name */}
+        <span className="text-sm font-serif font-medium tracking-[0.25em] text-foreground uppercase mt-3">
+          The Lucky Trip
         </span>
         {/* Brand name */}
         <span className="text-sm font-serif font-medium tracking-[0.25em] text-foreground uppercase mt-4">
