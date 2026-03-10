@@ -3,19 +3,7 @@ import { ChevronLeft, Calendar, Clock } from "lucide-react";
 import { getPartner } from "@/data/partners-data";
 import { getReferenceItinerary, ReferenceDay } from "@/data/reference-itineraries";
 import { ScrollArea } from "@/components/ui/scroll-area";
-
-/**
- * PARTNER ROTEIRO PAGE
- * 
- * Full view of a partner's reference itinerary for a destination.
- * Users can explore the complete itinerary and choose to plan with it.
- * 
- * RULES:
- * - Read-only view
- * - Viewable without login
- * - Links to Meu Roteiro with this source pre-selected
- * - No forced actions, no pop-ups
- */
+import CreatorItineraryPaywall, { isPremiumCreator } from "@/components/lucky-pro/CreatorItineraryPaywall";
 
 const PartnerRoteiro = () => {
   const { partnerId, destinationId } = useParams<{ partnerId: string; destinationId: string }>();
@@ -35,7 +23,7 @@ const PartnerRoteiro = () => {
   const days = Object.values(itinerary.days);
   const totalItems = days.reduce((sum, day) => sum + day.items.length, 0);
 
-  return (
+  const content = (
     <div className="min-h-screen bg-background pb-24">
       {/* Header */}
       <header className="px-6 pt-12 pb-6 border-b border-border">
@@ -91,6 +79,21 @@ const PartnerRoteiro = () => {
       </ScrollArea>
     </div>
   );
+
+  // Gate premium creators
+  if (isPremiumCreator(partnerId || "")) {
+    return (
+      <CreatorItineraryPaywall
+        partnerId={partnerId || ""}
+        partnerName={partner.name}
+        partnerImageUrl={partner.imageUrl}
+      >
+        {content}
+      </CreatorItineraryPaywall>
+    );
+  }
+
+  return content;
 };
 
 interface DaySectionProps {
