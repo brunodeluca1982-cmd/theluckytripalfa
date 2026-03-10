@@ -62,6 +62,7 @@ import IALuckyTrip from "./pages/ia/IALuckyTrip";
 import InspirationTrip from "./pages/InspirationTrip";
 import RoteiroFinal from "./pages/RoteiroFinal";
 import RoteiroResultado from "./pages/RoteiroResultado";
+import CriarRoteiro from "./pages/CriarRoteiro";
 import PurchaseSuccess from "./pages/PurchaseSuccess";
 import NotFound from "./pages/NotFound";
 import AdminEventos from "./pages/AdminEventos";
