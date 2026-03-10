@@ -834,6 +834,63 @@ export type Database = {
         }
         Relationships: []
       }
+      user_itineraries: {
+        Row: {
+          arrival_date: string | null
+          budget_style: string | null
+          created_at: string
+          departure_date: string | null
+          destination_id: string
+          destination_image_url: string | null
+          destination_name: string
+          generated_at: string | null
+          id: string
+          inspiration_tags: string[] | null
+          status: string
+          travel_company: string | null
+          travel_intentions: string[] | null
+          travel_pace: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          arrival_date?: string | null
+          budget_style?: string | null
+          created_at?: string
+          departure_date?: string | null
+          destination_id: string
+          destination_image_url?: string | null
+          destination_name: string
+          generated_at?: string | null
+          id?: string
+          inspiration_tags?: string[] | null
+          status?: string
+          travel_company?: string | null
+          travel_intentions?: string[] | null
+          travel_pace?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          arrival_date?: string | null
+          budget_style?: string | null
+          created_at?: string
+          departure_date?: string | null
+          destination_id?: string
+          destination_image_url?: string | null
+          destination_name?: string
+          generated_at?: string | null
+          id?: string
+          inspiration_tags?: string[] | null
+          status?: string
+          travel_company?: string | null
+          travel_intentions?: string[] | null
+          travel_pace?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
