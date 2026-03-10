@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import logoIcon from "@/assets/brand/logo-the-lucky-trip.png";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
