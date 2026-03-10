@@ -174,6 +174,10 @@ const App = () => {
                   {/* How to Get There */}
                   <Route path="/como-chegar" element={<HowToGetThere />} />
                   
+                  {/* Criar Roteiro (new flow) */}
+                  <Route path="/criar-roteiro" element={<CriarRoteiro />} />
+                  <Route path="/meus-roteiros/:itineraryId" element={<RoteiroResultado />} />
+
                   {/* Meu Roteiro */}
                   <Route path="/minha-viagem" element={<MinhaViagem />} />
                   <Route path="/meu-roteiro" element={<MeuRoteiro />} />
