@@ -58,6 +58,7 @@ import IAPerguntar from "./pages/ia/IAPerguntar";
 import IACriarRoteiro from "./pages/ia/IACriarRoteiro";
 import IAMelhorarRoteiro from "./pages/ia/IAMelhorarRoteiro";
 import IALuckyTrip from "./pages/ia/IALuckyTrip";
+import InspirationTrip from "./pages/InspirationTrip";
 import RoteiroFinal from "./pages/RoteiroFinal";
 import RoteiroResultado from "./pages/RoteiroResultado";
 import PurchaseSuccess from "./pages/PurchaseSuccess";
