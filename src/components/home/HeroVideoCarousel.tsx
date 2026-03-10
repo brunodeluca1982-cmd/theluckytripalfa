@@ -14,32 +14,7 @@ interface HeroSlide {
   buttonLabel: string;
 }
 
-const fallbackSlides: HeroSlide[] = [
-  {
-    id: "rio",
-    slug: "rio-de-janeiro",
-    videoUrl: "/videos/rio-hero.mp4",
-    title: "Rio de Janeiro",
-    subtitle: "Brasil",
-    buttonLabel: "Conferir agora",
-  },
-  {
-    id: "lisboa",
-    slug: "lisboa",
-    videoUrl: "/videos/rio-hero.mp4",
-    title: "Lisboa",
-    subtitle: "Portugal",
-    buttonLabel: "Conferir agora",
-  },
-  {
-    id: "paris",
-    slug: "paris",
-    videoUrl: "/videos/rio-hero.mp4",
-    title: "Paris",
-    subtitle: "França",
-    buttonLabel: "Conferir agora",
-  },
-];
+// No fallback slides — hero is fully driven by database
 
 const AUTO_ADVANCE_MS = 6000;
 
@@ -87,7 +62,7 @@ const HeroVideoCarousel = () => {
 
   // 3. Build slides: match each experience with its best media
   const heroSlides: HeroSlide[] = (() => {
-    if (!experiences || experiences.length === 0 || !mediaRows) return fallbackSlides;
+    if (!experiences || experiences.length === 0 || !mediaRows) return [];
 
     const mediaBySlug = new Map<string, typeof mediaRows>();
     for (const m of mediaRows) {
@@ -116,7 +91,7 @@ const HeroVideoCarousel = () => {
       });
     }
 
-    return slides.length > 0 ? slides : fallbackSlides;
+    return slides;
   })();
 
   const goTo = useCallback(
@@ -156,6 +131,12 @@ const HeroVideoCarousel = () => {
   const handleSlideAction = (slide: HeroSlide) => {
     navigate(`/experiencia/${slide.slug}`);
   };
+
+  if (heroSlides.length === 0) {
+    return (
+      <section className="relative w-full aspect-[9/16] max-h-[75vh] overflow-hidden bg-muted" />
+    );
+  }
 
   const slide = heroSlides[current];
 
