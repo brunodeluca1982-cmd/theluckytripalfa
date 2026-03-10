@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import logoFull from "@/assets/brand/logo-the-lucky-trip.png";
 
 /**
  * SPLASH SCREEN — THE LUCKY TRIP
