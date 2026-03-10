@@ -347,6 +347,7 @@ export type Database = {
           country: string | null
           created_at: string
           full_description: string | null
+          home_destination_path: string | null
           id: string
           instagram_permalink: string | null
           instagram_post_id: string | null
@@ -365,6 +366,7 @@ export type Database = {
           country?: string | null
           created_at?: string
           full_description?: string | null
+          home_destination_path?: string | null
           id?: string
           instagram_permalink?: string | null
           instagram_post_id?: string | null
@@ -383,6 +385,7 @@ export type Database = {
           country?: string | null
           created_at?: string
           full_description?: string | null
+          home_destination_path?: string | null
           id?: string
           instagram_permalink?: string | null
           instagram_post_id?: string | null

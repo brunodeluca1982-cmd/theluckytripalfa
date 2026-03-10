@@ -12,6 +12,7 @@ interface HeroSlide {
   title: string;
   subtitle?: string;
   buttonLabel: string;
+  destinationPath?: string | null;
 }
 
 // No fallback slides — hero is fully driven by database
@@ -31,7 +32,7 @@ const HeroVideoCarousel = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("experiences")
-        .select("id, slug, title, subtitle, city, country")
+        .select("id, slug, title, subtitle, city, country, home_destination_path")
         .eq("is_active", true)
         .eq("show_on_home", true)
         .order("sort_order", { ascending: true })
@@ -88,6 +89,7 @@ const HeroVideoCarousel = () => {
         title: exp.title,
         subtitle: exp.country || exp.city || exp.subtitle || undefined,
         buttonLabel: "Conferir agora",
+        destinationPath: (exp as any).home_destination_path ?? null,
       });
     }
 
@@ -129,7 +131,11 @@ const HeroVideoCarousel = () => {
   }, [current]);
 
   const handleSlideAction = (slide: HeroSlide) => {
-    navigate(`/experiencia/${slide.slug}`);
+    if (slide.destinationPath) {
+      navigate(slide.destinationPath);
+    } else {
+      navigate(`/experiencia/${slide.slug}`);
+    }
   };
 
   if (heroSlides.length === 0) {
