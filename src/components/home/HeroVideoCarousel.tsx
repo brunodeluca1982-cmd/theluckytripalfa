@@ -14,32 +14,7 @@ interface HeroSlide {
   buttonLabel: string;
 }
 
-const fallbackSlides: HeroSlide[] = [
-  {
-    id: "rio",
-    slug: "rio-de-janeiro",
-    videoUrl: "/videos/rio-hero.mp4",
-    title: "Rio de Janeiro",
-    subtitle: "Brasil",
-    buttonLabel: "Conferir agora",
-  },
-  {
-    id: "lisboa",
-    slug: "lisboa",
-    videoUrl: "/videos/rio-hero.mp4",
-    title: "Lisboa",
-    subtitle: "Portugal",
-    buttonLabel: "Conferir agora",
-  },
-  {
-    id: "paris",
-    slug: "paris",
-    videoUrl: "/videos/rio-hero.mp4",
-    title: "Paris",
-    subtitle: "França",
-    buttonLabel: "Conferir agora",
-  },
-];
+// No fallback slides — hero is fully driven by database
 
 const AUTO_ADVANCE_MS = 6000;
 
