@@ -178,8 +178,13 @@ const HeroVideoCarousel = () => {
   return (
     <section className="relative w-full aspect-[9/16] max-h-[75vh] overflow-hidden">
       {/* Media layers */}
-      {heroSlides.map((s, i) =>
-        s.videoUrl ? (
+      {heroSlides.map((s, i) => {
+        const canPlayMov = typeof document !== 'undefined' &&
+          document.createElement('video').canPlayType('video/quicktime') !== '';
+        const isMov = s.videoUrl?.toLowerCase().endsWith('.mov');
+        const useVideo = s.videoUrl && (!isMov || canPlayMov);
+
+        return useVideo ? (
           <video
             key={s.id}
             ref={(el) => { videoRefs.current[i] = el; }}
@@ -193,6 +198,9 @@ const HeroVideoCarousel = () => {
               "absolute inset-0 w-full h-full object-cover transition-opacity duration-500",
               i === current ? "opacity-100 z-10" : "opacity-0 z-0"
             )}
+            onError={(e) => {
+              (e.target as HTMLVideoElement).style.display = 'none';
+            }}
           />
         ) : (
           <img
@@ -204,8 +212,8 @@ const HeroVideoCarousel = () => {
               i === current ? "opacity-100 z-10" : "opacity-0 z-0"
             )}
           />
-        )
-      )}
+        );
+      })}
 
       {/* Gradient overlays */}
       <div className="absolute inset-0 z-20 bg-gradient-to-b from-black/20 via-transparent to-black/60" />

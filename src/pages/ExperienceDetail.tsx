@@ -128,7 +128,13 @@ const ExperienceDetail = () => {
   const description = exp.full_description || exp.short_description || "";
 
   // Separate videos and images for smart rendering
-  const videos = hasMedia ? mediaList.filter((m) => m.type === "video") : [];
+  const canPlayMov = typeof document !== 'undefined' &&
+    document.createElement('video').canPlayType('video/quicktime') !== '';
+  const allVideos = hasMedia ? mediaList.filter((m) => m.type === "video") : [];
+  const videos = allVideos.filter((v) => {
+    const isMov = v.url.toLowerCase().endsWith('.mov');
+    return !isMov || canPlayMov;
+  });
   const images = hasMedia ? mediaList.filter((m) => m.type === "image") : [];
   const posterUrl = images.length > 0 ? images[0].url : undefined;
 
