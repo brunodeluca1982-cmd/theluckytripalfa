@@ -26,6 +26,7 @@ const HeroVideoCarousel = () => {
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const navigate = useNavigate();
+  const { isAuthenticated } = useSubscription();
 
   const HERO_SLUGS = ["cristo-redentor", "museu-do-amanha", "praia-de-ipanema"];
 
