@@ -12,6 +12,7 @@ interface HeroSlide {
   title: string;
   subtitle?: string;
   buttonLabel: string;
+  destinationPath?: string | null;
 }
 
 // No fallback slides — hero is fully driven by database
