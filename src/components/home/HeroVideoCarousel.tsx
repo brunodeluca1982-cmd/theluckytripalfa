@@ -91,7 +91,7 @@ const HeroVideoCarousel = () => {
       });
     }
 
-    return slides.length > 0 ? slides : fallbackSlides;
+    return slides;
   })();
 
   const goTo = useCallback(
