@@ -52,10 +52,6 @@ const SplashScreen = ({ onComplete }: SplashScreenProps) => {
       >
         <img src={logoSymbol} alt="L." className="h-20 w-auto select-none" />
         {/* Brand name */}
-        <span className="text-sm font-serif font-medium tracking-[0.25em] text-foreground uppercase mt-3">
-          The Lucky Trip
-        </span>
-        {/* Brand name */}
         <span className="text-sm font-serif font-medium tracking-[0.25em] text-foreground uppercase mt-4">
           The Lucky Trip
         </span>
