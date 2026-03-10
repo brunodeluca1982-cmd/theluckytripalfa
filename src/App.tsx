@@ -60,6 +60,7 @@ import IAMelhorarRoteiro from "./pages/ia/IAMelhorarRoteiro";
 import IALuckyTrip from "./pages/ia/IALuckyTrip";
 import RoteiroFinal from "./pages/RoteiroFinal";
 import RoteiroResultado from "./pages/RoteiroResultado";
+import PurchaseSuccess from "./pages/PurchaseSuccess";
 import NotFound from "./pages/NotFound";
 import AdminEventos from "./pages/AdminEventos";
 import { SpotifyPlayerProvider } from "@/contexts/SpotifyPlayerContext";
@@ -124,6 +125,7 @@ const App = () => {
           <Routes>
             {/* Standalone pages (no app shell) */}
             <Route path="/roteiro/rio-3-dias-final" element={<RoteiroFinal />} />
+            <Route path="/purchase-success" element={<PurchaseSuccess />} />
             <Route path="/wa" element={<WhatsAppRedirect />} />
             <Route path="/admin-eventos" element={<AdminEventos />} />
             
