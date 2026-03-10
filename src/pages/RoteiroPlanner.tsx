@@ -350,6 +350,7 @@ const RoteiroPlanner = () => {
         </div>
       </header>
 
+      <PaywallGate featureId="itinerary-editing">
       {/* Tabs Navigation */}
       <ItineraryTabs defaultValue="itinerary">
         {{
