@@ -224,7 +224,7 @@ const HeroVideoCarousel = () => {
       <header className="absolute top-0 left-0 right-0 z-30 flex items-center justify-between px-5 pt-12 pb-4">
         <img src={logoSymbol} alt="L." className="h-8 w-auto brightness-0 invert select-none drop-shadow-md" />
         <button
-          onClick={() => navigate("/perfil")}
+          onClick={() => navigate(isAuthenticated ? "/perfil" : "/auth")}
           className="w-10 h-10 rounded-full bg-primary flex items-center justify-center"
           aria-label="Perfil"
         >
