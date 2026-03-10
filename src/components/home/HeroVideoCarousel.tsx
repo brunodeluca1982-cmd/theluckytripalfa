@@ -7,8 +7,7 @@ import { cn } from "@/lib/utils";
 interface HeroSlide {
   id: string;
   slug: string;
-  videoUrl?: string;
-  imageUrl?: string;
+  videoUrl: string;
   title: string;
   subtitle?: string;
   buttonLabel: string;
