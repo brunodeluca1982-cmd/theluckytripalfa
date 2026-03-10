@@ -54,6 +54,7 @@ function detectSource(link: string): "instagram" | "tiktok" | "link" {
 }
 
 export default function AddIdeaSection() {
+  const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const [url, setUrl] = useState("");
   const [isLoading, setIsLoading] = useState(false);
