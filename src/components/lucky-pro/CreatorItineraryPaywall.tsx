@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Lock, Crown, ShoppingBag, Sparkles } from "lucide-react";
+import { Lock, Crown, ShoppingBag, Sparkles, MapPin, Eye, EyeOff } from "lucide-react";
 import { useSubscription } from "@/hooks/use-subscription";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import LuckyProPaywall from "@/components/lucky-pro/LuckyProPaywall";
+import { Progress } from "@/components/ui/progress";
+import { ReferenceItinerary } from "@/data/reference-itineraries";
 
 /** Premium creator IDs whose itineraries require purchase */
 export const PREMIUM_CREATOR_IDS = ["bruno-de-luca", "carolina-dieckmann"];
@@ -12,22 +14,24 @@ export const PREMIUM_CREATOR_IDS = ["bruno-de-luca", "carolina-dieckmann"];
 export const isPremiumCreator = (partnerId: string): boolean =>
   PREMIUM_CREATOR_IDS.includes(partnerId);
 
+const CREATOR_QUOTES: Record<string, string> = {
+  "bruno-de-luca": "Esse é o tipo de viagem que eu faria se estivesse trazendo um amigo para conhecer o Rio.",
+  "carolina-dieckmann": "São os lugares que me fazem sentir em casa toda vez que volto ao Rio.",
+};
+
 interface CreatorItineraryPaywallProps {
   partnerId: string;
   partnerName: string;
   partnerImageUrl?: string;
+  itinerary?: ReferenceItinerary | null;
   children: React.ReactNode;
 }
 
-/**
- * Gates creator itinerary content.
- * Premium subscribers pass through. Otherwise checks guide purchase.
- * Falls back to a purchase screen.
- */
 const CreatorItineraryPaywall = ({
   partnerId,
   partnerName,
   partnerImageUrl,
+  itinerary,
   children,
 }: CreatorItineraryPaywallProps) => {
   const { isPremium, isAuthenticated, isLoading, checkGuideAccess } = useSubscription();
@@ -35,8 +39,7 @@ const CreatorItineraryPaywall = ({
   const [showLuckyPro, setShowLuckyPro] = useState(false);
   const navigate = useNavigate();
 
-  // Guide ID used in purchases table
-  const guideId = partnerId; // e.g. "bruno-de-luca"
+  const guideId = partnerId;
 
   if (isLoading) {
     return (
@@ -56,7 +59,6 @@ const CreatorItineraryPaywall = ({
       navigate("/perfil/assinatura");
       return;
     }
-
     setPurchaseLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke("create-guide-purchase", {
@@ -71,91 +73,161 @@ const CreatorItineraryPaywall = ({
     }
   };
 
+  // Gather all items from itinerary for preview
+  const allItems = itinerary
+    ? Object.values(itinerary.days).flatMap(day => day.items)
+    : [];
+  const totalPlaces = allItems.length;
+  const revealedCount = 2;
+  const revealedItems = allItems.slice(0, revealedCount);
+  const lockedCount = totalPlaces - revealedCount;
+  const progressPercent = totalPlaces > 0 ? (revealedCount / totalPlaces) * 100 : 0;
+
+  // Sample locked teasers
+  const lockedTeasers = [
+    "Speakeasy escondido no Centro",
+    "Restaurante que só cariocas conhecem",
+    "Pôr do sol secreto em Santa Teresa",
+    "Mirante escondido com vista panorâmica",
+  ];
+
+  const firstName = partnerName.split(" ")[0];
+  const quote = CREATOR_QUOTES[partnerId];
+
   return (
     <>
-      <div className="min-h-screen flex flex-col relative">
-        {/* Background */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[hsl(30,20%,16%)] via-[hsl(30,15%,10%)] to-[hsl(30,10%,6%)]" />
+      <div className="min-h-screen flex flex-col bg-background">
+        {/* Hero */}
+        <div className="relative bg-gradient-to-b from-[hsl(30,20%,12%)] to-background pt-14 pb-8 px-6">
+          <div className="flex flex-col items-center">
+            {partnerImageUrl && (
+              <div className="w-20 h-20 rounded-full border-2 border-primary/30 overflow-hidden mb-4 shadow-lg">
+                <img src={partnerImageUrl} alt={partnerName} className="w-full h-full object-cover" />
+              </div>
+            )}
+            <h1 className="text-xl font-serif font-semibold text-foreground text-center leading-tight">
+              {partnerName}
+            </h1>
+            <p className="text-sm text-muted-foreground text-center mt-2 max-w-xs">
+              O roteiro que {firstName} faria se tivesse poucos dias na cidade.
+            </p>
+            {quote && (
+              <blockquote className="mt-4 text-xs text-muted-foreground/70 italic text-center max-w-xs border-l-2 border-primary/30 pl-3">
+                "{quote}"
+              </blockquote>
+            )}
+          </div>
+        </div>
 
-        <div className="relative z-10 flex-1 flex flex-col items-center px-6 pt-20 pb-10">
-          {/* Creator avatar */}
-          {partnerImageUrl && (
-            <div className="w-24 h-24 rounded-full border-2 border-[hsl(40,60%,50%)]/30 overflow-hidden mb-6">
-              <img
-                src={partnerImageUrl}
-                alt={partnerName}
-                className="w-full h-full object-cover"
-              />
+        {/* Progress indicator */}
+        <div className="px-6 py-4">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <Eye className="w-3.5 h-3.5 text-primary" />
+              <span className="text-xs font-medium text-foreground">
+                {revealedCount} de {totalPlaces} lugares revelados
+              </span>
             </div>
-          )}
+            <span className="text-[10px] text-muted-foreground">
+              {Math.round(progressPercent)}%
+            </span>
+          </div>
+          <Progress value={progressPercent} className="h-1.5" />
+        </div>
 
-          {/* Lock badge */}
-          <div className="flex items-center gap-2 mb-6">
-            <Lock className="w-3.5 h-3.5 text-[hsl(40,60%,50%)]" />
-            <span className="text-[10px] tracking-[0.15em] uppercase text-[hsl(40,60%,50%)]">
-              Roteiro Premium
+        {/* Revealed items */}
+        <div className="px-6 space-y-3">
+          <p className="text-[10px] tracking-[0.12em] uppercase text-muted-foreground font-medium">
+            Prévia do roteiro
+          </p>
+          {revealedItems.map((item, i) => (
+            <div
+              key={item.id}
+              className="p-4 rounded-xl bg-card border border-border flex items-start gap-3"
+            >
+              <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                <MapPin className="w-4 h-4 text-primary" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="font-medium text-foreground text-sm">{item.name}</h3>
+                {item.editorial && (
+                  <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
+                    {item.editorial}
+                  </p>
+                )}
+                {item.time && (
+                  <span className="inline-block mt-1 text-[10px] font-mono text-muted-foreground bg-muted px-2 py-0.5 rounded">
+                    {item.time}
+                  </span>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Locked content */}
+        <div className="px-6 mt-6 space-y-2">
+          <div className="flex items-center gap-2 mb-3">
+            <Lock className="w-3.5 h-3.5 text-muted-foreground" />
+            <span className="text-[10px] tracking-[0.12em] uppercase text-muted-foreground font-medium">
+              + {lockedCount} lugares neste roteiro
             </span>
           </div>
 
-          {/* Title */}
-          <h1 className="text-2xl font-serif font-semibold text-white text-center leading-tight mb-3">
-            Siga os passos de quem realmente conhece
-          </h1>
-
-          <p className="text-sm text-white/50 text-center leading-relaxed max-w-xs mb-10">
-            Este roteiro foi criado a partir das experiências reais de viagem de {partnerName}.
-          </p>
-
-          {/* Itinerary preview teaser */}
-          <div className="w-full max-w-sm space-y-2 mb-10">
-            {["Dia 1 — Chegada e primeiras descobertas", "Dia 2 — Os segredos do bairro", "Dia 3 — Experiências únicas"].map(
-              (label, i) => (
-                <div
-                  key={i}
-                  className={`px-4 py-3 rounded-xl border flex items-center gap-3 ${
-                    i === 0
-                      ? "bg-white/5 border-white/10"
-                      : "bg-white/[0.02] border-white/5 blur-[2px]"
-                  }`}
-                >
-                  <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0">
-                    <span className="text-xs font-bold text-white/40">{i + 1}</span>
-                  </div>
-                  <p className={`text-sm ${i === 0 ? "text-white/70" : "text-white/30"}`}>
-                    {label}
-                  </p>
+          {lockedTeasers.map((teaser, i) => (
+            <div
+              key={i}
+              className="relative p-4 rounded-xl bg-card/50 border border-border/50 overflow-hidden"
+            >
+              {/* Blur overlay */}
+              <div className="absolute inset-0 backdrop-blur-[6px] bg-background/40 z-10 flex items-center justify-center">
+                <EyeOff className="w-4 h-4 text-muted-foreground/40" />
+              </div>
+              <div className="flex items-start gap-3 opacity-40">
+                <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
+                  <MapPin className="w-4 h-4 text-muted-foreground" />
                 </div>
-              )
-            )}
-          </div>
+                <div>
+                  <h3 className="font-medium text-foreground text-sm">{teaser}</h3>
+                  <p className="text-xs text-muted-foreground mt-0.5">Local exclusivo selecionado por {firstName}</p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
 
-          {/* Purchase CTA */}
+        {/* CTA section */}
+        <div className="px-6 mt-8 pb-12 space-y-3">
+          {/* Primary CTA */}
           <button
             onClick={handlePurchase}
             disabled={purchaseLoading}
-            className="w-full max-w-sm py-4 rounded-xl bg-[hsl(40,60%,50%)] text-[hsl(30,10%,10%)] font-semibold text-base hover:bg-[hsl(40,60%,55%)] active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+            className="w-full py-4 rounded-xl bg-primary text-primary-foreground font-semibold text-base hover:bg-primary/90 active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-md"
           >
             <ShoppingBag className="w-4 h-4" />
-            {purchaseLoading ? "Processando..." : "Comprar este roteiro — R$ 197"}
+            {purchaseLoading ? "Processando..." : `Viajar com o roteiro do ${firstName} — R$ 197`}
           </button>
 
           {/* Divider */}
-          <div className="flex items-center gap-3 w-full max-w-sm my-4">
-            <div className="flex-1 h-px bg-white/10" />
-            <span className="text-[11px] text-white/30">ou</span>
-            <div className="flex-1 h-px bg-white/10" />
+          <div className="flex items-center gap-3 my-1">
+            <div className="flex-1 h-px bg-border" />
+            <span className="text-[11px] text-muted-foreground">ou</span>
+            <div className="flex-1 h-px bg-border" />
           </div>
 
-          {/* Lucky Pro CTA */}
+          {/* Secondary CTA */}
+          <p className="text-xs text-muted-foreground text-center">
+            Ou desbloqueie todos os roteiros com Lucky Pro
+          </p>
           <button
             onClick={() => setShowLuckyPro(true)}
-            className="w-full max-w-sm py-3.5 rounded-xl border border-[hsl(40,60%,50%)]/30 text-[hsl(40,60%,50%)] font-medium text-sm hover:bg-[hsl(40,60%,50%)]/10 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+            className="w-full py-3.5 rounded-xl border border-primary/30 text-primary font-medium text-sm hover:bg-primary/5 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
           >
             <Crown className="w-4 h-4" />
-            Desbloquear tudo com Lucky Pro
+            Desbloquear Lucky Pro
           </button>
 
-          <p className="text-[11px] text-white/25 text-center mt-6 max-w-xs">
+          <p className="text-[11px] text-muted-foreground/50 text-center mt-4">
             Assinantes Lucky Pro têm acesso a todos os roteiros de criadores automaticamente.
           </p>
         </div>
