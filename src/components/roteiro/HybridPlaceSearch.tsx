@@ -68,7 +68,7 @@ export const HybridPlaceSearch = ({
   const [error, setError] = useState<string | null>(null);
   
   const sessionTokenRef = useRef<string>(generateSessionToken());
-  const debounceRef = useRef<NodeJS.Timeout | null>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Build curated places list from guide data
