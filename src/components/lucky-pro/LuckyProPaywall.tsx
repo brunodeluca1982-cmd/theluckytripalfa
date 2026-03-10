@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { X, Crown, Map, Sparkles, Download, Users, Heart, Check } from "lucide-react";
 import { useSubscription } from "@/hooks/use-subscription";
+import { useAuthRedirect } from "@/hooks/use-auth-redirect";
 import { supabase } from "@/integrations/supabase/client";
 import { STRIPE_CONFIG, type PlanType } from "@/data/stripe-config";
 import { toast } from "sonner";
