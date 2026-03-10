@@ -5,6 +5,7 @@ import DescobertasBruno from "@/components/home/DescobertasBruno";
 import MiniFerias from "@/components/home/MiniFerias";
 import PlaylistViagem from "@/components/home/PlaylistViagem";
 import CriarRoteiroCTA from "@/components/home/CriarRoteiroCTA";
+import SegredosSection from "@/components/home/SegredosSection";
 
 const Index = () => {
   return (
@@ -14,6 +15,9 @@ const Index = () => {
 
       {/* 2) DESCOBERTAS DO BRUNO */}
       <DescobertasBruno />
+
+      {/* 2.5) SEGREDOS QUE POUCOS CONHECEM */}
+      <SegredosSection />
 
       {/* 3) VIAJE NOS MAIS BUSCADOS */}
       <CitiesSection />
