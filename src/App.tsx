@@ -48,6 +48,7 @@ import SuporteHumano from "./pages/profile/SuporteHumano";
 import SecondaryModuleDetail from "./pages/SecondaryModuleDetail";
 import PartnerProfile from "./pages/PartnerProfile";
 import PartnerRoteiro from "./pages/PartnerRoteiro";
+import AuthPage from "./pages/AuthPage";
 import IAAssistant from "./pages/IAAssistant";
 import IAChatPlaceholder from "./pages/ia/IAChatPlaceholder";
 import IACreateItinerary from "./pages/ia/IACreateItinerary";
@@ -128,6 +129,7 @@ const App = () => {
             <Route path="/roteiro/rio-3-dias-final" element={<RoteiroFinal />} />
             <Route path="/purchase-success" element={<PurchaseSuccess />} />
             <Route path="/wa" element={<WhatsAppRedirect />} />
+            <Route path="/auth" element={<AuthPage />} />
             <Route path="/admin-eventos" element={<AdminEventos />} />
             
             {/* App pages (with bottom navigation) */}

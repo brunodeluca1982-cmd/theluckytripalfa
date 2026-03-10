@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Lock, Crown, ShoppingBag, Sparkles, MapPin, Eye, EyeOff } from "lucide-react";
 import { useSubscription } from "@/hooks/use-subscription";
+import { useAuthRedirect } from "@/hooks/use-auth-redirect";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import LuckyProPaywall from "@/components/lucky-pro/LuckyProPaywall";
@@ -35,6 +36,7 @@ const CreatorItineraryPaywall = ({
   children,
 }: CreatorItineraryPaywallProps) => {
   const { isPremium, isAuthenticated, isLoading, checkGuideAccess } = useSubscription();
+  const { redirectToAuth } = useAuthRedirect();
   const [purchaseLoading, setPurchaseLoading] = useState(false);
   const [showLuckyPro, setShowLuckyPro] = useState(false);
   const navigate = useNavigate();
@@ -56,7 +58,7 @@ const CreatorItineraryPaywall = ({
 
   const handlePurchase = async () => {
     if (!isAuthenticated) {
-      navigate("/perfil/assinatura");
+      redirectToAuth({ type: "buy_creator_itinerary", payload: { partnerId }, returnTo: window.location.pathname });
       return;
     }
     setPurchaseLoading(true);

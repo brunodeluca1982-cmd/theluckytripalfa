@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { X, Crown, Map, Sparkles, Download, Users, Heart, Check } from "lucide-react";
 import { useSubscription } from "@/hooks/use-subscription";
+import { useAuthRedirect } from "@/hooks/use-auth-redirect";
 import { supabase } from "@/integrations/supabase/client";
 import { STRIPE_CONFIG, type PlanType } from "@/data/stripe-config";
 import { toast } from "sonner";
@@ -51,13 +52,14 @@ const LuckyProPaywall = ({ open, onClose }: LuckyProPaywallProps) => {
   const [selectedPlan, setSelectedPlan] = useState<PlanType>("yearly");
   const [loading, setLoading] = useState(false);
   const { isAuthenticated } = useSubscription();
+  const { redirectToAuth } = useAuthRedirect();
   const navigate = useNavigate();
 
   if (!open) return null;
 
   const handleCheckout = async () => {
     if (!isAuthenticated) {
-      navigate("/perfil/assinatura");
+      redirectToAuth({ type: "open_lucky_pro_paywall", returnTo: window.location.pathname });
       onClose();
       return;
     }

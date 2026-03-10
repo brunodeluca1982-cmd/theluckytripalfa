@@ -1,6 +1,7 @@
 import { ReactNode, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSubscription } from '@/hooks/use-subscription';
+import { useAuthRedirect } from '@/hooks/use-auth-redirect';
 import { Lock, Sparkles, ShoppingBag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
@@ -67,6 +68,7 @@ interface GuidePaywallGateProps {
 
 export const GuidePaywallGate = ({ guideId, guideName, children, fallback }: GuidePaywallGateProps) => {
   const { isPremium, isAuthenticated, isLoading, checkGuideAccess } = useSubscription();
+  const { redirectToAuth } = useAuthRedirect();
   const [showPaywall, setShowPaywall] = useState(false);
   const [purchaseLoading, setPurchaseLoading] = useState(false);
   const navigate = useNavigate();
@@ -76,7 +78,7 @@ export const GuidePaywallGate = ({ guideId, guideName, children, fallback }: Gui
 
   const handlePurchase = async () => {
     if (!isAuthenticated) {
-      navigate('/perfil/assinatura');
+      redirectToAuth({ type: "buy_guide", payload: { guideId }, returnTo: window.location.pathname });
       setShowPaywall(false);
       return;
     }
@@ -97,7 +99,11 @@ export const GuidePaywallGate = ({ guideId, guideName, children, fallback }: Gui
   };
 
   const handleSubscribe = () => {
-    navigate('/perfil/assinatura');
+    if (!isAuthenticated) {
+      redirectToAuth({ type: "open_lucky_pro_paywall", returnTo: window.location.pathname });
+    } else {
+      navigate('/perfil/assinatura');
+    }
     setShowPaywall(false);
   };
 
