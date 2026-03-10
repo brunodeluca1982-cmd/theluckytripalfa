@@ -127,30 +127,51 @@ const ExperienceDetail = () => {
   const subtitle = exp.country || exp.city || exp.subtitle || null;
   const description = exp.full_description || exp.short_description || "";
 
+  // Separate videos and images for smart rendering
+  const videos = hasMedia ? mediaList.filter((m) => m.type === "video") : [];
+  const images = hasMedia ? mediaList.filter((m) => m.type === "image") : [];
+  const posterUrl = images.length > 0 ? images[0].url : undefined;
+
   return (
     <div className="min-h-screen bg-black">
-      {/* Hero media */}
+      {/* Hero media — video gets priority with poster fallback */}
       <div className="relative w-full aspect-[4/3] bg-muted overflow-hidden">
-        {hasMedia && mediaList.length > 1 ? (
+        {videos.length > 0 ? (
+          <>
+            <video
+              src={videos[0].url}
+              poster={posterUrl}
+              controls
+              playsInline
+              muted
+              preload="auto"
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                // If video fails, hide it — poster image behind will show
+                (e.target as HTMLVideoElement).style.display = 'none';
+              }}
+            />
+            {/* Fallback image behind the video in case .mov doesn't render */}
+            {posterUrl && (
+              <img
+                src={posterUrl}
+                alt={exp.title}
+                className="absolute inset-0 w-full h-full object-cover -z-10"
+              />
+            )}
+          </>
+        ) : images.length > 1 ? (
           <Carousel className="w-full h-full" opts={{ loop: true }}>
             <CarouselContent className="ml-0 h-full">
-              {mediaList.map((m, i) => (
+              {images.map((m, i) => (
                 <CarouselItem key={i} className="pl-0 h-full">
-                  {m.type === "video" ? (
-                    <video src={m.url} controls playsInline muted preload="metadata" className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLVideoElement).style.display = 'none'; }} />
-                  ) : (
-                    <img src={m.url} alt={exp.title} className="w-full h-full object-cover" />
-                  )}
+                  <img src={m.url} alt={exp.title} className="w-full h-full object-cover" />
                 </CarouselItem>
               ))}
             </CarouselContent>
           </Carousel>
-        ) : hasMedia ? (
-          mediaList[0].type === "video" ? (
-            <video src={mediaList[0].url} controls playsInline muted preload="metadata" className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLVideoElement).style.display = 'none'; }} />
-          ) : (
-            <img src={mediaList[0].url} alt={exp.title} className="w-full h-full object-cover" />
-          )
+        ) : images.length === 1 ? (
+          <img src={images[0].url} alt={exp.title} className="w-full h-full object-cover" />
         ) : (
           <div className="w-full h-full bg-muted flex items-center justify-center">
             <p className="text-muted-foreground text-sm">Sem mídia disponível</p>
