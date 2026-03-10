@@ -24,12 +24,13 @@ export const STRIPE_CONFIG = {
       popular: true,
     },
     yearly: {
-      id: 'price_1T9XcNJ2w2OK6FGM4ZtNrpMO',
-      amount: 19700,
+      id: 'price_1T9YqIJ2w2OK6FGMSod2kUak',
+      amount: 9700,
       label: 'Anual',
       interval: 'year' as const,
-      description: 'R$ 197,00/ano',
-      savings: 'Economize 45%',
+      description: 'R$ 97,00/ano',
+      savings: 'Melhor custo-benefício',
+      recommended: true,
     },
   },
   guidePurchase: {

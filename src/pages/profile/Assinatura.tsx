@@ -163,6 +163,11 @@ const Assinatura = () => {
                             Popular
                           </span>
                         )}
+                        {'recommended' in plan && plan.recommended && (
+                          <span className="text-[10px] bg-accent text-accent-foreground px-1.5 py-0.5 rounded-full font-medium">
+                            Recomendado
+                          </span>
+                        )}
                       </div>
                       <p className="text-xs text-muted-foreground mt-0.5">{plan.description}</p>
                     </div>

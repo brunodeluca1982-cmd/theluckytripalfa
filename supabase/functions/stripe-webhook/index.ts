@@ -86,7 +86,7 @@ serve(async (req) => {
         
         let planType = 'monthly';
         if (priceId === "price_1T9XZ6J2w2OK6FGMPG0Yx3t8") planType = "weekly";
-        else if (priceId === "price_1T9XcNJ2w2OK6FGM4ZtNrpMO") planType = "yearly";
+        else if (priceId === "price_1T9YqIJ2w2OK6FGMSod2kUak") planType = "yearly";
 
         // Update subscriptions table
         await supabase.from('subscriptions').upsert({
