@@ -27,7 +27,7 @@ export function useAdminAuth() {
       setIsLoading(false);
     };
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
+    const { data: { subscription } } = (supabase.auth as any).onAuthStateChange(() => {
       check();
     });
     check();
