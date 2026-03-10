@@ -29,33 +29,33 @@ const IARoteirosInteligentes = () => {
         </p>
       </header>
 
-      {/* Content */}
-      <div className="flex-1 flex flex-col items-center justify-center px-6 py-16">
-        <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center mb-8">
-          <Route className="w-10 h-10 text-muted-foreground" />
-        </div>
-        
-        <h2 className="text-lg font-medium text-foreground text-center mb-4">
-          Em breve
-        </h2>
-        
-        <p className="text-center text-muted-foreground leading-relaxed max-w-sm mb-8">
-          Essa função permitirá combinar experiências de diferentes Partners on Trip em um único roteiro personalizado.
-        </p>
-
-        {/* Example */}
-        <div className="w-full max-w-sm p-6 rounded-2xl bg-muted/30 border border-border">
-          <div className="flex items-center gap-2 mb-3">
-            <Sparkles className="w-4 h-4 text-primary" />
-            <span className="text-xs tracking-widest text-muted-foreground uppercase">
-              Exemplo
-            </span>
+      <PaywallGate featureId="travel-intelligence">
+        <div className="flex-1 flex flex-col items-center justify-center px-6 py-16">
+          <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center mb-8">
+            <Route className="w-10 h-10 text-muted-foreground" />
           </div>
-          <p className="text-sm text-foreground">
-            Verão europeu com Bruno De Luca + Isabeli Fontana + Ronald Domingues
+          
+          <h2 className="text-lg font-medium text-foreground text-center mb-4">
+            Em breve
+          </h2>
+          
+          <p className="text-center text-muted-foreground leading-relaxed max-w-sm mb-8">
+            Essa função permitirá combinar experiências de diferentes Partners on Trip em um único roteiro personalizado.
           </p>
+
+          <div className="w-full max-w-sm p-6 rounded-2xl bg-muted/30 border border-border">
+            <div className="flex items-center gap-2 mb-3">
+              <Sparkles className="w-4 h-4 text-primary" />
+              <span className="text-xs tracking-widest text-muted-foreground uppercase">
+                Exemplo
+              </span>
+            </div>
+            <p className="text-sm text-foreground">
+              Verão europeu com Bruno De Luca + Isabeli Fontana + Ronald Domingues
+            </p>
+          </div>
         </div>
-      </div>
+      </PaywallGate>
     </div>
   );
 };
