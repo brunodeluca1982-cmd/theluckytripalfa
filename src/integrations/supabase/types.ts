@@ -491,6 +491,7 @@ export type Database = {
           media_type: string
           media_url: string | null
           permalink: string | null
+          should_create_experience: boolean
           status: string
           thumbnail_url: string | null
           timestamp: string | null
@@ -506,6 +507,7 @@ export type Database = {
           media_type?: string
           media_url?: string | null
           permalink?: string | null
+          should_create_experience?: boolean
           status?: string
           thumbnail_url?: string | null
           timestamp?: string | null
@@ -521,6 +523,7 @@ export type Database = {
           media_type?: string
           media_url?: string | null
           permalink?: string | null
+          should_create_experience?: boolean
           status?: string
           thumbnail_url?: string | null
           timestamp?: string | null
