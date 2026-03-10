@@ -7,11 +7,11 @@ import { cn } from "@/lib/utils";
 interface HeroSlide {
   id: string;
   slug: string;
-  videoUrl: string;
+  videoUrl?: string;
+  imageUrl?: string;
   title: string;
   subtitle?: string;
   buttonLabel: string;
-  destinationPath?: string | null;
 }
 
 // No fallback slides — hero is fully driven by database
@@ -27,7 +27,7 @@ const HeroVideoCarousel = () => {
 
   const HERO_SLUGS = ["cristo-redentor", "museu-do-amanha", "praia-de-ipanema"];
 
-  // 1. Load only the two hero experiences
+  // 1. Load hero experiences
   const { data: experiences } = useQuery({
     queryKey: ["home-hero-experiences", HERO_SLUGS],
     queryFn: async () => {
@@ -43,7 +43,7 @@ const HeroVideoCarousel = () => {
     staleTime: 5 * 60 * 1000,
   });
 
-  // 2. Load only active videos for those slugs
+  // 2. Load all active media (video + image) for those slugs
   const { data: mediaRows } = useQuery({
     queryKey: ["home-hero-media", HERO_SLUGS],
     queryFn: async () => {
@@ -51,7 +51,6 @@ const HeroVideoCarousel = () => {
         .from("experience_media")
         .select("experience_slug, media_type, media_url")
         .in("experience_slug", HERO_SLUGS)
-        .eq("media_type", "video")
         .eq("is_active", true)
         .order("sort_order", { ascending: true });
       if (error) throw error;
@@ -60,30 +59,31 @@ const HeroVideoCarousel = () => {
     staleTime: 5 * 60 * 1000,
   });
 
-  // 3. Build slides — skip any experience without its own active video
+  // 3. Build slides — prefer video, fallback to image, skip if neither
   const heroSlides: HeroSlide[] = (() => {
     if (!experiences || !mediaRows) return [];
 
-    const videoBySlug = new Map<string, string>();
+    const mediaBySlug = new Map<string, { video?: string; image?: string }>();
     for (const m of mediaRows) {
-      if (!videoBySlug.has(m.experience_slug)) {
-        videoBySlug.set(m.experience_slug, m.media_url);
-      }
+      const entry = mediaBySlug.get(m.experience_slug) ?? {};
+      if (m.media_type === "video" && !entry.video) entry.video = m.media_url;
+      if (m.media_type === "image" && !entry.image) entry.image = m.media_url;
+      mediaBySlug.set(m.experience_slug, entry);
     }
 
     const slides: HeroSlide[] = [];
     for (const exp of experiences) {
-      const videoUrl = videoBySlug.get(exp.slug);
-      if (!videoUrl) continue; // skip if no own video
+      const media = mediaBySlug.get(exp.slug);
+      if (!media || (!media.video && !media.image)) continue;
 
       slides.push({
         id: exp.id,
         slug: exp.slug,
-        videoUrl,
+        videoUrl: media.video,
+        imageUrl: media.image,
         title: exp.title,
         subtitle: exp.city || exp.country || exp.subtitle || undefined,
         buttonLabel: "Conferir agora",
-        destinationPath: null,
       });
     }
 
@@ -102,6 +102,7 @@ const HeroVideoCarousel = () => {
 
   // Auto-advance
   useEffect(() => {
+    if (heroSlides.length <= 1) return;
     timerRef.current = setTimeout(() => {
       const next = (current + 1) % heroSlides.length;
       goTo(next);
@@ -139,21 +140,34 @@ const HeroVideoCarousel = () => {
   return (
     <section className="relative w-full aspect-[9/16] max-h-[75vh] overflow-hidden">
       {/* Media layers */}
-      {heroSlides.map((s, i) => (
-        <video
-          key={s.id}
-          ref={(el) => { videoRefs.current[i] = el; }}
-          src={s.videoUrl}
-          muted
-          loop
-          playsInline
-          preload={i <= 1 ? "auto" : "none"}
-          className={cn(
-            "absolute inset-0 w-full h-full object-cover transition-opacity duration-500",
-            i === current ? "opacity-100 z-10" : "opacity-0 z-0"
-          )}
-        />
-      ))}
+      {heroSlides.map((s, i) =>
+        s.videoUrl ? (
+          <video
+            key={s.id}
+            ref={(el) => { videoRefs.current[i] = el; }}
+            src={s.videoUrl}
+            poster={s.imageUrl}
+            muted
+            loop
+            playsInline
+            preload={i <= 1 ? "auto" : "none"}
+            className={cn(
+              "absolute inset-0 w-full h-full object-cover transition-opacity duration-500",
+              i === current ? "opacity-100 z-10" : "opacity-0 z-0"
+            )}
+          />
+        ) : (
+          <img
+            key={s.id}
+            src={s.imageUrl}
+            alt={s.title}
+            className={cn(
+              "absolute inset-0 w-full h-full object-cover transition-opacity duration-500",
+              i === current ? "opacity-100 z-10" : "opacity-0 z-0"
+            )}
+          />
+        )
+      )}
 
       {/* Gradient overlays */}
       <div className="absolute inset-0 z-20 bg-gradient-to-b from-black/20 via-transparent to-black/60" />
