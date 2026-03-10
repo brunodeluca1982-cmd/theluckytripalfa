@@ -107,7 +107,7 @@ function AdminLogin({ onLogin }: { onLogin: () => void }) {
 
   const handleLogin = async () => {
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { error } = await (supabase.auth as any).signInWithPassword({ email, password });
     setLoading(false);
     if (error) {
       toast({ title: "Erro no login", description: error.message, variant: "destructive" });
