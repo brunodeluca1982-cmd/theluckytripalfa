@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import logoSymbol from "@/assets/brand/logo-l-transparent.png";
+import logoSymbol from "@/assets/brand/logo-l-correct.png";
 
 /**
  * SPLASH SCREEN — THE LUCKY TRIP
