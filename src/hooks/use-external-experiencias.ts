@@ -1,5 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
+/**
+ * Canonical experience interface — maps to the `experiences` table.
+ * Keeps the same shape as the old ExternalExperiencia for backward compatibility.
+ */
 export interface ExternalExperiencia {
   id: string;
   nome: string;
@@ -24,24 +29,49 @@ export interface ExternalExperiencia {
   hero_image_path: string | null;
 }
 
-const URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/external-experiencias`;
+/**
+ * Maps a row from the `experiences` table to the ExternalExperiencia shape.
+ */
+function mapRow(row: any): ExternalExperiencia {
+  return {
+    id: row.slug,                              // use slug as id for route compatibility
+    nome: row.title,
+    bairro: row.neighborhood || row.city || "",
+    categoria: row.category || "",
+    cidade: row.city || "",
+    com_criancas: false,
+    duracao: null,
+    google_maps_url: null,
+    melhor_horario: null,
+    meu_olhar: row.full_description || row.short_description || "",
+    nivel_esforco: 0,
+    ordem_bairro: row.sort_order || 0,
+    ordem_item: row.sort_order || 0,
+    precisa_reserva: false,
+    seguro_mulher_sozinha: false,
+    tipo_experiencia: row.category || null,
+    vibe: null,
+    ativo: row.is_active,
+    created_at: row.created_at,
+    hero_video_path: null,
+    hero_image_path: null,
+  };
+}
 
-async function fetchExternalExperiencias(): Promise<ExternalExperiencia[]> {
-  const resp = await fetch(URL, {
-    headers: {
-      Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-      "Content-Type": "application/json",
-    },
-  });
-  if (!resp.ok) throw new Error("Failed to fetch experiencias");
-  const json = await resp.json();
-  return json.experiencias || [];
+async function fetchExperiences(): Promise<ExternalExperiencia[]> {
+  const { data, error } = await supabase
+    .from("experiences")
+    .select("*")
+    .eq("is_active", true)
+    .order("sort_order", { ascending: true });
+  if (error) throw error;
+  return (data || []).map(mapRow);
 }
 
 export function useExternalExperiencias() {
   return useQuery({
-    queryKey: ["external-experiencias"],
-    queryFn: fetchExternalExperiencias,
+    queryKey: ["experiences-canonical"],
+    queryFn: fetchExperiences,
     staleTime: 5 * 60 * 1000,
   });
 }
