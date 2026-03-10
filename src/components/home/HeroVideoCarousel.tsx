@@ -62,7 +62,7 @@ const HeroVideoCarousel = () => {
 
   // 3. Build slides: match each experience with its best media
   const heroSlides: HeroSlide[] = (() => {
-    if (!experiences || experiences.length === 0 || !mediaRows) return fallbackSlides;
+    if (!experiences || experiences.length === 0 || !mediaRows) return [];
 
     const mediaBySlug = new Map<string, typeof mediaRows>();
     for (const m of mediaRows) {
