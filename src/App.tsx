@@ -216,6 +216,7 @@ const App = () => {
         <PersistentSpotifyPlayer />
       </TooltipProvider>
       </SpotifyPlayerProvider>
+      </SubscriptionProvider>
     </QueryClientProvider>
   );
 };
