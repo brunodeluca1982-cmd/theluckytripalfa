@@ -4,6 +4,7 @@ import { ChevronLeft, CreditCard, Check, Sparkles, ExternalLink, Loader2 } from 
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { useSubscription } from '@/hooks/use-subscription';
+import { useAuthRedirect } from '@/hooks/use-auth-redirect';
 import { supabase } from '@/integrations/supabase/client';
 import { STRIPE_CONFIG, PREMIUM_FEATURES, type PlanType } from '@/data/stripe-config';
 import { toast } from 'sonner';
