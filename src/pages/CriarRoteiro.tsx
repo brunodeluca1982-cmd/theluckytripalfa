@@ -104,6 +104,8 @@ const CriarRoteiro = () => {
 
   const bgImage = state.destinationImageUrl || undefined;
 
+  const TOTAL_STEPS = 5;
+
   return (
     <FlowHeroBackground imageUrl={bgImage}>
       {/* Header */}
@@ -124,9 +126,28 @@ const CriarRoteiro = () => {
         </button>
       </div>
 
+      {/* Progress indicator */}
+      {step >= 1 && step <= TOTAL_STEPS && (
+        <div className="px-6 pb-2">
+          <div className="flex items-center gap-2 mb-1">
+            {Array.from({ length: TOTAL_STEPS }, (_, i) => (
+              <div
+                key={i}
+                className={`h-1 flex-1 rounded-full transition-all ${
+                  i + 1 <= step ? "bg-white" : "bg-white/20"
+                }`}
+              />
+            ))}
+          </div>
+          <p className="text-white/50 text-[11px] font-medium">
+            Passo {step} de {TOTAL_STEPS}
+          </p>
+        </div>
+      )}
+
       {/* Title for steps 1-2 */}
       {step <= 2 && (
-        <div className="px-6 pt-2 pb-4 text-center">
+        <div className="px-6 pt-1 pb-4 text-center">
           <h1 className="text-3xl font-bold text-white font-[var(--font-serif)] italic">
             Criar roteiro
           </h1>
