@@ -144,6 +144,11 @@ const App = () => {
           <HeroVideo onEnd={handleVideoEnd} onSkip={handleVideoSkip} fading={videoFading} />
         )}
 
+        {/* Phase 2.5: Onboarding Walkthrough */}
+        {phase === "onboarding" && (
+          <OnboardingWalkthrough onComplete={handleOnboardingComplete} />
+        )}
+
         {/* Phase 3: App — starts on Rio destination */}
         <BrowserRouter>
           <Routes>
