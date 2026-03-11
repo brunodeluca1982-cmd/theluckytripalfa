@@ -49,12 +49,11 @@ const CriarRoteiro = () => {
     goTo(6); // show generating screen
 
     try {
-      // Get current user (optional — works for anon too)
       const {
         data: { user },
       } = await supabase.auth.getUser();
 
-      // Save to Supabase
+      // 1. Create itinerary record FIRST (before AI generation)
       const { data, error } = await supabase
         .from("user_itineraries")
         .insert({
@@ -84,10 +83,32 @@ const CriarRoteiro = () => {
 
       if (error) throw error;
 
-      // Simulate AI generation time (replace with real AI call later)
+      // 2. Generate initial day structure so the itinerary is never empty
+      const numDays = tripDays > 0 ? tripDays : 3; // default to 3 days
+      const slots = ["Manhã", "Almoço", "Tarde", "Pôr do sol", "Noite"];
+      const dayItems = [];
+
+      for (let day = 1; day <= numDays; day++) {
+        slots.forEach((slot, slotIdx) => {
+          dayItems.push({
+            roteiro_id: data.id,
+            day_index: day,
+            order_in_day: slotIdx,
+            name: `${slot} — Dia ${day}`,
+            time_slot: slot.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""),
+            city: state.destinationName,
+            source: "auto",
+            notes: "Aguardando sugestão",
+          });
+        });
+      }
+
+      await supabase.from("roteiro_itens").insert(dayItems);
+
+      // 3. Simulate AI generation (replace with real AI call later)
       await new Promise((r) => setTimeout(r, 3000));
 
-      // Update status
+      // 4. Update status to active
       await supabase
         .from("user_itineraries")
         .update({ status: "active", generated_at: new Date().toISOString() })
@@ -100,9 +121,11 @@ const CriarRoteiro = () => {
       toast.error("Erro ao criar roteiro. Tente novamente.");
       goTo(5); // back to preview
     }
-  }, [state, goTo, clear, navigate]);
+  }, [state, goTo, clear, navigate, tripDays]);
 
   const bgImage = state.destinationImageUrl || undefined;
+
+  const TOTAL_STEPS = 5;
 
   return (
     <FlowHeroBackground imageUrl={bgImage}>
@@ -124,9 +147,28 @@ const CriarRoteiro = () => {
         </button>
       </div>
 
+      {/* Progress indicator */}
+      {step >= 1 && step <= TOTAL_STEPS && (
+        <div className="px-6 pb-2">
+          <div className="flex items-center gap-2 mb-1">
+            {Array.from({ length: TOTAL_STEPS }, (_, i) => (
+              <div
+                key={i}
+                className={`h-1 flex-1 rounded-full transition-all ${
+                  i + 1 <= step ? "bg-white" : "bg-white/20"
+                }`}
+              />
+            ))}
+          </div>
+          <p className="text-white/50 text-[11px] font-medium">
+            Passo {step} de {TOTAL_STEPS}
+          </p>
+        </div>
+      )}
+
       {/* Title for steps 1-2 */}
       {step <= 2 && (
-        <div className="px-6 pt-2 pb-4 text-center">
+        <div className="px-6 pt-1 pb-4 text-center">
           <h1 className="text-3xl font-bold text-white font-[var(--font-serif)] italic">
             Criar roteiro
           </h1>
