@@ -21,7 +21,7 @@ const Assinatura = () => {
 
   const handleCheckout = async () => {
     if (!isAuthenticated) {
-      toast.error('Faça login para assinar');
+      redirectToAuth({ type: "open_subscription", returnTo: "/perfil/assinatura" });
       return;
     }
 
@@ -33,7 +33,9 @@ const Assinatura = () => {
       });
 
       if (error) throw error;
-      if (data?.url) window.open(data.url, '_blank');
+      if (data?.url) {
+        window.location.href = data.url;
+      }
     } catch (err) {
       console.error(err);
       toast.error('Erro ao iniciar checkout');
