@@ -14,6 +14,7 @@ const Assinatura = () => {
   const [selectedPlan, setSelectedPlan] = useState<PlanType>('monthly');
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [portalLoading, setPortalLoading] = useState(false);
+  const { redirectToAuth } = useAuthRedirect();
   const [searchParams] = useSearchParams();
 
   const success = searchParams.get('success');
