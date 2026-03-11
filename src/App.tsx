@@ -69,6 +69,7 @@ import AdminEventos from "./pages/AdminEventos";
 import { SpotifyPlayerProvider } from "@/contexts/SpotifyPlayerContext";
 import PersistentSpotifyPlayer from "@/components/PersistentSpotifyPlayer";
 import HeroVideo from "@/components/HeroVideo";
+import OnboardingWalkthrough from "@/components/OnboardingWalkthrough";
 
 
 const queryClient = new QueryClient();
@@ -79,28 +80,48 @@ const hasSeenHero = (): boolean => {
 const markHeroSeen = (): void => {
   try { localStorage.setItem("heroSeen", "true"); } catch {}
 };
+const hasSeenOnboarding = (): boolean => {
+  try { return localStorage.getItem("onboardingSeen") === "true"; } catch { return false; }
+};
+const markOnboardingSeen = (): void => {
+  try { localStorage.setItem("onboardingSeen", "true"); } catch {}
+};
 
-type AppPhase = "splash" | "video" | "ready";
+type AppPhase = "splash" | "video" | "onboarding" | "ready";
 
 const App = () => {
   const skipVideo = hasSeenHero();
+  const skipOnboarding = hasSeenOnboarding();
   const [phase, setPhase] = useState<AppPhase>("splash");
   const [videoFading, setVideoFading] = useState(false);
 
   const handleSplashComplete = useCallback(() => {
     if (skipVideo) {
-      setPhase("ready");
+      if (skipOnboarding) {
+        setPhase("ready");
+      } else {
+        setPhase("onboarding");
+      }
     } else {
       setPhase("video");
     }
-  }, [skipVideo]);
+  }, [skipVideo, skipOnboarding]);
 
   const handleVideoEnd = useCallback(() => {
     markHeroSeen();
     setVideoFading(true);
     setTimeout(() => {
-      setPhase("ready");
+      if (skipOnboarding) {
+        setPhase("ready");
+      } else {
+        setPhase("onboarding");
+      }
     }, 500);
+  }, [skipOnboarding]);
+
+  const handleOnboardingComplete = useCallback(() => {
+    markOnboardingSeen();
+    setPhase("ready");
   }, []);
 
   const handleVideoSkip = useCallback(() => {
