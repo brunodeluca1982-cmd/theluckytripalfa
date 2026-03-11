@@ -71,7 +71,10 @@ const LuckyProPaywall = ({ open, onClose }: LuckyProPaywallProps) => {
         body: { priceId: plan.id },
       });
       if (error) throw error;
-      if (data?.url) window.open(data.url, "_blank");
+      if (data?.url) {
+        onClose();
+        window.location.href = data.url;
+      }
     } catch {
       toast.error("Erro ao iniciar pagamento");
     } finally {

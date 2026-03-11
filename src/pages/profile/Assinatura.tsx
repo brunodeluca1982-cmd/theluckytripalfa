@@ -4,6 +4,7 @@ import { ChevronLeft, CreditCard, Check, Sparkles, ExternalLink, Loader2 } from 
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { useSubscription } from '@/hooks/use-subscription';
+import { useAuthRedirect } from '@/hooks/use-auth-redirect';
 import { supabase } from '@/integrations/supabase/client';
 import { STRIPE_CONFIG, PREMIUM_FEATURES, type PlanType } from '@/data/stripe-config';
 import { toast } from 'sonner';
@@ -13,13 +14,14 @@ const Assinatura = () => {
   const [selectedPlan, setSelectedPlan] = useState<PlanType>('monthly');
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [portalLoading, setPortalLoading] = useState(false);
+  const { redirectToAuth } = useAuthRedirect();
   const [searchParams] = useSearchParams();
 
   const success = searchParams.get('success');
 
   const handleCheckout = async () => {
     if (!isAuthenticated) {
-      toast.error('Faça login para assinar');
+      redirectToAuth({ type: "open_subscription", returnTo: "/perfil/assinatura" });
       return;
     }
 
@@ -31,7 +33,9 @@ const Assinatura = () => {
       });
 
       if (error) throw error;
-      if (data?.url) window.open(data.url, '_blank');
+      if (data?.url) {
+        window.location.href = data.url;
+      }
     } catch (err) {
       console.error(err);
       toast.error('Erro ao iniciar checkout');
