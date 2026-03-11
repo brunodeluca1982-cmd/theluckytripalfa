@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Home, Map, BookmarkCheck, Sparkles, User } from "lucide-react";
+import { Home, Search, Route, BookmarkCheck, User } from "lucide-react";
 import { useEffect, useState } from "react";
 
 /**
@@ -28,9 +28,9 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { id: "home", label: "Home", icon: Home, path: "/" },
-  { id: "destinos", label: "Destinos", icon: Map, path: "/destinos" },
-  { id: "roteiro", label: "Minha Viagem", icon: BookmarkCheck, path: "/minha-viagem" },
-  { id: "lucky", label: "Lucky", icon: Sparkles, path: "/ia" },
+  { id: "destinos", label: "Destinos", icon: Search, path: "/destinos" },
+  { id: "criar", label: "Criar roteiro", icon: Route, path: "/criar-roteiro" },
+  { id: "roteiro", label: "Meus roteiros", icon: BookmarkCheck, path: "/minha-viagem" },
   { id: "perfil", label: "Perfil", icon: User, path: "/perfil" },
 ];
 

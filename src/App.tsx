@@ -62,6 +62,7 @@ import IALuckyTrip from "./pages/ia/IALuckyTrip";
 import InspirationTrip from "./pages/InspirationTrip";
 import RoteiroFinal from "./pages/RoteiroFinal";
 import RoteiroResultado from "./pages/RoteiroResultado";
+import CriarRoteiro from "./pages/CriarRoteiro";
 import PurchaseSuccess from "./pages/PurchaseSuccess";
 import NotFound from "./pages/NotFound";
 import AdminEventos from "./pages/AdminEventos";
@@ -173,6 +174,10 @@ const App = () => {
                   {/* How to Get There */}
                   <Route path="/como-chegar" element={<HowToGetThere />} />
                   
+                  {/* Criar Roteiro (new flow) */}
+                  <Route path="/criar-roteiro" element={<CriarRoteiro />} />
+                  <Route path="/meus-roteiros/:itineraryId" element={<RoteiroResultado />} />
+
                   {/* Meu Roteiro */}
                   <Route path="/minha-viagem" element={<MinhaViagem />} />
                   <Route path="/meu-roteiro" element={<MeuRoteiro />} />
