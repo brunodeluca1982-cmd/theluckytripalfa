@@ -9,7 +9,7 @@ const slides = [
     tag: "DESCUBRA",
     title: "Viaje com outros olhos",
     description:
-      'Navegue por um mapa imersivo e descubra "joias escondidas" com a curadoria exclusiva de Bruno de Luca. Fuja do óbvio e encontre o que o Google não te mostra.',
+      'Navegue por um mapa imersivo e descubra "joias escondidas" com a curadoria exclusiva de Bruno De Luca. Fuja do óbvio e encontre o que o Google não te mostra.',
     bgUrl:
       "https://images.unsplash.com/photo-1483729558449-99ef09a8c325?w=800&q=80",
   },

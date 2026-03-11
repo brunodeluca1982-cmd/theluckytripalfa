@@ -65,7 +65,7 @@ const DescobertasBruno = () => {
       <div className="flex items-center gap-3 mb-1">
         <img
           src={brunImg}
-          alt="Bruno de Luca"
+          alt="Bruno De Luca"
           className="w-8 h-8 rounded-full object-cover border border-border"
         />
         <h2 className="text-xs font-semibold tracking-[0.15em] uppercase text-primary">
