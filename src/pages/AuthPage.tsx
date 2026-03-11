@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { useAuthRedirect } from "@/hooks/use-auth-redirect";
 import { toast } from "sonner";
-import logoSymbol from "@/assets/brand/logo-l-correct.png";
+import logoSymbol from "@/assets/brand/logo-l-creme.png";
 
 type AuthMode = "signup" | "login";
 
