@@ -29,8 +29,9 @@ interface NavItem {
 const navItems: NavItem[] = [
   { id: "home", label: "Home", icon: Home, path: "/" },
   { id: "destinos", label: "Destinos", icon: Search, path: "/destinos" },
-  { id: "roteiro", label: "Minhas viagens", icon: BookmarkCheck, path: "/minha-viagem" },
-  { id: "criar", label: "Criar roteiro", icon: Route, path: "/ia" },
+  { id: "roteiro", label: "Minha viagem", icon: BookmarkCheck, path: "/minha-viagem" },
+  { id: "criar", label: "Lucky", icon: Route, path: "/ia" },
+  { id: "perfil", label: "Perfil", icon: User, path: "/perfil" },
 ];
 
 const BottomNavigation = () => {
