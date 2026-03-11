@@ -65,7 +65,19 @@ serve(async (req) => {
     const meta = await scrapePageMeta(url);
     console.log("Metadata:", JSON.stringify(meta));
 
-    // 2. Fetch curated data from external Supabase
+    // 2. Fetch curated data from both databases
+
+    // Primary Supabase (experiences)
+    const PRIMARY_URL = Deno.env.get("SUPABASE_URL")!;
+    const PRIMARY_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const primaryDb = createClient(PRIMARY_URL, PRIMARY_KEY);
+
+    const { data: primaryExperiences } = await primaryDb
+      .from("experiences")
+      .select("slug, title, neighborhood, category, short_description")
+      .eq("is_active", true);
+
+    // External Supabase (legacy restaurants + hotels)
     const EXTERNAL_URL = "https://lsibzflaaqzvtzjlvrxw.supabase.co";
     const EXTERNAL_KEY = Deno.env.get("EXTERNAL_SUPABASE_ANON_KEY");
     if (!EXTERNAL_KEY) {
@@ -88,6 +100,9 @@ serve(async (req) => {
     const hoteis = hotelRes.data || [];
 
     const catalog = [
+      // Primary experiences first (canonical)
+      ...(primaryExperiences || []).map((e: any) => `EXP|${e.slug}|${e.title}|${e.neighborhood || ""}|${e.category || ""}||${e.short_description?.slice(0, 80) || ""}`),
+      // Legacy experiences
       ...experiencias.map((e: any) => `EXP|${e.id}|${e.nome}|${e.bairro}|${e.categoria}|${e.vibe || ""}|${e.meu_olhar?.slice(0, 80) || ""}`),
       ...restaurantes.map((r: any) => `REST|${r.id}|${r.nome}|${r.bairro}|${r.categoria}|${r.tipo_cozinha || ""}|${r.meu_olhar?.slice(0, 80) || ""}`),
       ...hoteis.map((h: any) => `HOTEL|${h.id}|${h.nome}|${h.bairro}|${h.categoria || ""}||${h.meu_olhar?.slice(0, 80) || ""}`),
