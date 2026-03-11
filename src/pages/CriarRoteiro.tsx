@@ -16,7 +16,7 @@ import StepInspiration from "./criar-roteiro/StepInspiration";
 import StepPreview from "./criar-roteiro/StepPreview";
 import StepGenerating from "./criar-roteiro/StepGenerating";
 
-import logoSymbol from "@/assets/brand/logo-l-correct.png";
+import logoSymbol from "@/assets/brand/logo-l-creme.png";
 import { useSubscription } from "@/hooks/use-subscription";
 
 const CriarRoteiro = () => {
