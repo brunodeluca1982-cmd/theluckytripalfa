@@ -144,11 +144,18 @@ const ExternalActivityView = ({ exp, backPath }: { exp: ExternalExperiencia; bac
           <img src={getAttractionImage(slug)} alt={exp.nome} className="w-full h-full object-cover" />
         )}
         <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/40" />
-        <div className="absolute top-0 left-0 right-0 px-4 pt-[env(safe-area-inset-top,12px)] pb-2 flex items-center z-10">
-          <Link to={backPath} className="inline-flex items-center gap-1.5 text-sm text-white/90 font-medium">
+        <div className="absolute top-0 left-0 right-0 px-4 pt-[env(safe-area-inset-top,12px)] pb-2 flex items-center justify-center z-10">
+          <Link to={backPath} className="absolute left-4 inline-flex items-center gap-1.5 text-sm text-white/90 font-medium">
             <ChevronLeft className="w-4 h-4" />
             Voltar
           </Link>
+          <button
+            onClick={handleSave}
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 text-white text-sm font-medium"
+          >
+            <Bookmark className="w-4 h-4" fill={isSaved ? "currentColor" : "none"} />
+            {isSaved ? "Salvo" : "Salvar"}
+          </button>
         </div>
       </div>
 
@@ -205,24 +212,6 @@ const ExternalActivityView = ({ exp, backPath }: { exp: ExternalExperiencia; bac
             </span>
           )}
         </div>
-
-        {/* Description */}
-        <div className="space-y-3 mb-6">
-          {exp.meu_olhar.split("\n").map((paragraph, index) => (
-            <p key={index} className="text-base text-white/75 leading-relaxed">
-              {paragraph}
-            </p>
-          ))}
-        </div>
-
-        {/* Save button */}
-        <button
-          onClick={handleSave}
-          className="w-full h-14 rounded-full bg-white text-black font-semibold text-base flex items-center justify-center gap-2 mb-6 active:scale-[0.98] transition-transform"
-        >
-          <Bookmark className="w-5 h-5" fill={isSaved ? "currentColor" : "none"} />
-          {isSaved ? "Salvo" : "Salvar"}
-        </button>
 
         {/* Secondary links */}
         {exp.google_maps_url && (
@@ -339,11 +328,18 @@ const ActivityDetail = () => {
           <img src={getAttractionImage(from || "")} alt={activity.title} className="w-full h-full object-cover" />
         )}
         <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/40" />
-        <div className="absolute top-0 left-0 right-0 px-4 pt-[env(safe-area-inset-top,12px)] pb-2 flex items-center z-10">
-          <Link to={backPath} className="inline-flex items-center gap-1.5 text-sm text-white/90 font-medium">
+        <div className="absolute top-0 left-0 right-0 px-4 pt-[env(safe-area-inset-top,12px)] pb-2 flex items-center justify-center z-10">
+          <Link to={backPath} className="absolute left-4 inline-flex items-center gap-1.5 text-sm text-white/90 font-medium">
             <ChevronLeft className="w-4 h-4" />
             Voltar
           </Link>
+          <button
+            onClick={handlePrimarySave}
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 text-white text-sm font-medium"
+          >
+            <Bookmark className="w-4 h-4" fill={isSaved ? "currentColor" : "none"} />
+            {isSaved ? "Salvo" : "Salvar"}
+          </button>
         </div>
       </div>
 
@@ -377,15 +373,6 @@ const ActivityDetail = () => {
             </p>
           ))}
         </div>
-
-        {/* Save button */}
-        <button
-          onClick={handlePrimarySave}
-          className="w-full h-14 rounded-full bg-white text-black font-semibold text-base flex items-center justify-center gap-2 mb-6 active:scale-[0.98] transition-transform"
-        >
-          <Bookmark className="w-5 h-5" fill={isSaved ? "currentColor" : "none"} />
-          {isSaved ? "Salvo" : "Salvar"}
-        </button>
 
         {/* Secondary links */}
         <div className="space-y-3">
