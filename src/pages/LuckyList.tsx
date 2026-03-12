@@ -21,7 +21,7 @@ const LuckyList = () => {
   return (
     <div className="min-h-screen flex flex-col">
       {/* Background */}
-      <div className="fixed inset-0 z-0 bg-cover bg-center bg-no-repeat" style={{ backgroundImage: `url(${luckyListHero})` }} />
+      <div className="fixed inset-0 z-0 bg-cover bg-center bg-no-repeat" style={{ backgroundImage: `url(${heroUrl})` }} />
       <div className="fixed inset-0 z-0 bg-gradient-to-t from-black/90 via-black/60 to-black/40" />
 
       {/* Header */}
