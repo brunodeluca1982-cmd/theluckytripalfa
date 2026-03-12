@@ -6,6 +6,7 @@ import { useCityHero } from "@/contexts/CityHeroContext";
 
 const LuckyList = () => {
   const { data: items = [], isLoading } = useLuckyList();
+  const { heroUrl } = useCityHero();
   const grouped = groupByBairro(items);
   const neighborhoods = Object.keys(grouped).sort();
 
