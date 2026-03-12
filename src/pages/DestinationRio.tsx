@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import DestinationHub, { MapPin, Bed, Utensils, Compass, Sparkles } from "@/components/DestinationHub";
 import { Button } from "@/components/ui/button";
-import rioHeroImage from "@/assets/highlights/rio-hero-carnaval.jpg";
+import { useCityHero } from "@/contexts/CityHeroContext";
 
 /**
  * ═══════════════════════════════════════════════════════════════════════════
@@ -41,7 +41,7 @@ import rioHeroImage from "@/assets/highlights/rio-hero-carnaval.jpg";
  * ═══════════════════════════════════════════════════════════════════════════
  */
 
-const RIO_BACKGROUND = rioHeroImage;
+// Background now comes from CityHeroContext
 
 /**
  * PRIMARY HUB ACTIONS — LOCKED
@@ -59,6 +59,7 @@ const rioActions = [
 
 const DestinationRio = () => {
   const [searchParams] = useSearchParams();
+  const { heroUrl } = useCityHero();
   const isDebug = searchParams.get("debug") === "1";
   const [testResult, setTestResult] = useState<any[] | null>(null);
   const [loading, setLoading] = useState(false);
@@ -176,7 +177,7 @@ const DestinationRio = () => {
         destinationId="rio-de-janeiro"
         name="Rio de Janeiro"
         country="Brasil"
-        backgroundImage={RIO_BACKGROUND}
+        backgroundImage={heroUrl}
         actions={rioActions}
       />
     </div>

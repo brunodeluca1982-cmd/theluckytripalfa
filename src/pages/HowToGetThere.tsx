@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { ChevronLeft, Plane, Car, Bus, ExternalLink, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { LucideIcon } from "lucide-react";
-import santosDumontImage from "@/assets/places/santos-dumont-airport.jpg";
+import { useCityHero } from "@/contexts/CityHeroContext";
 
 type TransportType = "aviao" | "carro" | "onibus" | null;
 
@@ -46,6 +46,7 @@ const RadialButton = ({ icon: Icon, label, position, isActive, onClick }: Radial
 const HowToGetThere = () => {
   const [activeTransport, setActiveTransport] = useState<TransportType>(null);
   const [webviewUrl, setWebviewUrl] = useState<string | null>(null);
+  const { heroUrl } = useCityHero();
 
   const handleTransportClick = (transport: TransportType) => {
     setActiveTransport(activeTransport === transport ? null : transport);
@@ -93,7 +94,7 @@ const HowToGetThere = () => {
           ═══════════════════════════════════════════════════════════════ */}
       <div 
         className="absolute inset-0 bg-cover bg-center bg-fixed"
-        style={{ backgroundImage: `url(${santosDumontImage})` }}
+        style={{ backgroundImage: `url(${heroUrl})` }}
       />
       <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/45 to-black/60" />
 

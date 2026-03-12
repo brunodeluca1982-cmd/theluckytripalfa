@@ -6,7 +6,7 @@ import { useSpotifyPlayer } from "@/contexts/SpotifyPlayerContext";
 import { useEventMode } from "@/contexts/EventModeContext";
 import { EventBanner } from "@/components/EventBanner";
 import { clearVideoSeen } from "@/pages/DestinationVideoIntro";
-import blocoBackground from "@/assets/highlights/o-que-fazer-bg.jpeg";
+import { useCityHero } from "@/contexts/CityHeroContext";
 
 const categories = [
   { id: "classico", label: "Clássico", path: "/o-que-fazer/categoria/classico" },
@@ -21,6 +21,7 @@ const WhatToDo = () => {
   const navigate = useNavigate();
   const { active, activate, openSheet } = useSpotifyPlayer();
   const { evento, getPlacement } = useEventMode();
+  const { heroUrl } = useCityHero();
 
   const handleMusicTap = useCallback(() => {
     if (!active) activate();
@@ -39,7 +40,7 @@ const WhatToDo = () => {
       {/* Full-screen background */}
       <div
         className="absolute inset-0 bg-cover bg-fixed bg-center"
-        style={{ backgroundImage: `url(${blocoBackground})` }}
+        style={{ backgroundImage: `url(${heroUrl})` }}
       />
       <div className="absolute inset-0 bg-black/[0.27]" />
 
