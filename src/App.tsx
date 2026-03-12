@@ -170,36 +170,36 @@ const App = () => {
                   {/* Destinos */}
                   <Route path="/destinos" element={<Destinos />} />
                   <Route path="/destino/:id/intro" element={<DestinationVideoIntro />} />
-                  <Route path="/destino/rio-de-janeiro" element={<DestinationRio />} />
+                  <Route path="/destino/rio-de-janeiro" element={<CityHeroProvider cityId="rio-de-janeiro"><DestinationRio /></CityHeroProvider>} />
                   
                   {/* Secondary Modules - Detail Pages */}
                   <Route path="/destino/:destinationId/modulo/:moduleId" element={<SecondaryModuleDetail />} />
                   
                   {/* Where to Stay */}
                   <Route path="/city-view" element={<Navigate to="/onde-ficar-rio" replace />} />
-                  <Route path="/onde-ficar-rio" element={<OndeficarRio />} />
-                  <Route path="/onde-ficar/:neighborhood" element={<WhereToStayDetail />} />
-                  <Route path="/hotel/:id" element={<HotelDetail />} />
+                  <Route path="/onde-ficar-rio" element={<CityHeroProvider cityId="rio-de-janeiro"><OndeficarRio /></CityHeroProvider>} />
+                  <Route path="/onde-ficar/:neighborhood" element={<CityHeroProvider cityId="rio-de-janeiro"><WhereToStayDetail /></CityHeroProvider>} />
+                  <Route path="/hotel/:id" element={<CityHeroProvider cityId="rio-de-janeiro"><HotelDetail /></CityHeroProvider>} />
                   
                   {/* Where to Eat */}
-                  <Route path="/eat-map-view" element={<EatMapView />} />
-                  <Route path="/onde-comer/:neighborhood" element={<WhereToEatDetail />} />
-                  <Route path="/restaurante/:id" element={<RestaurantDetail />} />
+                  <Route path="/eat-map-view" element={<CityHeroProvider cityId="rio-de-janeiro"><EatMapView /></CityHeroProvider>} />
+                  <Route path="/onde-comer/:neighborhood" element={<CityHeroProvider cityId="rio-de-janeiro"><WhereToEatDetail /></CityHeroProvider>} />
+                  <Route path="/restaurante/:id" element={<CityHeroProvider cityId="rio-de-janeiro"><RestaurantDetail /></CityHeroProvider>} />
                   
                   {/* What to Do */}
-                  <Route path="/o-que-fazer" element={<WhatToDo />} />
-                  <Route path="/o-que-fazer/categoria/:category" element={<WhatToDoCategory />} />
-                  <Route path="/o-que-fazer/:neighborhood" element={<WhatToDoDetail />} />
-                  <Route path="/atividade/:id" element={<ActivityDetail />} />
-                  <Route path="/experiencia/:slug" element={<ExperienceDetail />} />
+                  <Route path="/o-que-fazer" element={<CityHeroProvider cityId="rio-de-janeiro"><WhatToDo /></CityHeroProvider>} />
+                  <Route path="/o-que-fazer/categoria/:category" element={<CityHeroProvider cityId="rio-de-janeiro"><WhatToDoCategory /></CityHeroProvider>} />
+                  <Route path="/o-que-fazer/:neighborhood" element={<CityHeroProvider cityId="rio-de-janeiro"><WhatToDoDetail /></CityHeroProvider>} />
+                  <Route path="/atividade/:id" element={<CityHeroProvider cityId="rio-de-janeiro"><ActivityDetail /></CityHeroProvider>} />
+                  <Route path="/experiencia/:slug" element={<CityHeroProvider cityId="rio-de-janeiro"><ExperienceDetail /></CityHeroProvider>} />
                   
                   {/* Lucky List */}
-                  <Route path="/lucky-list" element={<LuckyList />} />
-                  <Route path="/lucky-list/bairro/:neighborhoodId" element={<LuckyListNeighborhood />} />
-                  <Route path="/lucky-list/:id" element={<LuckyListDetail />} />
+                  <Route path="/lucky-list" element={<CityHeroProvider cityId="rio-de-janeiro"><LuckyList /></CityHeroProvider>} />
+                  <Route path="/lucky-list/bairro/:neighborhoodId" element={<CityHeroProvider cityId="rio-de-janeiro"><LuckyListNeighborhood /></CityHeroProvider>} />
+                  <Route path="/lucky-list/:id" element={<CityHeroProvider cityId="rio-de-janeiro"><LuckyListDetail /></CityHeroProvider>} />
                   
                   {/* How to Get There */}
-                  <Route path="/como-chegar" element={<HowToGetThere />} />
+                  <Route path="/como-chegar" element={<CityHeroProvider cityId="rio-de-janeiro"><HowToGetThere /></CityHeroProvider>} />
                   
                   {/* Criar Roteiro (new flow) */}
                   <Route path="/criar-roteiro" element={<CriarRoteiro />} />
