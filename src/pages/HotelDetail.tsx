@@ -166,14 +166,6 @@ const HotelDetail = () => {
           <p className="text-sm italic text-white/50 mb-6">{hotel.atmosfera}</p>
         )}
 
-        {/* Save button — full width white */}
-        <button
-          onClick={handleSave}
-          className="w-full h-14 rounded-full bg-white text-black font-semibold text-base flex items-center justify-center gap-2 mb-6 active:scale-[0.98] transition-transform"
-        >
-          <Bookmark className="w-5 h-5" fill={isSaved ? "currentColor" : "none"} />
-          {isSaved ? "Salvo" : "Salvar"}
-        </button>
 
         {/* Secondary links */}
         <div className="space-y-3">

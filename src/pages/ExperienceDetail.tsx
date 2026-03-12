@@ -241,14 +241,6 @@ const ExperienceDetail = () => {
           </div>
         )}
 
-        {/* Save button */}
-        <button
-          onClick={handleSave}
-          className="w-full h-14 rounded-full bg-white text-black font-semibold text-base flex items-center justify-center gap-2 mb-6 active:scale-[0.98] transition-transform"
-        >
-          <Bookmark className="w-5 h-5" fill={isSaved ? "currentColor" : "none"} />
-          {isSaved ? "Salvo" : "Salvar"}
-        </button>
 
         {/* Instagram source badge */}
         {igPost?.permalink && (

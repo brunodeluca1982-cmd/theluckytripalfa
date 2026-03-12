@@ -35,8 +35,8 @@ const LuckyListDetail = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="px-6 py-4 border-b border-border flex items-center justify-between">
-        <Link to={returnPath} className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
+      <header className="px-6 py-4 border-b border-border relative flex items-center justify-center">
+        <Link to={returnPath} className="absolute left-6 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
           <ChevronLeft className="w-4 h-4" />
           Voltar
         </Link>
