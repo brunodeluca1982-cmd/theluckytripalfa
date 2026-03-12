@@ -41,7 +41,7 @@ import { useCityHero } from "@/contexts/CityHeroContext";
  * ═══════════════════════════════════════════════════════════════════════════
  */
 
-const RIO_BACKGROUND = rioHeroImage;
+// Background now comes from CityHeroContext
 
 /**
  * PRIMARY HUB ACTIONS — LOCKED
