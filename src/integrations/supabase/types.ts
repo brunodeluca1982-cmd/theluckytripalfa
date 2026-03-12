@@ -633,6 +633,66 @@ export type Database = {
         }
         Relationships: []
       }
+      o_que_fazer_rio: {
+        Row: {
+          ativo: boolean
+          bairro: string | null
+          categoria: string
+          como_fazer: string | null
+          created_at: string
+          duracao_media: string | null
+          energia: string | null
+          google_maps: string | null
+          id: string
+          meu_olhar: string | null
+          momento_ideal: string | null
+          momento_lucky_list: string | null
+          nome: string
+          ordem: number
+          tags_ia: string[] | null
+          updated_at: string
+          vibe: string | null
+        }
+        Insert: {
+          ativo?: boolean
+          bairro?: string | null
+          categoria?: string
+          como_fazer?: string | null
+          created_at?: string
+          duracao_media?: string | null
+          energia?: string | null
+          google_maps?: string | null
+          id?: string
+          meu_olhar?: string | null
+          momento_ideal?: string | null
+          momento_lucky_list?: string | null
+          nome: string
+          ordem?: number
+          tags_ia?: string[] | null
+          updated_at?: string
+          vibe?: string | null
+        }
+        Update: {
+          ativo?: boolean
+          bairro?: string | null
+          categoria?: string
+          como_fazer?: string | null
+          created_at?: string
+          duracao_media?: string | null
+          energia?: string | null
+          google_maps?: string | null
+          id?: string
+          meu_olhar?: string | null
+          momento_ideal?: string | null
+          momento_lucky_list?: string | null
+          nome?: string
+          ordem?: number
+          tags_ia?: string[] | null
+          updated_at?: string
+          vibe?: string | null
+        }
+        Relationships: []
+      }
       place_photos: {
         Row: {
           created_at: string
