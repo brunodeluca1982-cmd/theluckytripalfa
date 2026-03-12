@@ -40,7 +40,7 @@ const WhatToDo = () => {
       {/* Full-screen background */}
       <div
         className="absolute inset-0 bg-cover bg-fixed bg-center"
-        style={{ backgroundImage: `url(${blocoBackground})` }}
+        style={{ backgroundImage: `url(${heroUrl})` }}
       />
       <div className="absolute inset-0 bg-black/[0.27]" />
 
