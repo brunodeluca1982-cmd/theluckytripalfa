@@ -46,6 +46,7 @@ const RadialButton = ({ icon: Icon, label, position, isActive, onClick }: Radial
 const HowToGetThere = () => {
   const [activeTransport, setActiveTransport] = useState<TransportType>(null);
   const [webviewUrl, setWebviewUrl] = useState<string | null>(null);
+  const { heroUrl } = useCityHero();
 
   const handleTransportClick = (transport: TransportType) => {
     setActiveTransport(activeTransport === transport ? null : transport);
