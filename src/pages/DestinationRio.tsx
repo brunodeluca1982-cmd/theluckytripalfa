@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import DestinationHub, { MapPin, Bed, Utensils, Compass, Sparkles } from "@/components/DestinationHub";
 import { Button } from "@/components/ui/button";
-import rioHeroImage from "@/assets/highlights/rio-hero-carnaval.jpg";
+import { useCityHero } from "@/contexts/CityHeroContext";
 
 /**
  * ═══════════════════════════════════════════════════════════════════════════
