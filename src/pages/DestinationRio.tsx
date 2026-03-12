@@ -177,7 +177,7 @@ const DestinationRio = () => {
         destinationId="rio-de-janeiro"
         name="Rio de Janeiro"
         country="Brasil"
-        backgroundImage={RIO_BACKGROUND}
+        backgroundImage={heroUrl}
         actions={rioActions}
       />
     </div>
