@@ -94,7 +94,7 @@ const HowToGetThere = () => {
           ═══════════════════════════════════════════════════════════════ */}
       <div 
         className="absolute inset-0 bg-cover bg-center bg-fixed"
-        style={{ backgroundImage: `url(${santosDumontImage})` }}
+        style={{ backgroundImage: `url(${heroUrl})` }}
       />
       <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/45 to-black/60" />
 
