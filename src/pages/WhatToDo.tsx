@@ -6,7 +6,7 @@ import { useSpotifyPlayer } from "@/contexts/SpotifyPlayerContext";
 import { useEventMode } from "@/contexts/EventModeContext";
 import { EventBanner } from "@/components/EventBanner";
 import { clearVideoSeen } from "@/pages/DestinationVideoIntro";
-import blocoBackground from "@/assets/highlights/o-que-fazer-bg.jpeg";
+import { useCityHero } from "@/contexts/CityHeroContext";
 
 const categories = [
   { id: "classico", label: "Clássico", path: "/o-que-fazer/categoria/classico" },
