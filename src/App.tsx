@@ -70,6 +70,7 @@ import { SpotifyPlayerProvider } from "@/contexts/SpotifyPlayerContext";
 import PersistentSpotifyPlayer from "@/components/PersistentSpotifyPlayer";
 import HeroVideo from "@/components/HeroVideo";
 import OnboardingWalkthrough from "@/components/OnboardingWalkthrough";
+import { CityHeroProvider } from "@/contexts/CityHeroContext";
 
 
 const queryClient = new QueryClient();
