@@ -1,36 +1,27 @@
 import { Link, useParams } from "react-router-dom";
 import { ChevronLeft } from "lucide-react";
-import { luckyListItems } from "@/data/lucky-list-data";
-import { shouldDisplayField, getReturnPath } from "@/data/subscriber-behavior";
+import { useLuckyListItem } from "@/hooks/use-lucky-list";
+import { getReturnPath } from "@/data/subscriber-behavior";
 import SaveToRoteiroButton from "@/components/SaveToRoteiroButton";
-
-/**
- * LUCKY LIST — DETAIL TEMPLATE
- * 
- * PREMIUM LAYER - Consistent template for all Lucky List items
- * 
- * Subscriber behavior:
- * - Full content exposure, no truncation
- * - Conditional fields shown only if populated
- * - Contextual navigation back to origin
- * 
- * Internal label: "Lucky List only — premium layer"
- */
 
 const LuckyListDetail = () => {
   const { id } = useParams<{ id: string }>();
   const returnPath = getReturnPath();
-  
-  const item = luckyListItems.find(i => i.id === id);
-  
+  const { data: item, isLoading } = useLuckyListItem(id);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <p className="text-muted-foreground animate-pulse">Carregando...</p>
+      </div>
+    );
+  }
+
   if (!item) {
     return (
       <div className="min-h-screen bg-background">
         <header className="px-6 py-4 border-b border-border">
-          <Link
-            to={returnPath}
-            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-          >
+          <Link to={returnPath} className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
             <ChevronLeft className="w-4 h-4" />
             Voltar
           </Link>
@@ -42,115 +33,76 @@ const LuckyListDetail = () => {
     );
   }
 
-  const hasMedia = shouldDisplayField(item.mediaUrl);
-  const hasExternalLink = shouldDisplayField(item.externalLink);
-  const hasGoogleMaps = shouldDisplayField(item.googleMaps);
-  const hasInstagram = shouldDisplayField(item.instagram);
-  const hasPrice = shouldDisplayField(item.price);
-
   return (
     <div className="min-h-screen bg-background">
-      {/* Header with Save Action - Back to original context */}
       <header className="px-6 py-4 border-b border-border flex items-center justify-between">
-        <Link
-          to={returnPath}
-          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-        >
+        <Link to={returnPath} className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
           <ChevronLeft className="w-4 h-4" />
           Voltar
         </Link>
-        <div className="flex items-center gap-4">
-          <SaveToRoteiroButton
-            itemId={item.id}
-            itemType="lucky-list"
-            itemTitle={item.title}
-          />
-        </div>
+        <SaveToRoteiroButton itemId={item.id} itemType="lucky-list" itemTitle={item.nome} />
       </header>
 
-      {/* Content */}
       <main className="pb-12">
-        {/* Category & Neighborhood */}
         <div className="px-6 pt-8">
-          <p className="text-xs tracking-widest text-muted-foreground uppercase">
-            {item.category}
-          </p>
-          {item.neighborhoodName && (
-            <p className="text-xs text-muted-foreground/60 mt-1">
-              {item.neighborhoodName}
-            </p>
+          {item.categoria_experiencia && (
+            <p className="text-xs tracking-widest text-muted-foreground uppercase">{item.categoria_experiencia}</p>
+          )}
+          {item.bairro && (
+            <p className="text-xs text-muted-foreground/60 mt-1">{item.bairro}</p>
           )}
         </div>
 
-        {/* Title */}
         <div className="px-6 pt-4 pb-6">
-          <h1 className="text-4xl font-serif font-semibold text-foreground leading-tight">
-            {item.title}
-          </h1>
+          <h1 className="text-4xl font-serif font-semibold text-foreground leading-tight">{item.nome}</h1>
         </div>
 
-        {/* Media - Only if populated */}
-        {hasMedia && (
-          <div className="w-full aspect-[16/9]">
-            <img src={item.mediaUrl} alt={item.title} className="w-full h-full object-cover" />
+        {/* Meu Olhar */}
+        {item.meu_olhar && (
+          <div className="px-6 pt-4">
+            <p className="text-base text-foreground/80 italic leading-relaxed">{item.meu_olhar}</p>
           </div>
         )}
 
-        {/* Description */}
-        <div className="px-6 pt-8">
-          <div className="space-y-2">
-            {item.description.split('\n').map((paragraph, index) => (
-              <p key={index} className="text-base text-muted-foreground leading-relaxed">
-                {paragraph}
-              </p>
-            ))}
+        {/* Como Fazer */}
+        {item.como_fazer && (
+          <div className="px-6 pt-6">
+            <div className="space-y-2">
+              {item.como_fazer.split('\n').map((paragraph, index) => (
+                <p key={index} className="text-base text-muted-foreground leading-relaxed">{paragraph}</p>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
-        {/* Metadata - Only show populated fields */}
-        {(hasGoogleMaps || hasInstagram || hasPrice) && (
+        {/* Metadata */}
+        {(item.google_maps || item.contato_instagram || item.contato_telefone || item.horarios) && (
           <div className="px-6 pt-6 space-y-1 text-sm text-muted-foreground">
-            {hasGoogleMaps && (
+            {item.google_maps && (
               <p>
-                <a 
-                  href={item.googleMaps} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="hover:text-foreground transition-colors underline"
-                >
+                <a href={item.google_maps} target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors underline">
                   Ver no Google Maps
                 </a>
               </p>
             )}
-            {hasInstagram && (
-              <p>Instagram: {item.instagram}</p>
-            )}
-            {hasPrice && (
-              <p>Preço: {item.price}</p>
-            )}
+            {item.contato_instagram && <p>Instagram: {item.contato_instagram}</p>}
+            {item.contato_telefone && <p>Telefone: {item.contato_telefone}</p>}
+            {item.horarios && <p>Horários: {item.horarios}</p>}
           </div>
         )}
 
-        {/* External booking / partner link - Only if populated */}
-        {hasExternalLink && (
-          <div className="px-6 pt-8">
-            <a 
-              href={item.externalLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-block py-3 px-4 bg-primary text-primary-foreground rounded-lg text-sm hover:opacity-90 transition-opacity"
-            >
-              Reservar / Saber mais
-            </a>
+        {/* Tags */}
+        {item.nivel_esforco && (
+          <div className="px-6 pt-4">
+            <span className="text-xs bg-muted text-muted-foreground px-2 py-1 rounded-full">
+              Esforço: {item.nivel_esforco}
+            </span>
           </div>
         )}
       </main>
 
-      {/* Footer */}
       <footer className="px-6 py-8 border-t border-border">
-        <p className="text-xs text-muted-foreground">
-          The Lucky Trip — Rio de Janeiro
-        </p>
+        <p className="text-xs text-muted-foreground">The Lucky Trip — Rio de Janeiro</p>
       </footer>
     </div>
   );
