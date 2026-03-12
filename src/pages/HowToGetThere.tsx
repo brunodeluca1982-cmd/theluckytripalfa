@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { ChevronLeft, Plane, Car, Bus, ExternalLink, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { LucideIcon } from "lucide-react";
-import santosDumontImage from "@/assets/places/santos-dumont-airport.jpg";
+import { useCityHero } from "@/contexts/CityHeroContext";
 
 type TransportType = "aviao" | "carro" | "onibus" | null;
 
