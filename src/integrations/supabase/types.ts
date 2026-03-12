@@ -567,6 +567,72 @@ export type Database = {
         }
         Relationships: []
       }
+      lucky_list_rio: {
+        Row: {
+          ativo: boolean
+          bairro: string | null
+          categoria_experiencia: string | null
+          cidade: string
+          com_criancas: boolean | null
+          como_fazer: string | null
+          contato_instagram: string | null
+          contato_telefone: string | null
+          created_at: string
+          google_maps: string | null
+          horarios: string | null
+          id: string
+          meu_olhar: string | null
+          nivel_esforco: string | null
+          nome: string
+          quando_tem_musica: string | null
+          seguro_mulher_sozinha: boolean | null
+          tags_ia: string[] | null
+          tipo_item: string | null
+        }
+        Insert: {
+          ativo?: boolean
+          bairro?: string | null
+          categoria_experiencia?: string | null
+          cidade?: string
+          com_criancas?: boolean | null
+          como_fazer?: string | null
+          contato_instagram?: string | null
+          contato_telefone?: string | null
+          created_at?: string
+          google_maps?: string | null
+          horarios?: string | null
+          id?: string
+          meu_olhar?: string | null
+          nivel_esforco?: string | null
+          nome: string
+          quando_tem_musica?: string | null
+          seguro_mulher_sozinha?: boolean | null
+          tags_ia?: string[] | null
+          tipo_item?: string | null
+        }
+        Update: {
+          ativo?: boolean
+          bairro?: string | null
+          categoria_experiencia?: string | null
+          cidade?: string
+          com_criancas?: boolean | null
+          como_fazer?: string | null
+          contato_instagram?: string | null
+          contato_telefone?: string | null
+          created_at?: string
+          google_maps?: string | null
+          horarios?: string | null
+          id?: string
+          meu_olhar?: string | null
+          nivel_esforco?: string | null
+          nome?: string
+          quando_tem_musica?: string | null
+          seguro_mulher_sozinha?: boolean | null
+          tags_ia?: string[] | null
+          tipo_item?: string | null
+        }
+        Relationships: []
+      }
       place_photos: {
         Row: {
           created_at: string
