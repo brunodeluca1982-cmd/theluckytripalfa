@@ -1,8 +1,8 @@
 import { Link } from "react-router-dom";
 import { ChevronLeft } from "lucide-react";
-import luckyListHero from "@/assets/highlights/lucky-list-hero.jpg";
 import { useLuckyList, groupByBairro } from "@/hooks/use-lucky-list";
 import { LuckyListCard } from "@/components/lucky-list/LuckyListCard";
+import { useCityHero } from "@/contexts/CityHeroContext";
 
 const LuckyList = () => {
   const { data: items = [], isLoading } = useLuckyList();
