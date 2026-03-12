@@ -185,11 +185,18 @@ const ExperienceDetail = () => {
           </div>
         )}
         <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/40" />
-        <div className="absolute top-0 left-0 right-0 px-4 pt-[env(safe-area-inset-top,12px)] pb-2 flex items-center z-10">
-          <Link to="/" className="inline-flex items-center gap-1.5 text-sm text-white/90 font-medium">
+        <div className="absolute top-0 left-0 right-0 px-4 pt-[env(safe-area-inset-top,12px)] pb-2 flex items-center justify-center z-10">
+          <Link to="/" className="absolute left-4 inline-flex items-center gap-1.5 text-sm text-white/90 font-medium">
             <ChevronLeft className="w-4 h-4" />
             Voltar
           </Link>
+          <button
+            onClick={handleSave}
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 text-white text-sm font-medium"
+          >
+            <Bookmark className="w-4 h-4" fill={isSaved ? "currentColor" : "none"} />
+            {isSaved ? "Salvo" : "Salvar"}
+          </button>
         </div>
       </div>
 
