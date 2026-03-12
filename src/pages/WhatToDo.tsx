@@ -21,6 +21,7 @@ const WhatToDo = () => {
   const navigate = useNavigate();
   const { active, activate, openSheet } = useSpotifyPlayer();
   const { evento, getPlacement } = useEventMode();
+  const { heroUrl } = useCityHero();
 
   const handleMusicTap = useCallback(() => {
     if (!active) activate();
