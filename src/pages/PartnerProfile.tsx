@@ -105,7 +105,7 @@ const PartnerProfile = () => {
 
       {/* Layer 2 — Partner hero portrait */}
       {partnerHero && (
-        <div className="relative z-10 mx-5 mb-2 rounded-2xl overflow-hidden aspect-[4/5] max-h-[50vh]">
+        <div className="relative z-10 mx-5 mb-2 rounded-2xl overflow-hidden aspect-[3/4] max-h-[48vh]">
           {!heroLoaded && (
             <Skeleton className="absolute inset-0 w-full h-full rounded-none" />
           )}
