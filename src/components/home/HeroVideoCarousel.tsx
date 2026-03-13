@@ -25,6 +25,7 @@ const HeroVideoCarousel = () => {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const touchStartX = useRef<number | null>(null);
   const navigate = useNavigate();
   const { isAuthenticated } = useSubscription();
 
