@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+import { trackEvent, Events } from "@/lib/analytics";
 import HeroVideoCarousel from "@/components/home/HeroVideoCarousel";
 import OQueFazerAgora from "@/components/home/OQueFazerAgora";
 import ClassicosDoRio from "@/components/home/ClassicosDoRio";
@@ -8,6 +10,9 @@ import PlaylistViagem from "@/components/home/PlaylistViagem";
 import CriarRoteiroCTA from "@/components/home/CriarRoteiroCTA";
 
 const Index = () => {
+  useEffect(() => {
+    trackEvent(Events.HOME_VIEW);
+  }, []);
   return (
     <div className="min-h-screen flex flex-col bg-background pb-20">
       {/* 1) HERO VIDEO CAROUSEL */}
