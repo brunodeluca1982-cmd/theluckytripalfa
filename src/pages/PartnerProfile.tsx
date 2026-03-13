@@ -7,10 +7,21 @@ import { useSpotifyPlayer } from "@/contexts/SpotifyPlayerContext";
 import { useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 
-const DestinationCard = ({ dest, partnerId }: { dest: { destinationId: string; destinationName: string }; partnerId: string }) => {
+/* ── Destination card with Google Places photo ── */
+const DestinationCard = ({
+  dest,
+  partnerId,
+}: {
+  dest: { destinationId: string; destinationName: string };
+  partnerId: string;
+}) => {
   const [loaded, setLoaded] = useState(false);
   const query = buildPlaceQuery(dest.destinationName);
-  const { photoUrl, isLoading } = usePlacePhoto(`partner-dest-${dest.destinationId}`, "attraction", query);
+  const { photoUrl, isLoading } = usePlacePhoto(
+    `partner-dest-${dest.destinationId}`,
+    "attraction",
+    query,
+  );
 
   return (
     <Link
@@ -32,7 +43,9 @@ const DestinationCard = ({ dest, partnerId }: { dest: { destinationId: string; d
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
         <div className="absolute bottom-3 left-3 right-3">
-          <p className="text-white font-serif text-lg font-medium drop-shadow-lg">{dest.destinationName}</p>
+          <p className="text-white font-serif text-lg font-medium drop-shadow-lg">
+            {dest.destinationName}
+          </p>
         </div>
       </div>
       <div className="px-4 py-3 flex items-center justify-between">
@@ -46,11 +59,13 @@ const DestinationCard = ({ dest, partnerId }: { dest: { destinationId: string; d
   );
 };
 
+/* ── Main page ── */
 const PartnerProfile = () => {
   const { id } = useParams<{ id: string }>();
   const partner = getPartner(id || "");
   const { heroUrl } = useCityHero();
   const { openSheet } = useSpotifyPlayer();
+  const [heroLoaded, setHeroLoaded] = useState(false);
 
   if (!partner) {
     return (
@@ -60,9 +75,11 @@ const PartnerProfile = () => {
     );
   }
 
+  const partnerHero = partner.heroImageUrl || partner.imageUrl;
+
   return (
     <div className="relative min-h-screen pb-24">
-      {/* City hero background */}
+      {/* Layer 1 — Rio de Janeiro city hero as full page background */}
       <div
         className="fixed inset-0 z-0 bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: `url(${heroUrl})` }}
@@ -86,32 +103,53 @@ const PartnerProfile = () => {
         </button>
       </header>
 
-      {/* Partner Avatar */}
-      <div className="relative z-10 flex flex-col items-center text-center px-5 mb-8">
-        <div className="w-24 h-24 rounded-full border-2 border-white/20 overflow-hidden mb-4 shadow-xl">
-          {partner.imageUrl ? (
-            <img
-              src={partner.imageUrl}
-              alt={partner.name}
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <div className="w-full h-full bg-white/10 flex items-center justify-center">
-              <span className="text-2xl font-medium text-white/60">
-                {partner.initials}
-              </span>
-            </div>
+      {/* Layer 2 — Partner hero portrait */}
+      {partnerHero && (
+        <div className="relative z-10 mx-5 mb-6 rounded-2xl overflow-hidden aspect-[3/4] max-h-[55vh]">
+          {!heroLoaded && (
+            <Skeleton className="absolute inset-0 w-full h-full rounded-none" />
+          )}
+          <img
+            src={partnerHero}
+            alt={partner.name}
+            className={`absolute inset-0 w-full h-full object-cover object-top transition-opacity duration-500 ${heroLoaded ? "opacity-100" : "opacity-0"}`}
+            onLoad={() => setHeroLoaded(true)}
+          />
+          {/* Gradient for text legibility over the portrait */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+
+          {/* Name + bio overlaid on the portrait */}
+          <div className="absolute bottom-0 left-0 right-0 p-5">
+            <h1 className="text-3xl font-serif font-medium text-white drop-shadow-lg leading-tight">
+              {partner.name}
+            </h1>
+            {partner.bio && (
+              <p className="text-sm text-white/60 mt-1.5 leading-relaxed max-w-[280px]">
+                {partner.bio}
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Fallback: no hero image — show avatar + text */}
+      {!partnerHero && (
+        <div className="relative z-10 flex flex-col items-center text-center px-5 mb-8">
+          <div className="w-24 h-24 rounded-full border-2 border-white/20 overflow-hidden mb-4 shadow-xl bg-white/10 flex items-center justify-center">
+            <span className="text-2xl font-medium text-white/60">
+              {partner.initials}
+            </span>
+          </div>
+          <h1 className="text-3xl font-serif font-medium text-white drop-shadow-lg">
+            {partner.name}
+          </h1>
+          {partner.bio && (
+            <p className="text-sm text-white/50 mt-2 max-w-[280px] leading-relaxed">
+              {partner.bio}
+            </p>
           )}
         </div>
-        <h1 className="text-3xl font-serif font-medium text-white drop-shadow-lg">
-          {partner.name}
-        </h1>
-        {partner.bio && (
-          <p className="text-sm text-white/50 mt-2 max-w-[280px] leading-relaxed">
-            {partner.bio}
-          </p>
-        )}
-      </div>
+      )}
 
       {/* Destinations Section */}
       <section className="relative z-10 px-5">
@@ -126,7 +164,11 @@ const PartnerProfile = () => {
         ) : (
           <div className="space-y-4">
             {partner.destinations.map((dest) => (
-              <DestinationCard key={dest.destinationId} dest={dest} partnerId={partner.id} />
+              <DestinationCard
+                key={dest.destinationId}
+                dest={dest}
+                partnerId={partner.id}
+              />
             ))}
           </div>
         )}
