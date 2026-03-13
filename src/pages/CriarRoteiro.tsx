@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import { ChevronLeft } from "lucide-react";
@@ -18,12 +18,16 @@ import StepGenerating from "./criar-roteiro/StepGenerating";
 
 import logoSymbol from "@/assets/brand/logo-l-creme.png";
 import { useSubscription } from "@/hooks/use-subscription";
+import { useFreeLimits } from "@/hooks/use-free-limits";
+import LuckyProPaywall from "@/components/lucky-pro/LuckyProPaywall";
 
 const CriarRoteiro = () => {
   const navigate = useNavigate();
   const { state, update, goTo, clear, tripDays } = useCreateItinerary();
   const { isAuthenticated } = useSubscription();
   const step = state.step;
+  const limits = useFreeLimits();
+  const [showPaywall, setShowPaywall] = useState(false);
 
   const handleSelectDestination = useCallback(
     (d: Destination) => {
@@ -46,6 +50,13 @@ const CriarRoteiro = () => {
   }, [step, navigate, goTo]);
 
   const handleGenerate = useCallback(async () => {
+    // Check trip creation limit
+    if (!limits.canUse('tripsCreated')) {
+      setShowPaywall(true);
+      return;
+    }
+    limits.recordUse('tripsCreated');
+
     goTo(6); // show generating screen
 
     try {
@@ -121,13 +132,14 @@ const CriarRoteiro = () => {
       toast.error("Erro ao criar roteiro. Tente novamente.");
       goTo(5); // back to preview
     }
-  }, [state, goTo, clear, navigate, tripDays]);
+  }, [state, goTo, clear, navigate, tripDays, limits]);
 
   const bgImage = state.destinationImageUrl || undefined;
 
   const TOTAL_STEPS = 5;
 
   return (
+    <>
     <FlowHeroBackground imageUrl={bgImage}>
       {/* Header */}
       <div className="sticky top-0 z-20 flex items-center justify-between px-4 pt-4 pb-2">
@@ -230,6 +242,15 @@ const CriarRoteiro = () => {
         </AnimatePresence>
       </div>
     </FlowHeroBackground>
+
+    {/* Paywall */}
+    <LuckyProPaywall
+      open={showPaywall}
+      onClose={() => setShowPaywall(false)}
+      title="Desbloqueie o The Lucky Trip"
+      message="Crie viagens ilimitadas com o método completo do The Lucky Trip."
+    />
+    </>
   );
 };
 

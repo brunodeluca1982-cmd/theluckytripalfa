@@ -173,6 +173,13 @@ const IAAssistant = () => {
   const sendMessage = useCallback(async (text: string) => {
     if (!text.trim() || isLoading) return;
 
+    // Check free limit
+    if (!limits.canUse('iaUses')) {
+      setShowPaywall(true);
+      return;
+    }
+    limits.recordUse('iaUses');
+
     const userMsg: Msg = { role: "user", content: text.trim() };
     const allMessages = [...messages, userMsg];
     setMessages(allMessages);
@@ -266,7 +273,7 @@ const IAAssistant = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [messages, isLoading]);
+  }, [messages, isLoading, limits]);
 
   // Keep ref in sync for auto-trigger
   sendMessageRef.current = sendMessage;
@@ -301,6 +308,12 @@ const IAAssistant = () => {
           </div>
           <div className="w-9" />
         </div>
+        {/* Usage indicator */}
+        {!limits.isPremium && (
+          <p className="text-[10px] text-white/40 text-center mt-1">
+            Você já usou {limits.usageLabel('iaUses')} sugestões da IA.
+          </p>
+        )}
       </header>
 
       {/* Scrollable content */}
@@ -466,6 +479,14 @@ const IAAssistant = () => {
           Respostas baseadas em conteúdo curado pela equipe editorial.
         </p>
       </div>
+
+      {/* Paywall */}
+      <LuckyProPaywall
+        open={showPaywall}
+        onClose={() => setShowPaywall(false)}
+        title="Desbloqueie o The Lucky Trip"
+        message="Você já experimentou algumas sugestões da IA do The Lucky Trip. Desbloqueie o uso ilimitado e organize suas viagens com o método completo."
+      />
     </div>
   );
 };

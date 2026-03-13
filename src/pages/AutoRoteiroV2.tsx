@@ -24,6 +24,8 @@ import { toast } from "@/hooks/use-toast";
 import { SlotItemPhoto } from "@/components/roteiro/SlotItemPhoto";
 import type { PlaceResult } from "@/lib/search-places";
 import { resolveHotelRoute } from "@/lib/hotel-slug";
+import { useFreeLimits } from "@/hooks/use-free-limits";
+import LuckyProPaywall from "@/components/lucky-pro/LuckyProPaywall";
 
 const slotConfig: Record<SlotKind, { label: string; icon: React.ElementType; color: string; suggestedTime: string }> = {
   morning: { label: "Manhã", icon: Sun, color: "text-amber-500", suggestedTime: "09:00" },
@@ -56,6 +58,8 @@ const AutoRoteiroV2 = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [showAddPlace, setShowAddPlace] = useState(false);
   const weatherMap = useWeatherIcons({ destinationId: draft.destinationId });
+  const limits = useFreeLimits();
+  const [showPaywall, setShowPaywall] = useState(false);
 
   const days = Math.max(1, tripDays);
 
@@ -73,6 +77,13 @@ const AutoRoteiroV2 = () => {
   );
 
   const handleGenerate = async () => {
+    // Check auto-organize limit
+    if (!limits.canUse('autoOrganize')) {
+      setShowPaywall(true);
+      return;
+    }
+    limits.recordUse('autoOrganize');
+
     setIsGenerating(true);
     try {
       const preferences = tripStylesToPreferences(draft.tripStyles);
@@ -515,6 +526,14 @@ const AutoRoteiroV2 = () => {
           </div>
         )}
       </main>
+
+      {/* Paywall */}
+      <LuckyProPaywall
+        open={showPaywall}
+        onClose={() => setShowPaywall(false)}
+        title="Desbloqueie o The Lucky Trip"
+        message="Deixe o The Lucky Trip organizar suas viagens. Desbloqueie a organização inteligente de roteiros e planeje quantas viagens quiser."
+      />
     </div>
   );
 };
