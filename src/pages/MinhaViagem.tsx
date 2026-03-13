@@ -31,14 +31,16 @@ function readDraft(): SavedItem[] {
 function GlassButton({
   children,
   className = "",
-  ...props
-}: React.ButtonHTMLAttributes<HTMLButtonElement> & { children: React.ReactNode }) {
+  onClick,
+  disabled,
+}: { children: React.ReactNode; className?: string; onClick?: () => void; disabled?: boolean }) {
   return (
     <motion.button
       whileTap={{ scale: 0.97 }}
       transition={{ type: "spring", stiffness: 400, damping: 20 }}
       className={`flex items-center justify-center gap-2 py-3.5 px-6 text-sm font-medium text-foreground rounded-full backdrop-blur-xl bg-white/18 border border-white/35 shadow-lg hover:bg-white/25 transition-colors duration-200 ${className}`}
-      {...props}
+      onClick={onClick}
+      disabled={disabled}
     >
       {children}
     </motion.button>

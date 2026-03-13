@@ -55,14 +55,18 @@ function detectSource(link: string): "instagram" | "tiktok" | "link" {
 function GlassButton({
   children,
   className = "",
-  ...props
-}: React.ButtonHTMLAttributes<HTMLButtonElement> & { children: React.ReactNode }) {
+  onClick,
+  disabled,
+  type,
+}: { children: React.ReactNode; className?: string; onClick?: () => void; disabled?: boolean; type?: "submit" | "button" }) {
   return (
     <motion.button
       whileTap={{ scale: 0.97 }}
       transition={{ type: "spring", stiffness: 400, damping: 20 }}
       className={`flex items-center gap-2 py-3 px-5 text-xs font-medium text-foreground rounded-full backdrop-blur-xl bg-white/15 border border-white/25 shadow-sm hover:bg-white/22 transition-colors duration-200 ${className}`}
-      {...props}
+      onClick={onClick}
+      disabled={disabled}
+      type={type}
     >
       {children}
     </motion.button>
@@ -72,14 +76,16 @@ function GlassButton({
 function GlassPill({
   children,
   className = "",
-  ...props
-}: React.ButtonHTMLAttributes<HTMLButtonElement> & { children: React.ReactNode }) {
+  onClick,
+  disabled,
+}: { children: React.ReactNode; className?: string; onClick?: () => void; disabled?: boolean }) {
   return (
     <motion.button
       whileTap={{ scale: 0.97 }}
       transition={{ type: "spring", stiffness: 400, damping: 20 }}
       className={`flex items-center gap-1.5 py-2 px-3.5 text-[11px] font-medium text-foreground/80 rounded-full backdrop-blur-xl bg-white/10 border border-white/20 hover:bg-white/18 transition-colors duration-200 ${className}`}
-      {...props}
+      onClick={onClick}
+      disabled={disabled}
     >
       {children}
     </motion.button>
