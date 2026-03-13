@@ -18,6 +18,36 @@ function isActivitySavedLocally(activityId: string) {
   return draft.some((item: { id: string; type: string }) => item.id === activityId && item.type === "activity");
 }
 
+interface MediaRow {
+  type: "image" | "video";
+  url: string;
+  title?: string;
+}
+
+function useActivityMedia(slug: string | undefined) {
+  return useQuery({
+    queryKey: ["o-que-fazer-media", slug],
+    enabled: !!slug,
+    staleTime: 5 * 60 * 1000,
+    queryFn: async (): Promise<MediaRow[]> => {
+      const { data, error } = await supabase
+        .from("experience_media")
+        .select("media_type, media_url, title")
+        .eq("experience_slug", slug!)
+        .eq("is_active", true)
+        .order("sort_order", { ascending: true });
+
+      if (error) throw error;
+
+      return (data ?? []).map((row: any) => ({
+        type: row.media_type as "image" | "video",
+        url: row.media_url,
+        title: row.title,
+      }));
+    },
+  });
+}
+
 const ActivityDetail = () => {
   const { id } = useParams<{ id: string }>();
   const [searchParams] = useSearchParams();
