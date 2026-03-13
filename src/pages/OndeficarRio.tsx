@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { RIO_NEIGHBORHOODS, getNeighborhoodById } from "@/data/rio-neighborhoods";
 import { useExternalHotels } from "@/hooks/use-external-hotels";
+import NeighborhoodEditorialCard from "@/components/onde-ficar/NeighborhoodEditorialCard";
 
 // Fixed editorial neighborhood order
 const NEIGHBORHOOD_ORDER = [
@@ -32,6 +33,7 @@ function normalizeNeighborhood(bairro: string): string {
 const OndeficarRio = () => {
   const { data: externalHotels } = useExternalHotels();
   const navigate = useNavigate();
+  const hotelListRef = useRef<HTMLDivElement>(null);
 
   // Pan/zoom state
   const containerRef = useRef<HTMLDivElement>(null);
@@ -291,14 +293,33 @@ const OndeficarRio = () => {
         </p>
       </div>
 
+      {/* Editorial card overlay */}
+      {selectedNeighborhood && (() => {
+        const n = getNeighborhoodById(selectedNeighborhood);
+        if (!n) return null;
+        return (
+          <NeighborhoodEditorialCard
+            neighborhoodId={selectedNeighborhood}
+            neighborhoodName={n.name}
+            onViewHotels={() => {
+              hotelListRef.current?.scrollIntoView({ behavior: "smooth" });
+            }}
+          />
+        );
+      })()}
+
       {/* Hotel List */}
-      <div className="px-6 py-6">
+      <div className="px-6 py-6" ref={hotelListRef}>
         <h2 className="text-lg font-serif font-medium text-foreground mb-4">
-          Hotéis
+          {selectedNeighborhood
+            ? `Hotéis em ${getNeighborhoodById(selectedNeighborhood)?.name || selectedNeighborhood}`
+            : "Hotéis"}
         </h2>
 
         <div className="space-y-6">
-          {NEIGHBORHOOD_ORDER.map((neighborhoodId) => {
+          {NEIGHBORHOOD_ORDER.filter(
+            (nId) => !selectedNeighborhood || nId === selectedNeighborhood
+          ).map((neighborhoodId) => {
             const neighborhoodHotels = hotelListData.filter(
               (h) => h.neighborhood === neighborhoodId
             );
@@ -307,9 +328,11 @@ const OndeficarRio = () => {
 
             return (
               <div key={neighborhoodId}>
-                <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3">
-                  {neighborhoodData?.name || neighborhoodId}
-                </h3>
+                {!selectedNeighborhood && (
+                  <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3">
+                    {neighborhoodData?.name || neighborhoodId}
+                  </h3>
+                )}
                 <div className="space-y-1">
                   {neighborhoodHotels.map(renderHotelRow)}
                 </div>

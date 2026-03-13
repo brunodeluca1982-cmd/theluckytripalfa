@@ -633,6 +633,45 @@ export type Database = {
         }
         Relationships: []
       }
+      neighborhood_editorial: {
+        Row: {
+          como_e_ficar: string | null
+          created_at: string
+          id: string
+          neighborhood_id: string
+          neighborhood_name: string
+          o_que_considerar: string | null
+          o_que_faz_especial: string | null
+          pra_quem: string | null
+          summary: string | null
+          updated_at: string
+        }
+        Insert: {
+          como_e_ficar?: string | null
+          created_at?: string
+          id?: string
+          neighborhood_id: string
+          neighborhood_name: string
+          o_que_considerar?: string | null
+          o_que_faz_especial?: string | null
+          pra_quem?: string | null
+          summary?: string | null
+          updated_at?: string
+        }
+        Update: {
+          como_e_ficar?: string | null
+          created_at?: string
+          id?: string
+          neighborhood_id?: string
+          neighborhood_name?: string
+          o_que_considerar?: string | null
+          o_que_faz_especial?: string | null
+          pra_quem?: string | null
+          summary?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       o_que_fazer_rio: {
         Row: {
           ativo: boolean
