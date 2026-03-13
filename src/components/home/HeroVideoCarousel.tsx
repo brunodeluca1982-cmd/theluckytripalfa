@@ -172,7 +172,7 @@ const HeroVideoCarousel = () => {
 
   if (heroSlides.length === 0) {
     return (
-      <section className="relative w-full aspect-[9/16] max-h-[75vh] overflow-hidden bg-muted" />
+      <section className="relative w-full aspect-[9/16] max-h-[75vh] overflow-hidden bg-gradient-to-br from-[hsl(30,10%,15%)] via-[hsl(35,8%,12%)] to-[hsl(30,10%,10%)]" />
     );
   }
 
