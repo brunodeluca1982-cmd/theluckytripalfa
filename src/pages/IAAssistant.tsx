@@ -273,7 +273,7 @@ const IAAssistant = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [messages, isLoading]);
+  }, [messages, isLoading, limits]);
 
   // Keep ref in sync for auto-trigger
   sendMessageRef.current = sendMessage;
