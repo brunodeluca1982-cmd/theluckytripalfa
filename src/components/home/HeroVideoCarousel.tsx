@@ -167,6 +167,24 @@ const HeroVideoCarousel = () => {
     });
   }, [current]);
 
+  const handleTouchStart = (e: TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchEnd = (e: TouchEvent) => {
+    if (touchStartX.current === null || heroSlides.length <= 1) return;
+    const diff = touchStartX.current - e.changedTouches[0].clientX;
+    const threshold = 50;
+    if (Math.abs(diff) > threshold) {
+      if (diff > 0) {
+        goTo((current + 1) % heroSlides.length);
+      } else {
+        goTo((current - 1 + heroSlides.length) % heroSlides.length);
+      }
+    }
+    touchStartX.current = null;
+  };
+
   const handleSlideAction = (slide: HeroSlide) => {
     navigate(`/experiencia/${slide.slug}`);
   };
