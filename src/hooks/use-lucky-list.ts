@@ -14,8 +14,8 @@ export interface LuckyListItem {
   como_fazer: string | null;
   tags_ia: string[] | null;
   nivel_esforco: string | null;
-  com_criancas: boolean;
-  seguro_mulher_sozinha: boolean;
+  com_criancas: boolean | null;
+  seguro_mulher_sozinha: boolean | null;
   ativo: boolean;
   horarios: string | null;
   contato_instagram: string | null;
@@ -28,14 +28,14 @@ export function useLuckyList() {
     queryKey: ["lucky-list-rio"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("lucky_list_rio" as any)
+        .from("lucky_list_rio")
         .select("*")
         .eq("ativo", true)
         .order("bairro")
         .order("nome");
 
       if (error) throw error;
-      return (data as unknown as LuckyListItem[]) || [];
+      return (data as LuckyListItem[]) || [];
     },
   });
 }
@@ -46,14 +46,14 @@ export function useLuckyListItem(id: string | undefined) {
     enabled: !!id,
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("lucky_list_rio" as any)
+        .from("lucky_list_rio")
         .select("*")
         .eq("id", id!)
         .eq("ativo", true)
         .single();
 
       if (error) throw error;
-      return data as unknown as LuckyListItem;
+      return data as LuckyListItem;
     },
   });
 }
