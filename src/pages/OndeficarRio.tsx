@@ -323,7 +323,7 @@ const OndeficarRio = () => {
       })()}
 
       {/* Hotel List */}
-      <div className="px-6 py-6" ref={hotelListRef}>
+      <div className="px-6 py-6 relative z-10" ref={hotelListRef}>
         <h2 className="text-lg font-serif font-medium text-foreground mb-4">
           {selectedNeighborhood
             ? `Hotéis em ${getNeighborhoodById(selectedNeighborhood)?.name || selectedNeighborhood}`
