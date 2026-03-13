@@ -10,6 +10,8 @@ import { toast } from "sonner";
 import rioHeroFallback from "@/assets/highlights/rio-de-janeiro-hero.jpg";
 import { useTripDraft } from "@/hooks/use-trip-draft";
 import { getDestination } from "@/data/destinations-database";
+import { useFreeLimits } from "@/hooks/use-free-limits";
+import LuckyProPaywall from "@/components/lucky-pro/LuckyProPaywall";
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/lucky-trip-ai`;
 const STORAGE_KEY = "draft-roteiro";
