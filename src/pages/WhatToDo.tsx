@@ -135,6 +135,17 @@ function OQueFazerCard({ item, index }: { item: OQueFazerItem; index: number }) 
         )}
       </div>
 
+      {/* Tags IA chips */}
+      {item.tags_ia && item.tags_ia.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 mt-2">
+          {item.tags_ia.map((tag, i) => (
+            <span key={i} className="px-2 py-0.5 rounded-full bg-white/10 text-[10px] text-white/50 border border-white/10">
+              {tag}
+            </span>
+          ))}
+        </div>
+      )}
+
       {/* Google Maps button */}
       {item.google_maps && (
         <a

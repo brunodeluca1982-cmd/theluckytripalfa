@@ -49,6 +49,7 @@ async function fetchOQueFazer(): Promise<OQueFazerItem[]> {
     .from("o_que_fazer_rio")
     .select("*")
     .eq("ativo", true)
+    .eq("cidade", "Rio de Janeiro")
     .order("ordem", { ascending: true });
 
   if (error) throw error;
