@@ -77,6 +77,13 @@ const AutoRoteiroV2 = () => {
   );
 
   const handleGenerate = async () => {
+    // Check auto-organize limit
+    if (!limits.canUse('autoOrganize')) {
+      setShowPaywall(true);
+      return;
+    }
+    limits.recordUse('autoOrganize');
+
     setIsGenerating(true);
     try {
       const preferences = tripStylesToPreferences(draft.tripStyles);
