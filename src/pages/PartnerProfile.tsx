@@ -7,7 +7,18 @@ import { useSpotifyPlayer } from "@/contexts/SpotifyPlayerContext";
 import { useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 
-/* ── Destination card with Google Places photo ── */
+/* ── Destination card with rotating Google Places photo ── */
+const PLACE_QUERIES = [
+  "Rio de Janeiro Christ the Redeemer",
+  "Copacabana Beach Rio de Janeiro",
+  "Sugarloaf Mountain Rio de Janeiro",
+  "Ipanema Beach Rio de Janeiro",
+  "Lapa Arches Rio de Janeiro",
+  "Botafogo Bay Rio de Janeiro",
+  "Lagoa Rodrigo de Freitas Rio",
+  "Santa Teresa Rio de Janeiro",
+];
+
 const DestinationCard = ({
   dest,
   partnerId,
@@ -16,11 +27,13 @@ const DestinationCard = ({
   partnerId: string;
 }) => {
   const [loaded, setLoaded] = useState(false);
-  const query = buildPlaceQuery(dest.destinationName);
+  // Pick a random query each mount so the image varies
+  const [randomQuery] = useState(() => PLACE_QUERIES[Math.floor(Math.random() * PLACE_QUERIES.length)]);
+  const randomSuffix = useState(() => Math.floor(Math.random() * 1000))[0];
   const { photoUrl, isLoading } = usePlacePhoto(
-    `partner-dest-${dest.destinationId}`,
+    `partner-dest-${dest.destinationId}-${randomSuffix}`,
     "attraction",
-    query,
+    randomQuery,
   );
 
   return (
