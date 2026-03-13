@@ -1,27 +1,110 @@
-import { Link } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
-import { Clapperboard, Music, ArrowLeft } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { Clapperboard, Music, ArrowLeft, Lock, MapPin, Clock, Zap, Loader2 } from "lucide-react";
 import { useCallback } from "react";
 import { useSpotifyPlayer } from "@/contexts/SpotifyPlayerContext";
 import { useEventMode } from "@/contexts/EventModeContext";
-import { EventBanner } from "@/components/EventBanner";
 import { clearVideoSeen } from "@/pages/DestinationVideoIntro";
 import { useCityHero } from "@/contexts/CityHeroContext";
+import { useOQueFazer, type OQueFazerItem } from "@/hooks/use-o-que-fazer";
 
-const categories = [
-  { id: "classico", label: "Clássico", path: "/o-que-fazer/categoria/classico" },
-  { id: "praia", label: "Praia", path: "/o-que-fazer/categoria/praia" },
-  { id: "cultura", label: "Cultura", path: "/o-que-fazer/categoria/cultura" },
-  { id: "aventura", label: "Aventura", path: "/o-que-fazer/categoria/aventura" },
-  { id: "relax", label: "Relax", path: "/o-que-fazer/categoria/relax" },
-  { id: "festa", label: "Festa", path: "/o-que-fazer/categoria/festa" },
-];
+/* ───── Lucky List Teaser (blurred) ───── */
+
+function LuckyListTeaser({ text }: { text: string }) {
+  return (
+    <Link
+      to="/lucky-list"
+      className="relative block mt-3 rounded-xl overflow-hidden border border-white/20"
+    >
+      {/* Blurred content */}
+      <div className="px-4 py-3 backdrop-blur-xl bg-white/5 select-none" style={{ filter: "blur(4px)" }}>
+        <p className="text-xs text-white/60 leading-relaxed line-clamp-2">{text}</p>
+      </div>
+      {/* Overlay with lock */}
+      <div className="absolute inset-0 flex items-center justify-center bg-black/30 backdrop-blur-[2px]">
+        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/15 border border-white/25">
+          <Lock className="w-3 h-3 text-white/80" />
+          <span className="text-[11px] font-medium text-white/90 tracking-wide">Ver na Lucky List</span>
+        </div>
+      </div>
+    </Link>
+  );
+}
+
+/* ───── Item Card ───── */
+
+function OQueFazerCard({ item }: { item: OQueFazerItem }) {
+  return (
+    <div className="py-4 border-b border-white/10 last:border-b-0">
+      {/* Category + Bairro */}
+      <div className="flex items-center gap-2 mb-1">
+        {item.categoria && (
+          <span className="text-[10px] tracking-[0.2em] uppercase text-white/50">{item.categoria}</span>
+        )}
+        {item.bairro && (
+          <>
+            <span className="text-white/20">·</span>
+            <span className="text-[10px] tracking-[0.2em] uppercase text-white/50">{item.bairro}</span>
+          </>
+        )}
+      </div>
+
+      {/* Nome */}
+      <h2 className="text-lg font-serif font-medium text-white leading-snug mb-1.5">
+        {item.nome}
+      </h2>
+
+      {/* Meu olhar */}
+      {item.meu_olhar && (
+        <p className="text-sm text-white/70 leading-relaxed line-clamp-3 mb-2">
+          {item.meu_olhar.split("\n")[0]}
+        </p>
+      )}
+
+      {/* Metadata pills */}
+      <div className="flex flex-wrap items-center gap-2">
+        {item.vibe && (
+          <span className="inline-flex items-center gap-1 text-[10px] tracking-widest uppercase text-white/50">
+            {item.vibe}
+          </span>
+        )}
+        {item.duracao_media && (
+          <span className="inline-flex items-center gap-1 text-[10px] text-white/50">
+            <Clock className="w-3 h-3" /> {item.duracao_media}
+          </span>
+        )}
+        {item.energia && (
+          <span className="inline-flex items-center gap-1 text-[10px] text-white/50">
+            <Zap className="w-3 h-3" /> {item.energia}
+          </span>
+        )}
+        {item.google_maps && (
+          <a
+            href={item.google_maps}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 text-[10px] text-white/60 hover:text-white/90 transition-colors"
+          >
+            <MapPin className="w-3 h-3" /> Mapa
+          </a>
+        )}
+      </div>
+
+      {/* Lucky List teaser */}
+      {item.momento_lucky_list && (
+        <LuckyListTeaser text={item.momento_lucky_list} />
+      )}
+    </div>
+  );
+}
+
+/* ───── Main Page ───── */
 
 const WhatToDo = () => {
   const navigate = useNavigate();
   const { active, activate, openSheet } = useSpotifyPlayer();
   const { evento, getPlacement } = useEventMode();
   const { heroUrl } = useCityHero();
+  const { data: items, isLoading } = useOQueFazer();
 
   const handleMusicTap = useCallback(() => {
     if (!active) activate();
@@ -36,17 +119,17 @@ const WhatToDo = () => {
   const topPlacement = getPlacement("o_que_fazer_top");
 
   return (
-    <div className="h-screen relative overflow-hidden pb-20 flex flex-col">
+    <div className="min-h-screen relative pb-20 flex flex-col">
       {/* Full-screen background */}
       <div
-        className="absolute inset-0 bg-cover bg-fixed bg-center"
+        className="fixed inset-0 bg-cover bg-center"
         style={{ backgroundImage: `url(${heroUrl})` }}
       />
-      <div className="absolute inset-0 bg-black/[0.27]" />
+      <div className="fixed inset-0 bg-black/[0.27]" />
 
-      {/* Sepia editorial overlay — visible when no event */}
+      {/* Sepia editorial overlay */}
       <div
-        className="absolute inset-0 pointer-events-none transition-opacity duration-[400ms]"
+        className="fixed inset-0 pointer-events-none transition-opacity duration-[400ms]"
         style={{
           backgroundColor: "hsla(35, 30%, 20%, 0.35)",
           mixBlendMode: "color",
@@ -91,7 +174,6 @@ const WhatToDo = () => {
           no rio
         </p>
 
-        {/* Event label (shown when event is active) */}
         {evento && (
           <div className="flex items-center gap-2 mt-3 px-3 py-1 rounded-full bg-white/15 backdrop-blur-sm border border-white/20">
             <span className="text-xs text-white/80 font-medium">{evento.titulo}</span>
@@ -132,19 +214,25 @@ const WhatToDo = () => {
         </div>
       )}
 
-      {/* Category Buttons */}
-      <div className="relative z-20 px-6 flex flex-col gap-2 mt-auto mb-auto">
-        {categories.map((cat) => (
-          <Link
-            key={cat.id}
-            to={cat.path}
-            className="flex items-center justify-center w-full py-3 px-5 rounded-2xl backdrop-blur-md transition-all duration-200 bg-white/20 border border-white/30 hover:bg-white/30"
-          >
-            <span className="text-white text-base font-medium tracking-wide">
-              {cat.label}
-            </span>
-          </Link>
-        ))}
+      {/* Items list */}
+      <div className="relative z-20 px-6 mt-4 flex-1 overflow-y-auto">
+        {isLoading ? (
+          <div className="flex items-center justify-center py-16">
+            <Loader2 className="w-6 h-6 animate-spin text-white/60" />
+          </div>
+        ) : items && items.length > 0 ? (
+          <div className="backdrop-blur-md bg-white/5 rounded-2xl border border-white/10 px-4">
+            {items.map((item) => (
+              <OQueFazerCard key={item.id} item={item} />
+            ))}
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center py-16 gap-3">
+            <p className="text-sm text-white/60 text-center">
+              Nenhuma atividade disponível ainda.
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );
