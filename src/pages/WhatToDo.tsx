@@ -88,6 +88,12 @@ function OQueFazerCard({ item, index }: { item: OQueFazerItem; index: number }) 
         </div>
       )}
 
+      {!photoUrl && !photoLoading && (
+        <div className="w-full aspect-[16/9] rounded-xl overflow-hidden mb-4 relative bg-white/5 flex items-center justify-center">
+          <span className="text-xs text-white/45">Imagem indisponível</span>
+        </div>
+      )}
+
       {/* Category + Bairro */}
       <div className="flex items-center gap-2 mb-1">
         {item.categoria && (
