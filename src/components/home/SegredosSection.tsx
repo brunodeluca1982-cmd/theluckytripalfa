@@ -11,7 +11,7 @@ const SegredosSection = () => {
   const [showPaywall, setShowPaywall] = useState(false);
 
   const secrets = items.slice(0, 5);
-  const freeLimit = 2;
+  const freeLimit = 3;
 
   if (secrets.length === 0) return null;
 

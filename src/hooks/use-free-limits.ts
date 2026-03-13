@@ -18,7 +18,7 @@ const LIMITS = {
   iaUses: 3,
   tripEdits: 3,
   tripsCreated: 1,
-  luckyListViews: 2,
+  luckyListViews: 3,
   autoOrganize: 1,
 } as const;
 
