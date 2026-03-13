@@ -4,6 +4,11 @@ import { Star, MapPin } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useOQueFazer, type OQueFazerItem } from "@/hooks/use-o-que-fazer";
 import { usePlacePhoto, buildPlaceQuery } from "@/hooks/use-place-photo";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+} from "@/components/ui/carousel";
 
 /** Keywords that signal a "classic" experience */
 const CLASSIC_KEYWORDS = [
@@ -70,27 +75,33 @@ const ClassicosDoRio = () => {
         Os imperdíveis para qualquer viagem ao Rio.
       </p>
 
-      <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide -mx-5 px-5">
-        {classics.map((item) => (
-          <Link
-            key={item.id}
-            to="/o-que-fazer"
-            className="relative flex-shrink-0 w-[160px] rounded-2xl overflow-hidden"
-          >
-            <CardImage item={item} />
-            <div className="absolute bottom-0 left-0 right-0 p-3">
-              <p className="text-white text-sm font-medium leading-tight line-clamp-2">
-                {item.nome}
-              </p>
-              {item.categoria && (
-                <p className="text-white/60 text-[10px] mt-0.5">
-                  {item.categoria}
-                </p>
-              )}
-            </div>
-          </Link>
-        ))}
-      </div>
+      <Carousel
+        opts={{ align: "start", dragFree: true, containScroll: "trimSnaps" }}
+        className="w-full -mx-5"
+      >
+        <CarouselContent className="ml-3 pr-5">
+          {classics.map((item) => (
+            <CarouselItem key={item.id} className="pl-3 basis-[160px]">
+              <Link
+                to="/o-que-fazer"
+                className="relative block rounded-2xl overflow-hidden"
+              >
+                <CardImage item={item} />
+                <div className="absolute bottom-0 left-0 right-0 p-3">
+                  <p className="text-white text-sm font-medium leading-tight line-clamp-2">
+                    {item.nome}
+                  </p>
+                  {item.categoria && (
+                    <p className="text-white/60 text-[10px] mt-0.5">
+                      {item.categoria}
+                    </p>
+                  )}
+                </div>
+              </Link>
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+      </Carousel>
     </section>
   );
 };

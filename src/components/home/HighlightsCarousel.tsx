@@ -81,6 +81,8 @@ const HighlightsCarousel = () => {
         opts={{
           align: "start",
           loop: false,
+          dragFree: true,
+          containScroll: "trimSnaps",
         }}
         className="w-full"
       >

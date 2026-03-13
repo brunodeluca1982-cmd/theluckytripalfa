@@ -7,6 +7,11 @@ import { useLuckyList, type LuckyListItem } from "@/hooks/use-lucky-list";
 import { usePlacePhoto, buildPlaceQuery } from "@/hooks/use-place-photo";
 import LuckyProPaywall from "@/components/lucky-pro/LuckyProPaywall";
 import brunImg from "@/assets/partners/bruno-de-luca.jpeg";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+} from "@/components/ui/carousel";
 
 const CardImage = ({ item }: { item: LuckyListItem }) => {
   const [loaded, setLoaded] = useState(false);
@@ -73,57 +78,64 @@ const DescobertasBruno = () => {
           Os achados favoritos do nosso curador local no Rio.
         </p>
 
-        <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide -mx-5 px-5">
-          {discoveries.map((item, i) => {
-            const isLocked = !isPremium && i >= freeLimit;
+        <Carousel
+          opts={{ align: "start", dragFree: true, containScroll: "trimSnaps" }}
+          className="w-full -mx-5"
+        >
+          <CarouselContent className="ml-3 pr-5">
+            {discoveries.map((item, i) => {
+              const isLocked = !isPremium && i >= freeLimit;
 
-            if (isLocked) {
+              if (isLocked) {
+                return (
+                  <CarouselItem key={item.id} className="pl-3 basis-[200px]">
+                    <button
+                      onClick={() => setShowPaywall(true)}
+                      className="w-full rounded-2xl overflow-hidden border border-border bg-card text-left relative"
+                    >
+                      <div className="relative aspect-[4/3] bg-muted">
+                        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-primary/5 blur-[4px]" />
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <span className="flex items-center gap-1.5 bg-black/60 backdrop-blur-sm text-white text-[11px] font-medium px-3 py-1.5 rounded-full">
+                            <Lock className="w-3 h-3" />
+                            Lucky Pro
+                          </span>
+                        </div>
+                      </div>
+                      <div className="px-3 py-3">
+                        <p className="text-foreground text-sm font-medium leading-tight line-clamp-2 blur-[3px]">
+                          {item.nome}
+                        </p>
+                        <p className="text-muted-foreground text-[11px] mt-1 blur-[3px]">
+                          {item.meu_olhar}
+                        </p>
+                      </div>
+                    </button>
+                  </CarouselItem>
+                );
+              }
+
               return (
-                <button
-                  key={item.id}
-                  onClick={() => setShowPaywall(true)}
-                  className="flex-shrink-0 w-[200px] rounded-2xl overflow-hidden border border-border bg-card text-left relative"
-                >
-                  <div className="relative aspect-[4/3] bg-muted">
-                    <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-primary/5 blur-[4px]" />
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <span className="flex items-center gap-1.5 bg-black/60 backdrop-blur-sm text-white text-[11px] font-medium px-3 py-1.5 rounded-full">
-                        <Lock className="w-3 h-3" />
-                        Lucky Pro
-                      </span>
+                <CarouselItem key={item.id} className="pl-3 basis-[200px]">
+                  <Link
+                    to={`/lucky-list/${item.id}`}
+                    className="block rounded-2xl overflow-hidden border border-border bg-card"
+                  >
+                    <CardImage item={item} />
+                    <div className="px-3 py-3">
+                      <p className="text-foreground text-sm font-medium leading-tight line-clamp-2">
+                        {item.nome}
+                      </p>
+                      <p className="text-muted-foreground text-[11px] mt-1 line-clamp-2">
+                        {item.meu_olhar}
+                      </p>
                     </div>
-                  </div>
-                  <div className="px-3 py-3">
-                    <p className="text-foreground text-sm font-medium leading-tight line-clamp-2 blur-[3px]">
-                      {item.nome}
-                    </p>
-                    <p className="text-muted-foreground text-[11px] mt-1 blur-[3px]">
-                      {item.meu_olhar}
-                    </p>
-                  </div>
-                </button>
+                  </Link>
+                </CarouselItem>
               );
-            }
-
-            return (
-              <Link
-                key={item.id}
-                to={`/lucky-list/${item.id}`}
-                className="flex-shrink-0 w-[200px] rounded-2xl overflow-hidden border border-border bg-card"
-              >
-                <CardImage item={item} />
-                <div className="px-3 py-3">
-                  <p className="text-foreground text-sm font-medium leading-tight line-clamp-2">
-                    {item.nome}
-                  </p>
-                  <p className="text-muted-foreground text-[11px] mt-1 line-clamp-2">
-                    {item.meu_olhar}
-                  </p>
-                </div>
-              </Link>
-            );
-          })}
-        </div>
+            })}
+          </CarouselContent>
+        </Carousel>
       </section>
       <LuckyProPaywall open={showPaywall} onClose={() => setShowPaywall(false)} />
     </>
