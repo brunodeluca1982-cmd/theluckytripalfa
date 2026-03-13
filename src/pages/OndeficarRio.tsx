@@ -188,7 +188,19 @@ const OndeficarRio = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background relative">
+      {/* Hero background — blurred, atmospheric */}
+      {heroUrl && (
+        <div className="fixed inset-0 z-0">
+          <img
+            src={heroUrl}
+            alt=""
+            className="w-full h-full object-cover opacity-30 blur-xl scale-110"
+            draggable={false}
+          />
+          <div className="absolute inset-0 bg-background/60" />
+        </div>
+      )}
       {/* Header */}
       <header className="px-6 py-4 border-b border-border">
         <Link
