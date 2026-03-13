@@ -396,10 +396,10 @@ const ManualItinerary = () => {
 
             {/* Neighborhood */}
             <div className="space-y-2">
-              <Label htmlFor="exp-neighborhood">Neighborhood (optional)</Label>
+              <Label htmlFor="exp-neighborhood">Bairro (opcional)</Label>
               <Input
                 id="exp-neighborhood"
-                placeholder="e.g. Santa Teresa"
+                placeholder="Ex: Santa Teresa"
                 value={newExperience.neighborhood}
                 onChange={(e) => setNewExperience({ ...newExperience, neighborhood: e.target.value })}
               />
