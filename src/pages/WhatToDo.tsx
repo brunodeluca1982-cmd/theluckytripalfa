@@ -297,12 +297,6 @@ const WhatToDo = () => {
         )}
       </div>
 
-      {/* Detail Sheet */}
-      <OQueFazerDetailSheet
-        open={sheetOpen}
-        onOpenChange={setSheetOpen}
-        item={selectedItem}
-      />
     </div>
   );
 };
