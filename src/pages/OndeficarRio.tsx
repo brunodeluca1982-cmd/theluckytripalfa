@@ -1,6 +1,7 @@
 import { useState, useMemo, useRef, useCallback, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
 import { RIO_NEIGHBORHOODS, getNeighborhoodById } from "@/data/rio-neighborhoods";
 import { useExternalHotels } from "@/hooks/use-external-hotels";
 import { useCityHero } from "@/contexts/CityHeroContext";
