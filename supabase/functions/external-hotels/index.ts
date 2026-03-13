@@ -19,7 +19,24 @@ serve(async (req) => {
       throw new Error("EXTERNAL_SUPABASE_ANON_KEY is not configured");
     }
 
+    // Discovery: list available tables via PostgREST root
+    const discoverResp = await fetch(`${EXTERNAL_URL}/rest/v1/`, {
+      headers: {
+        apikey: EXTERNAL_KEY,
+        Authorization: `Bearer ${EXTERNAL_KEY}`,
+      },
+    });
+    const definitions = await discoverResp.json();
+    const tableNames = Object.keys(definitions?.definitions || definitions?.paths || definitions || {});
+    console.log("Available external tables:", JSON.stringify(tableNames));
+
     const externalClient = createClient(EXTERNAL_URL, EXTERNAL_KEY);
+
+    // Try common table names
+    for (const tableName of ["hoteis", "hotels", "hotel_media", "hoteis_rio"]) {
+      const { data: probe, error: probeErr } = await externalClient.from(tableName).select("*").limit(1);
+      console.log(`Probe ${tableName}:`, { found: !!probe?.length, error: probeErr?.message });
+    }
 
     const { data, error, count } = await externalClient
       .from("hoteis")
