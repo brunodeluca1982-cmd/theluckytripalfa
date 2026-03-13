@@ -237,18 +237,50 @@ const OndeficarRio = () => {
           />
 
           {/* Neighborhood pins */}
-          {RIO_NEIGHBORHOODS.map((neighborhood) => (
-            <Link
-              key={neighborhood.id}
-              to={`/onde-ficar/${neighborhood.id}?from=map`}
-              className="absolute w-8 h-8 -ml-4 -mt-4 rounded-full bg-foreground/10 border border-foreground/20 hover:bg-foreground/20 hover:border-foreground/40 transition-colors flex items-center justify-center z-20"
-              style={{ top: neighborhood.mapPosition.top, left: neighborhood.mapPosition.left }}
-              aria-label={`Explorar hotéis em ${neighborhood.name}`}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="w-2 h-2 rounded-full bg-foreground/60" />
-            </Link>
-          ))}
+          {RIO_NEIGHBORHOODS.map((neighborhood) => {
+            const isSelected = selectedNeighborhood === neighborhood.id;
+            return (
+              <button
+                key={neighborhood.id}
+                className="absolute w-8 h-8 -ml-4 -mt-4 rounded-full bg-foreground/10 border border-foreground/20 hover:bg-foreground/20 hover:border-foreground/40 transition-colors flex items-center justify-center z-20"
+                style={{ top: neighborhood.mapPosition.top, left: neighborhood.mapPosition.left }}
+                aria-label={`Explorar hotéis em ${neighborhood.name}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (isSelected) {
+                    navigate(`/onde-ficar/${neighborhood.id}?from=map`);
+                  } else {
+                    setSelectedNeighborhood(neighborhood.id);
+                  }
+                }}
+              >
+                {/* Halo ring */}
+                {isSelected && (
+                  <span className="absolute inset-0 -m-2 rounded-full bg-primary/20 border border-primary/30 animate-[halo-ping_0.5s_ease-out_forwards] pointer-events-none" />
+                )}
+                <div className={`w-2 h-2 rounded-full transition-colors duration-200 ${isSelected ? "bg-primary" : "bg-foreground/60"}`} />
+              </button>
+            );
+          })}
+          {/* Selected neighborhood label */}
+          {selectedNeighborhood && (() => {
+            const n = RIO_NEIGHBORHOODS.find(nb => nb.id === selectedNeighborhood);
+            if (!n) return null;
+            return (
+              <div
+                className="absolute z-30 pointer-events-none animate-fade-in"
+                style={{
+                  top: n.mapPosition.top,
+                  left: n.mapPosition.left,
+                  transform: "translate(-50%, -140%)",
+                }}
+              >
+                <span className="px-2 py-0.5 rounded-full bg-primary/80 text-primary-foreground text-[10px] font-medium whitespace-nowrap shadow-sm">
+                  {n.name}
+                </span>
+              </div>
+            );
+          })()}
         </div>
       </div>
 
