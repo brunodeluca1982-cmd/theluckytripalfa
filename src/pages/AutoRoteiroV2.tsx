@@ -526,6 +526,14 @@ const AutoRoteiroV2 = () => {
           </div>
         )}
       </main>
+
+      {/* Paywall */}
+      <LuckyProPaywall
+        open={showPaywall}
+        onClose={() => setShowPaywall(false)}
+        title="Desbloqueie o The Lucky Trip"
+        message="Deixe o The Lucky Trip organizar suas viagens. Desbloqueie a organização inteligente de roteiros e planeje quantas viagens quiser."
+      />
     </div>
   );
 };
