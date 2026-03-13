@@ -236,8 +236,8 @@ const App = () => {
                     <Route path="/perfil/suporte" element={<SuporteHumano />} />
 
                     {/* Partners on Trip */}
-                    <Route path="/partner/:id" element={<PartnerProfile />} />
-                    <Route path="/partner/:partnerId/roteiro/:destinationId" element={<PartnerRoteiro />} />
+                    <Route path="/partner/:id" element={<CityHeroProvider cityId="rio-de-janeiro"><PartnerProfile /></CityHeroProvider>} />
+                    <Route path="/partner/:partnerId/roteiro/:destinationId" element={<CityHeroProvider cityId="rio-de-janeiro"><PartnerRoteiro /></CityHeroProvider>} />
 
                     {/* IA Assistant */}
                     <Route path="/ia" element={<IAAssistant />} />
