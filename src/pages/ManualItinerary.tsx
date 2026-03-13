@@ -379,7 +379,7 @@ const ManualItinerary = () => {
       <Dialog open={isAddExperienceOpen} onOpenChange={setIsAddExperienceOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Add experience</DialogTitle>
+            <DialogTitle>Adicionar experiência</DialogTitle>
           </DialogHeader>
           
           <div className="space-y-4 py-4">
