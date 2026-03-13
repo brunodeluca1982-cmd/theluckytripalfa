@@ -105,7 +105,7 @@ const PartnerProfile = () => {
 
       {/* Layer 2 — Partner hero portrait */}
       {partnerHero && (
-        <div className="relative z-10 mx-5 mb-6 rounded-2xl overflow-hidden aspect-[3/4] max-h-[55vh]">
+        <div className="relative z-10 mx-5 mb-2 rounded-2xl overflow-hidden aspect-[3/4] max-h-[50vh]">
           {!heroLoaded && (
             <Skeleton className="absolute inset-0 w-full h-full rounded-none" />
           )}
@@ -116,7 +116,7 @@ const PartnerProfile = () => {
             onLoad={() => setHeroLoaded(true)}
           />
           {/* Gradient for text legibility over the portrait */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
 
           {/* Name + bio overlaid on the portrait */}
           <div className="absolute bottom-0 left-0 right-0 p-5">
