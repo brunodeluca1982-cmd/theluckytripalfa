@@ -48,19 +48,27 @@ const CitiesSection = () => {
             <Wrapper
               key={city.id}
               {...(wrapperProps as any)}
-              className="relative flex-shrink-0 w-[200px] aspect-[3/4] rounded-2xl overflow-hidden"
+              className={`relative flex-shrink-0 w-[200px] aspect-[3/4] rounded-2xl overflow-hidden ${
+                !isAvailable ? "pointer-events-none" : ""
+              }`}
             >
               {city.imageUrl && <CityImage src={city.imageUrl} alt={city.name} />}
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+
+              {/* Disabled overlay for "Em breve" */}
+              {!isAvailable && (
+                <div className="absolute inset-0 bg-black/40 backdrop-blur-[3px]" />
+              )}
+
               <div className="absolute bottom-0 left-0 right-0 p-3">
-                <p className="text-white font-semibold text-sm leading-tight">
+                <p className={`font-semibold text-sm leading-tight ${isAvailable ? "text-white" : "text-white/60"}`}>
                   {city.name}
                 </p>
-                <p className="text-white/70 text-xs mt-0.5">{city.country}</p>
+                <p className={`text-xs mt-0.5 ${isAvailable ? "text-white/70" : "text-white/40"}`}>{city.country}</p>
               </div>
               {!isAvailable && (
-                <div className="absolute top-2 left-2 px-2 py-0.5 bg-black/50 rounded-full">
-                  <span className="text-[10px] text-white/80 font-medium">Em breve</span>
+                <div className="absolute top-2 left-2 px-2.5 py-1 bg-black/60 backdrop-blur-sm rounded-full border border-white/10">
+                  <span className="text-[10px] text-white/80 font-medium tracking-wide">Em breve</span>
                 </div>
               )}
             </Wrapper>

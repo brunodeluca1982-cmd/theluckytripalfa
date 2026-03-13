@@ -55,7 +55,7 @@ const Destinos = () => {
                     whileTap={{ scale: 0.97 }}
                     className={cn(
                       "relative aspect-[4/5] rounded-xl overflow-hidden",
-                      isDisabled && "opacity-40 grayscale-[40%]"
+                      isDisabled && "opacity-50 grayscale pointer-events-none"
                     )}
                   >
                     {dest.imageUrl && (
