@@ -3,7 +3,7 @@ import logoSymbol from "@/assets/brand/logo-l-creme.png";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useSubscription } from "@/hooks/use-subscription";
+import { useSpotifyPlayer } from "@/contexts/SpotifyPlayerContext";
 import { cn } from "@/lib/utils";
 
 interface HeroSlide {
