@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { ChevronLeft, MapPin, Bed, Utensils, Compass, Sparkles, Clapperboard, Music } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { clearVideoSeen } from "@/pages/DestinationVideoIntro";
 import { useSpotifyPlayer } from "@/contexts/SpotifyPlayerContext";
 import { useEventMode } from "@/contexts/EventModeContext";
