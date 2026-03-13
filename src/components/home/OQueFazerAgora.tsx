@@ -76,27 +76,33 @@ const OQueFazerAgora = () => {
         {momentoLabel} — o melhor para este momento.
       </p>
 
-      <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide -mx-5 px-5">
-        {topItems.map((item) => (
-          <Link
-            key={item.id}
-            to="/o-que-fazer"
-            className="flex-shrink-0 w-[180px] rounded-2xl overflow-hidden border border-border bg-card"
-          >
-            <CardImage item={item} />
-            <div className="px-3 py-2.5">
-              <p className="text-foreground text-sm font-medium leading-tight line-clamp-2">
-                {item.nome}
-              </p>
-              {item.duracao_media && (
-                <p className="text-muted-foreground text-[10px] mt-1">
-                  {item.duracao_media}
-                </p>
-              )}
-            </div>
-          </Link>
-        ))}
-      </div>
+      <Carousel
+        opts={{ align: "start", dragFree: true, containScroll: "trimSnaps" }}
+        className="w-full -mx-5"
+      >
+        <CarouselContent className="ml-3 pr-5">
+          {topItems.map((item) => (
+            <CarouselItem key={item.id} className="pl-3 basis-[180px]">
+              <Link
+                to="/o-que-fazer"
+                className="block rounded-2xl overflow-hidden border border-border bg-card"
+              >
+                <CardImage item={item} />
+                <div className="px-3 py-2.5">
+                  <p className="text-foreground text-sm font-medium leading-tight line-clamp-2">
+                    {item.nome}
+                  </p>
+                  {item.duracao_media && (
+                    <p className="text-muted-foreground text-[10px] mt-1">
+                      {item.duracao_media}
+                    </p>
+                  )}
+                </div>
+              </Link>
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+      </Carousel>
     </section>
   );
 };
