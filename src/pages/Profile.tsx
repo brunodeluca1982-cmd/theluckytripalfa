@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { BookmarkCheck, Calculator, BookOpen, CreditCard, Settings, MessageCircle, User, LogOut, LogIn, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
