@@ -40,9 +40,8 @@ async function fetchHighlights(): Promise<Highlight[]> {
 
   return data.map((item) => {
     const image = item.thumbnail_url || item.video_url || "";
-    const path = item.destination_slug
-      ? `/destino/${item.destination_slug}`
-      : item.permalink || "/destinos";
+    const path = item.permalink
+      || (item.destination_slug ? `/destino/${item.destination_slug}` : "/destinos");
 
     return {
       id: item.id,
