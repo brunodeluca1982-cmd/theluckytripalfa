@@ -57,7 +57,7 @@ const DescobertasBruno = () => {
   const [showPaywall, setShowPaywall] = useState(false);
 
   const discoveries = items.slice(0, 6);
-  const freeLimit = 2;
+  const freeLimit = 3;
 
   if (isLoading || discoveries.length === 0) return null;
 
