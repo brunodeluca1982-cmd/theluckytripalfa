@@ -1,7 +1,8 @@
 import { Link } from "react-router-dom";
-import { ChevronLeft, Bookmark } from "lucide-react";
+import { ChevronLeft, Bookmark, Music } from "lucide-react";
 import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
-import type { ReactNode } from "react";
+import { useSpotifyPlayer } from "@/contexts/SpotifyPlayerContext";
+import { useCallback, type ReactNode } from "react";
 
 interface MediaItem {
   type: "image" | "video";
@@ -38,6 +39,13 @@ export default function DetailHeroLayout({
   children,
   footer,
 }: DetailHeroLayoutProps) {
+  const { active, activate, openSheet } = useSpotifyPlayer();
+
+  const handleMusicTap = useCallback(() => {
+    if (!active) activate();
+    else openSheet();
+  }, [active, activate, openSheet]);
+
   const hasMedia = media && media.length > 0;
   const images = hasMedia ? media.filter((m) => m.type === "image") : [];
   const videos = hasMedia ? media.filter((m) => m.type === "video") : [];
@@ -101,11 +109,12 @@ export default function DetailHeroLayout({
             <ChevronLeft className="w-5 h-5" />
           </Link>
           <button
-            onClick={onSave}
-            className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-black/25 backdrop-blur-md border border-white/15 text-white/90 active:scale-95 transition-all"
-            aria-label={isSaved ? "Salvo" : "Salvar"}
+            onClick={handleMusicTap}
+            className="inline-flex items-center justify-center w-10 h-10 rounded-full backdrop-blur-md border border-white/15 active:scale-95 transition-all"
+            style={{ backgroundColor: "hsla(141, 73%, 42%, 0.25)", color: "hsla(141, 73%, 72%, 1)" }}
+            aria-label="Abrir player de música"
           >
-            <Bookmark className="w-5 h-5" fill={isSaved ? "currentColor" : "none"} />
+            <Music className="w-5 h-5" />
           </button>
         </div>
 
