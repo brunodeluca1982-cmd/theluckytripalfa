@@ -132,6 +132,8 @@ const IAAssistant = () => {
   const [savedCount, setSavedCount] = useState(getSavedCount);
   const autoTriggered = useRef(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const limits = useFreeLimits();
+  const [showPaywall, setShowPaywall] = useState(false);
 
   // Resolve hero image
   const destination = draft.destinationId ? getDestination(draft.destinationId) : null;
