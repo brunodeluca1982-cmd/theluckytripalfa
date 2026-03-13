@@ -24,6 +24,8 @@ import { toast } from "@/hooks/use-toast";
 import { SlotItemPhoto } from "@/components/roteiro/SlotItemPhoto";
 import type { PlaceResult } from "@/lib/search-places";
 import { resolveHotelRoute } from "@/lib/hotel-slug";
+import { useFreeLimits } from "@/hooks/use-free-limits";
+import LuckyProPaywall from "@/components/lucky-pro/LuckyProPaywall";
 
 const slotConfig: Record<SlotKind, { label: string; icon: React.ElementType; color: string; suggestedTime: string }> = {
   morning: { label: "Manhã", icon: Sun, color: "text-amber-500", suggestedTime: "09:00" },
