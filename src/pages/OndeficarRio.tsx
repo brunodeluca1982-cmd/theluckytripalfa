@@ -357,7 +357,7 @@ const OndeficarRio = () => {
       </div>
 
       {/* Footer */}
-      <footer className="px-6 py-8 border-t border-border">
+      <footer className="px-6 py-8 border-t border-white/10 relative z-10">
         <p className="text-xs text-muted-foreground">
           The Lucky Trip — Rio de Janeiro
         </p>
