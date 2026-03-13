@@ -5,7 +5,7 @@ import { getNeighborhoodById } from "@/data/rio-neighborhoods";
 import RoteiroAccessLink from "@/components/RoteiroAccessLink";
 import { getRestaurantImage } from "@/data/place-images";
 import { useNeighborhoodHero } from "@/hooks/use-neighborhood-hero";
-import { useExternalRestaurants, normalizeNeighborhood, generateRestaurantSlug } from "@/hooks/use-external-restaurants";
+import { useExternalRestaurants, normalizeNeighborhood } from "@/hooks/use-external-restaurants";
 import { useMemo } from "react";
 import { GooglePlaceSearchSection } from "@/components/GooglePlaceSearchSection";
 import { supabase } from "@/integrations/supabase/client";
