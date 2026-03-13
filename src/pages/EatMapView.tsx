@@ -6,7 +6,7 @@ import LuckyListMarker from "@/components/LuckyListMarker";
 import LuckyListPreviewSheet from "@/components/LuckyListPreviewSheet";
 import RoteiroAccessLink from "@/components/RoteiroAccessLink";
 import NeighborhoodDetailSheet from "@/components/eat/NeighborhoodDetailSheet";
-import { useExternalRestaurants, normalizeNeighborhood, generateRestaurantSlug } from "@/hooks/use-external-restaurants";
+import { useExternalRestaurants, normalizeNeighborhood } from "@/hooks/use-external-restaurants";
 import { usePlacePhoto, buildPlaceQuery } from "@/hooks/use-place-photo";
 import { getRestaurantImage } from "@/data/place-images";
 

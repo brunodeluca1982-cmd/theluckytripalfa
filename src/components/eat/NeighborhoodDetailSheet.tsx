@@ -4,7 +4,7 @@ import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { getNeighborhoodById } from "@/data/rio-neighborhoods";
 import { getRestaurantImage } from "@/data/place-images";
 import { useNeighborhoodHero } from "@/hooks/use-neighborhood-hero";
-import { generateRestaurantSlug } from "@/hooks/use-external-restaurants";
+
 
 interface Restaurant {
   id: string;
