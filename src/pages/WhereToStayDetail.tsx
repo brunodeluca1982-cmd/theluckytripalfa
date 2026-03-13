@@ -9,22 +9,6 @@ import { useExternalHotels } from "@/hooks/use-external-hotels";
 import { useExternalNeighborhood } from "@/hooks/use-external-neighborhoods";
 import { useMemo } from "react";
 
-const neighborhoodDescriptions: Record<string, string> = {
-  ipanema: "Bairro icônico do Rio clássico.",
-  leblon: "Mais residencial, organizado e tradicional.",
-  copacabana: "Intensa, histórica e muito movimentada.",
-  arpoador: "Arpoador é onde o Rio respira.",
-  leme: "Mais calmo, residencial e com clima de bairro.",
-  "sao-conrado": "Silencioso, contemplativo e menos urbano.",
-  "barra-da-tijuca": "A Barra é o Rio em versão expandida.",
-  recreio: "Jovem, esportivo e mais selvagem.",
-  "santa-teresa": "Artístico, histórico e cheio de personalidade.",
-  centro: "O coração histórico do Rio.",
-  "jardim-botanico": "Verde, silencioso e mais familiar.",
-  gavea: "Boêmia, universitária e ao mesmo tempo residencial.",
-  botafogo: "Urbano, prático e diverso.",
-  flamengo: "Residencial, organizado e funcional.",
-};
 
 function normalizeNeighborhood(bairro: string): string {
   return bairro.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "-");
@@ -37,7 +21,7 @@ const WhereToStayDetail = () => {
 
   const neighborhoodData = getNeighborhoodById(neighborhood || "");
   const name = neighborhoodEditorial?.neighborhood_name || neighborhoodData?.name || neighborhood || "Bairro";
-  const description = neighborhoodEditorial?.identity_phrase || neighborhoodDescriptions[neighborhood || ""] || `Descubra onde ficar em ${name}.`;
+  const description = neighborhoodEditorial?.identity_phrase || `Descubra onde ficar em ${name}.`;
   const { heroUrl } = useNeighborhoodHero("rio-de-janeiro", neighborhood || "", "Rio de Janeiro", name, getHotelImage(neighborhood || ""));
 
   const hotels = useMemo(() => {
@@ -45,9 +29,9 @@ const WhereToStayDetail = () => {
     return externalHotels
       .filter((h) => h.bairro_slug === neighborhood || normalizeNeighborhood(h.bairro) === neighborhood)
       .map((h) => ({
+        id: h.id,
         name: h.nome,
         description: h.meu_olhar || "",
-        slug: h.nome.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9\s-]/g, "").replace(/\s+/g, "-"),
         categoria: h.categoria?.trim() || "",
       }));
   }, [externalHotels, neighborhood]);
@@ -90,12 +74,12 @@ const WhereToStayDetail = () => {
             </div>
           ) : hotels.length > 0 ? (
             <div>
-              {hotels.map((hotel, index) => (
+              {hotels.map((hotel) => (
                 <HotelCard
-                  key={index}
+                  key={hotel.id}
+                  id={hotel.id}
                   name={hotel.name}
                   description={hotel.description}
-                  slug={hotel.slug}
                   neighborhood={neighborhood}
                   categoria={hotel.categoria}
                 />

@@ -6,7 +6,7 @@ import LuckyListMarker from "@/components/LuckyListMarker";
 import LuckyListPreviewSheet from "@/components/LuckyListPreviewSheet";
 import RoteiroAccessLink from "@/components/RoteiroAccessLink";
 import NeighborhoodDetailSheet from "@/components/eat/NeighborhoodDetailSheet";
-import { useExternalRestaurants, normalizeNeighborhood, generateRestaurantSlug } from "@/hooks/use-external-restaurants";
+import { useExternalRestaurants, normalizeNeighborhood } from "@/hooks/use-external-restaurants";
 import { usePlacePhoto, buildPlaceQuery } from "@/hooks/use-place-photo";
 import { getRestaurantImage } from "@/data/place-images";
 
@@ -40,7 +40,6 @@ function RestaurantRow({
   neighborhood: string;
   tag: string;
 }) {
-  const slug = generateRestaurantSlug(name);
   const placeQuery = buildPlaceQuery(name, neighborhood);
   const { photoUrl } = usePlacePhoto(id, "restaurant", placeQuery);
   const fallback = getRestaurantImage(neighborhood);
@@ -48,7 +47,7 @@ function RestaurantRow({
 
   return (
     <Link
-      to={`/restaurante/${slug}?from=${neighborhood}`}
+      to={`/restaurante/${id}?from=${neighborhood}`}
       className="flex items-center gap-3 py-3 border-b border-border hover:bg-muted/30 transition-colors -mx-2 px-2 rounded"
     >
       {/* Thumbnail */}
