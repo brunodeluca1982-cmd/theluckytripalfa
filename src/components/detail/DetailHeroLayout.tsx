@@ -1,7 +1,8 @@
 import { Link } from "react-router-dom";
-import { ChevronLeft, Bookmark } from "lucide-react";
+import { ChevronLeft, Bookmark, Music } from "lucide-react";
 import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
-import type { ReactNode } from "react";
+import { useSpotifyPlayer } from "@/contexts/SpotifyPlayerContext";
+import { useCallback, type ReactNode } from "react";
 
 interface MediaItem {
   type: "image" | "video";
