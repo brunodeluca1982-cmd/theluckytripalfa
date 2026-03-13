@@ -113,7 +113,8 @@ const ActivityDetail = () => {
       backPath={backPath}
       title={item.nome}
       pills={pills}
-      heroImageUrl={photoUrl || undefined}
+      media={playableMedia.length > 0 ? playableMedia : undefined}
+      heroImageUrl={playableMedia.length === 0 ? photoUrl || undefined : undefined}
       isSaved={isSaved}
       onSave={handleSave}
       footer={`The Lucky Trip — ${item.bairro || "Rio de Janeiro"}`}
