@@ -51,6 +51,7 @@ export interface Partner {
   initials: string;                     // Fallback for avatar
   bio?: string;                         // Short description
   imageUrl?: string;                    // Profile image
+  heroImageUrl?: string;                // Optional large hero/portrait image
   destinations: PartnerDestination[];   // Curated destinations
 }
 
