@@ -29,7 +29,7 @@ const IARoteirosInteligentes = () => {
         </p>
       </header>
 
-      <PaywallGate featureId="travel-intelligence">
+      <PaywallGate featureId="auto-organize">
         <div className="flex-1 flex flex-col items-center justify-center px-6 py-16">
           <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center mb-8">
             <Route className="w-10 h-10 text-muted-foreground" />
