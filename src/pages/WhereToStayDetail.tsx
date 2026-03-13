@@ -21,7 +21,7 @@ const WhereToStayDetail = () => {
 
   const neighborhoodData = getNeighborhoodById(neighborhood || "");
   const name = neighborhoodEditorial?.neighborhood_name || neighborhoodData?.name || neighborhood || "Bairro";
-  const description = neighborhoodEditorial?.identity_phrase || neighborhoodDescriptions[neighborhood || ""] || `Descubra onde ficar em ${name}.`;
+  const description = neighborhoodEditorial?.identity_phrase || `Descubra onde ficar em ${name}.`;
   const { heroUrl } = useNeighborhoodHero("rio-de-janeiro", neighborhood || "", "Rio de Janeiro", name, getHotelImage(neighborhood || ""));
 
   const hotels = useMemo(() => {
