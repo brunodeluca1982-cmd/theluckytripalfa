@@ -29,7 +29,7 @@ export const STRIPE_CONFIG = {
       label: 'Anual',
       interval: 'year' as const,
       description: 'R$ 97,00/ano',
-      savings: 'Melhor custo-benefício',
+      savings: 'Plano fundador — melhor escolha',
       recommended: true,
     },
   },
@@ -38,22 +38,25 @@ export const STRIPE_CONFIG = {
     amount: 19700,
     description: 'R$ 197,00 (acesso vitalício)',
   },
+  roteiroPurchase: {
+    priceId: 'price_1T9XcNJ2w2OK6FGMUMmwTkwE',
+    amount: 15000,
+    description: 'R$ 150,00 (roteiro avulso)',
+  },
 } as const;
 
 export type PlanType = keyof typeof STRIPE_CONFIG.prices;
 
 export const PREMIUM_FEATURES = [
-  { id: 'lucky-list', label: 'The Lucky List', description: 'Dicas exclusivas do Bruno' },
-  { id: 'itinerary-editing', label: 'Edição de Roteiro', description: 'Monte e edite roteiros inteligentes' },
-  { id: 'multiple-trips', label: 'Múltiplas Viagens', description: 'Planeje viagens simultâneas' },
-  { id: 'travel-intelligence', label: 'Inteligência de Viagem', description: 'Análise avançada com IA' },
+  { id: 'lucky-list', label: 'Lucky List completa', description: 'Todos os segredos exclusivos' },
+  { id: 'ia-unlimited', label: 'IA ilimitada', description: 'Sugestões e planejamento sem limites' },
+  { id: 'unlimited-trips', label: 'Viagens ilimitadas', description: 'Planeje quantas viagens quiser' },
+  { id: 'unlimited-edits', label: 'Edições ilimitadas', description: 'Edite e refine seus roteiros' },
+  { id: 'auto-organize', label: 'Organização inteligente', description: 'Roteiros organizados automaticamente' },
 ] as const;
 
 export type PremiumFeatureId = typeof PREMIUM_FEATURES[number]['id'];
 
-/**
- * Check if a feature is gated behind premium
- */
 export const isPremiumFeature = (featureId: string): boolean => {
   return PREMIUM_FEATURES.some(f => f.id === featureId);
 };

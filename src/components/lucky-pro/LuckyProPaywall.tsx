@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { X, Crown, Map, Sparkles, Download, Users, Heart, Check } from "lucide-react";
+import { X, Crown, Check } from "lucide-react";
 import { useSubscription } from "@/hooks/use-subscription";
 import { useAuthRedirect } from "@/hooks/use-auth-redirect";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,15 +10,10 @@ import { toast } from "sonner";
 interface LuckyProPaywallProps {
   open: boolean;
   onClose: () => void;
+  /** Optional custom title/message */
+  title?: string;
+  message?: string;
 }
-
-const FEATURES = [
-  { icon: Map, label: "The Lucky List completa", desc: "127 segredos exclusivos por cidade" },
-  { icon: Sparkles, label: "Melhorar roteiro com IA", desc: "Deixe a IA refinar seu roteiro" },
-  { icon: Download, label: "Acesso offline", desc: "Leve seus roteiros para qualquer lugar" },
-  { icon: Users, label: "Colaboração em tempo real", desc: "Planeje viagens em grupo" },
-  { icon: Heart, label: "Salvar locais ilimitados", desc: "Sem restrições de favoritos" },
-];
 
 interface PlanOption {
   key: PlanType;
@@ -33,8 +28,8 @@ const PLANS: PlanOption[] = [
     key: "yearly",
     label: "Anual",
     price: "R$ 97/ano",
-    sublabel: "≈ R$ 8 por mês",
-    badge: "Melhor valor",
+    sublabel: "Acesso beta durante a fase de testes",
+    badge: "Plano fundador",
   },
   {
     key: "monthly",
@@ -48,12 +43,19 @@ const PLANS: PlanOption[] = [
   },
 ];
 
-const LuckyProPaywall = ({ open, onClose }: LuckyProPaywallProps) => {
+const VALUE_PROPS = [
+  "Lucky List completa",
+  "IA ilimitada",
+  "Viagens ilimitadas",
+  "Edições ilimitadas",
+  "Organização inteligente de roteiros",
+];
+
+const LuckyProPaywall = ({ open, onClose, title, message }: LuckyProPaywallProps) => {
   const [selectedPlan, setSelectedPlan] = useState<PlanType>("yearly");
   const [loading, setLoading] = useState(false);
   const { isAuthenticated } = useSubscription();
   const { redirectToAuth } = useAuthRedirect();
-  const navigate = useNavigate();
 
   if (!open) return null;
 
@@ -104,28 +106,25 @@ const LuckyProPaywall = ({ open, onClose }: LuckyProPaywallProps) => {
 
         {/* Title */}
         <h1 className="text-3xl font-serif font-semibold text-white text-center mb-2">
-          Lucky Pro
+          {title || "Desbloqueie o The Lucky Trip"}
         </h1>
-        <p className="text-sm text-[hsl(40,40%,65%)] text-center mb-8">
-          O Rio que o Google não mostra
+        <p className="text-sm text-[hsl(40,40%,65%)] text-center mb-8 max-w-xs">
+          {message || "Planeje suas viagens com curadoria real e inteligência artificial."}
         </p>
 
-        {/* Features */}
-        <div className="w-full max-w-sm space-y-4 mb-8">
-          {FEATURES.map((f) => (
-            <div key={f.label} className="flex items-start gap-3">
-              <div className="w-8 h-8 rounded-lg bg-[hsl(40,60%,50%)]/10 flex items-center justify-center flex-shrink-0 mt-0.5">
-                <f.icon className="w-4 h-4 text-[hsl(40,60%,50%)]" />
+        {/* Value props */}
+        <div className="w-full max-w-sm space-y-3 mb-8">
+          {VALUE_PROPS.map((prop) => (
+            <div key={prop} className="flex items-center gap-3">
+              <div className="w-6 h-6 rounded-full bg-[hsl(40,60%,50%)]/15 flex items-center justify-center flex-shrink-0">
+                <Check className="w-3.5 h-3.5 text-[hsl(40,60%,50%)]" />
               </div>
-              <div>
-                <p className="text-sm font-medium text-white">{f.label}</p>
-                <p className="text-xs text-white/40">{f.desc}</p>
-              </div>
+              <span className="text-sm text-white/80">{prop}</span>
             </div>
           ))}
         </div>
 
-        {/* Plan selector — psychological anchoring */}
+        {/* Plan selector */}
         <div className="w-full max-w-sm space-y-3 mb-6">
           {PLANS.map((p) => {
             const isSelected = selectedPlan === p.key;
@@ -182,10 +181,19 @@ const LuckyProPaywall = ({ open, onClose }: LuckyProPaywallProps) => {
           disabled={loading}
           className="w-full max-w-sm py-4 rounded-xl bg-[hsl(40,60%,50%)] text-[hsl(30,10%,10%)] font-semibold text-base hover:bg-[hsl(40,60%,55%)] active:scale-[0.98] transition-all disabled:opacity-50"
         >
-          {loading ? "Processando..." : "Desbloquear Lucky Pro"}
+          {loading ? "Processando..." : "Entrar para o Lucky Trip"}
         </button>
 
-        <p className="text-[11px] text-white/30 text-center mt-3">
+        <button
+          onClick={() => {
+            onClose();
+          }}
+          className="w-full max-w-sm text-center text-xs text-white/40 mt-3 py-2"
+        >
+          Ver planos
+        </button>
+
+        <p className="text-[11px] text-white/30 text-center mt-2">
           Cancele quando quiser.
         </p>
 
