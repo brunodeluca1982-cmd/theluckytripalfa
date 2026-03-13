@@ -123,7 +123,7 @@ const HotelDetail = () => {
             {hotel.instagram}
           </a>
         )}
-        <a href="https://tidd.ly/4kOcJUx" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm text-white/50 hover:text-white/80 transition-colors">
+        <a href={reserveLink} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm text-white/50 hover:text-white/80 transition-colors">
           Reserve aqui
         </a>
       </div>
