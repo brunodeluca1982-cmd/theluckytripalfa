@@ -39,6 +39,7 @@
 
 import brunoDeLucaImg from "@/assets/partners/bruno-de-luca.jpeg";
 import carolinaDieckmannImg from "@/assets/partners/carolina-dieckmann.jpeg";
+import carolinaDieckmannHeroImg from "@/assets/partners/carolina-dieckmann-hero.jpeg";
 import celinaLocksImg from "@/assets/partners/celina-locks.jpeg";
 import diFerreroImg from "@/assets/partners/di-ferrero.jpeg";
 import isabeliFontanaImg from "@/assets/partners/isabeli-fontana.jpeg";
@@ -50,6 +51,7 @@ export interface Partner {
   initials: string;                     // Fallback for avatar
   bio?: string;                         // Short description
   imageUrl?: string;                    // Profile image
+  heroImageUrl?: string;                // Optional large hero/portrait image
   destinations: PartnerDestination[];   // Curated destinations
 }
 
@@ -84,8 +86,9 @@ export const partners: Partner[] = [
     id: "carolina-dieckmann",
     name: "Carolina Dieckmann",
     initials: "CD",
-    bio: "Atriz e exploradora",
+    bio: "Focada em sua paixão por registrar momentos — conteúdo de viagem de forma leve e natural.",
     imageUrl: carolinaDieckmannImg,
+    heroImageUrl: carolinaDieckmannHeroImg,
     destinations: [
       {
         destinationId: "rio-de-janeiro",
