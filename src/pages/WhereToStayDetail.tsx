@@ -50,7 +50,7 @@ const WhereToStayDetail = () => {
   const hotels = useMemo(() => {
     if (!externalHotels) return [];
     return externalHotels
-      .filter((h) => normalizeNeighborhood(h.bairro) === neighborhood)
+      .filter((h) => h.bairro_slug === neighborhood || normalizeNeighborhood(h.bairro) === neighborhood)
       .map((h) => ({
         name: h.nome,
         description: h.meu_olhar || "",
