@@ -40,7 +40,6 @@ function RestaurantRow({
   neighborhood: string;
   tag: string;
 }) {
-  const slug = generateRestaurantSlug(name);
   const placeQuery = buildPlaceQuery(name, neighborhood);
   const { photoUrl } = usePlacePhoto(id, "restaurant", placeQuery);
   const fallback = getRestaurantImage(neighborhood);
