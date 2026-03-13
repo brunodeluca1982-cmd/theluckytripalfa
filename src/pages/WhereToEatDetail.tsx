@@ -17,23 +17,6 @@ import type { PlaceResult } from "@/lib/search-places";
  * Uses exclusively external Supabase data. No static fallback.
  */
 
-const neighborhoodDescriptions: Record<string, string> = {
-  ipanema: "Aqui a gastronomia é diversa como a própria praia. Tem alta cozinha, bistrôs autorais, cafés modernos, botecos clássicos e lugares onde você entra pra almoçar e acaba ficando até o jantar.",
-  leblon: "No Leblon, os restaurantes são mais maduros. Menos moda, mais constância. Cozinhas sólidas, serviço afinado e um público que volta porque confia.",
-  copacabana: "Copacabana é tradição à mesa. Restaurantes históricos, hotéis clássicos e cozinhas que atravessaram décadas sem perder o nível.",
-  leme: "Mais discreto e local. Poucos restaurantes, mas bem escolhidos, com clima de bairro e menos pressa.",
-  arpoador: "Pequeno no mapa, mas estratégico. Comer aqui é quase sempre combinado com praia, pôr do sol ou uma pausa entre caminhadas.",
-  "jardim-botanico": "A gastronomia aqui é mais verde, mais calma e mais cuidadosa. Restaurantes que valorizam tempo, ambiente e ingredientes.",
-  gavea: "Bairro de bares clássicos e restaurantes que funcionam como extensão da sala de casa. Muito encontro, muita conversa e pouca formalidade.",
-  botafogo: "Um dos polos gastronômicos mais criativos do Rio. Restaurantes novos, cozinhas autorais, bares híbridos e muita experimentação.",
-  flamengo: "Mais funcional do que gastronômico, mas com boas surpresas. Restaurantes tradicionais, opções honestas e lugares que servem bem sem chamar atenção.",
-  "santa-teresa": "Aqui comer faz parte da experiência. Vista, atmosfera e história pesam tanto quanto o prato.",
-  "sao-conrado": "Poucas opções, mas bem pontuais. A gastronomia aparece como apoio ao dia de praia ou ao fim de tarde.",
-  "barra-da-tijuca": "Restaurantes amplos, confortáveis e bem estruturados. Muito churrasco, japonês, casas grandes e opções para grupos.",
-  recreio: "Comida ligada ao esporte e à natureza. Lugares simples, pós-praia, com foco em peixe, sucos, açaí e refeições diretas.",
-  centro: "Balcões de almoço históricos, bares tradicionais e confeitarias centenárias preservando os sabores do Rio antigo.",
-  lagoa: "Um dos cartões-postais do Rio, com restaurantes sofisticados à beira d'água e opções para todos os momentos do dia.",
-};
 
 const WhereToEatDetail = () => {
   const { neighborhood } = useParams<{ neighborhood: string }>();
