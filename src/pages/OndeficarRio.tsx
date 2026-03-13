@@ -196,7 +196,7 @@ const OndeficarRio = () => {
                 key={neighborhood.id}
                 className="absolute w-8 h-8 -ml-4 -mt-4 rounded-full bg-foreground/10 border border-foreground/20 hover:bg-foreground/20 hover:border-foreground/40 transition-colors flex items-center justify-center z-20"
                 style={{ top: neighborhood.mapPosition.top, left: neighborhood.mapPosition.left }}
-                aria-label={`Explorar hotéis em ${neighborhood.name}`}
+                aria-label={`Ver hotéis em ${neighborhood.name}`}
                 onClick={(e) => {
                   e.stopPropagation();
                   if (isSelected) {
