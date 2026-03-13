@@ -36,6 +36,7 @@ const OndeficarRio = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(0.7);
   const [translate, setTranslate] = useState({ x: 0, y: 0 });
+  const [selectedNeighborhood, setSelectedNeighborhood] = useState<string | null>(null);
   const gestureRef = useRef({
     isPanning: false,
     startX: 0, startY: 0,
