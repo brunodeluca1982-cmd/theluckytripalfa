@@ -6,8 +6,6 @@ import { Button } from "@/components/ui/button";
 import AddIdeaSection from "@/components/minha-viagem/AddIdeaSection";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
-import { useExternalExperiencias, normalizeNeighborhood } from "@/hooks/use-external-experiencias";
-import { getAttractionImage } from "@/data/place-images";
 import type { SavedItem } from "@/hooks/use-item-save";
 
 const STORAGE_KEY = "draft-roteiro";
@@ -32,7 +30,6 @@ function readDraft(): SavedItem[] {
 const MinhaViagem = () => {
   const navigate = useNavigate();
   const [items, setItems] = useState<SavedItem[]>(readDraft);
-  const { data: experiencias } = useExternalExperiencias();
 
   useEffect(() => {
     const sync = () => setItems(readDraft());
@@ -54,20 +51,14 @@ const MinhaViagem = () => {
     toast({ title: "Removido da viagem" });
   }, []);
 
-  const getNeighborhood = (item: SavedItem): string => {
-    if (!experiencias) return item.destinationName;
-    const exp = experiencias.find((e) => e.id === item.id);
-    return exp?.bairro || item.destinationName;
-  };
-
-  const getImage = (item: SavedItem): string => {
-    if (!experiencias) return getAttractionImage(item.id);
-    const exp = experiencias.find((e) => e.id === item.id);
-    if (exp) {
-      const slug = normalizeNeighborhood(exp.bairro);
-      return getAttractionImage(slug);
+  const getDetailPath = (item: SavedItem): string => {
+    switch (item.type) {
+      case "activity": return `/atividade/${item.id}`;
+      case "hotel": return `/hotel/${item.id}`;
+      case "restaurant": return `/restaurante/${item.id}`;
+      case "lucky-list": return `/lucky-list/${item.id}`;
+      default: return `/atividade/${item.id}`;
     }
-    return getAttractionImage(item.id);
   };
 
   return (
@@ -99,121 +90,64 @@ const MinhaViagem = () => {
             <p className="text-sm text-muted-foreground mb-6 max-w-[260px]">
               Salve lugares ou crie um roteiro para começar sua viagem.
             </p>
-            <Button
-              onClick={() => navigate("/ia/criar-roteiro")}
-              className="w-full max-w-[260px] h-12 text-base font-semibold rounded-xl gap-2 mb-3"
-            >
-              <Sparkles className="w-5 h-5" />
-              Criar roteiro
-            </Button>
-            <Button variant="outline" asChild className="w-full max-w-[260px]">
-              <Link to="/destinos">Explorar destinos</Link>
-            </Button>
+            <div className="flex flex-col gap-3 w-full max-w-xs">
+              <Button asChild variant="default" size="lg" className="w-full">
+                <Link to="/o-que-fazer" className="flex items-center gap-2">
+                  <Sparkles className="w-4 h-4" />
+                  Explorar O Que Fazer
+                </Link>
+              </Button>
+              <Button asChild variant="outline" size="lg" className="w-full">
+                <Link to="/lucky-list" className="flex items-center gap-2">
+                  <MapPin className="w-4 h-4" />
+                  Lucky List
+                </Link>
+              </Button>
+            </div>
           </div>
         ) : (
-          <div className="space-y-3">
-            {/* Invite friends button */}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => toast({ title: "Em breve!", description: "Convite para amigos estará disponível em breve." })}
-              className="w-full h-10 rounded-xl gap-2 text-sm font-medium"
-            >
-              <Users className="w-4 h-4" />
-              Convidar amigos
-            </Button>
-
-            <p className="text-sm text-muted-foreground mb-2">
-              {items.length} {items.length === 1 ? "lugar salvo" : "lugares salvos"}
-            </p>
-            <AnimatePresence initial={false}>
-              {items.map((item) => (
-                <motion.div
-                  key={`${item.id}-${item.type}`}
-                  layout
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, x: -80 }}
-                  transition={{ duration: 0.25 }}
-                  className="flex items-center gap-3 bg-card rounded-xl border border-border overflow-hidden"
+          <AnimatePresence>
+            {items.map((item) => (
+              <motion.div
+                key={`${item.type}-${item.id}`}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, x: -100 }}
+                className="flex items-center gap-3 p-3 rounded-xl border border-border bg-card"
+              >
+                <Link to={getDetailPath(item)} className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-foreground truncate">{item.destinationName}</p>
+                  <Badge variant="secondary" className="mt-1 text-[10px]">
+                    {typeLabels[item.type] || item.type}
+                  </Badge>
+                </Link>
+                <button
+                  onClick={() => handleRemove(item.id, item.type)}
+                  className="p-1.5 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors flex-shrink-0"
                 >
-                  <div className="w-20 h-20 flex-shrink-0">
-                    <img
-                      src={getImage(item)}
-                      alt={item.title}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
+                  <X className="w-4 h-4" />
+                </button>
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        )}
 
-                  <div className="flex-1 min-w-0 py-2 pr-1">
-                    <p className="text-sm font-medium text-foreground truncate">
-                      {item.title}
-                    </p>
-                    {(item as any).sourceUrl ? (
-                      <p className="text-xs text-muted-foreground truncate">
-                        {(item as any).sourceUrl}
-                      </p>
-                    ) : (
-                      <p className="text-xs text-muted-foreground truncate">
-                        {item.neighborhood || getNeighborhood(item)}
-                      </p>
-                    )}
-                    <div className="flex items-center gap-1.5 mt-1 flex-wrap">
-                      {typeLabels[item.type] && (
-                        <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4">
-                          {typeLabels[item.type]}
-                        </Badge>
-                      )}
-                      {item.source && (
-                        <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 gap-0.5">
-                          {item.source === 'instagram' ? (
-                            <Instagram className="w-2.5 h-2.5" />
-                          ) : item.source === 'tiktok' ? (
-                            <svg className="w-2.5 h-2.5" viewBox="0 0 24 24" fill="currentColor">
-                              <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.27 6.27 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.34-6.34V8.75a8.18 8.18 0 004.76 1.52V6.84a4.84 4.84 0 01-1-.15z" />
-                            </svg>
-                          ) : (
-                            <Link2 className="w-2.5 h-2.5" />
-                          )}
-                          {item.sourceLabel || item.source}
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
-
-                  <button
-                    onClick={() => handleRemove(item.id, item.type)}
-                    className="p-3 text-muted-foreground hover:text-destructive transition-colors flex-shrink-0"
-                    aria-label="Remover"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </motion.div>
-              ))}
-            </AnimatePresence>
+        {items.length > 0 && (
+          <div className="flex flex-col gap-3 pt-4">
+            <Button asChild variant="default" size="lg" className="w-full">
+              <Link to="/criar-roteiro" className="flex items-center gap-2">
+                <Sparkles className="w-4 h-4" />
+                Criar Roteiro com IA
+              </Link>
+            </Button>
+            <Button asChild variant="outline" size="lg" className="w-full">
+              <Link to="/roteiro-planner" className="flex items-center gap-2">
+                Montar Roteiro Manual
+              </Link>
+            </Button>
           </div>
         )}
       </main>
-
-      {/* Fixed CTA */}
-      {items.length > 0 && (
-        <div className="fixed bottom-20 left-0 right-0 p-4 z-40 space-y-2">
-          <Button
-            onClick={() => navigate("/ia/lucky-trip")}
-            className="w-full h-14 text-base font-semibold rounded-xl gap-2"
-          >
-            <Sparkles className="w-5 h-5" />
-            Organizar com Lucky
-          </Button>
-          <Button
-            variant="outline"
-            onClick={() => navigate("/ia/criar-roteiro")}
-            className="w-full h-11 text-sm font-medium rounded-xl"
-          >
-            Criar roteiro
-          </Button>
-        </div>
-      )}
     </div>
   );
 };

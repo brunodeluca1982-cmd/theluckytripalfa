@@ -1,25 +1,81 @@
 import { Link, useParams } from "react-router-dom";
-import { ChevronLeft, Loader2, Clock, MapPin, Baby, Shield } from "lucide-react";
+import { ChevronLeft, Loader2, Clock, MapPin, Zap, ExternalLink } from "lucide-react";
 import RoteiroAccessLink from "@/components/RoteiroAccessLink";
-import { getAttractionImage } from "@/data/place-images";
 import { GooglePlaceSearchSection } from "@/components/GooglePlaceSearchSection";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import type { PlaceResult } from "@/lib/search-places";
-import { useExternalExperiencias, normalizeNeighborhood } from "@/hooks/use-external-experiencias";
+import { useOQueFazer, type OQueFazerItem, slugifyOQueFazer } from "@/hooks/use-o-que-fazer";
+import { usePlacePhoto, buildPlaceQuery } from "@/hooks/use-place-photo";
+
+function normalizeSlug(s: string): string {
+  return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "-");
+}
+
+function ItemCard({ item }: { item: OQueFazerItem }) {
+  const placeQuery = buildPlaceQuery(item.nome, item.bairro || undefined);
+  const itemSlug = slugifyOQueFazer(item.nome);
+  const { photoUrl, isLoading: photoLoading } = usePlacePhoto(itemSlug, "attraction", placeQuery);
+
+  return (
+    <Link
+      to={`/atividade/${item.id}?from=${normalizeSlug(item.bairro || "")}`}
+      className="block border-b border-border pb-8 last:border-b-0 hover:bg-muted/30 transition-colors -mx-2 px-2 rounded"
+    >
+      <div className="w-full aspect-[16/9] bg-muted/50 rounded overflow-hidden mb-4 relative">
+        {photoLoading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-muted/30 z-10">
+            <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+          </div>
+        )}
+        {photoUrl && (
+          <img src={photoUrl} alt={item.nome} className="w-full h-full object-cover" loading="lazy" />
+        )}
+      </div>
+
+      <p className="text-xs tracking-widest text-muted-foreground uppercase mb-2">{item.categoria}</p>
+      <h2 className="text-2xl font-serif font-medium text-foreground mb-2">{item.nome}</h2>
+
+      <div className="flex flex-wrap gap-2 mb-4">
+        {item.duracao_media && (
+          <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+            <Clock className="w-3 h-3" /> {item.duracao_media}
+          </span>
+        )}
+        {item.vibe && (
+          <span className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground">{item.vibe}</span>
+        )}
+        {item.energia && (
+          <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+            <Zap className="w-3 h-3" /> {item.energia}
+          </span>
+        )}
+      </div>
+
+      {item.meu_olhar && (
+        <div className="space-y-2 mb-4">
+          {item.meu_olhar.split("\n").map((paragraph, index) => (
+            <p key={index} className="text-base text-muted-foreground leading-relaxed">{paragraph}</p>
+          ))}
+        </div>
+      )}
+
+      <span className="text-xs text-muted-foreground/60">Ver detalhes</span>
+    </Link>
+  );
+}
 
 const WhatToDoDetail = () => {
   const { neighborhood } = useParams<{ neighborhood: string }>();
   const slug = neighborhood || "";
 
-  const { data: allExperiencias, isLoading } = useExternalExperiencias();
+  const { data: allItems, isLoading } = useOQueFazer();
 
-  // Filter experiencias for this neighborhood
-  const experiencias = (allExperiencias || []).filter(
-    (e) => normalizeNeighborhood(e.bairro) === slug
+  const items = (allItems || []).filter(
+    (e) => normalizeSlug(e.bairro || "") === slug
   );
 
-  const neighborhoodName = experiencias[0]?.bairro || slug;
+  const neighborhoodName = items[0]?.bairro || slug;
 
   const handleAddToRoteiro = async (place: PlaceResult) => {
     const { error } = await supabase.from("roteiro_itens").insert({
@@ -45,24 +101,16 @@ const WhatToDoDetail = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Hero Image — photo-first */}
-      <div className="relative w-full aspect-[4/3] bg-muted overflow-hidden">
-        <img
-          src={getAttractionImage(slug)}
-          alt={`O que fazer em ${neighborhoodName}`}
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-transparent" />
-        <div className="absolute top-0 left-0 right-0 px-4 pt-[env(safe-area-inset-top,12px)] pb-2 flex items-center justify-between z-10">
-          <Link
-            to="/o-que-fazer"
-            className="w-9 h-9 rounded-full bg-black/30 backdrop-blur-md flex items-center justify-center text-white"
-          >
-            <ChevronLeft className="w-5 h-5" />
-          </Link>
-          <RoteiroAccessLink />
-        </div>
-      </div>
+      <header className="px-6 py-4 border-b border-border flex items-center justify-between">
+        <Link
+          to="/o-que-fazer"
+          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <ChevronLeft className="w-4 h-4" />
+          Voltar
+        </Link>
+        <RoteiroAccessLink />
+      </header>
 
       <main className="pb-12">
         <div className="px-6 pt-8 pb-6">
@@ -76,73 +124,14 @@ const WhatToDoDetail = () => {
             <div className="flex items-center justify-center py-16">
               <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
             </div>
-          ) : experiencias.length > 0 ? (
+          ) : items.length > 0 ? (
             <div className="space-y-8">
-              {experiencias.map((exp) => (
-                <Link
-                  key={exp.id}
-                  to={`/atividade/${exp.id}?from=${slug}`}
-                  className="block border-b border-border pb-8 last:border-b-0 hover:bg-muted/30 transition-colors -mx-2 px-2 rounded"
-                >
-                  <div className="w-full aspect-[16/9] bg-muted/50 rounded overflow-hidden mb-4">
-                    <img
-                      src={getAttractionImage(slug)}
-                      alt={exp.nome}
-                      className="w-full h-full object-cover"
-                      loading="lazy"
-                    />
-                  </div>
-
-                  <p className="text-xs tracking-widest text-muted-foreground uppercase mb-2">
-                    {exp.categoria}
-                  </p>
-
-                  <h2 className="text-2xl font-serif font-medium text-foreground mb-2">
-                    {exp.nome}
-                  </h2>
-
-                  {/* Metadata pills */}
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {exp.duracao && (
-                      <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
-                        <Clock className="w-3 h-3" /> {exp.duracao}
-                      </span>
-                    )}
-                    {exp.vibe && (
-                      <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
-                        {exp.vibe}
-                      </span>
-                    )}
-                    {exp.com_criancas && (
-                      <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
-                        <Baby className="w-3 h-3" /> Kids OK
-                      </span>
-                    )}
-                    {exp.seguro_mulher_sozinha && (
-                      <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
-                        <Shield className="w-3 h-3" /> Safe solo
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="space-y-2 mb-4">
-                    {exp.meu_olhar.split("\n").map((paragraph, index) => (
-                      <p key={index} className="text-base text-muted-foreground leading-relaxed">
-                        {paragraph}
-                      </p>
-                    ))}
-                  </div>
-
-                  <span className="text-xs text-muted-foreground/60">
-                    Ver detalhes
-                  </span>
-                </Link>
+              {items.map((item) => (
+                <ItemCard key={item.id} item={item} />
               ))}
             </div>
           ) : (
-            <p className="text-base text-muted-foreground">
-              Atividades em breve.
-            </p>
+            <p className="text-base text-muted-foreground">Atividades em breve.</p>
           )}
         </div>
 
@@ -158,9 +147,7 @@ const WhatToDoDetail = () => {
       </main>
 
       <footer className="px-6 py-8 border-t border-border">
-        <p className="text-xs text-muted-foreground">
-          The Lucky Trip — {neighborhoodName}
-        </p>
+        <p className="text-xs text-muted-foreground">The Lucky Trip — {neighborhoodName}</p>
       </footer>
     </div>
   );
