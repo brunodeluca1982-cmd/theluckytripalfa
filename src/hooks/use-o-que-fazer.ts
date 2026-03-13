@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import type { Tables } from "@/integrations/supabase/types";
 
 export interface OQueFazerItem {
   id: string;
@@ -18,6 +19,9 @@ export interface OQueFazerItem {
   ordem: number;
 }
 
+type OQueFazerRow = Tables<"o_que_fazer_rio">;
+const O_QUE_FAZER_QUERY_KEY = ["o-que-fazer-rio", "v2"] as const;
+
 /**
  * Returns the current approximate period of day:
  * manhã (6-12), tarde (12-18), noite (18-6)
@@ -27,6 +31,25 @@ function getCurrentMomento(): string {
   if (h >= 6 && h < 12) return "manhã";
   if (h >= 12 && h < 18) return "tarde";
   return "noite";
+}
+
+function mapRowToItem(r: OQueFazerRow): OQueFazerItem {
+  return {
+    id: r.id,
+    nome: r.nome,
+    categoria: r.categoria ?? "",
+    bairro: r.bairro ?? null,
+    google_maps: r.google_maps ?? null,
+    meu_olhar: r.meu_olhar ?? null,
+    momento_ideal: r.momento_ideal ?? null,
+    momento_lucky_list: r.momento_lucky_list ?? null,
+    como_fazer: r.como_fazer ?? null,
+    tags_ia: r.tags_ia ?? [],
+    vibe: r.vibe ?? null,
+    energia: r.energia ?? null,
+    duracao_media: r.duracao_media ?? null,
+    ordem: r.ordem ?? 0,
+  };
 }
 
 /**
@@ -44,8 +67,7 @@ function smartSort(items: OQueFazerItem[]): OQueFazerItem[] {
 }
 
 async function fetchOQueFazer(): Promise<OQueFazerItem[]> {
-  // Cast to 'any' because the generated types don't yet include this new table
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from("o_que_fazer_rio")
     .select("*")
     .eq("ativo", true)
@@ -53,29 +75,15 @@ async function fetchOQueFazer(): Promise<OQueFazerItem[]> {
 
   if (error) throw error;
 
-  return ((data as any[]) || []).map((r) => ({
-    id: r.id,
-    nome: r.nome,
-    categoria: r.categoria ?? "",
-    bairro: r.bairro ?? null,
-    google_maps: r.google_maps ?? null,
-    meu_olhar: r.meu_olhar ?? null,
-    momento_ideal: r.momento_ideal ?? null,
-    momento_lucky_list: r.momento_lucky_list ?? null,
-    como_fazer: r.como_fazer ?? null,
-    tags_ia: r.tags_ia ?? [],
-    vibe: r.vibe ?? null,
-    energia: r.energia ?? null,
-    duracao_media: r.duracao_media ?? null,
-    ordem: r.ordem ?? 0,
-  }));
+  return (data || []).map(mapRowToItem);
 }
 
 export function useOQueFazer() {
   return useQuery({
-    queryKey: ["o-que-fazer-rio"],
+    queryKey: O_QUE_FAZER_QUERY_KEY,
     queryFn: fetchOQueFazer,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 0,
+    refetchOnMount: "always",
     select: smartSort,
   });
 }
@@ -83,36 +91,19 @@ export function useOQueFazer() {
 /** Fetch a single O Que Fazer item by id */
 export function useOQueFazerItem(id: string | undefined) {
   return useQuery({
-    queryKey: ["o-que-fazer-rio", id],
+    queryKey: [...O_QUE_FAZER_QUERY_KEY, id],
     enabled: !!id,
     queryFn: async (): Promise<OQueFazerItem | null> => {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from("o_que_fazer_rio")
         .select("*")
         .eq("id", id!)
         .eq("ativo", true)
-        .single();
+        .maybeSingle();
 
-      if (error) return null;
-      if (!data) return null;
+      if (error || !data) return null;
 
-      const r = data as any;
-      return {
-        id: r.id,
-        nome: r.nome,
-        categoria: r.categoria ?? "",
-        bairro: r.bairro ?? null,
-        google_maps: r.google_maps ?? null,
-        meu_olhar: r.meu_olhar ?? null,
-        momento_ideal: r.momento_ideal ?? null,
-        momento_lucky_list: r.momento_lucky_list ?? null,
-        como_fazer: r.como_fazer ?? null,
-        tags_ia: r.tags_ia ?? [],
-        vibe: r.vibe ?? null,
-        energia: r.energia ?? null,
-        duracao_media: r.duracao_media ?? null,
-        ordem: r.ordem ?? 0,
-      };
+      return mapRowToItem(data);
     },
   });
 }
