@@ -145,8 +145,6 @@ const WhatToDo = () => {
   const { evento, getPlacement } = useEventMode();
   const { heroUrl } = useCityHero();
   const { data: items, isLoading, isError, error, refetch, isFetching } = useOQueFazer();
-  const [selectedItem, setSelectedItem] = useState<OQueFazerItem | null>(null);
-  const [sheetOpen, setSheetOpen] = useState(false);
 
   const handleMusicTap = useCallback(() => {
     if (!active) activate();
@@ -159,9 +157,8 @@ const WhatToDo = () => {
   }, [navigate]);
 
   const handleCardTap = useCallback((item: OQueFazerItem) => {
-    setSelectedItem(item);
-    setSheetOpen(true);
-  }, []);
+    navigate(`/atividade/${item.id}?from=city`);
+  }, [navigate]);
 
   const topPlacement = getPlacement("o_que_fazer_top");
 
