@@ -74,12 +74,12 @@ const WhereToStayDetail = () => {
             </div>
           ) : hotels.length > 0 ? (
             <div>
-              {hotels.map((hotel, index) => (
+              {hotels.map((hotel) => (
                 <HotelCard
-                  key={index}
+                  key={hotel.id}
+                  id={hotel.id}
                   name={hotel.name}
                   description={hotel.description}
-                  slug={hotel.slug}
                   neighborhood={neighborhood}
                   categoria={hotel.categoria}
                 />
