@@ -86,8 +86,9 @@ export const partners: Partner[] = [
     id: "carolina-dieckmann",
     name: "Carolina Dieckmann",
     initials: "CD",
-    bio: "Atriz e exploradora",
+    bio: "Focada em sua paixão por registrar momentos — conteúdo de viagem de forma leve e natural.",
     imageUrl: carolinaDieckmannImg,
+    heroImageUrl: carolinaDieckmannHeroImg,
     destinations: [
       {
         destinationId: "rio-de-janeiro",
