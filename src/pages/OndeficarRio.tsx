@@ -33,6 +33,7 @@ function normalizeNeighborhood(bairro: string): string {
 const OndeficarRio = () => {
   const { data: externalHotels } = useExternalHotels();
   const navigate = useNavigate();
+  const hotelListRef = useRef<HTMLDivElement>(null);
 
   // Pan/zoom state
   const containerRef = useRef<HTMLDivElement>(null);
