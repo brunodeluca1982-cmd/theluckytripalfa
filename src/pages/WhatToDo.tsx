@@ -1,40 +1,93 @@
 import { Link, useNavigate } from "react-router-dom";
-import { Clapperboard, Music, ArrowLeft, Lock, MapPin, Clock, Zap, Loader2 } from "lucide-react";
+import { Clapperboard, Music, ArrowLeft, Lock, MapPin, Clock, Zap, Loader2, ExternalLink } from "lucide-react";
 import { useCallback } from "react";
 import { useSpotifyPlayer } from "@/contexts/SpotifyPlayerContext";
 import { useEventMode } from "@/contexts/EventModeContext";
 import { clearVideoSeen } from "@/pages/DestinationVideoIntro";
 import { useCityHero } from "@/contexts/CityHeroContext";
 import { useOQueFazer, type OQueFazerItem } from "@/hooks/use-o-que-fazer";
+import { usePlacePhoto, buildPlaceQuery } from "@/hooks/use-place-photo";
+
+/* ───── Slugify helper for cache keys ───── */
+function slugify(s: string) {
+  return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+}
 
 /* ───── Lucky List Teaser (blurred) ───── */
 
-function LuckyListTeaser({ text }: { text: string }) {
+const TEASER_CTAS = [
+  "Descubra o momento certo",
+  "O segredo está nos detalhes",
+  "Tem mais por trás disso",
+  "Existe um jeito melhor",
+  "Quem sabe, sabe",
+];
+
+function LuckyListTeaser({ text, index }: { text: string; index: number }) {
+  const cta = TEASER_CTAS[index % TEASER_CTAS.length];
   return (
     <Link
       to="/lucky-list"
-      className="relative block mt-3 rounded-xl overflow-hidden border border-white/20"
+      className="relative block mt-3 rounded-xl overflow-hidden border border-white/15"
     >
-      {/* Blurred content */}
-      <div className="px-4 py-3 backdrop-blur-xl bg-white/5 select-none" style={{ filter: "blur(4px)" }}>
-        <p className="text-xs text-white/60 leading-relaxed line-clamp-2">{text}</p>
+      <div className="px-4 py-3 backdrop-blur-xl bg-white/5 select-none" style={{ filter: "blur(5px)" }}>
+        <p className="text-xs text-white/50 leading-relaxed line-clamp-2">{text}</p>
       </div>
-      {/* Overlay with lock */}
-      <div className="absolute inset-0 flex items-center justify-center bg-black/30 backdrop-blur-[2px]">
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/15 border border-white/25">
-          <Lock className="w-3 h-3 text-white/80" />
-          <span className="text-[11px] font-medium text-white/90 tracking-wide">Ver na Lucky List</span>
+      <div className="absolute inset-0 flex items-center justify-center bg-black/25 backdrop-blur-[1px]">
+        <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 border border-white/20">
+          <Lock className="w-3 h-3 text-white/70" />
+          <span className="text-[11px] font-medium text-white/85 tracking-wide">{cta}</span>
         </div>
       </div>
     </Link>
   );
 }
 
+/* ───── Como Fazer Steps ───── */
+
+function ComoFazerSteps({ text }: { text: string }) {
+  const steps = text.split("\n").map(s => s.trim()).filter(Boolean);
+  if (steps.length === 0) return null;
+  return (
+    <div className="mt-2 space-y-1">
+      {steps.map((step, i) => (
+        <div key={i} className="flex items-start gap-2">
+          <span className="text-[10px] text-white/30 font-mono mt-0.5 flex-shrink-0">{i + 1}.</span>
+          <p className="text-xs text-white/55 leading-relaxed">{step}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 /* ───── Item Card ───── */
 
-function OQueFazerCard({ item }: { item: OQueFazerItem }) {
+function OQueFazerCard({ item, index }: { item: OQueFazerItem; index: number }) {
+  const placeQuery = buildPlaceQuery(item.nome, item.bairro || undefined);
+  const itemSlug = slugify(item.nome);
+  const { photoUrl, isLoading: photoLoading } = usePlacePhoto(itemSlug, "attraction", placeQuery);
+
   return (
-    <div className="py-4 border-b border-white/10 last:border-b-0">
+    <div className="py-5 border-b border-white/10 last:border-b-0">
+      {/* Hero Image */}
+      {(photoUrl || photoLoading) && (
+        <div className="w-full aspect-[16/9] rounded-xl overflow-hidden mb-4 relative bg-white/5">
+          {photoLoading && (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <Loader2 className="w-5 h-5 animate-spin text-white/30" />
+            </div>
+          )}
+          {photoUrl && (
+            <img
+              src={photoUrl}
+              alt={item.nome}
+              className="w-full h-full object-cover"
+              loading="lazy"
+            />
+          )}
+        </div>
+      )}
+
       {/* Category + Bairro */}
       <div className="flex items-center gap-2 mb-1">
         {item.categoria && (
@@ -60,38 +113,45 @@ function OQueFazerCard({ item }: { item: OQueFazerItem }) {
         </p>
       )}
 
+      {/* Como fazer (step list) */}
+      {item.como_fazer && <ComoFazerSteps text={item.como_fazer} />}
+
       {/* Metadata pills */}
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2 mt-2">
         {item.vibe && (
-          <span className="inline-flex items-center gap-1 text-[10px] tracking-widest uppercase text-white/50">
+          <span className="inline-flex items-center gap-1 text-[10px] tracking-widest uppercase text-white/40">
             {item.vibe}
           </span>
         )}
         {item.duracao_media && (
-          <span className="inline-flex items-center gap-1 text-[10px] text-white/50">
+          <span className="inline-flex items-center gap-1 text-[10px] text-white/40">
             <Clock className="w-3 h-3" /> {item.duracao_media}
           </span>
         )}
         {item.energia && (
-          <span className="inline-flex items-center gap-1 text-[10px] text-white/50">
+          <span className="inline-flex items-center gap-1 text-[10px] text-white/40">
             <Zap className="w-3 h-3" /> {item.energia}
           </span>
         )}
-        {item.google_maps && (
-          <a
-            href={item.google_maps}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 text-[10px] text-white/60 hover:text-white/90 transition-colors"
-          >
-            <MapPin className="w-3 h-3" /> Mapa
-          </a>
-        )}
       </div>
+
+      {/* Google Maps button */}
+      {item.google_maps && (
+        <a
+          href={item.google_maps}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1.5 mt-3 text-xs text-white/65 hover:text-white/90 transition-colors"
+        >
+          <MapPin className="w-3.5 h-3.5" />
+          Ver no mapa
+          <ExternalLink className="w-2.5 h-2.5 opacity-50" />
+        </a>
+      )}
 
       {/* Lucky List teaser */}
       {item.momento_lucky_list && (
-        <LuckyListTeaser text={item.momento_lucky_list} />
+        <LuckyListTeaser text={item.momento_lucky_list} index={index} />
       )}
     </div>
   );
@@ -222,8 +282,8 @@ const WhatToDo = () => {
           </div>
         ) : items && items.length > 0 ? (
           <div className="backdrop-blur-md bg-white/5 rounded-2xl border border-white/10 px-4">
-            {items.map((item) => (
-              <OQueFazerCard key={item.id} item={item} />
+            {items.map((item, i) => (
+              <OQueFazerCard key={item.id} item={item} index={i} />
             ))}
           </div>
         ) : (
