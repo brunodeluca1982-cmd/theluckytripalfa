@@ -291,6 +291,24 @@ const WhatToDo = () => {
           <div className="flex items-center justify-center py-16">
             <Loader2 className="w-6 h-6 animate-spin text-white/60" />
           </div>
+        ) : isError ? (
+          <div className="flex flex-col items-center justify-center py-16 gap-3">
+            <p className="text-sm text-white/80 text-center">
+              Não conseguimos carregar as atividades agora.
+            </p>
+            <p className="text-xs text-white/50 text-center max-w-xs">
+              {error instanceof Error ? error.message : "Erro de leitura da base oficial o_que_fazer_rio."}
+            </p>
+            <button
+              type="button"
+              onClick={() => refetch()}
+              disabled={isFetching}
+              className="inline-flex items-center gap-2 text-xs text-white/80 hover:text-white transition-colors disabled:opacity-50"
+            >
+              <RefreshCw className={`w-3 h-3 ${isFetching ? "animate-spin" : ""}`} />
+              Tentar novamente
+            </button>
+          </div>
         ) : items && items.length > 0 ? (
           <div className="backdrop-blur-md bg-white/5 rounded-2xl border border-white/10 px-4">
             {items.map((item, i) => (
