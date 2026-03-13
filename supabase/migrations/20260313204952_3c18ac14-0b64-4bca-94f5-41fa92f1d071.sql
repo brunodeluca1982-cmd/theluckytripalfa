@@ -1,0 +1,3 @@
+UPDATE home_hero_items SET title = 'Pôr do Sol no Arpoador', subtitle = 'O melhor lugar sem muvuca', permalink = '/atividade/52719c39-8ee7-4122-ab89-f96c19558a85', destination_slug = NULL WHERE id = '1564231b-39e0-4722-8e0f-eb76becf7820';
+UPDATE home_hero_items SET title = 'Pedra Bonita', subtitle = 'Trilha com a melhor vista do Rio', permalink = '/atividade/ba6f9b77-3d94-4b3e-86ce-21db4b61105e', destination_slug = NULL WHERE id = 'f5c4def2-2a23-4976-b21b-32ea0e86d8a7';
+UPDATE home_hero_items SET title = 'Parque Lage', subtitle = 'Quando realmente vale a pena', permalink = '/atividade/10c1f726-8646-4cac-b598-58f43044cab7', destination_slug = NULL WHERE id = '4b98bb75-a95b-465a-a369-091a18fae562';

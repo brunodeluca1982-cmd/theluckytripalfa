@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 interface HeroSlide {
   id: string;
   destinationSlug: string | null;
+  permalink: string | null;
   videoUrl?: string;
   imageUrl?: string;
   title: string;
@@ -52,6 +53,7 @@ const HeroVideoCarousel = () => {
       .map((item) => ({
         id: item.id,
         destinationSlug: item.destination_slug,
+        permalink: item.permalink ?? null,
         videoUrl: item.video_url ?? undefined,
         imageUrl: item.thumbnail_url ?? item.video_url ?? undefined,
         title: item.title,
@@ -114,7 +116,10 @@ const HeroVideoCarousel = () => {
   };
 
   const handleSlideAction = (slide: HeroSlide) => {
-    if (slide.destinationSlug) {
+    // Priority: permalink (direct item link) > destination hub
+    if (slide.permalink) {
+      navigate(slide.permalink);
+    } else if (slide.destinationSlug) {
       navigate(`/destino/${slide.destinationSlug}`);
     }
   };
