@@ -112,7 +112,7 @@ const PartnerProfile = () => {
           <img
             src={partnerHero}
             alt={partner.name}
-            className={`absolute inset-0 w-full h-full object-cover object-[center_15%] transition-opacity duration-500 ${heroLoaded ? "opacity-100" : "opacity-0"}`}
+            className={`absolute inset-0 w-full h-[180%] object-cover object-top transition-opacity duration-500 ${heroLoaded ? "opacity-100" : "opacity-0"}`}
             onLoad={() => setHeroLoaded(true)}
           />
           {/* Gradient for text legibility over the portrait */}
