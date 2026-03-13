@@ -11,13 +11,13 @@ const LuckyList = () => {
   const { data: items = [], isLoading } = useLuckyList();
   const { heroUrl } = useCityHero();
   const grouped = groupByBairro(items);
-  const neighborhoods = Object.keys(grouped).sort();
+  const neighborhoods = Object.keys(grouped);
   const limits = useFreeLimits();
   const [showPaywall, setShowPaywall] = useState(false);
 
-  // Flatten all items to enforce global 2-item free limit
+  // Flatten all items to enforce global 3-item free limit
   const allItems = neighborhoods.flatMap((b) => grouped[b]);
-  const freeLimit = limits.getLimit('luckyListViews');
+  const freeLimit = 3;
 
   if (isLoading) {
     return (
