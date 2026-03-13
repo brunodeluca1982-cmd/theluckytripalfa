@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import { ChevronLeft } from "lucide-react";
@@ -18,12 +18,16 @@ import StepGenerating from "./criar-roteiro/StepGenerating";
 
 import logoSymbol from "@/assets/brand/logo-l-creme.png";
 import { useSubscription } from "@/hooks/use-subscription";
+import { useFreeLimits } from "@/hooks/use-free-limits";
+import LuckyProPaywall from "@/components/lucky-pro/LuckyProPaywall";
 
 const CriarRoteiro = () => {
   const navigate = useNavigate();
   const { state, update, goTo, clear, tripDays } = useCreateItinerary();
   const { isAuthenticated } = useSubscription();
   const step = state.step;
+  const limits = useFreeLimits();
+  const [showPaywall, setShowPaywall] = useState(false);
 
   const handleSelectDestination = useCallback(
     (d: Destination) => {
