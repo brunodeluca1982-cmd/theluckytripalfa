@@ -25,14 +25,15 @@ export interface LuckyListItem {
 
 export function useLuckyList() {
   return useQuery({
-    queryKey: ["lucky-list-rio"],
+    queryKey: ["lucky-list-rio", "v2"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("lucky_list_rio")
         .select("*")
         .eq("ativo", true)
-        .order("bairro")
-        .order("nome");
+        .eq("cidade", "Rio de Janeiro")
+        .order("created_at", { ascending: true })
+        .order("id", { ascending: true });
 
       if (error) throw error;
       return (data as LuckyListItem[]) || [];
@@ -42,7 +43,7 @@ export function useLuckyList() {
 
 export function useLuckyListItem(id: string | undefined) {
   return useQuery({
-    queryKey: ["lucky-list-rio", id],
+    queryKey: ["lucky-list-rio", "item", id],
     enabled: !!id,
     queryFn: async () => {
       const { data, error } = await supabase
@@ -50,6 +51,7 @@ export function useLuckyListItem(id: string | undefined) {
         .select("*")
         .eq("id", id!)
         .eq("ativo", true)
+        .eq("cidade", "Rio de Janeiro")
         .single();
 
       if (error) throw error;

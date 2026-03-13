@@ -7,7 +7,7 @@ import luckyListHero from "@/assets/highlights/lucky-list-hero.jpg";
 import SecretLockedSheet from "@/components/lucky-pro/SecretLockedSheet";
 import LuckyProPaywall from "@/components/lucky-pro/LuckyProPaywall";
 
-const FREE_ITEM_COUNT = 2;
+const FREE_ITEM_COUNT = 3;
 
 const truncateTitle = (text: string, maxLen = 45): string => {
   if (text.length <= maxLen) return text;
