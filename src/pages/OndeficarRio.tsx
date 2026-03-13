@@ -293,6 +293,21 @@ const OndeficarRio = () => {
         </p>
       </div>
 
+      {/* Editorial card overlay */}
+      {selectedNeighborhood && (() => {
+        const n = getNeighborhoodById(selectedNeighborhood);
+        if (!n) return null;
+        return (
+          <NeighborhoodEditorialCard
+            neighborhoodId={selectedNeighborhood}
+            neighborhoodName={n.name}
+            onViewHotels={() => {
+              hotelListRef.current?.scrollIntoView({ behavior: "smooth" });
+            }}
+          />
+        );
+      })()}
+
       {/* Hotel List */}
       <div className="px-6 py-6">
         <h2 className="text-lg font-serif font-medium text-foreground mb-4">
