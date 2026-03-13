@@ -308,6 +308,12 @@ const IAAssistant = () => {
           </div>
           <div className="w-9" />
         </div>
+        {/* Usage indicator */}
+        {!limits.isPremium && (
+          <p className="text-[10px] text-white/40 text-center mt-1">
+            Você já usou {limits.usageLabel('iaUses')} sugestões da IA.
+          </p>
+        )}
       </header>
 
       {/* Scrollable content */}
