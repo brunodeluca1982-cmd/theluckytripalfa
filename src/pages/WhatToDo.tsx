@@ -1,13 +1,12 @@
 import { Link, useNavigate } from "react-router-dom";
-import { Clapperboard, Music, ArrowLeft, Lock, MapPin, Clock, Zap, Loader2, ExternalLink, RefreshCw } from "lucide-react";
-import { useCallback, useState } from "react";
+import { Clapperboard, Music, ArrowLeft, Lock, Clock, Zap, Loader2, RefreshCw } from "lucide-react";
+import { useCallback } from "react";
 import { useSpotifyPlayer } from "@/contexts/SpotifyPlayerContext";
 import { useEventMode } from "@/contexts/EventModeContext";
 import { clearVideoSeen } from "@/pages/DestinationVideoIntro";
 import { useCityHero } from "@/contexts/CityHeroContext";
 import { useOQueFazer, type OQueFazerItem } from "@/hooks/use-o-que-fazer";
 import { usePlacePhoto, buildPlaceQuery } from "@/hooks/use-place-photo";
-import OQueFazerDetailSheet from "@/components/o-que-fazer/OQueFazerDetailSheet";
 
 /* ───── Slugify helper for cache keys ───── */
 function slugify(s: string) {
