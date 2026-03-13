@@ -39,6 +39,13 @@ export default function DetailHeroLayout({
   children,
   footer,
 }: DetailHeroLayoutProps) {
+  const { active, activate, openSheet } = useSpotifyPlayer();
+
+  const handleMusicTap = useCallback(() => {
+    if (!active) activate();
+    else openSheet();
+  }, [active, activate, openSheet]);
+
   const hasMedia = media && media.length > 0;
   const images = hasMedia ? media.filter((m) => m.type === "image") : [];
   const videos = hasMedia ? media.filter((m) => m.type === "video") : [];
