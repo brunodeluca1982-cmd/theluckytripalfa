@@ -105,14 +105,14 @@ const PartnerProfile = () => {
 
       {/* Layer 2 — Partner hero portrait */}
       {partnerHero && (
-        <div className="relative z-10 mx-5 mb-2 rounded-2xl overflow-hidden aspect-[3/4] max-h-[48vh]">
+        <div className="relative z-10 mx-5 mb-2 rounded-2xl overflow-hidden aspect-[4/5] max-h-[48vh]">
           {!heroLoaded && (
             <Skeleton className="absolute inset-0 w-full h-full rounded-none" />
           )}
           <img
             src={partnerHero}
             alt={partner.name}
-            className={`absolute inset-0 w-full h-full object-cover object-[center_8%] transition-opacity duration-500 ${heroLoaded ? "opacity-100" : "opacity-0"}`}
+            className={`absolute -top-[5%] left-0 w-full h-[75%] object-cover object-top transition-opacity duration-500 ${heroLoaded ? "opacity-100" : "opacity-0"}`}
             onLoad={() => setHeroLoaded(true)}
           />
           {/* Gradient for text legibility over the portrait */}
