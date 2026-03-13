@@ -451,10 +451,10 @@ const ManualItinerary = () => {
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsAddExperienceOpen(false)}>
-              Cancel
+              Cancelar
             </Button>
             <Button onClick={handleAddExperience}>
-              Add
+              Adicionar
             </Button>
           </DialogFooter>
         </DialogContent>
