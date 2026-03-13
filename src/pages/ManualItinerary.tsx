@@ -385,10 +385,10 @@ const ManualItinerary = () => {
           <div className="space-y-4 py-4">
             {/* Experience name */}
             <div className="space-y-2">
-              <Label htmlFor="exp-name">Experience / place name</Label>
+              <Label htmlFor="exp-name">Nome da experiência / lugar</Label>
               <Input
                 id="exp-name"
-                placeholder="e.g. Visit Cristo Redentor"
+                placeholder="Ex: Visitar Cristo Redentor"
                 value={newExperience.name}
                 onChange={(e) => setNewExperience({ ...newExperience, name: e.target.value })}
               />
