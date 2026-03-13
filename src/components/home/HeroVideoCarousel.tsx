@@ -114,7 +114,10 @@ const HeroVideoCarousel = () => {
   };
 
   const handleSlideAction = (slide: HeroSlide) => {
-    if (slide.destinationSlug) {
+    // Priority: permalink (direct item link) > destination hub
+    if (slide.permalink) {
+      navigate(slide.permalink);
+    } else if (slide.destinationSlug) {
       navigate(`/destino/${slide.destinationSlug}`);
     }
   };
