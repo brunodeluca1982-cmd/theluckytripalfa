@@ -56,19 +56,34 @@ const DestinationHub = ({ destinationId, name, country, backgroundImage, actions
     actions.find(a => a.id === 'chegar'),
   ].filter(Boolean) as DestinationAction[];
 
+  const [bgLoaded, setBgLoaded] = useState(false);
+
   return (
     <div className="h-screen relative overflow-hidden pb-20">
-      {/* Full-screen hero background */}
-      <div
-        className="absolute inset-0 bg-cover bg-no-repeat"
-        style={{
-          backgroundImage: `url(${backgroundImage})`,
-          backgroundPosition: "50% 20%",
-          filter: evento
-            ? "saturate(1.15) contrast(1.05) brightness(1)"
-            : "saturate(0.9) brightness(0.85)",
-        }}
-      />
+      {/* Neutral gradient fallback — always behind */}
+      <div className="absolute inset-0 bg-gradient-to-br from-[hsl(30,10%,15%)] via-[hsl(35,8%,12%)] to-[hsl(30,10%,10%)]" />
+
+      {/* Full-screen hero background — fades in when loaded */}
+      {backgroundImage && (
+        <>
+          <img
+            src={backgroundImage}
+            alt=""
+            className="hidden"
+            onLoad={() => setBgLoaded(true)}
+          />
+          <div
+            className={`absolute inset-0 bg-cover bg-no-repeat transition-opacity duration-700 ${bgLoaded ? "opacity-100" : "opacity-0"}`}
+            style={{
+              backgroundImage: `url(${backgroundImage})`,
+              backgroundPosition: "50% 20%",
+              filter: evento
+                ? "saturate(1.15) contrast(1.05) brightness(1)"
+                : "saturate(0.9) brightness(0.85)",
+            }}
+          />
+        </>
+      )}
       <div
         className="absolute inset-0"
         style={{
