@@ -2,9 +2,11 @@ import { Link, useParams, useSearchParams } from "react-router-dom";
 import { Clock, Zap, Loader2, MapPin, ExternalLink, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useItemSave } from "@/hooks/use-item-save";
-import { useOQueFazerItem, type OQueFazerItem } from "@/hooks/use-o-que-fazer";
+import { useOQueFazerItem } from "@/hooks/use-o-que-fazer";
 import { usePlacePhoto, buildPlaceQuery } from "@/hooks/use-place-photo";
 import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import DetailHeroLayout from "@/components/detail/DetailHeroLayout";
 
 function slugify(s: string) {
