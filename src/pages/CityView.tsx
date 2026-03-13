@@ -178,7 +178,7 @@ const CityView = () => {
       {/* Instruction */}
       <div className="px-6 py-8">
         <p className="text-sm text-muted-foreground text-center">
-          Toque em um bairro para explorar onde ficar
+          Toque em um bairro para ver onde ficar
         </p>
       </div>
 

@@ -76,7 +76,7 @@ const PurchaseSuccess = () => {
           onClick={() => navigate("/lucky-list")}
           className="w-full max-w-xs py-4 rounded-xl bg-[hsl(40,60%,50%)] text-[hsl(30,10%,10%)] font-semibold text-base hover:bg-[hsl(40,60%,55%)] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
         >
-          Explorar The Lucky List
+          Ver The Lucky List
           <ArrowRight className="w-4 h-4" />
         </button>
 

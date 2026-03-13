@@ -100,7 +100,7 @@ const DestinationEntry = ({ name, country, backgroundImage, actions }: Destinati
             to="/destino/rio-de-janeiro/explorar"
             className="flex items-center justify-center gap-2 py-3 text-white/70 hover:text-white transition-colors"
           >
-            <span className="text-sm">Explorar mais</span>
+            <span className="text-sm">Descobrir mais</span>
             <ChevronRight className="w-4 h-4" />
           </Link>
         </div>

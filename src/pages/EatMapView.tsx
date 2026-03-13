@@ -301,7 +301,7 @@ const EatMapView = () => {
       {/* Hint */}
       <div className="px-6 py-3 border-b border-border">
         <p className="text-xs text-muted-foreground text-center">
-          Arraste e dê zoom para explorar o mapa.
+          Arraste e dê zoom para navegar no mapa.
         </p>
       </div>
 
