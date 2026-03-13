@@ -7,6 +7,11 @@ import { useLuckyList, type LuckyListItem } from "@/hooks/use-lucky-list";
 import { usePlacePhoto, buildPlaceQuery } from "@/hooks/use-place-photo";
 import LuckyProPaywall from "@/components/lucky-pro/LuckyProPaywall";
 import brunImg from "@/assets/partners/bruno-de-luca.jpeg";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+} from "@/components/ui/carousel";
 
 const CardImage = ({ item }: { item: LuckyListItem }) => {
   const [loaded, setLoaded] = useState(false);
