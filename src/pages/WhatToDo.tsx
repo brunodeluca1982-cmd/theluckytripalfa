@@ -1,12 +1,13 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Clapperboard, Music, ArrowLeft, Lock, MapPin, Clock, Zap, Loader2, ExternalLink, RefreshCw } from "lucide-react";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { useSpotifyPlayer } from "@/contexts/SpotifyPlayerContext";
 import { useEventMode } from "@/contexts/EventModeContext";
 import { clearVideoSeen } from "@/pages/DestinationVideoIntro";
 import { useCityHero } from "@/contexts/CityHeroContext";
 import { useOQueFazer, type OQueFazerItem } from "@/hooks/use-o-que-fazer";
 import { usePlacePhoto, buildPlaceQuery } from "@/hooks/use-place-photo";
+import OQueFazerDetailSheet from "@/components/o-que-fazer/OQueFazerDetailSheet";
 
 /* ───── Slugify helper for cache keys ───── */
 function slugify(s: string) {
@@ -29,6 +30,7 @@ function LuckyListTeaser({ text, index }: { text: string; index: number }) {
     <Link
       to="/lucky-list"
       className="relative block mt-3 rounded-xl overflow-hidden border border-white/15"
+      onClick={(e) => e.stopPropagation()}
     >
       <div className="px-4 py-3 backdrop-blur-xl bg-white/5 select-none" style={{ filter: "blur(5px)" }}>
         <p className="text-xs text-white/50 leading-relaxed line-clamp-2">{text}</p>
@@ -43,32 +45,18 @@ function LuckyListTeaser({ text, index }: { text: string; index: number }) {
   );
 }
 
-/* ───── Como Fazer Steps ───── */
-
-function ComoFazerSteps({ text }: { text: string }) {
-  const steps = text.split("\n").map(s => s.trim()).filter(Boolean);
-  if (steps.length === 0) return null;
-  return (
-    <div className="mt-2 space-y-1">
-      {steps.map((step, i) => (
-        <div key={i} className="flex items-start gap-2">
-          <span className="text-[10px] text-white/30 font-mono mt-0.5 flex-shrink-0">{i + 1}.</span>
-          <p className="text-xs text-white/55 leading-relaxed">{step}</p>
-        </div>
-      ))}
-    </div>
-  );
-}
-
 /* ───── Item Card ───── */
 
-function OQueFazerCard({ item, index }: { item: OQueFazerItem; index: number }) {
+function OQueFazerCard({ item, index, onTap }: { item: OQueFazerItem; index: number; onTap: () => void }) {
   const placeQuery = buildPlaceQuery(item.nome, item.bairro || undefined);
   const itemSlug = slugify(item.nome);
   const { photoUrl, isLoading: photoLoading } = usePlacePhoto(itemSlug, "attraction", placeQuery);
 
   return (
-    <div className="py-5 border-b border-white/10 last:border-b-0">
+    <button
+      onClick={onTap}
+      className="w-full text-left py-5 border-b border-white/10 last:border-b-0 hover:bg-white/5 transition-colors rounded-lg -mx-1 px-1"
+    >
       {/* Hero Image */}
       {(photoUrl || photoLoading) && (
         <div className="w-full aspect-[16/9] rounded-xl overflow-hidden mb-4 relative bg-white/5">
@@ -112,15 +100,12 @@ function OQueFazerCard({ item, index }: { item: OQueFazerItem; index: number }) 
         {item.nome}
       </h2>
 
-      {/* Meu olhar */}
+      {/* Meu olhar excerpt */}
       {item.meu_olhar && (
-        <p className="text-sm text-white/70 leading-relaxed line-clamp-3 mb-2">
+        <p className="text-sm text-white/70 leading-relaxed line-clamp-2 mb-2">
           {item.meu_olhar.split("\n")[0]}
         </p>
       )}
-
-      {/* Como fazer (step list) */}
-      {item.como_fazer && <ComoFazerSteps text={item.como_fazer} />}
 
       {/* Metadata pills */}
       <div className="flex flex-wrap items-center gap-2 mt-2">
@@ -141,36 +126,11 @@ function OQueFazerCard({ item, index }: { item: OQueFazerItem; index: number }) 
         )}
       </div>
 
-      {/* Tags IA chips */}
-      {item.tags_ia && item.tags_ia.length > 0 && (
-        <div className="flex flex-wrap gap-1.5 mt-2">
-          {item.tags_ia.map((tag, i) => (
-            <span key={i} className="px-2 py-0.5 rounded-full bg-white/10 text-[10px] text-white/50 border border-white/10">
-              {tag}
-            </span>
-          ))}
-        </div>
-      )}
-
-      {/* Google Maps button */}
-      {item.google_maps && (
-        <a
-          href={item.google_maps}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 mt-3 text-xs text-white/65 hover:text-white/90 transition-colors"
-        >
-          <MapPin className="w-3.5 h-3.5" />
-          Ver no mapa
-          <ExternalLink className="w-2.5 h-2.5 opacity-50" />
-        </a>
-      )}
-
       {/* Lucky List teaser */}
       {item.momento_lucky_list && (
         <LuckyListTeaser text={item.momento_lucky_list} index={index} />
       )}
-    </div>
+    </button>
   );
 }
 
@@ -182,6 +142,8 @@ const WhatToDo = () => {
   const { evento, getPlacement } = useEventMode();
   const { heroUrl } = useCityHero();
   const { data: items, isLoading, isError, error, refetch, isFetching } = useOQueFazer();
+  const [selectedItem, setSelectedItem] = useState<OQueFazerItem | null>(null);
+  const [sheetOpen, setSheetOpen] = useState(false);
 
   const handleMusicTap = useCallback(() => {
     if (!active) activate();
@@ -192,6 +154,11 @@ const WhatToDo = () => {
     clearVideoSeen("rio-de-janeiro");
     navigate("/destino/rio-de-janeiro/intro", { replace: true });
   }, [navigate]);
+
+  const handleCardTap = useCallback((item: OQueFazerItem) => {
+    setSelectedItem(item);
+    setSheetOpen(true);
+  }, []);
 
   const topPlacement = getPlacement("o_que_fazer_top");
 
@@ -318,7 +285,7 @@ const WhatToDo = () => {
         ) : items && items.length > 0 ? (
           <div className="backdrop-blur-md bg-white/5 rounded-2xl border border-white/10 px-4">
             {items.map((item, i) => (
-              <OQueFazerCard key={item.id} item={item} index={i} />
+              <OQueFazerCard key={item.id} item={item} index={i} onTap={() => handleCardTap(item)} />
             ))}
           </div>
         ) : (
@@ -329,6 +296,13 @@ const WhatToDo = () => {
           </div>
         )}
       </div>
+
+      {/* Detail Sheet */}
+      <OQueFazerDetailSheet
+        open={sheetOpen}
+        onOpenChange={setSheetOpen}
+        item={selectedItem}
+      />
     </div>
   );
 };
