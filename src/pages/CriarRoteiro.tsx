@@ -50,6 +50,13 @@ const CriarRoteiro = () => {
   }, [step, navigate, goTo]);
 
   const handleGenerate = useCallback(async () => {
+    // Check trip creation limit
+    if (!limits.canUse('tripsCreated')) {
+      setShowPaywall(true);
+      return;
+    }
+    limits.recordUse('tripsCreated');
+
     goTo(6); // show generating screen
 
     try {

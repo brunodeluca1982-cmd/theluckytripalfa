@@ -479,6 +479,14 @@ const IAAssistant = () => {
           Respostas baseadas em conteúdo curado pela equipe editorial.
         </p>
       </div>
+
+      {/* Paywall */}
+      <LuckyProPaywall
+        open={showPaywall}
+        onClose={() => setShowPaywall(false)}
+        title="Desbloqueie o The Lucky Trip"
+        message="Você já experimentou algumas sugestões da IA do The Lucky Trip. Desbloqueie o uso ilimitado e organize suas viagens com o método completo."
+      />
     </div>
   );
 };

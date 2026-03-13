@@ -1,14 +1,23 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, Lock } from "lucide-react";
 import { useLuckyList, groupByBairro } from "@/hooks/use-lucky-list";
 import { LuckyListCard } from "@/components/lucky-list/LuckyListCard";
 import { useCityHero } from "@/contexts/CityHeroContext";
+import { useFreeLimits } from "@/hooks/use-free-limits";
+import LuckyProPaywall from "@/components/lucky-pro/LuckyProPaywall";
 
 const LuckyList = () => {
   const { data: items = [], isLoading } = useLuckyList();
   const { heroUrl } = useCityHero();
   const grouped = groupByBairro(items);
   const neighborhoods = Object.keys(grouped).sort();
+  const limits = useFreeLimits();
+  const [showPaywall, setShowPaywall] = useState(false);
+
+  // Flatten all items to enforce global 2-item free limit
+  const allItems = neighborhoods.flatMap((b) => grouped[b]);
+  const freeLimit = limits.getLimit('luckyListViews');
 
   if (isLoading) {
     return (
@@ -17,6 +26,13 @@ const LuckyList = () => {
       </div>
     );
   }
+
+  // Build a set of allowed item IDs for free users
+  const allowedIds = new Set(
+    limits.isPremium ? allItems.map((i) => i.id) : allItems.slice(0, freeLimit).map((i) => i.id)
+  );
+
+  let globalIndex = 0;
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -46,6 +62,12 @@ const LuckyList = () => {
           <p className="text-sm text-white/40 mt-2">
             {items.length} {items.length === 1 ? "experiência" : "experiências"} · {neighborhoods.length} {neighborhoods.length === 1 ? "bairro" : "bairros"}
           </p>
+          {/* Usage indicator */}
+          {!limits.isPremium && (
+            <p className="text-xs text-[hsl(40,60%,50%)]/70 mt-3">
+              {limits.usageLabel('luckyListViews')} segredos disponíveis na versão gratuita.
+            </p>
+          )}
         </section>
 
         {/* Cards grouped by neighborhood */}
@@ -55,9 +77,37 @@ const LuckyList = () => {
               {bairro}
             </h2>
             <div className="grid gap-4">
-              {grouped[bairro].map((item) => (
-                <LuckyListCard key={item.id} item={item} />
-              ))}
+              {grouped[bairro].map((item) => {
+                const isAllowed = allowedIds.has(item.id);
+                globalIndex++;
+
+                if (isAllowed) {
+                  return <LuckyListCard key={item.id} item={item} />;
+                }
+
+                // Locked card
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => setShowPaywall(true)}
+                    className="rounded-2xl overflow-hidden bg-white/5 backdrop-blur-md border border-white/10 transition-all hover:bg-white/10 text-left"
+                  >
+                    <div className="relative aspect-[16/9] bg-white/5 overflow-hidden">
+                      <div className="absolute inset-0 backdrop-blur-xl bg-white/5 flex items-center justify-center">
+                        <Lock className="w-6 h-6 text-white/30" />
+                      </div>
+                    </div>
+                    <div className="p-4 space-y-1.5">
+                      <h3 className="text-base font-semibold text-white/40 line-clamp-1 blur-[3px]">
+                        {item.nome}
+                      </h3>
+                      <p className="text-xs text-[hsl(40,60%,50%)]/60">
+                        Desbloqueie com Lucky Pro
+                      </p>
+                    </div>
+                  </button>
+                );
+              })}
             </div>
           </section>
         ))}
@@ -67,6 +117,14 @@ const LuckyList = () => {
       <footer className="relative z-10 px-5 py-6 border-t border-white/10">
         <p className="text-xs text-white/30 text-center">The Lucky Trip — Conteúdo exclusivo</p>
       </footer>
+
+      {/* Paywall */}
+      <LuckyProPaywall
+        open={showPaywall}
+        onClose={() => setShowPaywall(false)}
+        title="Desbloqueie o The Lucky Trip"
+        message="Acesse todos os segredos da Lucky List e planeje suas viagens com curadoria real."
+      />
     </div>
   );
 };
