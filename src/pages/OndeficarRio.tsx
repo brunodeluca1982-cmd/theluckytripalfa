@@ -136,15 +136,11 @@ const OndeficarRio = () => {
     }));
   }, [externalHotels]);
 
-  const makeSlug = (name: string) =>
-    name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9\s-]/g, "").replace(/\s+/g, "-");
-
   const renderHotelRow = (hotel: typeof hotelListData[0]) => {
-    const slug = makeSlug(hotel.name);
     return (
       <Link
         key={hotel.id}
-        to={`/hotel/${slug}?from=${hotel.neighborhood}`}
+        to={`/hotel/${hotel.id}?from=${hotel.neighborhood}`}
         className="flex items-center justify-between py-4 border-b border-border hover:bg-muted/30 transition-colors -mx-2 px-2 rounded"
       >
         <div className="flex-1 min-w-0">

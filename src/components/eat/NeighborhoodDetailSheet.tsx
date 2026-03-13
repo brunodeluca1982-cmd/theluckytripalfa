@@ -95,13 +95,12 @@ const NeighborhoodDetailSheet = ({
               {filteredRestaurants.length > 0 ? (
                 <div className="space-y-6">
                   {filteredRestaurants.map((restaurant) => {
-                    const slug = generateRestaurantSlug(restaurant.name);
                     return (
                     <button
                       key={restaurant.id}
                       onClick={() => {
                         onOpenChange(false);
-                        navigate(`/restaurante/${slug}?from=${neighborhoodId || ''}`);
+                        navigate(`/restaurante/${restaurant.id}?from=${neighborhoodId || ''}`);
                       }}
                       className="w-full text-left pb-6 border-b border-border last:border-0 hover:bg-muted/30 transition-colors rounded -mx-2 px-2 pt-2"
                     >

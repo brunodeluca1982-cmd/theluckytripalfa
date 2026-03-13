@@ -47,7 +47,7 @@ function RestaurantRow({
 
   return (
     <Link
-      to={`/restaurante/${slug}?from=${neighborhood}`}
+      to={`/restaurante/${id}?from=${neighborhood}`}
       className="flex items-center gap-3 py-3 border-b border-border hover:bg-muted/30 transition-colors -mx-2 px-2 rounded"
     >
       {/* Thumbnail */}
