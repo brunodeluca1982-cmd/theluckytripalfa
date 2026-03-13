@@ -1,103 +1,132 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
+import { Lock, MapPin } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useSubscription } from "@/hooks/use-subscription";
+import { useLuckyList, type LuckyListItem } from "@/hooks/use-lucky-list";
 import { usePlacePhoto, buildPlaceQuery } from "@/hooks/use-place-photo";
+import LuckyProPaywall from "@/components/lucky-pro/LuckyProPaywall";
 import brunImg from "@/assets/partners/bruno-de-luca.jpeg";
 
-const discoveries = [
-  {
-    id: "bruno-speakeasy-leblon",
-    title: "Speakeasy do Leblon",
-    tag: "Noite",
-    placeName: "Speakeasy Leblon",
-    neighborhood: "Leblon",
-    fallbackUrl: "https://images.unsplash.com/photo-1551632436-cbf8dd35adfa?w=400&q=80",
-  },
-  {
-    id: "bruno-por-do-sol-arpoador",
-    title: "Pôr do sol no Arpoador",
-    tag: "Experiência",
-    placeName: "Pedra do Arpoador",
-    neighborhood: "Ipanema",
-    fallbackUrl: "https://images.unsplash.com/photo-1533105079780-92b9be482077?w=400&q=80",
-  },
-  {
-    id: "bruno-jazz-ipanema",
-    title: "Jazz escondido em Ipanema",
-    tag: "Música",
-    placeName: "Ipanema Jazz",
-    neighborhood: "Ipanema",
-    fallbackUrl: "https://images.unsplash.com/photo-1551632436-cbf8dd35adfa?w=400&q=80",
-  },
-  {
-    id: "bruno-restaurante-santa-teresa",
-    title: "Restaurante secreto em Santa Teresa",
-    tag: "Gastronomia",
-    placeName: "Santa Teresa restaurante",
-    neighborhood: "Santa Teresa",
-    fallbackUrl: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&q=80",
-  },
-];
-
-const CardImage = ({ item }: { item: (typeof discoveries)[number] }) => {
+const CardImage = ({ item }: { item: LuckyListItem }) => {
   const [loaded, setLoaded] = useState(false);
-  const placeQuery = buildPlaceQuery(item.placeName, item.neighborhood);
-  const { photoUrl } = usePlacePhoto(item.id, "attraction", placeQuery);
-  // Priority: Google Places photo → fallback Unsplash
-  const displayImage = photoUrl || item.fallbackUrl;
+  const placeQuery = buildPlaceQuery(item.nome, item.bairro || undefined);
+  const { photoUrl, isLoading } = usePlacePhoto(
+    `bruno-${item.id}`,
+    "attraction",
+    placeQuery
+  );
 
   return (
-    <>
-      {!loaded && <Skeleton className="absolute inset-0 w-full h-full rounded-none" />}
-      <img
-        src={displayImage}
-        alt={item.title}
-        className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${loaded ? "opacity-100" : "opacity-0"}`}
-        loading="lazy"
-        onLoad={() => setLoaded(true)}
-      />
-    </>
+    <div className="relative aspect-[4/3] bg-muted">
+      {(!loaded || isLoading) && (
+        <Skeleton className="absolute inset-0 w-full h-full rounded-none" />
+      )}
+      {photoUrl ? (
+        <img
+          src={photoUrl}
+          alt={item.nome}
+          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${loaded ? "opacity-100" : "opacity-0"}`}
+          loading="lazy"
+          onLoad={() => setLoaded(true)}
+        />
+      ) : (
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center">
+          <MapPin className="w-6 h-6 text-primary/30" />
+        </div>
+      )}
+      <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/50 to-transparent" />
+      {item.bairro && (
+        <span className="absolute bottom-2 left-2 text-[10px] font-medium text-white/80 bg-black/40 backdrop-blur-sm px-2 py-0.5 rounded-full flex items-center gap-1">
+          <MapPin className="w-2.5 h-2.5" />
+          {item.bairro}
+        </span>
+      )}
+    </div>
   );
 };
 
 const DescobertasBruno = () => {
-  return (
-    <section className="py-8 px-5">
-      <div className="flex items-center gap-3 mb-1">
-        <img
-          src={brunImg}
-          alt="Bruno De Luca"
-          className="w-8 h-8 rounded-full object-cover border border-border"
-        />
-        <h2 className="text-xs font-semibold tracking-[0.15em] uppercase text-primary">
-          Descobertas do Bruno
-        </h2>
-      </div>
-      <p className="text-muted-foreground text-sm leading-relaxed mb-5 ml-11">
-        Os achados favoritos do nosso curador local no Rio.
-      </p>
+  const { isPremium } = useSubscription();
+  const { data: items = [], isLoading } = useLuckyList();
+  const [showPaywall, setShowPaywall] = useState(false);
 
-      <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide -mx-5 px-5">
-        {discoveries.map((item) => (
-          <button
-            key={item.id}
-            className="relative flex-shrink-0 w-[160px] aspect-[3/4] rounded-2xl overflow-hidden group"
-          >
-            <CardImage item={item} />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
-            <div className="absolute top-2 left-2">
-              <span className="px-2 py-0.5 rounded-full bg-background/80 text-foreground text-[10px] font-medium">
-                {item.tag}
-              </span>
-            </div>
-            <div className="absolute bottom-0 left-0 right-0 p-3">
-              <p className="text-white text-xs font-medium leading-tight">
-                {item.title}
-              </p>
-            </div>
-          </button>
-        ))}
-      </div>
-    </section>
+  const discoveries = items.slice(0, 6);
+  const freeLimit = 2;
+
+  if (isLoading || discoveries.length === 0) return null;
+
+  return (
+    <>
+      <section className="py-8 px-5">
+        <div className="flex items-center gap-3 mb-1">
+          <img
+            src={brunImg}
+            alt="Bruno De Luca"
+            className="w-8 h-8 rounded-full object-cover border border-border"
+          />
+          <h2 className="text-xs font-semibold tracking-[0.15em] uppercase text-primary">
+            Descobertas do Bruno
+          </h2>
+        </div>
+        <p className="text-muted-foreground text-sm leading-relaxed mb-5 ml-11">
+          Os achados favoritos do nosso curador local no Rio.
+        </p>
+
+        <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide -mx-5 px-5">
+          {discoveries.map((item, i) => {
+            const isLocked = !isPremium && i >= freeLimit;
+
+            if (isLocked) {
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => setShowPaywall(true)}
+                  className="flex-shrink-0 w-[200px] rounded-2xl overflow-hidden border border-border bg-card text-left relative"
+                >
+                  <div className="relative aspect-[4/3] bg-muted">
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-primary/5 blur-[4px]" />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className="flex items-center gap-1.5 bg-black/60 backdrop-blur-sm text-white text-[11px] font-medium px-3 py-1.5 rounded-full">
+                        <Lock className="w-3 h-3" />
+                        Lucky Pro
+                      </span>
+                    </div>
+                  </div>
+                  <div className="px-3 py-3">
+                    <p className="text-foreground text-sm font-medium leading-tight line-clamp-2 blur-[3px]">
+                      {item.nome}
+                    </p>
+                    <p className="text-muted-foreground text-[11px] mt-1 blur-[3px]">
+                      {item.meu_olhar}
+                    </p>
+                  </div>
+                </button>
+              );
+            }
+
+            return (
+              <Link
+                key={item.id}
+                to={`/lucky-list/${item.id}`}
+                className="flex-shrink-0 w-[200px] rounded-2xl overflow-hidden border border-border bg-card"
+              >
+                <CardImage item={item} />
+                <div className="px-3 py-3">
+                  <p className="text-foreground text-sm font-medium leading-tight line-clamp-2">
+                    {item.nome}
+                  </p>
+                  <p className="text-muted-foreground text-[11px] mt-1 line-clamp-2">
+                    {item.meu_olhar}
+                  </p>
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+      </section>
+      <LuckyProPaywall open={showPaywall} onClose={() => setShowPaywall(false)} />
+    </>
   );
 };
 
