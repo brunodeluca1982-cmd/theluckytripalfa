@@ -29,9 +29,9 @@ const WhereToStayDetail = () => {
     return externalHotels
       .filter((h) => h.bairro_slug === neighborhood || normalizeNeighborhood(h.bairro) === neighborhood)
       .map((h) => ({
+        id: h.id,
         name: h.nome,
         description: h.meu_olhar || "",
-        slug: h.nome.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9\s-]/g, "").replace(/\s+/g, "-"),
         categoria: h.categoria?.trim() || "",
       }));
   }, [externalHotels, neighborhood]);
