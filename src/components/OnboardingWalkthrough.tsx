@@ -131,7 +131,7 @@ const OnboardingWalkthrough = ({ onComplete }: OnboardingWalkthroughProps) => {
               onClick={onComplete}
               className="w-full py-3.5 rounded-full bg-primary text-primary-foreground text-sm font-semibold tracking-wide active:scale-[0.97] transition-transform"
             >
-              Começar a explorar
+              Começar a descobrir
             </button>
           </div>
         ) : null}

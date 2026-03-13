@@ -190,7 +190,7 @@ const RoteiroResultado = () => {
                 onClick={() => navigate("/")}
                 className="flex-1 rounded-xl"
               >
-                Explorar destino
+                Conhecer destino
               </Button>
             </div>
 

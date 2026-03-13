@@ -154,7 +154,7 @@ const CityView = () => {
               to={`/onde-ficar/${neighborhood.id}?from=map`}
               className="absolute w-10 h-10 -ml-5 -mt-5 rounded-full bg-foreground/10 border border-foreground/20 hover:bg-foreground/20 hover:border-foreground/40 transition-colors flex items-center justify-center"
               style={{ top: neighborhood.mapPosition.top, left: neighborhood.mapPosition.left }}
-              aria-label={`Explorar ${neighborhood.name}`}
+              aria-label={`Ver ${neighborhood.name}`}
               onClick={(e) => e.stopPropagation()}
             >
               <div className="w-2 h-2 rounded-full bg-foreground/60" />
@@ -178,7 +178,7 @@ const CityView = () => {
       {/* Instruction */}
       <div className="px-6 py-8">
         <p className="text-sm text-muted-foreground text-center">
-          Toque em um bairro para explorar onde ficar
+          Toque em um bairro para ver onde ficar
         </p>
       </div>
 
