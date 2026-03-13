@@ -414,9 +414,9 @@ const ManualItinerary = () => {
                 className="flex gap-2"
               >
                 {[
-                  { value: 'morning', label: 'Morning', icon: Sun },
-                  { value: 'afternoon', label: 'Afternoon', icon: Sunset },
-                  { value: 'evening', label: 'Evening', icon: Moon }
+                  { value: 'morning', label: 'Manhã', icon: Sun },
+                  { value: 'afternoon', label: 'Tarde', icon: Sunset },
+                  { value: 'evening', label: 'Noite', icon: Moon }
                 ].map(option => (
                   <div key={option.value} className="flex-1">
                     <RadioGroupItem
