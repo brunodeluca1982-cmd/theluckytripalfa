@@ -175,7 +175,7 @@ const WhatToDo = () => {
   const { active, activate, openSheet } = useSpotifyPlayer();
   const { evento, getPlacement } = useEventMode();
   const { heroUrl } = useCityHero();
-  const { data: items, isLoading } = useOQueFazer();
+  const { data: items, isLoading, isError, error, refetch, isFetching } = useOQueFazer();
 
   const handleMusicTap = useCallback(() => {
     if (!active) activate();
