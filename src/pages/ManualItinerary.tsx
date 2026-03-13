@@ -37,13 +37,8 @@ const ManualItinerary = () => {
   const navigate = useNavigate();
   const { draft, tripDays } = useTripDraft();
   
-  // Redirect if no destination selected
-  if (!draft.destinationId) {
-    navigate('/meu-roteiro', { replace: true });
-    return null;
-  }
-  
   const actualTripDays = Math.max(1, tripDays);
+  
   
   // Initialize days based on trip dates
   const [days, setDays] = useState<Day[]>(() => 
@@ -343,7 +338,7 @@ const ManualItinerary = () => {
                     className="w-full mt-2 h-10"
                   >
                     <Plus className="w-4 h-4 mr-2" />
-                    Add experience
+                    Adicionar experiência
                   </Button>
                 </div>
               </div>
@@ -357,7 +352,7 @@ const ManualItinerary = () => {
             className="w-full h-12"
           >
             <Plus className="w-4 h-4 mr-2" />
-            Add new day
+            Adicionar novo dia
           </Button>
         </section>
       </main>
@@ -368,10 +363,10 @@ const ManualItinerary = () => {
           onClick={handleSave}
           className="w-full h-14 text-base font-medium rounded-xl"
         >
-          Save my itinerary
+          Salvar meu roteiro
         </Button>
         <p className="text-xs text-muted-foreground text-center mt-2">
-          You can edit this itinerary later.
+          Você pode editar este roteiro depois.
         </p>
       </div>
 
@@ -379,16 +374,16 @@ const ManualItinerary = () => {
       <Dialog open={isAddExperienceOpen} onOpenChange={setIsAddExperienceOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Add experience</DialogTitle>
+            <DialogTitle>Adicionar experiência</DialogTitle>
           </DialogHeader>
           
           <div className="space-y-4 py-4">
             {/* Experience name */}
             <div className="space-y-2">
-              <Label htmlFor="exp-name">Experience / place name</Label>
+              <Label htmlFor="exp-name">Nome da experiência / lugar</Label>
               <Input
                 id="exp-name"
-                placeholder="e.g. Visit Cristo Redentor"
+                placeholder="Ex: Visitar Cristo Redentor"
                 value={newExperience.name}
                 onChange={(e) => setNewExperience({ ...newExperience, name: e.target.value })}
               />
@@ -396,10 +391,10 @@ const ManualItinerary = () => {
 
             {/* Neighborhood */}
             <div className="space-y-2">
-              <Label htmlFor="exp-neighborhood">Neighborhood (optional)</Label>
+              <Label htmlFor="exp-neighborhood">Bairro (opcional)</Label>
               <Input
                 id="exp-neighborhood"
-                placeholder="e.g. Santa Teresa"
+                placeholder="Ex: Santa Teresa"
                 value={newExperience.neighborhood}
                 onChange={(e) => setNewExperience({ ...newExperience, neighborhood: e.target.value })}
               />
@@ -407,16 +402,16 @@ const ManualItinerary = () => {
 
             {/* Time of day */}
             <div className="space-y-2">
-              <Label>Time of day</Label>
+              <Label>Período do dia</Label>
               <RadioGroup
                 value={newExperience.timeOfDay}
                 onValueChange={(v) => setNewExperience({ ...newExperience, timeOfDay: v as 'morning' | 'afternoon' | 'evening' })}
                 className="flex gap-2"
               >
                 {[
-                  { value: 'morning', label: 'Morning', icon: Sun },
-                  { value: 'afternoon', label: 'Afternoon', icon: Sunset },
-                  { value: 'evening', label: 'Evening', icon: Moon }
+                  { value: 'morning', label: 'Manhã', icon: Sun },
+                  { value: 'afternoon', label: 'Tarde', icon: Sunset },
+                  { value: 'evening', label: 'Noite', icon: Moon }
                 ].map(option => (
                   <div key={option.value} className="flex-1">
                     <RadioGroupItem
@@ -438,10 +433,10 @@ const ManualItinerary = () => {
 
             {/* Personal note */}
             <div className="space-y-2">
-              <Label htmlFor="exp-note">Personal note (optional)</Label>
+              <Label htmlFor="exp-note">Nota pessoal (opcional)</Label>
               <Textarea
                 id="exp-note"
-                placeholder="Any details you want to remember..."
+                placeholder="Algum detalhe que queira lembrar..."
                 value={newExperience.note}
                 onChange={(e) => setNewExperience({ ...newExperience, note: e.target.value })}
                 rows={2}
@@ -451,10 +446,10 @@ const ManualItinerary = () => {
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsAddExperienceOpen(false)}>
-              Cancel
+              Cancelar
             </Button>
             <Button onClick={handleAddExperience}>
-              Add
+              Adicionar
             </Button>
           </DialogFooter>
         </DialogContent>
