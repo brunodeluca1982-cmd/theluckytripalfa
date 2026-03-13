@@ -1,6 +1,7 @@
 import { useState, useMemo, useRef, useCallback, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
 import { RIO_NEIGHBORHOODS, getNeighborhoodById } from "@/data/rio-neighborhoods";
 import { useExternalHotels } from "@/hooks/use-external-hotels";
 import { useCityHero } from "@/contexts/CityHeroContext";
@@ -308,19 +309,29 @@ const OndeficarRio = () => {
       </div>
 
       {/* Editorial card overlay */}
-      {selectedNeighborhood && (() => {
-        const n = getNeighborhoodById(selectedNeighborhood);
-        if (!n) return null;
-        return (
-          <NeighborhoodEditorialCard
-            neighborhoodId={selectedNeighborhood}
-            neighborhoodName={n.name}
-            onViewHotels={() => {
-              hotelListRef.current?.scrollIntoView({ behavior: "smooth" });
-            }}
-          />
-        );
-      })()}
+      <AnimatePresence mode="wait">
+        {selectedNeighborhood && (() => {
+          const n = getNeighborhoodById(selectedNeighborhood);
+          if (!n) return null;
+          return (
+            <motion.div
+              key={selectedNeighborhood}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.28 }}
+            >
+              <NeighborhoodEditorialCard
+                neighborhoodId={selectedNeighborhood}
+                neighborhoodName={n.name}
+                onViewHotels={() => {
+                  hotelListRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+                }}
+              />
+            </motion.div>
+          );
+        })()}
+      </AnimatePresence>
 
       {/* Hotel List */}
       <div className="px-6 py-6 relative z-10" ref={hotelListRef}>
