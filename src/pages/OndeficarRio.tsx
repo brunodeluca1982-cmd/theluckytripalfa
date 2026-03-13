@@ -309,13 +309,17 @@ const OndeficarRio = () => {
       })()}
 
       {/* Hotel List */}
-      <div className="px-6 py-6">
+      <div className="px-6 py-6" ref={hotelListRef}>
         <h2 className="text-lg font-serif font-medium text-foreground mb-4">
-          Hotéis
+          {selectedNeighborhood
+            ? `Hotéis em ${getNeighborhoodById(selectedNeighborhood)?.name || selectedNeighborhood}`
+            : "Hotéis"}
         </h2>
 
         <div className="space-y-6">
-          {NEIGHBORHOOD_ORDER.map((neighborhoodId) => {
+          {NEIGHBORHOOD_ORDER.filter(
+            (nId) => !selectedNeighborhood || nId === selectedNeighborhood
+          ).map((neighborhoodId) => {
             const neighborhoodHotels = hotelListData.filter(
               (h) => h.neighborhood === neighborhoodId
             );
@@ -324,9 +328,11 @@ const OndeficarRio = () => {
 
             return (
               <div key={neighborhoodId}>
-                <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3">
-                  {neighborhoodData?.name || neighborhoodId}
-                </h3>
+                {!selectedNeighborhood && (
+                  <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3">
+                    {neighborhoodData?.name || neighborhoodId}
+                  </h3>
+                )}
                 <div className="space-y-1">
                   {neighborhoodHotels.map(renderHotelRow)}
                 </div>
