@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { useNeighborhoodEditorial } from "@/hooks/use-neighborhood-editorial";
+import { useExternalNeighborhood } from "@/hooks/use-external-neighborhoods";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface Props {
@@ -12,12 +12,14 @@ interface Props {
 
 interface SectionProps {
   title: string;
-  content: string | null;
+  content: string | string[] | null;
 }
 
 function EditorialSection({ title, content }: SectionProps) {
   const [open, setOpen] = useState(false);
   if (!content) return null;
+
+  const text = Array.isArray(content) ? content.join("\n") : content;
 
   return (
     <Collapsible open={open} onOpenChange={setOpen}>
@@ -37,7 +39,7 @@ function EditorialSection({ title, content }: SectionProps) {
           transition={{ duration: 0.22, ease: "easeOut" }}
           className="text-sm text-muted-foreground/90 pb-4 leading-relaxed whitespace-pre-line"
         >
-          {content}
+          {text}
         </motion.p>
       </CollapsibleContent>
     </Collapsible>
@@ -58,7 +60,7 @@ function GlassButton({ children, onClick, className = "" }: { children: React.Re
 }
 
 export default function NeighborhoodEditorialCard({ neighborhoodId, neighborhoodName, onViewHotels }: Props) {
-  const { data: editorial, isLoading } = useNeighborhoodEditorial(neighborhoodId);
+  const { data: neighborhood, isLoading } = useExternalNeighborhood(neighborhoodId);
   const [expanded, setExpanded] = useState(false);
 
   if (isLoading) {
@@ -77,8 +79,11 @@ export default function NeighborhoodEditorialCard({ neighborhoodId, neighborhood
     );
   }
 
-  const summary = editorial?.summary;
-  const hasSections = editorial?.como_e_ficar || editorial?.pra_quem || editorial?.o_que_faz_especial || editorial?.o_que_considerar;
+  const summary = neighborhood?.identity_phrase;
+  const hasSections = neighborhood?.my_view || neighborhood?.how_to_live;
+  const bestForText = [neighborhood?.best_for_1, neighborhood?.best_for_2, neighborhood?.best_for_3]
+    .filter(Boolean)
+    .join("\n");
 
   return (
     <motion.div
@@ -90,7 +95,7 @@ export default function NeighborhoodEditorialCard({ neighborhoodId, neighborhood
       className="mx-4 mt-4 rounded-3xl backdrop-blur-2xl bg-white/10 border border-white/15 p-6 relative z-20 shadow-2xl"
     >
       <h3 className="text-2xl font-serif font-medium text-foreground mb-3 tracking-tight">
-        {neighborhoodName}
+        {neighborhood?.neighborhood_name || neighborhoodName}
       </h3>
 
       {summary && (
@@ -117,7 +122,7 @@ export default function NeighborhoodEditorialCard({ neighborhoodId, neighborhood
           >
             {hasSections && (
               <GlassButton onClick={() => setExpanded(true)}>
-                Por dentro de {neighborhoodName}
+                Por dentro de {neighborhood?.neighborhood_name || neighborhoodName}
               </GlassButton>
             )}
             <GlassButton onClick={onViewHotels} className="bg-white/15 border-white/25">
@@ -132,10 +137,9 @@ export default function NeighborhoodEditorialCard({ neighborhoodId, neighborhood
             transition={{ duration: 0.22, ease: "easeInOut" }}
             className="mt-2 overflow-hidden"
           >
-            <EditorialSection title="Como é ficar aqui" content={editorial?.como_e_ficar ?? null} />
-            <EditorialSection title="Pra quem esse bairro faz sentido" content={editorial?.pra_quem ?? null} />
-            <EditorialSection title="O que faz esse bairro especial" content={editorial?.o_que_faz_especial ?? null} />
-            <EditorialSection title="O que vale considerar" content={editorial?.o_que_considerar ?? null} />
+            <EditorialSection title="Meu olhar" content={neighborhood?.my_view ?? null} />
+            <EditorialSection title="Como viver esse bairro" content={neighborhood?.how_to_live ?? null} />
+            <EditorialSection title="Melhor para" content={bestForText || null} />
 
             <GlassButton onClick={onViewHotels} className="w-full mt-5 bg-white/15 border-white/25">
               Ver hotéis neste bairro

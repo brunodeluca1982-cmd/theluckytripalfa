@@ -21,28 +21,28 @@ serve(async (req) => {
 
     const externalClient = createClient(EXTERNAL_URL, EXTERNAL_KEY);
 
-    // Official view: v_stay_hotels_full
+    // Official table: stay_neighborhoods
     const { data, error, count } = await externalClient
-      .from("v_stay_hotels_full")
+      .from("stay_neighborhoods")
       .select("*", { count: "exact" })
-      .limit(200);
+      .limit(100);
 
-    console.log("stay_hotels_full result:", { count, dataLength: data?.length, error: error?.message });
+    console.log("stay_neighborhoods result:", { count, dataLength: data?.length, error: error?.message });
 
     if (error) {
-      console.error("stay_hotels_full error:", error);
+      console.error("stay_neighborhoods error:", error);
       return new Response(
-        JSON.stringify({ hotels: [], error: error.message }),
+        JSON.stringify({ neighborhoods: [], error: error.message }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
     return new Response(
-      JSON.stringify({ hotels: data || [] }),
+      JSON.stringify({ neighborhoods: data || [] }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (e) {
-    console.error("external-hotels error:", e);
+    console.error("external-neighborhoods error:", e);
     return new Response(
       JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
