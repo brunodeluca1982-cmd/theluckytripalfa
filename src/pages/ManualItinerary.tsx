@@ -343,7 +343,7 @@ const ManualItinerary = () => {
                     className="w-full mt-2 h-10"
                   >
                     <Plus className="w-4 h-4 mr-2" />
-                    Add experience
+                    Adicionar experiência
                   </Button>
                 </div>
               </div>
