@@ -21,9 +21,9 @@ serve(async (req) => {
 
     const externalClient = createClient(EXTERNAL_URL, EXTERNAL_KEY);
 
-    // Official table: stay_hotels_full
+    // Official view: v_stay_hotels_full
     const { data, error, count } = await externalClient
-      .from("stay_hotels_full")
+      .from("v_stay_hotels_full")
       .select("*", { count: "exact" })
       .eq("ativo", true)
       .order("ordem_bairro", { ascending: true })
