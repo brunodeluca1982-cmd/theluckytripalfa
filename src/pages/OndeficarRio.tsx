@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { RIO_NEIGHBORHOODS, getNeighborhoodById } from "@/data/rio-neighborhoods";
 import { useExternalHotels } from "@/hooks/use-external-hotels";
+import NeighborhoodEditorialCard from "@/components/onde-ficar/NeighborhoodEditorialCard";
 
 // Fixed editorial neighborhood order
 const NEIGHBORHOOD_ORDER = [
