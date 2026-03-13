@@ -26,7 +26,7 @@ const HeroVideoCarousel = () => {
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const touchStartX = useRef<number | null>(null);
   const navigate = useNavigate();
-  const { isAuthenticated } = useSubscription();
+  const { active: spotifyActive, activate: activateSpotify, openSheet: openSpotifySheet } = useSpotifyPlayer();
 
   // Load hero items from the official home_hero_items table
   const { data: heroItems } = useQuery({
