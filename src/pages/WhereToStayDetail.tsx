@@ -9,22 +9,6 @@ import { useExternalHotels } from "@/hooks/use-external-hotels";
 import { useExternalNeighborhood } from "@/hooks/use-external-neighborhoods";
 import { useMemo } from "react";
 
-const neighborhoodDescriptions: Record<string, string> = {
-  ipanema: "Bairro icônico do Rio clássico.",
-  leblon: "Mais residencial, organizado e tradicional.",
-  copacabana: "Intensa, histórica e muito movimentada.",
-  arpoador: "Arpoador é onde o Rio respira.",
-  leme: "Mais calmo, residencial e com clima de bairro.",
-  "sao-conrado": "Silencioso, contemplativo e menos urbano.",
-  "barra-da-tijuca": "A Barra é o Rio em versão expandida.",
-  recreio: "Jovem, esportivo e mais selvagem.",
-  "santa-teresa": "Artístico, histórico e cheio de personalidade.",
-  centro: "O coração histórico do Rio.",
-  "jardim-botanico": "Verde, silencioso e mais familiar.",
-  gavea: "Boêmia, universitária e ao mesmo tempo residencial.",
-  botafogo: "Urbano, prático e diverso.",
-  flamengo: "Residencial, organizado e funcional.",
-};
 
 function normalizeNeighborhood(bairro: string): string {
   return bairro.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "-");
