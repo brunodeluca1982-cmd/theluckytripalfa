@@ -368,10 +368,10 @@ const ManualItinerary = () => {
           onClick={handleSave}
           className="w-full h-14 text-base font-medium rounded-xl"
         >
-          Save my itinerary
+          Salvar meu roteiro
         </Button>
         <p className="text-xs text-muted-foreground text-center mt-2">
-          You can edit this itinerary later.
+          Você pode editar este roteiro depois.
         </p>
       </div>
 
