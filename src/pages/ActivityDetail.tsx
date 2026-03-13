@@ -1,5 +1,5 @@
 import { Link, useParams, useSearchParams } from "react-router-dom";
-import { ChevronLeft, Clock, Baby, Shield, Loader2, Bookmark, MapPin } from "lucide-react";
+import { Clock, Baby, Shield, Loader2, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useItemSave } from "@/hooks/use-item-save";
 import { activitiesByNeighborhood, cityLevelActivities, Activity } from "@/data/what-to-do-data";
@@ -9,8 +9,8 @@ import { useExternalExperiencias, normalizeNeighborhood } from "@/hooks/use-exte
 import type { ExternalExperiencia } from "@/hooks/use-external-experiencias";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
-import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
 import { useEffect, useState } from "react";
+import DetailHeroLayout from "@/components/detail/DetailHeroLayout";
 
 const guideIdToWhatToDoId: Record<string, string> = {
   "praia-ipanema": "praia-ipanema",
@@ -66,8 +66,6 @@ const findStaticActivityById = (
 
 interface MediaRow { type: "image" | "video"; url: string; title?: string; }
 
-// Legacy useExperienciaMedia removed — all media comes from experience_media table
-
 function useExperienceMediaBySlug(slug: string | undefined) {
   return useQuery({
     queryKey: ["experience-media-slug", slug],
@@ -96,14 +94,12 @@ function isActivitySavedLocally(activityId: string) {
   return draft.some((item: { id: string; type: string }) => item.id === activityId && item.type === "activity");
 }
 
-/** External experiencia detail view — dark card layout */
+/** External experiencia detail view */
 const ExternalActivityView = ({ exp, backPath }: { exp: ExternalExperiencia; backPath: string }) => {
   const { saveItem } = useItemSave();
   const slug = normalizeNeighborhood(exp.bairro);
   const { data: slugMedia } = useExperienceMediaBySlug(exp.id);
   const [isSaved, setIsSaved] = useState(false);
-
-  const mediaList = slugMedia;
 
   useEffect(() => {
     setIsSaved(isActivitySavedLocally(exp.id));
@@ -114,121 +110,61 @@ const ExternalActivityView = ({ exp, backPath }: { exp: ExternalExperiencia; bac
     setIsSaved(true);
   };
 
-  const hasMedia = mediaList && mediaList.length > 0;
+  const heroImage = getAttractionImage(slug);
+  const pills = [exp.categoria, exp.bairro, exp.vibe].filter(Boolean) as string[];
 
   return (
-    <div className="min-h-screen bg-black">
-      {/* Hero */}
-      <div className="relative w-full aspect-[4/3] bg-muted overflow-hidden">
-        {hasMedia && mediaList.length > 1 ? (
-          <Carousel className="w-full h-full" opts={{ loop: true }}>
-            <CarouselContent className="ml-0 h-full">
-              {mediaList.map((m, i) => (
-                <CarouselItem key={i} className="pl-0 h-full">
-                  {m.type === "video" ? (
-                    <video src={m.url} muted controls playsInline preload="metadata" className="w-full h-full object-cover" />
-                  ) : (
-                    <img src={m.url} alt={exp.nome} className="w-full h-full object-cover" />
-                  )}
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-          </Carousel>
-        ) : hasMedia ? (
-          mediaList[0].type === "video" ? (
-            <video src={mediaList[0].url} muted controls playsInline preload="metadata" className="w-full h-full object-cover" />
-          ) : (
-            <img src={mediaList[0].url} alt={exp.nome} className="w-full h-full object-cover" />
-          )
-        ) : (
-          <img src={getAttractionImage(slug)} alt={exp.nome} className="w-full h-full object-cover" />
-        )}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/40" />
-        <div className="absolute top-0 left-0 right-0 px-4 pt-[env(safe-area-inset-top,12px)] pb-2 flex items-center justify-center z-10">
-          <Link to={backPath} className="absolute left-4 inline-flex items-center gap-1.5 text-sm text-white/90 font-medium">
-            <ChevronLeft className="w-4 h-4" />
-            Voltar
-          </Link>
-          <button
-            onClick={handleSave}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 text-white text-sm font-medium"
-          >
-            <Bookmark className="w-4 h-4" fill={isSaved ? "currentColor" : "none"} />
-            {isSaved ? "Salvo" : "Salvar"}
-          </button>
-        </div>
-      </div>
-
-      {/* Content — dark */}
-      <div className="relative bg-black/90 backdrop-blur-sm px-5 pt-7 pb-24">
-
-        {/* Pills */}
-        <div className="flex flex-wrap gap-2 mb-5">
-          {exp.categoria && (
-            <span className="text-[11px] font-medium tracking-widest uppercase text-white/70 border border-white/20 rounded-full px-3 py-1">
-              {exp.categoria}
-            </span>
-          )}
-          <span className="text-[11px] font-medium tracking-widest uppercase text-white/70 border border-white/20 rounded-full px-3 py-1">
-            {exp.bairro}
+    <DetailHeroLayout
+      backPath={backPath}
+      title={exp.nome}
+      pills={pills}
+      media={slugMedia || undefined}
+      heroImageUrl={heroImage}
+      isSaved={isSaved}
+      onSave={handleSave}
+      footer={`The Lucky Trip — ${exp.bairro}`}
+    >
+      {/* Meta pills */}
+      <div className="flex flex-wrap gap-2 mb-5">
+        {exp.duracao && (
+          <span className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-white/10 text-white/70">
+            <Clock className="w-3 h-3" /> {exp.duracao}
           </span>
-          {exp.vibe && (
-            <span className="text-[11px] font-medium tracking-widest uppercase text-white/70 border border-white/20 rounded-full px-3 py-1">
-              {exp.vibe}
-            </span>
-          )}
-        </div>
-
-        {/* Title */}
-        <h1 className="text-4xl font-serif font-semibold text-white leading-tight mb-5">
-          {exp.nome}
-        </h1>
-
-        {/* Meta pills row */}
-        <div className="flex flex-wrap gap-2 mb-6">
-          {exp.duracao && (
-            <span className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-white/10 text-white/70">
-              <Clock className="w-3 h-3" /> {exp.duracao}
-            </span>
-          )}
-          {exp.melhor_horario && (
-            <span className="text-xs px-2.5 py-1 rounded-full bg-white/10 text-white/70">
-              🕐 {exp.melhor_horario}
-            </span>
-          )}
-          {exp.com_criancas && (
-            <span className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-white/10 text-white/70">
-              <Baby className="w-3 h-3" /> Kids OK
-            </span>
-          )}
-          {exp.seguro_mulher_sozinha && (
-            <span className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-white/10 text-white/70">
-              <Shield className="w-3 h-3" /> Safe solo
-            </span>
-          )}
-          {exp.precisa_reserva && (
-            <span className="text-xs px-2.5 py-1 rounded-full bg-white/10 text-white/70">
-              📋 Reserva necessária
-            </span>
-          )}
-        </div>
-
-        {/* Secondary links */}
-        {exp.google_maps_url && (
-          <a
-            href={exp.google_maps_url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-2 text-sm text-white/50 hover:text-white/80 transition-colors"
-          >
-            <MapPin className="w-4 h-4" />
-            Ver no Google Maps
-          </a>
         )}
-
-        <p className="text-xs text-white/20 mt-10">The Lucky Trip — {exp.bairro}</p>
+        {exp.melhor_horario && (
+          <span className="text-xs px-2.5 py-1 rounded-full bg-white/10 text-white/70">
+            🕐 {exp.melhor_horario}
+          </span>
+        )}
+        {exp.com_criancas && (
+          <span className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-white/10 text-white/70">
+            <Baby className="w-3 h-3" /> Kids OK
+          </span>
+        )}
+        {exp.seguro_mulher_sozinha && (
+          <span className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-white/10 text-white/70">
+            <Shield className="w-3 h-3" /> Safe solo
+          </span>
+        )}
+        {exp.precisa_reserva && (
+          <span className="text-xs px-2.5 py-1 rounded-full bg-white/10 text-white/70">
+            📋 Reserva necessária
+          </span>
+        )}
       </div>
-    </div>
+
+      {exp.google_maps_url && (
+        <a
+          href={exp.google_maps_url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-2 text-sm text-white/50 hover:text-white/80 transition-colors"
+        >
+          <MapPin className="w-4 h-4" />
+          Ver no Google Maps
+        </a>
+      )}
+    </DetailHeroLayout>
   );
 };
 
@@ -279,15 +215,11 @@ const ActivityDetail = () => {
       <div className="min-h-screen bg-background">
         <header className="px-6 py-4 border-b border-border">
           <Link to="/o-que-fazer" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
-            <ChevronLeft className="w-4 h-4" />
             Voltar
           </Link>
         </header>
         <div className="flex flex-col items-center justify-center px-6 py-16">
           <p className="text-lg text-foreground font-medium mb-2">Atividade não encontrada</p>
-          <p className="text-sm text-muted-foreground mb-6 text-center">
-            Esta atividade pode ter sido removida ou o link está incorreto.
-          </p>
           <Button asChild variant="outline">
             <Link to="/o-que-fazer">Voltar para O Que Fazer</Link>
           </Button>
@@ -297,106 +229,49 @@ const ActivityDetail = () => {
   }
 
   const { activity, neighborhoodName } = result;
-
-  const staticMedia = slugMediaForStatic && slugMediaForStatic.length > 0 ? slugMediaForStatic : null;
+  const staticMedia = slugMediaForStatic && slugMediaForStatic.length > 0 ? slugMediaForStatic : undefined;
+  const heroImage = getAttractionImage(from || "");
+  const pills = [activity.category, neighborhoodName].filter(Boolean) as string[];
 
   return (
-    <div className="min-h-screen bg-black">
-      {/* Hero */}
-      <div className="relative w-full aspect-[4/3] bg-muted overflow-hidden">
-        {staticMedia && staticMedia.length > 1 ? (
-          <Carousel className="w-full h-full" opts={{ loop: true }}>
-            <CarouselContent className="ml-0 h-full">
-              {staticMedia.map((m, i) => (
-                <CarouselItem key={i} className="pl-0 h-full">
-                  {m.type === "video" ? (
-                    <video src={m.url} muted controls playsInline preload="metadata" className="w-full h-full object-cover" />
-                  ) : (
-                    <img src={m.url} alt={activity.title} className="w-full h-full object-cover" />
-                  )}
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-          </Carousel>
-        ) : staticMedia ? (
-          staticMedia[0].type === "video" ? (
-            <video src={staticMedia[0].url} muted controls playsInline preload="metadata" className="w-full h-full object-cover" />
-          ) : (
-            <img src={staticMedia[0].url} alt={activity.title} className="w-full h-full object-cover" />
-          )
-        ) : (
-          <img src={getAttractionImage(from || "")} alt={activity.title} className="w-full h-full object-cover" />
-        )}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/40" />
-        <div className="absolute top-0 left-0 right-0 px-4 pt-[env(safe-area-inset-top,12px)] pb-2 flex items-center justify-center z-10">
-          <Link to={backPath} className="absolute left-4 inline-flex items-center gap-1.5 text-sm text-white/90 font-medium">
-            <ChevronLeft className="w-4 h-4" />
-            Voltar
-          </Link>
-          <button
-            onClick={handlePrimarySave}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 text-white text-sm font-medium"
-          >
-            <Bookmark className="w-4 h-4" fill={isSaved ? "currentColor" : "none"} />
-            {isSaved ? "Salvo" : "Salvar"}
-          </button>
-        </div>
+    <DetailHeroLayout
+      backPath={backPath}
+      title={activity.title}
+      subtitle={activity.price || null}
+      pills={pills}
+      media={staticMedia}
+      heroImageUrl={heroImage}
+      isSaved={isSaved}
+      onSave={handlePrimarySave}
+      footer={`The Lucky Trip — ${neighborhoodName}`}
+    >
+      {/* Description */}
+      <div className="space-y-3 mb-6">
+        {activity.description.split("\n").map((paragraph, index) => (
+          <p key={index} className="text-base text-white/75 leading-relaxed">{paragraph}</p>
+        ))}
       </div>
 
-      {/* Content — dark */}
-      <div className="relative bg-black/90 backdrop-blur-sm px-5 pt-7 pb-24">
-
-        {/* Pills */}
-        <div className="flex flex-wrap gap-2 mb-5">
-          <span className="text-[11px] font-medium tracking-widest uppercase text-white/70 border border-white/20 rounded-full px-3 py-1">
-            {activity.category}
-          </span>
-          <span className="text-[11px] font-medium tracking-widest uppercase text-white/70 border border-white/20 rounded-full px-3 py-1">
-            {neighborhoodName}
-          </span>
-        </div>
-
-        {/* Title */}
-        <h1 className="text-4xl font-serif font-semibold text-white leading-tight mb-5">
-          {activity.title}
-        </h1>
-
-        {activity.price && (
-          <p className="text-sm text-white/60 mb-5">{activity.price}</p>
+      {/* Secondary links */}
+      <div className="space-y-3">
+        {activity.googleMaps && (
+          <a href={activity.googleMaps} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm text-white/50 hover:text-white/80 transition-colors">
+            <MapPin className="w-4 h-4" />
+            Ver no Google Maps
+          </a>
         )}
-
-        {/* Description */}
-        <div className="space-y-3 mb-6">
-          {activity.description.split("\n").map((paragraph, index) => (
-            <p key={index} className="text-base text-white/75 leading-relaxed">
-              {paragraph}
-            </p>
-          ))}
-        </div>
-
-        {/* Secondary links */}
-        <div className="space-y-3">
-          {activity.googleMaps && (
-            <a href={activity.googleMaps} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm text-white/50 hover:text-white/80 transition-colors">
-              <MapPin className="w-4 h-4" />
-              Ver no Google Maps
-            </a>
-          )}
-          {activity.instagram && (
-            <a href={`https://instagram.com/${activity.instagram.replace("@", "")}`} target="_blank" rel="noopener noreferrer" className="text-sm text-white/50 hover:text-white/80 transition-colors">
-              {activity.instagram}
-            </a>
-          )}
-          {activity.externalLink && (
-            <a href={activity.externalLink} target="_blank" rel="noopener noreferrer" className="text-sm text-white/50 hover:text-white/80 transition-colors underline">
-              Reservar / Saber mais
-            </a>
-          )}
-        </div>
-
-        <p className="text-xs text-white/20 mt-10">The Lucky Trip — {neighborhoodName}</p>
+        {activity.instagram && (
+          <a href={`https://instagram.com/${activity.instagram.replace("@", "")}`} target="_blank" rel="noopener noreferrer" className="text-sm text-white/50 hover:text-white/80 transition-colors">
+            {activity.instagram}
+          </a>
+        )}
+        {activity.externalLink && (
+          <a href={activity.externalLink} target="_blank" rel="noopener noreferrer" className="text-sm text-white/50 hover:text-white/80 transition-colors underline">
+            Reservar / Saber mais
+          </a>
+        )}
       </div>
-    </div>
+    </DetailHeroLayout>
   );
 };
 

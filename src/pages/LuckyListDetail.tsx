@@ -1,13 +1,41 @@
-import { Link, useParams } from "react-router-dom";
-import { ChevronLeft } from "lucide-react";
+import { useParams } from "react-router-dom";
+import { MapPin, Instagram, Phone, Clock } from "lucide-react";
 import { useLuckyListItem } from "@/hooks/use-lucky-list";
 import { getReturnPath } from "@/data/subscriber-behavior";
-import SaveToRoteiroButton from "@/components/SaveToRoteiroButton";
+import { useItemSave } from "@/hooks/use-item-save";
+import { usePlacePhoto, buildPlaceQuery } from "@/hooks/use-place-photo";
+import { useState, useEffect } from "react";
+import DetailHeroLayout from "@/components/detail/DetailHeroLayout";
+
+function slugify(s: string) {
+  return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+}
+
+function isSavedLocally(id: string) {
+  const draft = JSON.parse(localStorage.getItem("draft-roteiro") || "[]");
+  return draft.some((item: { id: string; type: string }) => item.id === id && item.type === "lucky-list");
+}
 
 const LuckyListDetail = () => {
   const { id } = useParams<{ id: string }>();
   const returnPath = getReturnPath();
   const { data: item, isLoading } = useLuckyListItem(id);
+  const { saveItem } = useItemSave();
+  const [isSaved, setIsSaved] = useState(false);
+
+  const itemSlug = item ? slugify(item.nome) : "";
+  const placeQuery = item ? buildPlaceQuery(item.nome, item.bairro || undefined) : "";
+  const { photoUrl } = usePlacePhoto(itemSlug, "attraction", placeQuery, !!item);
+
+  useEffect(() => {
+    if (id) setIsSaved(isSavedLocally(id));
+  }, [id]);
+
+  const handleSave = () => {
+    if (!item) return;
+    saveItem(item.id, "lucky-list", item.nome, false);
+    setIsSaved(true);
+  };
 
   if (isLoading) {
     return (
@@ -19,92 +47,75 @@ const LuckyListDetail = () => {
 
   if (!item) {
     return (
-      <div className="min-h-screen bg-background">
-        <header className="px-6 py-4 border-b border-border">
-          <Link to={returnPath} className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
-            <ChevronLeft className="w-4 h-4" />
-            Voltar
-          </Link>
-        </header>
-        <main className="px-6 py-8">
-          <p className="text-muted-foreground">Item não encontrado.</p>
-        </main>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <p className="text-muted-foreground">Item não encontrado.</p>
       </div>
     );
   }
 
+  const pills = [item.categoria_experiencia, item.bairro].filter(Boolean) as string[];
+
   return (
-    <div className="min-h-screen bg-background">
-      <header className="px-6 py-4 border-b border-border relative flex items-center justify-center">
-        <Link to={returnPath} className="absolute left-6 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
-          <ChevronLeft className="w-4 h-4" />
-          Voltar
-        </Link>
-        <SaveToRoteiroButton itemId={item.id} itemType="lucky-list" itemTitle={item.nome} />
-      </header>
+    <DetailHeroLayout
+      backPath={returnPath}
+      title={item.nome}
+      pills={pills}
+      heroImageUrl={photoUrl || undefined}
+      isSaved={isSaved}
+      onSave={handleSave}
+      footer="The Lucky Trip — Rio de Janeiro"
+    >
+      {/* Meu Olhar */}
+      {item.meu_olhar && (
+        <p className="text-base text-white/80 italic leading-relaxed mb-5">{item.meu_olhar}</p>
+      )}
 
-      <main className="pb-12">
-        <div className="px-6 pt-8">
-          {item.categoria_experiencia && (
-            <p className="text-xs tracking-widest text-muted-foreground uppercase">{item.categoria_experiencia}</p>
-          )}
-          {item.bairro && (
-            <p className="text-xs text-muted-foreground/60 mt-1">{item.bairro}</p>
-          )}
+      {/* Como Fazer */}
+      {item.como_fazer && (
+        <div className="space-y-2 mb-6">
+          {item.como_fazer.split("\n").map((paragraph, index) => (
+            <p key={index} className="text-base text-white/70 leading-relaxed">{paragraph}</p>
+          ))}
         </div>
+      )}
 
-        <div className="px-6 pt-4 pb-6">
-          <h1 className="text-4xl font-serif font-semibold text-foreground leading-tight">{item.nome}</h1>
+      {/* Metadata */}
+      <div className="space-y-3">
+        {item.google_maps && (
+          <a href={item.google_maps} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm text-white/50 hover:text-white/80 transition-colors">
+            <MapPin className="w-4 h-4" />
+            Ver no Google Maps
+          </a>
+        )}
+        {item.contato_instagram && (
+          <p className="flex items-center gap-2 text-sm text-white/50">
+            <Instagram className="w-4 h-4" />
+            {item.contato_instagram}
+          </p>
+        )}
+        {item.contato_telefone && (
+          <p className="flex items-center gap-2 text-sm text-white/50">
+            <Phone className="w-4 h-4" />
+            {item.contato_telefone}
+          </p>
+        )}
+        {item.horarios && (
+          <p className="flex items-center gap-2 text-sm text-white/50">
+            <Clock className="w-4 h-4" />
+            {item.horarios}
+          </p>
+        )}
+      </div>
+
+      {/* Effort tag */}
+      {item.nivel_esforco && (
+        <div className="mt-4">
+          <span className="text-xs bg-white/10 text-white/60 px-2.5 py-1 rounded-full">
+            Esforço: {item.nivel_esforco}
+          </span>
         </div>
-
-        {/* Meu Olhar */}
-        {item.meu_olhar && (
-          <div className="px-6 pt-4">
-            <p className="text-base text-foreground/80 italic leading-relaxed">{item.meu_olhar}</p>
-          </div>
-        )}
-
-        {/* Como Fazer */}
-        {item.como_fazer && (
-          <div className="px-6 pt-6">
-            <div className="space-y-2">
-              {item.como_fazer.split('\n').map((paragraph, index) => (
-                <p key={index} className="text-base text-muted-foreground leading-relaxed">{paragraph}</p>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Metadata */}
-        {(item.google_maps || item.contato_instagram || item.contato_telefone || item.horarios) && (
-          <div className="px-6 pt-6 space-y-1 text-sm text-muted-foreground">
-            {item.google_maps && (
-              <p>
-                <a href={item.google_maps} target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors underline">
-                  Ver no Google Maps
-                </a>
-              </p>
-            )}
-            {item.contato_instagram && <p>Instagram: {item.contato_instagram}</p>}
-            {item.contato_telefone && <p>Telefone: {item.contato_telefone}</p>}
-            {item.horarios && <p>Horários: {item.horarios}</p>}
-          </div>
-        )}
-
-        {/* Tags */}
-        {item.nivel_esforco && (
-          <div className="px-6 pt-4">
-            <span className="text-xs bg-muted text-muted-foreground px-2 py-1 rounded-full">
-              Esforço: {item.nivel_esforco}
-            </span>
-          </div>
-        )}
-      </main>
-
-      <footer className="px-6 py-8 border-t border-border">
-        <p className="text-xs text-muted-foreground">The Lucky Trip — Rio de Janeiro</p>
-      </footer>
-    </div>
+      )}
+    </DetailHeroLayout>
   );
 };
 
