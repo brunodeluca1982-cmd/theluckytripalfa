@@ -17,7 +17,7 @@ const LuckyList = () => {
 
   // Flatten all items to enforce global 3-item free limit
   const allItems = neighborhoods.flatMap((b) => grouped[b]);
-  const freeLimit = 3;
+  const freeLimit = 2;
 
   if (isLoading) {
     return (
