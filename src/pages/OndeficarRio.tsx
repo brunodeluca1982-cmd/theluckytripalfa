@@ -202,7 +202,7 @@ const OndeficarRio = () => {
         </div>
       )}
       {/* Header */}
-      <header className="px-6 py-4 border-b border-border">
+      <header className="px-6 py-4 border-b border-white/10 relative z-10">
         <Link
           to="/destino/rio-de-janeiro"
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
