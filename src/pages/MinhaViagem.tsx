@@ -175,7 +175,7 @@ function MinhaViagemInner() {
             <p className="text-xl font-serif font-medium text-foreground mb-1.5">Minha Viagem</p>
             <p className="text-sm text-muted-foreground/80 mb-8 max-w-[260px] leading-relaxed">Salve lugares ou crie um roteiro para começar sua viagem.</p>
             <div className="flex flex-col gap-3 w-full max-w-xs">
-              <Link to="/o-que-fazer"><GlassButton className="w-full bg-white/22 border-white/40"><Sparkles className="w-4 h-4" /> Explorar O Que Fazer</GlassButton></Link>
+              <Link to="/o-que-fazer"><GlassButton className="w-full bg-white/22 border-white/40"><Sparkles className="w-4 h-4" /> O Que Fazer</GlassButton></Link>
               <Link to="/lucky-list"><GlassButton className="w-full"><MapPin className="w-4 h-4" /> Lucky List</GlassButton></Link>
             </div>
           </motion.div>
