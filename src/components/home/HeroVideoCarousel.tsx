@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, TouchEvent } from "react";
 import logoSymbol from "@/assets/brand/logo-l-creme.png";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
