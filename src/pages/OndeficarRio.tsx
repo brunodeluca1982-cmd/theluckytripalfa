@@ -213,7 +213,7 @@ const OndeficarRio = () => {
       </header>
 
       {/* Header block */}
-      <div className="px-6 pt-6 pb-4">
+      <div className="px-6 pt-6 pb-4 relative z-10">
         <h1 className="text-2xl font-serif font-medium text-foreground">
           Onde faz mais sentido você ficar
         </h1>
