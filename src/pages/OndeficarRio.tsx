@@ -33,6 +33,7 @@ function normalizeNeighborhood(bairro: string): string {
 
 const OndeficarRio = () => {
   const { data: externalHotels } = useExternalHotels();
+  const { heroUrl } = useCityHero();
   const navigate = useNavigate();
   const hotelListRef = useRef<HTMLDivElement>(null);
 
