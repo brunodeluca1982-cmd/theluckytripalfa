@@ -43,7 +43,7 @@ const CriarRoteiro = () => {
 
   const handleBack = useCallback(() => {
     if (step <= 1) {
-      navigate("/");
+      navigate("/destino/rio-de-janeiro");
     } else {
       goTo(step - 1);
     }
