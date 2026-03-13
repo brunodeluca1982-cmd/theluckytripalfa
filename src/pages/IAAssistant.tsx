@@ -173,6 +173,13 @@ const IAAssistant = () => {
   const sendMessage = useCallback(async (text: string) => {
     if (!text.trim() || isLoading) return;
 
+    // Check free limit
+    if (!limits.canUse('iaUses')) {
+      setShowPaywall(true);
+      return;
+    }
+    limits.recordUse('iaUses');
+
     const userMsg: Msg = { role: "user", content: text.trim() };
     const allMessages = [...messages, userMsg];
     setMessages(allMessages);
