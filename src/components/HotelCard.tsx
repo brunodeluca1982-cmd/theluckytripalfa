@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { usePlacePhoto, buildPlaceQuery } from "@/hooks/use-place-photo";
 
 interface HotelCardProps {
+  id?: string;
   name: string;
   description?: string;
   slug?: string;
@@ -11,6 +12,7 @@ interface HotelCardProps {
 }
 
 const HotelCard = ({
+  id,
   name,
   description,
   slug,
@@ -18,9 +20,14 @@ const HotelCard = ({
   imageUrl,
   categoria,
 }: HotelCardProps) => {
-  const detailUrl = slug ? `/hotel/${slug}?from=${neighborhood || ""}` : undefined;
+  const itemId = id ? String(id) : undefined;
+  const detailUrl = itemId
+    ? `/hotel/${itemId}?from=${neighborhood || ""}`
+    : slug
+      ? `/hotel/${slug}?from=${neighborhood || ""}`
+      : undefined;
   const placeQuery = buildPlaceQuery(name, neighborhood);
-  const { photoUrl, isLoading } = usePlacePhoto(slug || name, "hotel", placeQuery, !imageUrl);
+  const { photoUrl, isLoading } = usePlacePhoto(itemId || slug || name, "hotel", placeQuery, !imageUrl);
   // Priority: 1) Supabase imageUrl (prop) → 2) Google Places photo → 3) none
   const displayImage = imageUrl || photoUrl;
 

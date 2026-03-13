@@ -118,13 +118,12 @@ const WhereToEatDetail = () => {
               </h2>
               <div>
                 {restaurantList.map((restaurant) => {
-                  const slug = generateRestaurantSlug(restaurant.nome);
                   return (
                     <RestaurantCard
                       key={restaurant.id}
+                      id={String(restaurant.id)}
                       name={restaurant.nome}
                       description={restaurant.meu_olhar || ""}
-                      slug={slug}
                       neighborhood={neighborhood}
                       imageUrl={getRestaurantImage(neighborhood || "")}
                     />

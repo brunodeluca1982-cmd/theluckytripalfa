@@ -14,10 +14,15 @@ interface RestaurantCardProps {
   image_status?: string;
 }
 
-const RestaurantCard = ({ name, description, slug, neighborhood, imageUrl }: RestaurantCardProps) => {
-  const detailUrl = slug ? `/restaurante/${slug}?from=${neighborhood || ''}` : undefined;
+const RestaurantCard = ({ name, description, id, slug, neighborhood, imageUrl }: RestaurantCardProps) => {
+  const itemId = id ? String(id) : undefined;
+  const detailUrl = itemId
+    ? `/restaurante/${itemId}?from=${neighborhood || ""}`
+    : slug
+      ? `/restaurante/${slug}?from=${neighborhood || ""}`
+      : undefined;
   const placeQuery = buildPlaceQuery(name, neighborhood);
-  const { photoUrl, isLoading } = usePlacePhoto(slug || name, "restaurant", placeQuery, !imageUrl);
+  const { photoUrl, isLoading } = usePlacePhoto(itemId || slug || name, "restaurant", placeQuery, !imageUrl);
   // Priority: 1) Supabase imageUrl (prop) → 2) Google Places photo → 3) none
   const displayImage = imageUrl || photoUrl;
 
