@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
-import { Clapperboard, Music, ArrowLeft, Lock, MapPin, Clock, Zap, Loader2, ExternalLink } from "lucide-react";
+import { Clapperboard, Music, ArrowLeft, Lock, MapPin, Clock, Zap, Loader2, ExternalLink, RefreshCw } from "lucide-react";
 import { useCallback } from "react";
 import { useSpotifyPlayer } from "@/contexts/SpotifyPlayerContext";
 import { useEventMode } from "@/contexts/EventModeContext";
@@ -85,6 +85,12 @@ function OQueFazerCard({ item, index }: { item: OQueFazerItem; index: number }) 
               loading="lazy"
             />
           )}
+        </div>
+      )}
+
+      {!photoUrl && !photoLoading && (
+        <div className="w-full aspect-[16/9] rounded-xl overflow-hidden mb-4 relative bg-white/5 flex items-center justify-center">
+          <span className="text-xs text-white/45">Imagem indisponível</span>
         </div>
       )}
 
@@ -175,7 +181,7 @@ const WhatToDo = () => {
   const { active, activate, openSheet } = useSpotifyPlayer();
   const { evento, getPlacement } = useEventMode();
   const { heroUrl } = useCityHero();
-  const { data: items, isLoading } = useOQueFazer();
+  const { data: items, isLoading, isError, error, refetch, isFetching } = useOQueFazer();
 
   const handleMusicTap = useCallback(() => {
     if (!active) activate();
@@ -290,6 +296,24 @@ const WhatToDo = () => {
         {isLoading ? (
           <div className="flex items-center justify-center py-16">
             <Loader2 className="w-6 h-6 animate-spin text-white/60" />
+          </div>
+        ) : isError ? (
+          <div className="flex flex-col items-center justify-center py-16 gap-3">
+            <p className="text-sm text-white/80 text-center">
+              Não conseguimos carregar as atividades agora.
+            </p>
+            <p className="text-xs text-white/50 text-center max-w-xs">
+              {error instanceof Error ? error.message : "Erro de leitura da base oficial o_que_fazer_rio."}
+            </p>
+            <button
+              type="button"
+              onClick={() => refetch()}
+              disabled={isFetching}
+              className="inline-flex items-center gap-2 text-xs text-white/80 hover:text-white transition-colors disabled:opacity-50"
+            >
+              <RefreshCw className={`w-3 h-3 ${isFetching ? "animate-spin" : ""}`} />
+              Tentar novamente
+            </button>
           </div>
         ) : items && items.length > 0 ? (
           <div className="backdrop-blur-md bg-white/5 rounded-2xl border border-white/10 px-4">
