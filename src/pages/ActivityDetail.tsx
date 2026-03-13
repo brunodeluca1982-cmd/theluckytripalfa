@@ -49,23 +49,24 @@ function useActivityMedia(slug: string | undefined) {
 }
 
 const ActivityDetail = () => {
-  const { id } = useParams<{ id: string }>();
+  const { id: idOrSlug } = useParams<{ id: string }>();
   const [searchParams] = useSearchParams();
   const { saveItem } = useItemSave();
-  const { data: item, isLoading } = useOQueFazerItem(id);
+  const { data: item, isLoading } = useOQueFazerItem(idOrSlug);
 
   const from = searchParams.get("from");
   const backPath = from === "city" ? "/o-que-fazer" : from ? `/o-que-fazer/${from}` : "/o-que-fazer";
 
+  const itemSlug = item ? slugify(item.nome) : idOrSlug || "";
   const placeQuery = buildPlaceQuery(item?.nome || "", item?.bairro || undefined);
-  const itemSlug = item ? slugify(item.nome) : "";
   const { photoUrl } = usePlacePhoto(itemSlug, "attraction", placeQuery, !!item);
+  const { data: mediaList = [] } = useActivityMedia(itemSlug || undefined);
 
   const [isSaved, setIsSaved] = useState(false);
 
   useEffect(() => {
-    if (id) setIsSaved(isActivitySavedLocally(id));
-  }, [id]);
+    if (item?.id) setIsSaved(isActivitySavedLocally(item.id));
+  }, [item?.id]);
 
   const handleSave = () => {
     if (!item) return;
