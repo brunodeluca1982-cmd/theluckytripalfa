@@ -8,15 +8,13 @@ import { cn } from "@/lib/utils";
 
 interface HeroSlide {
   id: string;
-  slug: string;
+  destinationSlug: string | null;
   videoUrl?: string;
   imageUrl?: string;
   title: string;
   subtitle?: string;
   buttonLabel: string;
 }
-
-// No fallback slides — hero is fully driven by database
 
 const AUTO_ADVANCE_MS = 6000;
 
@@ -29,107 +27,37 @@ const HeroVideoCarousel = () => {
   const navigate = useNavigate();
   const { isAuthenticated } = useSubscription();
 
-  const HERO_SLUGS = ["cristo-redentor", "museu-do-amanha", "praia-de-ipanema"];
-
-  // 1. Load hero experiences
-  const { data: experiences } = useQuery({
-    queryKey: ["home-hero-experiences", HERO_SLUGS],
+  // Load hero items from the official home_hero_items table
+  const { data: heroItems } = useQuery({
+    queryKey: ["home-hero-items"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("experiences")
-        .select("id, slug, title, subtitle, city, country")
-        .in("slug", HERO_SLUGS)
+        .from("home_hero_items")
+        .select("*")
         .eq("is_active", true)
+        .eq("show_on_home", true)
         .order("sort_order", { ascending: true });
       if (error) throw error;
-      return data;
+      return data ?? [];
     },
     staleTime: 5 * 60 * 1000,
   });
 
-  // 2. Load all active media (video + image) for those slugs
-  const { data: mediaRows } = useQuery({
-    queryKey: ["home-hero-media", HERO_SLUGS],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("experience_media")
-        .select("experience_slug, media_type, media_url")
-        .in("experience_slug", HERO_SLUGS)
-        .eq("is_active", true)
-        .order("sort_order", { ascending: true });
-      if (error) throw error;
-      return data;
-    },
-    staleTime: 5 * 60 * 1000,
-  });
-
-  // 2b. Fallback: load Google Places photos for slugs missing Supabase media
-  const slugsMissingMedia = (() => {
-    if (!experiences || !mediaRows) return [];
-    const slugsWithMedia = new Set(mediaRows.map((m) => m.experience_slug));
-    return experiences.filter((e) => !slugsWithMedia.has(e.slug)).map((e) => e.slug);
-  })();
-
-  const { data: placePhotos } = useQuery({
-    queryKey: ["home-hero-place-photos", slugsMissingMedia],
-    queryFn: async () => {
-      if (slugsMissingMedia.length === 0) return [];
-      const { data, error } = await supabase
-        .from("place_photos")
-        .select("item_id, photo_url, photo_source")
-        .in("item_id", slugsMissingMedia)
-        .not("photo_url", "is", null);
-      if (error) throw error;
-      return data;
-    },
-    enabled: slugsMissingMedia.length > 0,
-    staleTime: 5 * 60 * 1000,
-  });
-
-  // 3. Build slides — Supabase media first, then place_photos fallback
+  // Build slides from home_hero_items
   const heroSlides: HeroSlide[] = (() => {
-    if (!experiences || !mediaRows) return [];
+    if (!heroItems || heroItems.length === 0) return [];
 
-    // Priority 1: Supabase experience_media (exact slug match)
-    const mediaBySlug = new Map<string, { video?: string; image?: string }>();
-    for (const m of mediaRows) {
-      const entry = mediaBySlug.get(m.experience_slug) ?? {};
-      if (m.media_type === "video" && !entry.video) entry.video = m.media_url;
-      if (m.media_type === "image" && !entry.image) entry.image = m.media_url;
-      mediaBySlug.set(m.experience_slug, entry);
-    }
-
-    // Priority 2: Google Places photos (from place_photos table)
-    const placePhotoBySlug = new Map<string, string>();
-    if (placePhotos) {
-      for (const p of placePhotos) {
-        if (p.photo_url && !placePhotoBySlug.has(p.item_id)) {
-          placePhotoBySlug.set(p.item_id, p.photo_url);
-        }
-      }
-    }
-
-    const slides: HeroSlide[] = [];
-    for (const exp of experiences) {
-      const media = mediaBySlug.get(exp.slug);
-      const hasSupabaseMedia = media && (media.video || media.image);
-      const fallbackPhoto = placePhotoBySlug.get(exp.slug);
-
-      // Skip if no media from any source
-      if (!hasSupabaseMedia && !fallbackPhoto) continue;
-
-      slides.push({
-        id: exp.id,
-        slug: exp.slug,
-        videoUrl: hasSupabaseMedia ? media.video : undefined,
-        imageUrl: hasSupabaseMedia ? (media.image || media.video) : fallbackPhoto,
-        title: exp.title,
-        subtitle: exp.city || exp.country || exp.subtitle || undefined,
-        buttonLabel: "Conferir agora",
-      });
-    }
-
-    return slides;
+    return heroItems
+      .filter((item) => item.video_url || item.thumbnail_url)
+      .map((item) => ({
+        id: item.id,
+        destinationSlug: item.destination_slug,
+        videoUrl: item.video_url ?? undefined,
+        imageUrl: item.thumbnail_url ?? item.video_url ?? undefined,
+        title: item.title,
+        subtitle: item.subtitle ?? undefined,
+        buttonLabel: item.button_label,
+      }));
   })();
 
   const goTo = useCallback(
@@ -186,7 +114,9 @@ const HeroVideoCarousel = () => {
   };
 
   const handleSlideAction = (slide: HeroSlide) => {
-    navigate(`/experiencia/${slide.slug}`);
+    if (slide.destinationSlug) {
+      navigate(`/destino/${slide.destinationSlug}`);
+    }
   };
 
   if (heroSlides.length === 0) {
