@@ -109,11 +109,12 @@ export default function DetailHeroLayout({
             <ChevronLeft className="w-5 h-5" />
           </Link>
           <button
-            onClick={onSave}
-            className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-black/25 backdrop-blur-md border border-white/15 text-white/90 active:scale-95 transition-all"
-            aria-label={isSaved ? "Salvo" : "Salvar"}
+            onClick={handleMusicTap}
+            className="inline-flex items-center justify-center w-10 h-10 rounded-full backdrop-blur-md border border-white/15 active:scale-95 transition-all"
+            style={{ backgroundColor: "hsla(141, 73%, 42%, 0.25)", color: "hsla(141, 73%, 72%, 1)" }}
+            aria-label="Abrir player de música"
           >
-            <Bookmark className="w-5 h-5" fill={isSaved ? "currentColor" : "none"} />
+            <Music className="w-5 h-5" />
           </button>
         </div>
 
