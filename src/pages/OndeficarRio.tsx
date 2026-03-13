@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { RIO_NEIGHBORHOODS, getNeighborhoodById } from "@/data/rio-neighborhoods";
 import { useExternalHotels } from "@/hooks/use-external-hotels";
+import { useCityHero } from "@/contexts/CityHeroContext";
 import NeighborhoodEditorialCard from "@/components/onde-ficar/NeighborhoodEditorialCard";
 
 // Fixed editorial neighborhood order
@@ -32,6 +33,7 @@ function normalizeNeighborhood(bairro: string): string {
 
 const OndeficarRio = () => {
   const { data: externalHotels } = useExternalHotels();
+  const { heroUrl } = useCityHero();
   const navigate = useNavigate();
   const hotelListRef = useRef<HTMLDivElement>(null);
 
@@ -186,9 +188,21 @@ const OndeficarRio = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background relative">
+      {/* Hero background — blurred, atmospheric */}
+      {heroUrl && (
+        <div className="fixed inset-0 z-0">
+          <img
+            src={heroUrl}
+            alt=""
+            className="w-full h-full object-cover opacity-30 blur-xl scale-110"
+            draggable={false}
+          />
+          <div className="absolute inset-0 bg-background/60" />
+        </div>
+      )}
       {/* Header */}
-      <header className="px-6 py-4 border-b border-border">
+      <header className="px-6 py-4 border-b border-white/10 relative z-10">
         <Link
           to="/destino/rio-de-janeiro"
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -199,7 +213,7 @@ const OndeficarRio = () => {
       </header>
 
       {/* Header block */}
-      <div className="px-6 pt-6 pb-4">
+      <div className="px-6 pt-6 pb-4 relative z-10">
         <h1 className="text-2xl font-serif font-medium text-foreground">
           Onde faz mais sentido você ficar
         </h1>
@@ -211,7 +225,7 @@ const OndeficarRio = () => {
       {/* Interactive Map */}
       <div
         ref={containerRef}
-        className="relative w-full overflow-hidden cursor-grab active:cursor-grabbing"
+        className="relative z-10 w-full overflow-hidden cursor-grab active:cursor-grabbing"
         style={{ height: "300px", touchAction: "none" }}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
@@ -287,7 +301,7 @@ const OndeficarRio = () => {
       </div>
 
       {/* Hint */}
-      <div className="px-6 py-3 border-b border-border">
+      <div className="px-6 py-3 border-b border-white/10 relative z-10">
         <p className="text-xs text-muted-foreground">
           Arraste e dê zoom para explorar o mapa.
         </p>
@@ -309,7 +323,7 @@ const OndeficarRio = () => {
       })()}
 
       {/* Hotel List */}
-      <div className="px-6 py-6" ref={hotelListRef}>
+      <div className="px-6 py-6 relative z-10" ref={hotelListRef}>
         <h2 className="text-lg font-serif font-medium text-foreground mb-4">
           {selectedNeighborhood
             ? `Hotéis em ${getNeighborhoodById(selectedNeighborhood)?.name || selectedNeighborhood}`
@@ -343,7 +357,7 @@ const OndeficarRio = () => {
       </div>
 
       {/* Footer */}
-      <footer className="px-6 py-8 border-t border-border">
+      <footer className="px-6 py-8 border-t border-white/10 relative z-10">
         <p className="text-xs text-muted-foreground">
           The Lucky Trip — Rio de Janeiro
         </p>

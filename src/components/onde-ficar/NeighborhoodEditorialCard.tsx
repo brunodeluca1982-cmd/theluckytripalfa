@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useNeighborhoodEditorial } from "@/hooks/use-neighborhood-editorial";
 
@@ -21,14 +20,14 @@ function EditorialSection({ title, content }: SectionProps) {
 
   return (
     <Collapsible open={open} onOpenChange={setOpen}>
-      <CollapsibleTrigger className="flex items-center justify-between w-full py-3 border-t border-white/10 text-left">
+      <CollapsibleTrigger className="flex items-center justify-between w-full py-4 border-t border-white/10 text-left">
         <span className="text-sm font-medium text-foreground">{title}</span>
         <ChevronDown
-          className={`w-4 h-4 text-muted-foreground transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+          className={`w-4 h-4 text-muted-foreground transition-transform duration-300 ${open ? "rotate-180" : ""}`}
         />
       </CollapsibleTrigger>
       <CollapsibleContent>
-        <p className="text-sm text-muted-foreground pb-3 leading-relaxed whitespace-pre-line">
+        <p className="text-sm text-muted-foreground/90 pb-4 leading-relaxed whitespace-pre-line">
           {content}
         </p>
       </CollapsibleContent>
@@ -42,10 +41,11 @@ export default function NeighborhoodEditorialCard({ neighborhoodId, neighborhood
 
   if (isLoading) {
     return (
-      <div className="mx-6 mt-4 rounded-2xl backdrop-blur-xl bg-background/70 border border-white/10 p-5 animate-pulse">
-        <div className="h-5 bg-muted/40 rounded w-1/2 mb-3" />
-        <div className="h-3 bg-muted/30 rounded w-full mb-2" />
-        <div className="h-3 bg-muted/30 rounded w-3/4" />
+      <div className="mx-4 mt-4 rounded-3xl backdrop-blur-2xl bg-white/10 border border-white/15 p-6 animate-pulse relative z-20 shadow-2xl">
+        <div className="h-6 bg-white/10 rounded w-1/2 mb-4" />
+        <div className="h-3 bg-white/8 rounded w-full mb-2" />
+        <div className="h-3 bg-white/8 rounded w-3/4 mb-2" />
+        <div className="h-3 bg-white/8 rounded w-2/3" />
       </div>
     );
   }
@@ -54,45 +54,42 @@ export default function NeighborhoodEditorialCard({ neighborhoodId, neighborhood
   const hasSections = editorial?.como_e_ficar || editorial?.pra_quem || editorial?.o_que_faz_especial || editorial?.o_que_considerar;
 
   return (
-    <div className="mx-6 mt-4 rounded-2xl backdrop-blur-xl bg-background/70 border border-white/10 p-5 animate-fade-in">
-      {/* Header */}
-      <h3 className="text-lg font-serif font-medium text-foreground mb-2">
+    <div className="mx-4 mt-4 rounded-3xl backdrop-blur-2xl bg-white/10 border border-white/15 p-6 animate-fade-in relative z-20 shadow-2xl">
+      {/* Neighborhood name — large editorial typography */}
+      <h3 className="text-2xl font-serif font-medium text-foreground mb-3 tracking-tight">
         {neighborhoodName}
       </h3>
 
       {/* Summary */}
       {summary && (
-        <p className="text-sm text-muted-foreground leading-relaxed mb-4">
+        <p className="text-sm text-muted-foreground/90 leading-relaxed mb-6">
           {summary}
         </p>
       )}
 
       {!summary && !hasSections && (
-        <p className="text-sm text-muted-foreground leading-relaxed mb-4">
+        <p className="text-sm text-muted-foreground/90 leading-relaxed mb-6">
           Conteúdo editorial em breve.
         </p>
       )}
 
-      {/* Action buttons */}
+      {/* Action buttons — capsule glass style */}
       {!expanded && (
         <div className="flex gap-3">
           {hasSections && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex-1 text-xs backdrop-blur-sm bg-background/50 border-white/15"
+            <button
+              className="flex-1 py-3 px-4 text-xs font-medium text-foreground rounded-full backdrop-blur-xl bg-white/10 border border-white/20 hover:bg-white/15 transition-all duration-200"
               onClick={() => setExpanded(true)}
             >
               Por dentro de {neighborhoodName}
-            </Button>
+            </button>
           )}
-          <Button
-            size="sm"
-            className="flex-1 text-xs"
+          <button
+            className="flex-1 py-3 px-4 text-xs font-medium text-foreground rounded-full backdrop-blur-xl bg-white/15 border border-white/25 hover:bg-white/20 transition-all duration-200"
             onClick={onViewHotels}
           >
             Ver hotéis
-          </Button>
+          </button>
         </div>
       )}
 
@@ -104,13 +101,12 @@ export default function NeighborhoodEditorialCard({ neighborhoodId, neighborhood
           <EditorialSection title="O que faz esse bairro especial" content={editorial?.o_que_faz_especial ?? null} />
           <EditorialSection title="O que vale considerar" content={editorial?.o_que_considerar ?? null} />
 
-          <Button
-            size="sm"
-            className="w-full mt-4 text-xs"
+          <button
+            className="w-full mt-5 py-3 px-4 text-xs font-medium text-foreground rounded-full backdrop-blur-xl bg-white/15 border border-white/25 hover:bg-white/20 transition-all duration-200"
             onClick={onViewHotels}
           >
             Ver hotéis neste bairro
-          </Button>
+          </button>
         </div>
       )}
     </div>
