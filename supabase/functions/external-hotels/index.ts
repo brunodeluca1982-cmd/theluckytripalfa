@@ -19,40 +19,37 @@ serve(async (req) => {
       throw new Error("EXTERNAL_SUPABASE_ANON_KEY is not configured");
     }
 
-    // Discovery: list available tables via PostgREST root
-    const discoverResp = await fetch(`${EXTERNAL_URL}/rest/v1/`, {
-      headers: {
-        apikey: EXTERNAL_KEY,
-        Authorization: `Bearer ${EXTERNAL_KEY}`,
-      },
-    });
-    const definitions = await discoverResp.json();
-    const tableNames = Object.keys(definitions?.definitions || definitions?.paths || definitions || {});
-    console.log("Available external tables:", JSON.stringify(tableNames));
-
     const externalClient = createClient(EXTERNAL_URL, EXTERNAL_KEY);
 
-    // Try common table names
-    for (const tableName of ["hoteis", "hotels", "hotel_media", "hoteis_rio"]) {
-      const { data: probe, error: probeErr } = await externalClient.from(tableName).select("*").limit(1);
-      console.log(`Probe ${tableName}:`, { found: !!probe?.length, error: probeErr?.message });
+    // Try known table names in order of likelihood
+    const tablesToTry = ["hoteis", "hotels", "hotel_media"];
+    let data: any[] | null = null;
+    let lastError: any = null;
+
+    for (const tableName of tablesToTry) {
+      const result = await externalClient
+        .from(tableName)
+        .select("*", { count: "exact" })
+        .eq("ativo", true)
+        .order("ordem_bairro", { ascending: true })
+        .order("nome", { ascending: true })
+        .limit(100);
+
+      console.log(`Query ${tableName}:`, { count: result.count, len: result.data?.length, err: result.error?.message });
+
+      if (!result.error && result.data) {
+        data = result.data;
+        break;
+      }
+      lastError = result.error;
     }
 
-    const { data, error, count } = await externalClient
-      .from("hoteis")
-      .select("*", { count: "exact" })
-      .eq("ativo", true)
-      .order("ordem_bairro", { ascending: true })
-      .order("nome", { ascending: true })
-      .limit(100);
-
-    console.log("External query result:", { count, dataLength: data?.length, error });
-
-    if (error) {
-      console.error("External DB error:", error);
+    // If none of the tables worked, return empty array gracefully
+    if (data === null) {
+      console.warn("No hotel table found in external DB. Returning empty array.", lastError?.message);
       return new Response(
-        JSON.stringify({ error: error.message }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        JSON.stringify({ hotels: [] }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
