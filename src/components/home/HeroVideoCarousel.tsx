@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, TouchEvent } from "react";
 import logoSymbol from "@/assets/brand/logo-l-creme.png";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -25,6 +25,7 @@ const HeroVideoCarousel = () => {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const touchStartX = useRef<number | null>(null);
   const navigate = useNavigate();
   const { isAuthenticated } = useSubscription();
 
@@ -166,6 +167,24 @@ const HeroVideoCarousel = () => {
     });
   }, [current]);
 
+  const handleTouchStart = (e: TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchEnd = (e: TouchEvent) => {
+    if (touchStartX.current === null || heroSlides.length <= 1) return;
+    const diff = touchStartX.current - e.changedTouches[0].clientX;
+    const threshold = 50;
+    if (Math.abs(diff) > threshold) {
+      if (diff > 0) {
+        goTo((current + 1) % heroSlides.length);
+      } else {
+        goTo((current - 1 + heroSlides.length) % heroSlides.length);
+      }
+    }
+    touchStartX.current = null;
+  };
+
   const handleSlideAction = (slide: HeroSlide) => {
     navigate(`/experiencia/${slide.slug}`);
   };
@@ -179,7 +198,11 @@ const HeroVideoCarousel = () => {
   const slide = heroSlides[current];
 
   return (
-    <section className="relative w-full aspect-[9/16] max-h-[75vh] overflow-hidden">
+    <section
+      className="relative w-full aspect-[9/16] max-h-[75vh] overflow-hidden touch-pan-y"
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+    >
       {/* Media layers */}
       {heroSlides.map((s, i) => {
         const canPlayMov = typeof document !== 'undefined' &&
