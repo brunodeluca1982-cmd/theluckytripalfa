@@ -102,6 +102,12 @@ const ActivityDetail = () => {
 
   const pills = [item.categoria, item.bairro, item.vibe].filter(Boolean) as string[];
 
+  const canPlayMov = typeof document !== "undefined" && document.createElement("video").canPlayType("video/quicktime") !== "";
+  const playableMedia = mediaList.filter((m) => {
+    if (m.type === "video" && m.url.toLowerCase().endsWith(".mov") && !canPlayMov) return false;
+    return true;
+  });
+
   return (
     <DetailHeroLayout
       backPath={backPath}
