@@ -58,6 +58,8 @@ const AutoRoteiroV2 = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [showAddPlace, setShowAddPlace] = useState(false);
   const weatherMap = useWeatherIcons({ destinationId: draft.destinationId });
+  const limits = useFreeLimits();
+  const [showPaywall, setShowPaywall] = useState(false);
 
   const days = Math.max(1, tripDays);
 
