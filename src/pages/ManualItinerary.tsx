@@ -37,13 +37,8 @@ const ManualItinerary = () => {
   const navigate = useNavigate();
   const { draft, tripDays } = useTripDraft();
   
-  // Redirect if no destination selected
-  if (!draft.destinationId) {
-    navigate('/meu-roteiro', { replace: true });
-    return null;
-  }
-  
   const actualTripDays = Math.max(1, tripDays);
+  
   
   // Initialize days based on trip dates
   const [days, setDays] = useState<Day[]>(() => 
