@@ -1,7 +1,15 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Crown, ArrowRight } from "lucide-react";
+import { Crown, ArrowRight, Check } from "lucide-react";
 import { useSubscription } from "@/hooks/use-subscription";
+
+const UNLOCKED = [
+  "Lucky List completa",
+  "IA ilimitada",
+  "Viagens ilimitadas",
+  "Edições ilimitadas",
+  "Organização inteligente de roteiros",
+];
 
 const PurchaseSuccess = () => {
   const navigate = useNavigate();
@@ -9,6 +17,8 @@ const PurchaseSuccess = () => {
 
   useEffect(() => {
     refreshSubscription();
+    // Clear free-tier counters on premium unlock
+    ['lt-free-ia-uses', 'lt-free-trip-edits', 'lt-free-trips-created', 'lt-free-lucky-views', 'lt-free-auto-organize'].forEach(k => localStorage.removeItem(k));
   }, [refreshSubscription]);
 
   return (
@@ -43,12 +53,24 @@ const PurchaseSuccess = () => {
         </span>
 
         <h1 className="text-3xl font-serif font-semibold text-white mb-3">
-          Você agora é Lucky Pro
+          Bem-vindo ao The Lucky Trip
         </h1>
 
-        <p className="text-sm text-white/50 leading-relaxed max-w-xs mb-10">
-          O Rio de Janeiro que o Google não mostra agora está desbloqueado.
+        <p className="text-sm text-white/50 leading-relaxed max-w-xs mb-8">
+          Sua assinatura está ativa.
         </p>
+
+        {/* Unlocked features */}
+        <div className="w-full max-w-xs space-y-3 mb-10">
+          {UNLOCKED.map((item) => (
+            <div key={item} className="flex items-center gap-3">
+              <div className="w-5 h-5 rounded-full bg-[hsl(40,60%,50%)]/15 flex items-center justify-center flex-shrink-0">
+                <Check className="w-3 h-3 text-[hsl(40,60%,50%)]" />
+              </div>
+              <span className="text-sm text-white/70">{item}</span>
+            </div>
+          ))}
+        </div>
 
         <button
           onClick={() => navigate("/lucky-list")}
