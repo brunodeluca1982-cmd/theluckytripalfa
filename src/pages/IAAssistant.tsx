@@ -269,7 +269,12 @@ const IAAssistant = () => {
       }
     } catch (e) {
       console.error("Lucky AI error:", e);
-      toast.error("Erro de conexão com o assistente.");
+      // Show WhatsApp fallback instead of generic error
+      const fallbackMsg: Msg = {
+        role: "assistant",
+        content: "Ops, tive um problema técnico agora. Mas não se preocupe — me chama no WhatsApp que te ajudo por lá 👇\n\n[Falar com o Bruno no WhatsApp](https://wa.me/5521998102132?text=Ol%C3%A1%20Concierge%20The%20Lucky%20Trip%2C%20quero%20ajuda.%20Pode%20me%20ajudar%3F)",
+      };
+      setMessages((prev) => [...prev, fallbackMsg]);
     } finally {
       setIsLoading(false);
     }

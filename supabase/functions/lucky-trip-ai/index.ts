@@ -56,36 +56,51 @@ function enrichWithZones(items: any[], type: string) {
 async function runCurationLayer() {
   const EXTERNAL_URL = "https://lsibzflaaqzvtzjlvrxw.supabase.co";
   const EXTERNAL_KEY = Deno.env.get("EXTERNAL_SUPABASE_ANON_KEY");
-  if (!EXTERNAL_KEY) {
-    console.error("EXTERNAL_SUPABASE_ANON_KEY not set — curation layer empty!");
-    return { experiencias: [], restaurantes: [], hoteis: [] };
-  }
 
-  const ext = createClient(EXTERNAL_URL, EXTERNAL_KEY);
+  const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
+  const SUPABASE_KEY = Deno.env.get("SUPABASE_ANON_KEY");
 
-  const [expRes, restRes, hotelRes] = await Promise.all([
-    ext.from("experiencias")
-      .select("nome, bairro, cidade, categoria, meu_olhar, vibe, tags, duracao, melhor_horario, com_criancas, nivel_esforco, precisa_reserva")
-      .eq("ativo", true).order("nome").limit(500),
-    ext.from("restaurantes")
-      .select("nome, bairro, cidade, categoria, meu_olhar, preco_medio, tipo_cozinha, especialidade")
-      .eq("ativo", true).order("nome").limit(500),
-    ext.from("hoteis")
-      .select("nome, bairro, cidade, meu_olhar, preco_medio_diaria, categoria, atmosfera, perfil_publico")
-      .eq("ativo", true).order("nome").limit(200),
-  ]);
-
-  if (expRes.error) console.error("Curation: experiencias error:", expRes.error);
-  if (restRes.error) console.error("Curation: restaurantes error:", restRes.error);
-  if (hotelRes.error) console.error("Curation: hoteis error:", hotelRes.error);
-
-  const result = {
-    experiencias: enrichWithZones(expRes.data || [], "experience"),
-    restaurantes: enrichWithZones(restRes.data || [], "restaurant"),
-    hoteis: enrichWithZones(hotelRes.data || [], "hotel"),
+  const result: { experiencias: any[]; restaurantes: any[]; hoteis: any[]; lucky_list: any[] } = {
+    experiencias: [], restaurantes: [], hoteis: [], lucky_list: [],
   };
 
-  console.log(`[Curation] ${result.experiencias.length} exp, ${result.restaurantes.length} rest, ${result.hoteis.length} hotels`);
+  // 1. o_que_fazer_rio (local table — activities)
+  if (SUPABASE_URL && SUPABASE_KEY) {
+    const local = createClient(SUPABASE_URL, SUPABASE_KEY);
+    const [oqfRes, llRes] = await Promise.all([
+      local.from("o_que_fazer_rio")
+        .select("nome, bairro, categoria, meu_olhar, vibe, energia, duracao_media, momento_ideal, como_fazer, tags_ia")
+        .eq("ativo", true).order("ordem").limit(500),
+      local.from("lucky_list_rio")
+        .select("nome, bairro, categoria_experiencia, meu_olhar, tipo_item, como_fazer, tags_ia, nivel_esforco, horarios")
+        .eq("ativo", true).limit(500),
+    ]);
+    if (oqfRes.error) console.error("Curation: o_que_fazer_rio error:", oqfRes.error);
+    else result.experiencias = enrichWithZones(oqfRes.data || [], "experience");
+
+    if (llRes.error) console.error("Curation: lucky_list_rio error:", llRes.error);
+    else result.lucky_list = enrichWithZones(llRes.data || [], "lucky-list");
+  }
+
+  // 2. External restaurants + hotels
+  if (EXTERNAL_KEY) {
+    const ext = createClient(EXTERNAL_URL, EXTERNAL_KEY);
+    const [restRes, hotelRes] = await Promise.all([
+      ext.from("restaurantes")
+        .select("nome, bairro, cidade, categoria, meu_olhar, tipo_cozinha, especialidade")
+        .eq("ativo", true).order("nome").limit(500),
+      ext.from("v_stay_hotels_full")
+        .select("nome, bairro, cidade, meu_olhar, preco_medio_diaria, categoria, atmosfera, perfil_publico")
+        .limit(200),
+    ]);
+    if (restRes.error) console.error("Curation: restaurantes error:", restRes.error);
+    else result.restaurantes = enrichWithZones(restRes.data || [], "restaurant");
+
+    if (hotelRes.error) console.error("Curation: hotels error:", hotelRes.error);
+    else result.hoteis = enrichWithZones(hotelRes.data || [], "hotel");
+  }
+
+  console.log(`[Curation] ${result.experiencias.length} exp, ${result.restaurantes.length} rest, ${result.hoteis.length} hotels, ${result.lucky_list.length} lucky`);
   return result;
 }
 
@@ -212,8 +227,9 @@ Você opera em três camadas integradas:
 CAMADA 1 — CURADORIA (fonte de verdade)
 • Os lugares disponíveis estão no "CATÁLOGO CURADO" abaixo.
 • USE EXCLUSIVAMENTE esses dados. NUNCA invente lugares.
-• Se o catálogo não tiver um tipo solicitado: "Esse conteúdo ainda não está disponível no app."
+• Se o catálogo não tiver um tipo específico solicitado, recomende os itens mais próximos disponíveis ou encaminhe para o WhatsApp do concierge.
 • Se tiver poucos itens, use TODOS os disponíveis.
+• NUNCA diga que está indisponível, que não foi lançada, que não está pronta ou que não pode ajudar.
 
 CAMADA 2 — CONTEXTO (validação do mundo real)
 • O "CONTEXTO DE VALIDAÇÃO" contém dados geográficos, climáticos e de preferências.
@@ -377,7 +393,20 @@ ESTILO DE RESPOSTA
 ═══════════════════════════════════════════
 - Conciso, editorial, confiante.
 - Fale como concierge que DECIDE.
-- Após roteiro, ofereça refinamento.`;
+- Após roteiro, ofereça refinamento.
+- Tom: humano, seguro, editorial, útil, local, acolhedor — nunca genérico ou técnico.
+- NUNCA diga que está indisponível, que não foi lançada ou que não pode ajudar.
+- SEMPRE responda o usuário com algo útil.
+
+═══════════════════════════════════════════
+ESCALAÇÃO PARA WHATSAPP (FALLBACK HUMANO)
+═══════════════════════════════════════════
+Quando a pergunta sair completamente do escopo do catálogo curado (ex: destinos fora do Rio, serviços especiais, pedidos muito específicos):
+1. NÃO diga que não pode ajudar
+2. Dê uma resposta breve e útil com o que souber
+3. Ao final, adicione: "Essa eu prefiro te responder de forma mais pessoal. Me chama no WhatsApp que te ajudo por lá 👇"
+4. Inclua o link: [Falar com o Bruno no WhatsApp](https://wa.me/5521998102132?text=Ol%C3%A1%20Concierge%20The%20Lucky%20Trip%2C%20quero%20ajuda.%20Pode%20me%20ajudar%3F)
+- Use esse recurso com moderação — só quando realmente não tiver dados suficientes no catálogo.`;
 }
 
 // ═══════════════════════════════════════════════════════════════
