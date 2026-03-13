@@ -25,9 +25,6 @@ serve(async (req) => {
     const { data, error, count } = await externalClient
       .from("v_stay_hotels_full")
       .select("*", { count: "exact" })
-      .eq("ativo", true)
-      .order("ordem_bairro", { ascending: true })
-      .order("nome", { ascending: true })
       .limit(200);
 
     console.log("stay_hotels_full result:", { count, dataLength: data?.length, error: error?.message });
