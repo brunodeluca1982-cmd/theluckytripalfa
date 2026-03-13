@@ -132,7 +132,7 @@ const CriarRoteiro = () => {
       toast.error("Erro ao criar roteiro. Tente novamente.");
       goTo(5); // back to preview
     }
-  }, [state, goTo, clear, navigate, tripDays]);
+  }, [state, goTo, clear, navigate, tripDays, limits]);
 
   const bgImage = state.destinationImageUrl || undefined;
 
