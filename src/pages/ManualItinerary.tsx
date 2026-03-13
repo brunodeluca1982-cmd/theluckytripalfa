@@ -438,10 +438,10 @@ const ManualItinerary = () => {
 
             {/* Personal note */}
             <div className="space-y-2">
-              <Label htmlFor="exp-note">Personal note (optional)</Label>
+              <Label htmlFor="exp-note">Nota pessoal (opcional)</Label>
               <Textarea
                 id="exp-note"
-                placeholder="Any details you want to remember..."
+                placeholder="Algum detalhe que queira lembrar..."
                 value={newExperience.note}
                 onChange={(e) => setNewExperience({ ...newExperience, note: e.target.value })}
                 rows={2}
