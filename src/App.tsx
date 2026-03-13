@@ -1,10 +1,11 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { SubscriptionProvider } from "@/hooks/use-subscription";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { trackEvent, Events } from "@/lib/analytics";
 import WhatsAppRedirect from "./pages/WhatsAppRedirect";
 import SplashScreen from "@/components/SplashScreen";
 import MainLayout from "@/components/MainLayout";
@@ -96,6 +97,11 @@ const App = () => {
   const [phase, setPhase] = useState<AppPhase>("splash");
   const [videoFading, setVideoFading] = useState(false);
 
+  // Track app open
+  useEffect(() => {
+    trackEvent(Events.APP_OPEN);
+  }, []);
+
   const handleSplashComplete = useCallback(() => {
     if (skipVideo) {
       if (skipOnboarding) {
@@ -122,6 +128,7 @@ const App = () => {
 
   const handleOnboardingComplete = useCallback(() => {
     markOnboardingSeen();
+    trackEvent(Events.ONBOARDING_COMPLETED);
     setPhase("ready");
   }, []);
 
@@ -150,107 +157,109 @@ const App = () => {
           <OnboardingWalkthrough onComplete={handleOnboardingComplete} />
         )}
 
-        {/* Phase 3: App — starts on Rio destination */}
-        <BrowserRouter>
-          <Routes>
-            {/* Standalone pages (no app shell) */}
-            <Route path="/roteiro/rio-3-dias-final" element={<RoteiroFinal />} />
-            <Route path="/purchase-success" element={<PurchaseSuccess />} />
-            <Route path="/wa" element={<WhatsAppRedirect />} />
-            <Route path="/auth" element={<AuthPage />} />
-            <Route path="/admin-eventos" element={<AdminEventos />} />
-            
-            {/* App pages (with bottom navigation) */}
-            <Route path="/*" element={
-              <MainLayout>
-                <Routes>
-                  {/* Home */}
-                  <Route path="/" element={<Index />} />
-                  
-                  {/* Destinos */}
-                  <Route path="/destinos" element={<Destinos />} />
-                  <Route path="/destino/:id/intro" element={<DestinationVideoIntro />} />
-                  <Route path="/destino/rio-de-janeiro" element={<CityHeroProvider cityId="rio-de-janeiro"><DestinationRio /></CityHeroProvider>} />
-                  
-                  {/* Secondary Modules - Detail Pages */}
-                  <Route path="/destino/:destinationId/modulo/:moduleId" element={<SecondaryModuleDetail />} />
-                  
-                  {/* Where to Stay */}
-                  <Route path="/city-view" element={<Navigate to="/onde-ficar-rio" replace />} />
-                  <Route path="/onde-ficar-rio" element={<CityHeroProvider cityId="rio-de-janeiro"><OndeficarRio /></CityHeroProvider>} />
-                  <Route path="/onde-ficar/:neighborhood" element={<CityHeroProvider cityId="rio-de-janeiro"><WhereToStayDetail /></CityHeroProvider>} />
-                  <Route path="/hotel/:id" element={<CityHeroProvider cityId="rio-de-janeiro"><HotelDetail /></CityHeroProvider>} />
-                  
-                  {/* Where to Eat */}
-                  <Route path="/eat-map-view" element={<CityHeroProvider cityId="rio-de-janeiro"><EatMapView /></CityHeroProvider>} />
-                  <Route path="/onde-comer/:neighborhood" element={<CityHeroProvider cityId="rio-de-janeiro"><WhereToEatDetail /></CityHeroProvider>} />
-                  <Route path="/restaurante/:id" element={<CityHeroProvider cityId="rio-de-janeiro"><RestaurantDetail /></CityHeroProvider>} />
-                  
-                  {/* What to Do */}
-                  <Route path="/o-que-fazer" element={<CityHeroProvider cityId="rio-de-janeiro"><WhatToDo /></CityHeroProvider>} />
-                  <Route path="/o-que-fazer/categoria/:category" element={<CityHeroProvider cityId="rio-de-janeiro"><WhatToDoCategory /></CityHeroProvider>} />
-                  <Route path="/o-que-fazer/:neighborhood" element={<CityHeroProvider cityId="rio-de-janeiro"><WhatToDoDetail /></CityHeroProvider>} />
-                  <Route path="/atividade/:id" element={<CityHeroProvider cityId="rio-de-janeiro"><ActivityDetail /></CityHeroProvider>} />
-                  <Route path="/experiencia/:slug" element={<CityHeroProvider cityId="rio-de-janeiro"><ExperienceDetail /></CityHeroProvider>} />
-                  
-                  {/* Lucky List */}
-                  <Route path="/lucky-list" element={<CityHeroProvider cityId="rio-de-janeiro"><LuckyList /></CityHeroProvider>} />
-                  <Route path="/lucky-list/bairro/:neighborhoodId" element={<CityHeroProvider cityId="rio-de-janeiro"><LuckyListNeighborhood /></CityHeroProvider>} />
-                  <Route path="/lucky-list/:id" element={<CityHeroProvider cityId="rio-de-janeiro"><LuckyListDetail /></CityHeroProvider>} />
-                  
-                  {/* How to Get There */}
-                  <Route path="/como-chegar" element={<CityHeroProvider cityId="rio-de-janeiro"><HowToGetThere /></CityHeroProvider>} />
-                  
-                  {/* Criar Roteiro (new flow) */}
-                  <Route path="/criar-roteiro" element={<CriarRoteiro />} />
-                  <Route path="/meus-roteiros/:itineraryId" element={<RoteiroResultado />} />
+        {/* Phase 3: App */}
+        {phase === "ready" && (
+          <BrowserRouter>
+            <Routes>
+              {/* Standalone pages (no app shell) */}
+              <Route path="/roteiro/rio-3-dias-final" element={<RoteiroFinal />} />
+              <Route path="/purchase-success" element={<PurchaseSuccess />} />
+              <Route path="/wa" element={<WhatsAppRedirect />} />
+              <Route path="/auth" element={<AuthPage />} />
+              <Route path="/admin-eventos" element={<AdminEventos />} />
+              
+              {/* App pages (with bottom navigation) */}
+              <Route path="/*" element={
+                <MainLayout>
+                  <Routes>
+                    {/* Home */}
+                    <Route path="/" element={<Index />} />
+                    
+                    {/* Destinos */}
+                    <Route path="/destinos" element={<Destinos />} />
+                    <Route path="/destino/:id/intro" element={<DestinationVideoIntro />} />
+                    <Route path="/destino/rio-de-janeiro" element={<CityHeroProvider cityId="rio-de-janeiro"><DestinationRio /></CityHeroProvider>} />
+                    
+                    {/* Secondary Modules - Detail Pages */}
+                    <Route path="/destino/:destinationId/modulo/:moduleId" element={<SecondaryModuleDetail />} />
+                    
+                    {/* Where to Stay */}
+                    <Route path="/city-view" element={<Navigate to="/onde-ficar-rio" replace />} />
+                    <Route path="/onde-ficar-rio" element={<CityHeroProvider cityId="rio-de-janeiro"><OndeficarRio /></CityHeroProvider>} />
+                    <Route path="/onde-ficar/:neighborhood" element={<CityHeroProvider cityId="rio-de-janeiro"><WhereToStayDetail /></CityHeroProvider>} />
+                    <Route path="/hotel/:id" element={<CityHeroProvider cityId="rio-de-janeiro"><HotelDetail /></CityHeroProvider>} />
+                    
+                    {/* Where to Eat */}
+                    <Route path="/eat-map-view" element={<CityHeroProvider cityId="rio-de-janeiro"><EatMapView /></CityHeroProvider>} />
+                    <Route path="/onde-comer/:neighborhood" element={<CityHeroProvider cityId="rio-de-janeiro"><WhereToEatDetail /></CityHeroProvider>} />
+                    <Route path="/restaurante/:id" element={<CityHeroProvider cityId="rio-de-janeiro"><RestaurantDetail /></CityHeroProvider>} />
+                    
+                    {/* What to Do */}
+                    <Route path="/o-que-fazer" element={<CityHeroProvider cityId="rio-de-janeiro"><WhatToDo /></CityHeroProvider>} />
+                    <Route path="/o-que-fazer/categoria/:category" element={<CityHeroProvider cityId="rio-de-janeiro"><WhatToDoCategory /></CityHeroProvider>} />
+                    <Route path="/o-que-fazer/:neighborhood" element={<CityHeroProvider cityId="rio-de-janeiro"><WhatToDoDetail /></CityHeroProvider>} />
+                    <Route path="/atividade/:id" element={<CityHeroProvider cityId="rio-de-janeiro"><ActivityDetail /></CityHeroProvider>} />
+                    <Route path="/experiencia/:slug" element={<CityHeroProvider cityId="rio-de-janeiro"><ExperienceDetail /></CityHeroProvider>} />
+                    
+                    {/* Lucky List */}
+                    <Route path="/lucky-list" element={<CityHeroProvider cityId="rio-de-janeiro"><LuckyList /></CityHeroProvider>} />
+                    <Route path="/lucky-list/bairro/:neighborhoodId" element={<CityHeroProvider cityId="rio-de-janeiro"><LuckyListNeighborhood /></CityHeroProvider>} />
+                    <Route path="/lucky-list/:id" element={<CityHeroProvider cityId="rio-de-janeiro"><LuckyListDetail /></CityHeroProvider>} />
+                    
+                    {/* How to Get There */}
+                    <Route path="/como-chegar" element={<CityHeroProvider cityId="rio-de-janeiro"><HowToGetThere /></CityHeroProvider>} />
+                    
+                    {/* Criar Roteiro (new flow) */}
+                    <Route path="/criar-roteiro" element={<CriarRoteiro />} />
+                    <Route path="/meus-roteiros/:itineraryId" element={<RoteiroResultado />} />
 
-                  {/* Meu Roteiro */}
-                  <Route path="/minha-viagem" element={<MinhaViagem />} />
-                  <Route path="/meu-roteiro" element={<MeuRoteiro />} />
-                  <Route path="/meu-roteiro/grupo" element={<Navigate to="/meu-roteiro/datas" replace />} />
-                  <Route path="/meu-roteiro/datas" element={<TripDates />} />
-                  <Route path="/meu-roteiro/preferencias" element={<TripPreferences />} />
-                  <Route path="/meu-roteiro/decisao" element={<ItineraryDecision />} />
-                  <Route path="/meu-roteiro/automatico" element={<AutomaticItinerary />} />
-                  <Route path="/meu-roteiro/manual" element={<ManualItinerary />} />
-                  <Route path="/meu-roteiro/resultado" element={<RoteiroResultado />} />
-                  <Route path="/favoritos" element={<Favoritos />} />
-                  <Route path="/inspiracao-trip" element={<InspirationTrip />} />
-                  <Route path="/planejar/:destinationId" element={<RoteiroPlanner />} />
-                  
-                  {/* Profile */}
-                  <Route path="/perfil" element={<Profile />} />
-                  <Route path="/perfil/divisao-gastos" element={<DivisaoGastos />} />
-                  <Route path="/perfil/diario" element={<DiarioViagem />} />
-                  <Route path="/perfil/assinatura" element={<Assinatura />} />
-                  <Route path="/perfil/configuracoes" element={<Configuracoes />} />
-                  <Route path="/perfil/suporte" element={<SuporteHumano />} />
+                    {/* Meu Roteiro */}
+                    <Route path="/minha-viagem" element={<MinhaViagem />} />
+                    <Route path="/meu-roteiro" element={<MeuRoteiro />} />
+                    <Route path="/meu-roteiro/grupo" element={<Navigate to="/meu-roteiro/datas" replace />} />
+                    <Route path="/meu-roteiro/datas" element={<TripDates />} />
+                    <Route path="/meu-roteiro/preferencias" element={<TripPreferences />} />
+                    <Route path="/meu-roteiro/decisao" element={<ItineraryDecision />} />
+                    <Route path="/meu-roteiro/automatico" element={<AutomaticItinerary />} />
+                    <Route path="/meu-roteiro/manual" element={<ManualItinerary />} />
+                    <Route path="/meu-roteiro/resultado" element={<RoteiroResultado />} />
+                    <Route path="/favoritos" element={<Favoritos />} />
+                    <Route path="/inspiracao-trip" element={<InspirationTrip />} />
+                    <Route path="/planejar/:destinationId" element={<RoteiroPlanner />} />
+                    
+                    {/* Profile */}
+                    <Route path="/perfil" element={<Profile />} />
+                    <Route path="/perfil/divisao-gastos" element={<DivisaoGastos />} />
+                    <Route path="/perfil/diario" element={<DiarioViagem />} />
+                    <Route path="/perfil/assinatura" element={<Assinatura />} />
+                    <Route path="/perfil/configuracoes" element={<Configuracoes />} />
+                    <Route path="/perfil/suporte" element={<SuporteHumano />} />
 
-                  {/* Partners on Trip */}
-                  <Route path="/partner/:id" element={<PartnerProfile />} />
-                  <Route path="/partner/:partnerId/roteiro/:destinationId" element={<PartnerRoteiro />} />
+                    {/* Partners on Trip */}
+                    <Route path="/partner/:id" element={<PartnerProfile />} />
+                    <Route path="/partner/:partnerId/roteiro/:destinationId" element={<PartnerRoteiro />} />
 
-                  {/* IA Assistant */}
-                  <Route path="/ia" element={<IAAssistant />} />
-                  <Route path="/ia/chat" element={<IAChatPlaceholder />} />
-                  <Route path="/ia/create-itinerary" element={<IACreateItinerary />} />
-                  <Route path="/ia/improve-itinerary" element={<IAImproveItinerary />} />
-                  <Route path="/ia/roteiros-inteligentes" element={<IARoteirosInteligentes />} />
-                  <Route path="/ia/revisar-roteiro" element={<IARevisarRoteiro />} />
-                  {/* New PT-BR IA routes */}
-                  <Route path="/ia/perguntar" element={<IAPerguntar />} />
-                  <Route path="/ia/criar-roteiro" element={<IACriarRoteiro />} />
-                  <Route path="/ia/melhorar-roteiro" element={<IAMelhorarRoteiro />} />
-                  <Route path="/ia/lucky-trip" element={<IALuckyTrip />} />
+                    {/* IA Assistant */}
+                    <Route path="/ia" element={<IAAssistant />} />
+                    <Route path="/ia/chat" element={<IAChatPlaceholder />} />
+                    <Route path="/ia/create-itinerary" element={<IACreateItinerary />} />
+                    <Route path="/ia/improve-itinerary" element={<IAImproveItinerary />} />
+                    <Route path="/ia/roteiros-inteligentes" element={<IARoteirosInteligentes />} />
+                    <Route path="/ia/revisar-roteiro" element={<IARevisarRoteiro />} />
+                    {/* New PT-BR IA routes */}
+                    <Route path="/ia/perguntar" element={<IAPerguntar />} />
+                    <Route path="/ia/criar-roteiro" element={<IACriarRoteiro />} />
+                    <Route path="/ia/melhorar-roteiro" element={<IAMelhorarRoteiro />} />
+                    <Route path="/ia/lucky-trip" element={<IALuckyTrip />} />
 
-                  {/* Fallback */}
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </MainLayout>
-            } />
-          </Routes>
-        </BrowserRouter>
+                    {/* Fallback */}
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </MainLayout>
+              } />
+            </Routes>
+          </BrowserRouter>
+        )}
         <PersistentSpotifyPlayer />
       </TooltipProvider>
       </SpotifyPlayerProvider>
