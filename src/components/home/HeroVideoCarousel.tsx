@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 interface HeroSlide {
   id: string;
   destinationSlug: string | null;
+  permalink: string | null;
   videoUrl?: string;
   imageUrl?: string;
   title: string;
