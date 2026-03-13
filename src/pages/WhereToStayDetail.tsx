@@ -42,10 +42,11 @@ function normalizeNeighborhood(bairro: string): string {
 const WhereToStayDetail = () => {
   const { neighborhood } = useParams<{ neighborhood: string }>();
   const { data: externalHotels, isLoading } = useExternalHotels();
+  const { data: neighborhoodEditorial } = useExternalNeighborhood(neighborhood);
 
   const neighborhoodData = getNeighborhoodById(neighborhood || "");
-  const name = neighborhoodData?.name || neighborhood || "Bairro";
-  const description = neighborhoodDescriptions[neighborhood || ""] || `Descubra onde ficar em ${name}.`;
+  const name = neighborhoodEditorial?.neighborhood_name || neighborhoodData?.name || neighborhood || "Bairro";
+  const description = neighborhoodEditorial?.identity_phrase || neighborhoodDescriptions[neighborhood || ""] || `Descubra onde ficar em ${name}.`;
   const { heroUrl } = useNeighborhoodHero("rio-de-janeiro", neighborhood || "", "Rio de Janeiro", name, getHotelImage(neighborhood || ""));
 
   const hotels = useMemo(() => {
