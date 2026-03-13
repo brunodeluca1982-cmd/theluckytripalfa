@@ -1,83 +1,23 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { MapPin, UtensilsCrossed, Hotel, Compass } from "lucide-react";
+import { MapPin, UtensilsCrossed, Hotel, Compass, Star } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useOQueFazer, type OQueFazerItem } from "@/hooks/use-o-que-fazer";
-import { useExternalRestaurants, generateRestaurantSlug, type ExternalRestaurant } from "@/hooks/use-external-restaurants";
-import { useExternalHotels, type ExternalHotel } from "@/hooks/use-external-hotels";
-import { generateHotelSlug } from "@/pages/HotelDetail";
-import { usePlacePhoto, buildPlaceQuery } from "@/hooks/use-place-photo";
+import { usePlacePhoto } from "@/hooks/use-place-photo";
+import type { PoolItem } from "@/hooks/use-home-content-pool";
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
 } from "@/components/ui/carousel";
 
-/* ── Unified card item ── */
-interface CuratedItem {
-  id: string;
-  nome: string;
-  bairro: string;
-  tipo: "hotel" | "restaurante" | "experiência";
-  descricao?: string;
-  link: string;
-  photoKey: string;
-  photoQuery: string;
-  photoType: "hotel" | "restaurant" | "attraction";
-}
-
-function mapExperience(e: OQueFazerItem): CuratedItem {
-  return {
-    id: `exp-${e.id}`,
-    nome: e.nome,
-    bairro: e.bairro || "Rio de Janeiro",
-    tipo: "experiência",
-    descricao: e.meu_olhar || undefined,
-    link: "/o-que-fazer",
-    photoKey: `curado-exp-${e.id}`,
-    photoQuery: buildPlaceQuery(e.nome, e.bairro || undefined),
-    photoType: "attraction",
-  };
-}
-
-function mapRestaurant(r: ExternalRestaurant): CuratedItem {
-  const slug = generateRestaurantSlug(r.nome);
-  return {
-    id: `rest-${r.id}`,
-    nome: r.nome,
-    bairro: r.bairro,
-    tipo: "restaurante",
-    descricao: r.meu_olhar || undefined,
-    link: `/restaurante/${slug}?from=${r.bairro}`,
-    photoKey: `curado-rest-${r.id}`,
-    photoQuery: buildPlaceQuery(r.nome, r.bairro),
-    photoType: "restaurant",
-  };
-}
-
-function mapHotel(h: ExternalHotel): CuratedItem {
-  const slug = generateHotelSlug(h.nome);
-  return {
-    id: `hotel-${h.id}`,
-    nome: h.nome,
-    bairro: h.bairro,
-    tipo: "hotel",
-    descricao: h.meu_olhar || undefined,
-    link: `/hotel/${slug}?from=${h.bairro}`,
-    photoKey: `curado-hotel-${h.id}`,
-    photoQuery: buildPlaceQuery(h.nome, h.bairro),
-    photoType: "hotel",
-  };
-}
-
 const TIPO_ICON = {
   hotel: Hotel,
   restaurante: UtensilsCrossed,
   "experiência": Compass,
+  lucky: Star,
 } as const;
 
-/* ── Card Image ── */
-const CardImage = ({ item }: { item: CuratedItem }) => {
+const CardImage = ({ item }: { item: PoolItem }) => {
   const [loaded, setLoaded] = useState(false);
   const { photoUrl, isLoading } = usePlacePhoto(
     item.photoKey,
@@ -108,43 +48,12 @@ const CardImage = ({ item }: { item: CuratedItem }) => {
   );
 };
 
-/* ── Main Section ── */
-const CuradosDoRio = () => {
-  const { data: experiences = [], isLoading: loadExp } = useOQueFazer();
-  const { data: restaurants = [], isLoading: loadRest } = useExternalRestaurants();
-  const { data: hotels = [], isLoading: loadHotel } = useExternalHotels();
+interface CuradosParaVoceProps {
+  items: PoolItem[];
+}
 
-  const isLoading = loadExp || loadRest || loadHotel;
-
-  // Filter Rio only
-  const rioRestaurants = restaurants
-    .filter((r) => r.ativo && r.cidade?.toLowerCase().includes("rio"))
-    .slice(0, 4);
-  const rioHotels = hotels
-    .filter((h) => h.ativo && h.cidade?.toLowerCase().includes("rio"))
-    .slice(0, 4);
-  const rioExperiences = experiences.slice(0, 4); // already filtered by hook
-
-  // Interleave: experience, restaurant, hotel, experience, restaurant, hotel...
-  const curated: CuratedItem[] = [];
-  const maxLen = Math.max(rioExperiences.length, rioRestaurants.length, rioHotels.length);
-  const seen = new Set<string>();
-
-  for (let i = 0; i < maxLen; i++) {
-    const items = [
-      rioExperiences[i] ? mapExperience(rioExperiences[i]) : null,
-      rioRestaurants[i] ? mapRestaurant(rioRestaurants[i]) : null,
-      rioHotels[i] ? mapHotel(rioHotels[i]) : null,
-    ];
-    for (const item of items) {
-      if (item && !seen.has(item.nome)) {
-        seen.add(item.nome);
-        curated.push(item);
-      }
-    }
-  }
-
-  if (isLoading || curated.length === 0) return null;
+const CuradosParaVoce = ({ items }: CuradosParaVoceProps) => {
+  if (items.length === 0) return null;
 
   return (
     <section className="py-8 px-5">
@@ -160,8 +69,9 @@ const CuradosDoRio = () => {
         className="w-full -mx-5"
       >
         <CarouselContent className="ml-3 pr-5">
-          {curated.map((item) => {
-            const Icon = TIPO_ICON[item.tipo];
+          {items.map((item) => {
+            const Icon = TIPO_ICON[item.tipo] || Compass;
+            const label = item.tipo === "lucky" ? "Lucky List" : item.tipo;
             return (
               <CarouselItem key={item.id} className="pl-3 basis-[200px]">
                 <Link
@@ -173,7 +83,7 @@ const CuradosDoRio = () => {
                     <div className="flex items-center gap-1.5 mb-1">
                       <Icon className="w-3 h-3 text-muted-foreground" />
                       <span className="text-[10px] text-muted-foreground capitalize">
-                        {item.tipo}
+                        {label}
                       </span>
                     </div>
                     <p className="text-foreground text-sm font-medium leading-tight line-clamp-2">
@@ -195,4 +105,4 @@ const CuradosDoRio = () => {
   );
 };
 
-export default CuradosDoRio;
+export default CuradosParaVoce;

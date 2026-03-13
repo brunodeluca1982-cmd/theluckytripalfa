@@ -2,8 +2,8 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Clock, MapPin } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useOQueFazer, type OQueFazerItem } from "@/hooks/use-o-que-fazer";
-import { usePlacePhoto, buildPlaceQuery } from "@/hooks/use-place-photo";
+import { usePlacePhoto } from "@/hooks/use-place-photo";
+import type { PoolItem } from "@/hooks/use-home-content-pool";
 import {
   Carousel,
   CarouselContent,
@@ -17,13 +17,12 @@ function getCurrentMomentoLabel(): string {
   return "Noite no Rio";
 }
 
-const CardImage = ({ item }: { item: OQueFazerItem }) => {
+const CardImage = ({ item }: { item: PoolItem }) => {
   const [loaded, setLoaded] = useState(false);
-  const placeQuery = buildPlaceQuery(item.nome, item.bairro || undefined);
   const { photoUrl, isLoading } = usePlacePhoto(
-    item.id,
-    "attraction",
-    placeQuery
+    item.photoKey,
+    item.photoType,
+    item.photoQuery
   );
 
   return (
@@ -56,13 +55,14 @@ const CardImage = ({ item }: { item: OQueFazerItem }) => {
   );
 };
 
-const OQueFazerAgora = () => {
-  const { data: items = [], isLoading } = useOQueFazer();
-  // Already smart-sorted by momento_ideal match from the hook
-  const topItems = items.slice(0, 8);
+interface OQueFazerAgoraProps {
+  items: PoolItem[];
+}
+
+const OQueFazerAgora = ({ items }: OQueFazerAgoraProps) => {
   const momentoLabel = getCurrentMomentoLabel();
 
-  if (isLoading || topItems.length === 0) return null;
+  if (items.length === 0) return null;
 
   return (
     <section className="py-8 px-5">
@@ -81,10 +81,10 @@ const OQueFazerAgora = () => {
         className="w-full -mx-5"
       >
         <CarouselContent className="ml-3 pr-5">
-          {topItems.map((item) => (
+          {items.map((item) => (
             <CarouselItem key={item.id} className="pl-3 basis-[180px]">
               <Link
-                to="/o-que-fazer"
+                to={item.link}
                 className="block rounded-2xl overflow-hidden border border-border bg-card"
               >
                 <CardImage item={item} />
@@ -92,11 +92,6 @@ const OQueFazerAgora = () => {
                   <p className="text-foreground text-sm font-medium leading-tight line-clamp-2">
                     {item.nome}
                   </p>
-                  {item.duracao_media && (
-                    <p className="text-muted-foreground text-[10px] mt-1">
-                      {item.duracao_media}
-                    </p>
-                  )}
                 </div>
               </Link>
             </CarouselItem>
