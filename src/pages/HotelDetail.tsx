@@ -83,6 +83,7 @@ const HotelDetail = () => {
 
   const mapsUrl = cleanUrl(hotel.google_maps_url);
   const pills = [hotel.categoria, hotel.bairro].filter(Boolean) as string[];
+  const reserveLink = hotel.reserve_url || "https://tidd.ly/4kOcJUx";
 
   return (
     <DetailHeroLayout
