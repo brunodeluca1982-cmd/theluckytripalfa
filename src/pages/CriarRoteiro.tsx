@@ -139,6 +139,7 @@ const CriarRoteiro = () => {
   const TOTAL_STEPS = 5;
 
   return (
+    <>
     <FlowHeroBackground imageUrl={bgImage}>
       {/* Header */}
       <div className="sticky top-0 z-20 flex items-center justify-between px-4 pt-4 pb-2">
