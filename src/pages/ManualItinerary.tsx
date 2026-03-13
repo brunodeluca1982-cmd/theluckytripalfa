@@ -357,7 +357,7 @@ const ManualItinerary = () => {
             className="w-full h-12"
           >
             <Plus className="w-4 h-4 mr-2" />
-            Add new day
+            Adicionar novo dia
           </Button>
         </section>
       </main>
