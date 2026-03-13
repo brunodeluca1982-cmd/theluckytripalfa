@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { BookmarkCheck, Calculator, BookOpen, CreditCard, Settings, MessageCircle, User, LogOut, LogIn, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
@@ -69,6 +70,13 @@ const Profile = () => {
   const { user, isReady } = useAuthReady();
   const { isPremium } = useSubscription();
   const navigate = useNavigate();
+
+  // Redirect to auth if not logged in
+  useEffect(() => {
+    if (isReady && !user) {
+      navigate("/auth", { replace: true });
+    }
+  }, [isReady, user, navigate]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
