@@ -2,9 +2,11 @@ import { Link, useParams, useSearchParams } from "react-router-dom";
 import { Clock, Zap, Loader2, MapPin, ExternalLink, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useItemSave } from "@/hooks/use-item-save";
-import { useOQueFazerItem, type OQueFazerItem } from "@/hooks/use-o-que-fazer";
+import { useOQueFazerItem } from "@/hooks/use-o-que-fazer";
 import { usePlacePhoto, buildPlaceQuery } from "@/hooks/use-place-photo";
 import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import DetailHeroLayout from "@/components/detail/DetailHeroLayout";
 
 function slugify(s: string) {
@@ -16,24 +18,55 @@ function isActivitySavedLocally(activityId: string) {
   return draft.some((item: { id: string; type: string }) => item.id === activityId && item.type === "activity");
 }
 
+interface MediaRow {
+  type: "image" | "video";
+  url: string;
+  title?: string;
+}
+
+function useActivityMedia(slug: string | undefined) {
+  return useQuery({
+    queryKey: ["o-que-fazer-media", slug],
+    enabled: !!slug,
+    staleTime: 5 * 60 * 1000,
+    queryFn: async (): Promise<MediaRow[]> => {
+      const { data, error } = await supabase
+        .from("experience_media")
+        .select("media_type, media_url, title")
+        .eq("experience_slug", slug!)
+        .eq("is_active", true)
+        .order("sort_order", { ascending: true });
+
+      if (error) throw error;
+
+      return (data ?? []).map((row: any) => ({
+        type: row.media_type as "image" | "video",
+        url: row.media_url,
+        title: row.title,
+      }));
+    },
+  });
+}
+
 const ActivityDetail = () => {
-  const { id } = useParams<{ id: string }>();
+  const { id: idOrSlug } = useParams<{ id: string }>();
   const [searchParams] = useSearchParams();
   const { saveItem } = useItemSave();
-  const { data: item, isLoading } = useOQueFazerItem(id);
+  const { data: item, isLoading } = useOQueFazerItem(idOrSlug);
 
   const from = searchParams.get("from");
   const backPath = from === "city" ? "/o-que-fazer" : from ? `/o-que-fazer/${from}` : "/o-que-fazer";
 
+  const itemSlug = item ? slugify(item.nome) : idOrSlug || "";
   const placeQuery = buildPlaceQuery(item?.nome || "", item?.bairro || undefined);
-  const itemSlug = item ? slugify(item.nome) : "";
   const { photoUrl } = usePlacePhoto(itemSlug, "attraction", placeQuery, !!item);
+  const { data: mediaList = [] } = useActivityMedia(itemSlug || undefined);
 
   const [isSaved, setIsSaved] = useState(false);
 
   useEffect(() => {
-    if (id) setIsSaved(isActivitySavedLocally(id));
-  }, [id]);
+    if (item?.id) setIsSaved(isActivitySavedLocally(item.id));
+  }, [item?.id]);
 
   const handleSave = () => {
     if (!item) return;
@@ -69,12 +102,19 @@ const ActivityDetail = () => {
 
   const pills = [item.categoria, item.bairro, item.vibe].filter(Boolean) as string[];
 
+  const canPlayMov = typeof document !== "undefined" && document.createElement("video").canPlayType("video/quicktime") !== "";
+  const playableMedia = mediaList.filter((m) => {
+    if (m.type === "video" && m.url.toLowerCase().endsWith(".mov") && !canPlayMov) return false;
+    return true;
+  });
+
   return (
     <DetailHeroLayout
       backPath={backPath}
       title={item.nome}
       pills={pills}
-      heroImageUrl={photoUrl || undefined}
+      media={playableMedia.length > 0 ? playableMedia : undefined}
+      heroImageUrl={playableMedia.length === 0 ? photoUrl || undefined : undefined}
       isSaved={isSaved}
       onSave={handleSave}
       footer={`The Lucky Trip — ${item.bairro || "Rio de Janeiro"}`}

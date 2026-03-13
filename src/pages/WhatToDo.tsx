@@ -1,13 +1,12 @@
 import { Link, useNavigate } from "react-router-dom";
-import { Clapperboard, Music, ArrowLeft, Lock, MapPin, Clock, Zap, Loader2, ExternalLink, RefreshCw } from "lucide-react";
-import { useCallback, useState } from "react";
+import { Clapperboard, Music, ArrowLeft, Lock, Clock, Zap, Loader2, RefreshCw } from "lucide-react";
+import { useCallback } from "react";
 import { useSpotifyPlayer } from "@/contexts/SpotifyPlayerContext";
 import { useEventMode } from "@/contexts/EventModeContext";
 import { clearVideoSeen } from "@/pages/DestinationVideoIntro";
 import { useCityHero } from "@/contexts/CityHeroContext";
 import { useOQueFazer, type OQueFazerItem } from "@/hooks/use-o-que-fazer";
 import { usePlacePhoto, buildPlaceQuery } from "@/hooks/use-place-photo";
-import OQueFazerDetailSheet from "@/components/o-que-fazer/OQueFazerDetailSheet";
 
 /* ───── Slugify helper for cache keys ───── */
 function slugify(s: string) {
@@ -53,11 +52,18 @@ function OQueFazerCard({ item, index, onTap }: { item: OQueFazerItem; index: num
   const { photoUrl, isLoading: photoLoading } = usePlacePhoto(itemSlug, "attraction", placeQuery);
 
   return (
-    <button
+    <article
+      role="button"
+      tabIndex={0}
       onClick={onTap}
-      className="w-full text-left py-5 border-b border-white/10 last:border-b-0 hover:bg-white/5 transition-colors rounded-lg -mx-1 px-1"
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onTap();
+        }
+      }}
+      className="w-full text-left py-5 border-b border-white/10 last:border-b-0 hover:bg-white/5 transition-colors rounded-lg -mx-1 px-1 cursor-pointer"
     >
-      {/* Hero Image */}
       {(photoUrl || photoLoading) && (
         <div className="w-full aspect-[16/9] rounded-xl overflow-hidden mb-4 relative bg-white/5">
           {photoLoading && (
@@ -82,7 +88,6 @@ function OQueFazerCard({ item, index, onTap }: { item: OQueFazerItem; index: num
         </div>
       )}
 
-      {/* Category + Bairro */}
       <div className="flex items-center gap-2 mb-1">
         {item.categoria && (
           <span className="text-[10px] tracking-[0.2em] uppercase text-white/50">{item.categoria}</span>
@@ -95,19 +100,16 @@ function OQueFazerCard({ item, index, onTap }: { item: OQueFazerItem; index: num
         )}
       </div>
 
-      {/* Nome */}
       <h2 className="text-lg font-serif font-medium text-white leading-snug mb-1.5">
         {item.nome}
       </h2>
 
-      {/* Meu olhar excerpt */}
       {item.meu_olhar && (
         <p className="text-sm text-white/70 leading-relaxed line-clamp-2 mb-2">
           {item.meu_olhar.split("\n")[0]}
         </p>
       )}
 
-      {/* Metadata pills */}
       <div className="flex flex-wrap items-center gap-2 mt-2">
         {item.vibe && (
           <span className="inline-flex items-center gap-1 text-[10px] tracking-widest uppercase text-white/40">
@@ -126,11 +128,12 @@ function OQueFazerCard({ item, index, onTap }: { item: OQueFazerItem; index: num
         )}
       </div>
 
-      {/* Lucky List teaser */}
+      <p className="text-xs text-white/55 mt-3">Ver experiência</p>
+
       {item.momento_lucky_list && (
         <LuckyListTeaser text={item.momento_lucky_list} index={index} />
       )}
-    </button>
+    </article>
   );
 }
 
@@ -142,8 +145,6 @@ const WhatToDo = () => {
   const { evento, getPlacement } = useEventMode();
   const { heroUrl } = useCityHero();
   const { data: items, isLoading, isError, error, refetch, isFetching } = useOQueFazer();
-  const [selectedItem, setSelectedItem] = useState<OQueFazerItem | null>(null);
-  const [sheetOpen, setSheetOpen] = useState(false);
 
   const handleMusicTap = useCallback(() => {
     if (!active) activate();
@@ -156,9 +157,8 @@ const WhatToDo = () => {
   }, [navigate]);
 
   const handleCardTap = useCallback((item: OQueFazerItem) => {
-    setSelectedItem(item);
-    setSheetOpen(true);
-  }, []);
+    navigate(`/atividade/${item.id}?from=city`);
+  }, [navigate]);
 
   const topPlacement = getPlacement("o_que_fazer_top");
 
@@ -297,12 +297,6 @@ const WhatToDo = () => {
         )}
       </div>
 
-      {/* Detail Sheet */}
-      <OQueFazerDetailSheet
-        open={sheetOpen}
-        onOpenChange={setSheetOpen}
-        item={selectedItem}
-      />
     </div>
   );
 };

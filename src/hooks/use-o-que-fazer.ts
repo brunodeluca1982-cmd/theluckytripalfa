@@ -88,22 +88,44 @@ export function useOQueFazer() {
   });
 }
 
-/** Fetch a single O Que Fazer item by id */
-export function useOQueFazerItem(id: string | undefined) {
+const UUID_REGEX =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+/**
+ * Fetch a single O Que Fazer item by id OR slugified name.
+ * This avoids invalid UUID errors when legacy links pass slug text.
+ */
+export function useOQueFazerItem(idOrSlug: string | undefined) {
   return useQuery({
-    queryKey: [...O_QUE_FAZER_QUERY_KEY, id],
-    enabled: !!id,
+    queryKey: [...O_QUE_FAZER_QUERY_KEY, idOrSlug],
+    enabled: !!idOrSlug,
     queryFn: async (): Promise<OQueFazerItem | null> => {
+      if (!idOrSlug) return null;
+
+      if (UUID_REGEX.test(idOrSlug)) {
+        const { data, error } = await supabase
+          .from("o_que_fazer_rio")
+          .select("*")
+          .eq("id", idOrSlug)
+          .eq("ativo", true)
+          .maybeSingle();
+
+        if (error || !data) return null;
+        return mapRowToItem(data);
+      }
+
       const { data, error } = await supabase
         .from("o_que_fazer_rio")
         .select("*")
-        .eq("id", id!)
-        .eq("ativo", true)
-        .maybeSingle();
+        .eq("ativo", true);
 
       if (error || !data) return null;
 
-      return mapRowToItem(data);
+      const match = data.find(
+        (row) => slugifyOQueFazer(row.nome) === slugifyOQueFazer(idOrSlug)
+      );
+
+      return match ? mapRowToItem(match) : null;
     },
   });
 }
