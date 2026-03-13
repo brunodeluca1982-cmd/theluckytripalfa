@@ -53,6 +53,7 @@ const HeroVideoCarousel = () => {
       .map((item) => ({
         id: item.id,
         destinationSlug: item.destination_slug,
+        permalink: item.permalink ?? null,
         videoUrl: item.video_url ?? undefined,
         imageUrl: item.thumbnail_url ?? item.video_url ?? undefined,
         title: item.title,
