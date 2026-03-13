@@ -301,7 +301,7 @@ const OndeficarRio = () => {
       </div>
 
       {/* Hint */}
-      <div className="px-6 py-3 border-b border-border">
+      <div className="px-6 py-3 border-b border-white/10 relative z-10">
         <p className="text-xs text-muted-foreground">
           Arraste e dê zoom para explorar o mapa.
         </p>
