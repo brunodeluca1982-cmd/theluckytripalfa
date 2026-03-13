@@ -56,45 +56,37 @@ export default function DetailHeroLayout({
     <div className="min-h-screen bg-black">
       {/* ─── Hero Section ─── */}
       <div className="relative w-full min-h-[56vh] overflow-hidden">
+        {/* Neutral gradient fallback — always visible behind media */}
+        <div className="absolute inset-0 bg-gradient-to-br from-[hsl(30,10%,15%)] via-[hsl(35,8%,12%)] to-[hsl(30,10%,10%)]" />
+
         {/* Media */}
         {videos.length > 0 ? (
-          <>
-            <video
-              src={videos[0].url}
-              poster={posterUrl || heroImageUrl}
-              autoPlay
-              loop
-              playsInline
-              muted
-              preload="auto"
-              className="absolute inset-0 w-full h-full object-cover"
-              onError={(e) => {
-                (e.target as HTMLVideoElement).style.display = "none";
-              }}
-            />
-            {(posterUrl || heroImageUrl) && (
-              <img
-                src={posterUrl || heroImageUrl}
-                alt={title}
-                className="absolute inset-0 w-full h-full object-cover -z-10"
-              />
-            )}
-          </>
+          <video
+            src={videos[0].url}
+            poster={posterUrl || heroImageUrl}
+            autoPlay
+            loop
+            playsInline
+            muted
+            preload="auto"
+            className="absolute inset-0 w-full h-full object-cover animate-fade-in"
+            onError={(e) => {
+              (e.target as HTMLVideoElement).style.display = "none";
+            }}
+          />
         ) : images.length > 1 ? (
           <Carousel className="absolute inset-0 w-full h-full" opts={{ loop: true }}>
             <CarouselContent className="ml-0 h-full">
               {images.map((m, i) => (
                 <CarouselItem key={i} className="pl-0 h-full">
-                  <img src={m.url} alt={title} className="w-full h-full object-cover" />
+                  <FadeInImage src={m.url} alt={title} className="w-full h-full object-cover" />
                 </CarouselItem>
               ))}
             </CarouselContent>
           </Carousel>
         ) : singleImage ? (
-          <img src={singleImage} alt={title} className="absolute inset-0 w-full h-full object-cover" />
-        ) : (
-          <div className="absolute inset-0 bg-muted" />
-        )}
+          <FadeInImage src={singleImage} alt={title} className="absolute inset-0 w-full h-full object-cover" />
+        ) : null}
 
         {/* Cinematic gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/10 to-black/80" />
