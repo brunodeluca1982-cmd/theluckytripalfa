@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
 import { ArrowRight, X } from "lucide-react";
+import { trackEvent, Events } from "@/lib/analytics";
 import brunoImg from "@/assets/partners/bruno-beach-portrait.png";
 
 const slides = [
@@ -57,23 +57,27 @@ interface OnboardingWalkthroughProps {
 
 const OnboardingWalkthrough = ({ onComplete }: OnboardingWalkthroughProps) => {
   const [current, setCurrent] = useState(0);
-  const [direction, setDirection] = useState<"left" | "right">("left");
 
   const slide = slides[current];
   const isLast = current === slides.length - 1;
+
+  // Track start on first render
+  useState(() => {
+    trackEvent(Events.ONBOARDING_STARTED);
+  });
 
   const next = useCallback(() => {
     if (isLast) {
       onComplete();
       return;
     }
-    setDirection("left");
     setCurrent((p) => p + 1);
   }, [isLast, onComplete]);
 
   const skip = useCallback(() => {
+    trackEvent(Events.ONBOARDING_SKIPPED, { skippedAt: current + 1 });
     onComplete();
-  }, [onComplete]);
+  }, [onComplete, current]);
 
   const bgStyle = slide.bgImage
     ? { backgroundImage: `url(${slide.bgImage})` }
@@ -120,27 +124,14 @@ const OnboardingWalkthrough = ({ onComplete }: OnboardingWalkthroughProps) => {
           {slide.description}
         </p>
 
-        {/* Final CTA or navigation */}
+        {/* Final CTA — enters the app directly, no forced auth */}
         {isLast ? (
           <div className="flex flex-col gap-3 mt-2">
             <button
-              onClick={() => {
-                onComplete();
-                // navigate to auth
-                window.location.href = "/auth";
-              }}
-              className="w-full py-3.5 rounded-full bg-primary text-primary-foreground text-sm font-semibold tracking-wide"
+              onClick={onComplete}
+              className="w-full py-3.5 rounded-full bg-primary text-primary-foreground text-sm font-semibold tracking-wide active:scale-[0.97] transition-transform"
             >
-              Criar minha conta
-            </button>
-            <button
-              onClick={() => {
-                onComplete();
-                window.location.href = "/auth";
-              }}
-              className="w-full py-3.5 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white text-sm font-medium"
-            >
-              Já tenho conta
+              Começar a explorar
             </button>
           </div>
         ) : null}
@@ -167,7 +158,7 @@ const OnboardingWalkthrough = ({ onComplete }: OnboardingWalkthroughProps) => {
           {!isLast && (
             <button
               onClick={next}
-              className="w-11 h-11 rounded-full bg-white/15 backdrop-blur-md border border-white/25 flex items-center justify-center text-white hover:bg-white/25 transition-colors"
+              className="w-11 h-11 rounded-full bg-white/15 backdrop-blur-md border border-white/25 flex items-center justify-center text-white hover:bg-white/25 transition-colors active:scale-[0.95]"
             >
               <ArrowRight className="w-5 h-5" />
             </button>

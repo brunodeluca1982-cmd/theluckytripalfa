@@ -1,15 +1,13 @@
-import { Link } from "react-router-dom";
-import { BookmarkCheck, Calculator, BookOpen, CreditCard, Settings, MessageCircle, User } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { BookmarkCheck, Calculator, BookOpen, CreditCard, Settings, MessageCircle, User, LogOut, LogIn, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useTripDraft } from "@/hooks/use-trip-draft";
 import { getDestination } from "@/data/destinations-database";
-import { cn } from "@/lib/utils";
+import { useAuthReady } from "@/hooks/use-auth-ready";
+import { useSubscription } from "@/hooks/use-subscription";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import rioHeroFallback from "@/assets/highlights/rio-de-janeiro-hero.jpg";
-
-/**
- * PROFILE — Hero/Glass redesign
- * Matches the iOS premium pattern used across the app.
- */
 
 interface ProfileModule {
   id: string;
@@ -68,6 +66,17 @@ const Profile = () => {
   const { draft } = useTripDraft();
   const destination = draft.destinationId ? getDestination(draft.destinationId) : null;
   const heroImage = destination?.imageUrl || draft.destinationImageUrl || rioHeroFallback;
+  const { user, isReady } = useAuthReady();
+  const { isPremium } = useSubscription();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    toast.success("Você saiu da conta");
+    navigate("/", { replace: true });
+  };
+
+  const displayName = user?.user_metadata?.full_name || user?.email?.split("@")[0] || null;
 
   return (
     <div className="relative min-h-screen pb-24">
@@ -89,9 +98,30 @@ const Profile = () => {
               Perfil
             </h1>
           </div>
-          <p className="text-sm text-white/60 font-light">
-            Seu espaço pessoal
-          </p>
+
+          {isReady && user ? (
+            <div className="mt-2">
+              {displayName && (
+                <p className="text-sm text-white/80 font-medium">{displayName}</p>
+              )}
+              <p className="text-xs text-white/50">{user.email}</p>
+              {isPremium && (
+                <span className="inline-block mt-1.5 text-[10px] tracking-[0.15em] uppercase px-2.5 py-0.5 rounded-full bg-primary/20 text-primary border border-primary/30 font-semibold">
+                  Lucky Pro
+                </span>
+              )}
+            </div>
+          ) : isReady ? (
+            <Link
+              to="/auth"
+              className="mt-2 inline-flex items-center gap-2 text-sm text-primary font-medium hover:text-primary/80 transition-colors"
+            >
+              <LogIn className="w-4 h-4" />
+              Entrar ou criar conta
+            </Link>
+          ) : (
+            <Loader2 className="w-4 h-4 animate-spin text-white/40 mt-2" />
+          )}
         </header>
 
         {/* Glass card with modules */}
@@ -126,6 +156,24 @@ const Profile = () => {
             );
           })}
         </motion.div>
+
+        {/* Logout button */}
+        {isReady && user && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+            className="mt-6"
+          >
+            <button
+              onClick={handleLogout}
+              className="w-full flex items-center justify-center gap-2 py-3 rounded-full bg-white/5 border border-white/10 text-white/50 text-sm hover:text-white/70 hover:bg-white/10 transition-colors active:scale-[0.98]"
+            >
+              <LogOut className="w-4 h-4" />
+              Sair da conta
+            </button>
+          </motion.div>
+        )}
 
         {/* Footer */}
         <p className="text-[10px] text-white/30 text-center mt-8">
