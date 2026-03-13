@@ -6,6 +6,7 @@ import RoteiroAccessLink from "@/components/RoteiroAccessLink";
 import { getHotelImage } from "@/data/place-images";
 import { useNeighborhoodHero } from "@/hooks/use-neighborhood-hero";
 import { useExternalHotels } from "@/hooks/use-external-hotels";
+import { useExternalNeighborhood } from "@/hooks/use-external-neighborhoods";
 import { useMemo } from "react";
 
 /**
