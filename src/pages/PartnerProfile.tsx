@@ -50,7 +50,7 @@ const PartnerProfile = () => {
   const { id } = useParams<{ id: string }>();
   const partner = getPartner(id || "");
   const { heroUrl } = useCityHero();
-  const { toggle } = useSpotifyPlayer();
+  const { openSheet } = useSpotifyPlayer();
 
   if (!partner) {
     return (

@@ -103,7 +103,7 @@ const PartnerRoteiro = () => {
   const { partnerId, destinationId } = useParams<{ partnerId: string; destinationId: string }>();
   const partner = getPartner(partnerId || "");
   const { heroUrl } = useCityHero();
-  const { toggle } = useSpotifyPlayer();
+  const { openSheet } = useSpotifyPlayer();
 
   const partnerDest = partner?.destinations.find((d) => d.destinationId === destinationId);
   const itinerary = partnerDest ? getReferenceItinerary(partnerDest.referenceItineraryId) : null;
