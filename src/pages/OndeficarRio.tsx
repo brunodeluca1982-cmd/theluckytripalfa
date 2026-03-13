@@ -152,7 +152,7 @@ const OndeficarRio = () => {
     return externalHotels.map((h) => ({
       id: h.id,
       name: h.nome,
-      neighborhood: normalizeNeighborhood(h.bairro),
+      neighborhood: h.bairro_slug || normalizeNeighborhood(h.bairro),
       tag: h.categoria?.trim() || "Hotel",
       meuOlhar: h.meu_olhar,
       instagram: h.instagram,
