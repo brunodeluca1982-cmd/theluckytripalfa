@@ -241,6 +241,15 @@ const CriarRoteiro = () => {
         </AnimatePresence>
       </div>
     </FlowHeroBackground>
+
+    {/* Paywall */}
+    <LuckyProPaywall
+      open={showPaywall}
+      onClose={() => setShowPaywall(false)}
+      title="Desbloqueie o The Lucky Trip"
+      message="Crie viagens ilimitadas com o método completo do The Lucky Trip."
+    />
+    </>
   );
 };
 
