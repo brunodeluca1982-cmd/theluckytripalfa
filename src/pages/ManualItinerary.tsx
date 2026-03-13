@@ -407,7 +407,7 @@ const ManualItinerary = () => {
 
             {/* Time of day */}
             <div className="space-y-2">
-              <Label>Time of day</Label>
+              <Label>Período do dia</Label>
               <RadioGroup
                 value={newExperience.timeOfDay}
                 onValueChange={(v) => setNewExperience({ ...newExperience, timeOfDay: v as 'morning' | 'afternoon' | 'evening' })}
