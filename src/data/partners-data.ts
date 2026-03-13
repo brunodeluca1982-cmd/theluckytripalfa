@@ -39,6 +39,7 @@
 
 import brunoDeLucaImg from "@/assets/partners/bruno-de-luca.jpeg";
 import carolinaDieckmannImg from "@/assets/partners/carolina-dieckmann.jpeg";
+import carolinaDieckmannHeroImg from "@/assets/partners/carolina-dieckmann-hero.jpeg";
 import celinaLocksImg from "@/assets/partners/celina-locks.jpeg";
 import diFerreroImg from "@/assets/partners/di-ferrero.jpeg";
 import isabeliFontanaImg from "@/assets/partners/isabeli-fontana.jpeg";
