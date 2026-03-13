@@ -70,6 +70,13 @@ const Profile = () => {
   const { isPremium } = useSubscription();
   const navigate = useNavigate();
 
+  // Redirect to auth if not logged in
+  useEffect(() => {
+    if (isReady && !user) {
+      navigate("/auth", { replace: true });
+    }
+  }, [isReady, user, navigate]);
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
     toast.success("Você saiu da conta");
