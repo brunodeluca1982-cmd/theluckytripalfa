@@ -1,92 +1,14 @@
 import { Link, useParams, useSearchParams } from "react-router-dom";
-import { Clock, Baby, Shield, Loader2, MapPin } from "lucide-react";
+import { Clock, Zap, Loader2, MapPin, ExternalLink, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useItemSave } from "@/hooks/use-item-save";
-import { activitiesByNeighborhood, cityLevelActivities, Activity } from "@/data/what-to-do-data";
-import { guideActivities } from "@/data/rio-guide-data";
-import { getAttractionImage } from "@/data/place-images";
-import { useExternalExperiencias, normalizeNeighborhood } from "@/hooks/use-external-experiencias";
-import type { ExternalExperiencia } from "@/hooks/use-external-experiencias";
-import { supabase } from "@/integrations/supabase/client";
-import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useOQueFazerItem, type OQueFazerItem } from "@/hooks/use-o-que-fazer";
+import { usePlacePhoto, buildPlaceQuery } from "@/hooks/use-place-photo";
+import { useState, useEffect } from "react";
 import DetailHeroLayout from "@/components/detail/DetailHeroLayout";
 
-const guideIdToWhatToDoId: Record<string, string> = {
-  "praia-ipanema": "praia-ipanema",
-  "por-sol-arpoador": "por-do-sol-arpoador",
-  "sup-arpoador": "sup-arpoador",
-  "pista-coutinho": "pista-coutinho",
-  "trilha-urca": "trilha-urca",
-  "mureta-urca": "mureta-urca",
-  "pao-acucar": "pao-de-acucar",
-  "jardim-botanico": "jardim-botanico-parque",
-  "parque-lage": "parque-lage",
-  "voo-livre": "voo-asa-delta",
-  "pedra-bonita": "pedra-bonita",
-  "pedra-gavea": "pedra-gavea",
-  "cristo-redentor": "cristo-redentor",
-  "ciclovia-barra": "ciclovia-barra",
-  "por-sol-pier": "por-do-sol-pier-barra",
-  "prainha": "prainha",
-  "grumari": "grumari",
-  "ccbb": "ccbb-rio",
-  "museu-amanha": "museu-amanha",
-  "aquario": "aquario",
-  "rua-mercado": "rua-do-mercado",
-  "bondinho-st": "bondinho-st",
-};
-
-const findStaticActivityById = (
-  id: string
-): { activity: Activity; neighborhoodName: string; neighborhoodId: string } | null => {
-  const mappedId = guideIdToWhatToDoId[id] || id;
-  for (const [neighborhoodId, data] of Object.entries(activitiesByNeighborhood)) {
-    const activity = data.activities.find((a) => a.id === mappedId);
-    if (activity) return { activity, neighborhoodName: data.neighborhoodName, neighborhoodId };
-  }
-  const cityActivity = cityLevelActivities.find((a) => a.id === mappedId);
-  if (cityActivity) {
-    return {
-      activity: { id: cityActivity.id, title: cityActivity.title, category: "Experiência Icônica", description: cityActivity.description },
-      neighborhoodName: "Rio de Janeiro",
-      neighborhoodId: "city",
-    };
-  }
-  const guideActivity = guideActivities.find((a) => a.id === id || a.id === mappedId);
-  if (guideActivity) {
-    return {
-      activity: { id: guideActivity.id, title: guideActivity.name, category: guideActivity.category, description: guideActivity.description },
-      neighborhoodName: guideActivity.neighborhood,
-      neighborhoodId: guideActivity.neighborhood.toLowerCase().replace(/\s+/g, "-"),
-    };
-  }
-  return null;
-};
-
-interface MediaRow { type: "image" | "video"; url: string; title?: string; }
-
-function useExperienceMediaBySlug(slug: string | undefined) {
-  return useQuery({
-    queryKey: ["experience-media-slug", slug],
-    queryFn: async (): Promise<MediaRow[]> => {
-      if (!slug) return [];
-      const { data, error } = await supabase
-        .from("experience_media")
-        .select("media_type, media_url, title")
-        .eq("experience_slug", slug)
-        .eq("is_active", true)
-        .order("sort_order", { ascending: true });
-      if (error) throw error;
-      return (data ?? []).map((r: any) => ({
-        type: r.media_type as "image" | "video",
-        url: r.media_url,
-        title: r.title,
-      }));
-    },
-    enabled: !!slug,
-    staleTime: 5 * 60 * 1000,
-  });
+function slugify(s: string) {
+  return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
 }
 
 function isActivitySavedLocally(activityId: string) {
@@ -94,113 +16,30 @@ function isActivitySavedLocally(activityId: string) {
   return draft.some((item: { id: string; type: string }) => item.id === activityId && item.type === "activity");
 }
 
-/** External experiencia detail view */
-const ExternalActivityView = ({ exp, backPath }: { exp: ExternalExperiencia; backPath: string }) => {
-  const { saveItem } = useItemSave();
-  const slug = normalizeNeighborhood(exp.bairro);
-  const { data: slugMedia } = useExperienceMediaBySlug(exp.id);
-  const [isSaved, setIsSaved] = useState(false);
-
-  useEffect(() => {
-    setIsSaved(isActivitySavedLocally(exp.id));
-  }, [exp.id]);
-
-  const handleSave = () => {
-    saveItem(exp.id, "activity", exp.nome, false);
-    setIsSaved(true);
-  };
-
-  const heroImage = getAttractionImage(slug);
-  const pills = [exp.categoria, exp.bairro, exp.vibe].filter(Boolean) as string[];
-
-  return (
-    <DetailHeroLayout
-      backPath={backPath}
-      title={exp.nome}
-      pills={pills}
-      media={slugMedia || undefined}
-      heroImageUrl={heroImage}
-      isSaved={isSaved}
-      onSave={handleSave}
-      footer={`The Lucky Trip — ${exp.bairro}`}
-    >
-      {/* Meta pills */}
-      <div className="flex flex-wrap gap-2 mb-5">
-        {exp.duracao && (
-          <span className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-white/10 text-white/70">
-            <Clock className="w-3 h-3" /> {exp.duracao}
-          </span>
-        )}
-        {exp.melhor_horario && (
-          <span className="text-xs px-2.5 py-1 rounded-full bg-white/10 text-white/70">
-            🕐 {exp.melhor_horario}
-          </span>
-        )}
-        {exp.com_criancas && (
-          <span className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-white/10 text-white/70">
-            <Baby className="w-3 h-3" /> Kids OK
-          </span>
-        )}
-        {exp.seguro_mulher_sozinha && (
-          <span className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-white/10 text-white/70">
-            <Shield className="w-3 h-3" /> Safe solo
-          </span>
-        )}
-        {exp.precisa_reserva && (
-          <span className="text-xs px-2.5 py-1 rounded-full bg-white/10 text-white/70">
-            📋 Reserva necessária
-          </span>
-        )}
-      </div>
-
-      {exp.google_maps_url && (
-        <a
-          href={exp.google_maps_url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center gap-2 text-sm text-white/50 hover:text-white/80 transition-colors"
-        >
-          <MapPin className="w-4 h-4" />
-          Ver no Google Maps
-        </a>
-      )}
-    </DetailHeroLayout>
-  );
-};
-
 const ActivityDetail = () => {
   const { id } = useParams<{ id: string }>();
   const [searchParams] = useSearchParams();
   const { saveItem } = useItemSave();
-
-  const { data: experiencias, isLoading } = useExternalExperiencias();
-  const { data: slugMediaForStatic } = useExperienceMediaBySlug(id);
+  const { data: item, isLoading } = useOQueFazerItem(id);
 
   const from = searchParams.get("from");
   const backPath = from === "city" ? "/o-que-fazer" : from ? `/o-que-fazer/${from}` : "/o-que-fazer";
 
-  const externalMatch = (experiencias || []).find((e) => e.id === id);
-  const result = findStaticActivityById(id || "");
-
-  const staticActivityId = result?.activity.id;
-  const staticActivityTitle = result?.activity.title;
+  const placeQuery = buildPlaceQuery(item?.nome || "", item?.bairro || undefined);
+  const itemSlug = item ? slugify(item.nome) : "";
+  const { photoUrl } = usePlacePhoto(itemSlug, "attraction", placeQuery, !!item);
 
   const [isSaved, setIsSaved] = useState(false);
 
   useEffect(() => {
-    if (!staticActivityId) return;
-    setIsSaved(isActivitySavedLocally(staticActivityId));
-  }, [staticActivityId]);
+    if (id) setIsSaved(isActivitySavedLocally(id));
+  }, [id]);
 
-  const handlePrimarySave = () => {
-    if (!staticActivityId || !staticActivityTitle) return;
-    saveItem(staticActivityId, "activity", staticActivityTitle, false);
+  const handleSave = () => {
+    if (!item) return;
+    saveItem(item.id, "activity", item.nome, false);
     setIsSaved(true);
   };
-
-  if (externalMatch) {
-    return <ExternalActivityView exp={externalMatch} backPath={backPath} />;
-  }
 
   if (isLoading) {
     return (
@@ -210,7 +49,7 @@ const ActivityDetail = () => {
     );
   }
 
-  if (!result) {
+  if (!item) {
     return (
       <div className="min-h-screen bg-background">
         <header className="px-6 py-4 border-b border-border">
@@ -228,49 +67,90 @@ const ActivityDetail = () => {
     );
   }
 
-  const { activity, neighborhoodName } = result;
-  const staticMedia = slugMediaForStatic && slugMediaForStatic.length > 0 ? slugMediaForStatic : undefined;
-  const heroImage = getAttractionImage(from || "");
-  const pills = [activity.category, neighborhoodName].filter(Boolean) as string[];
+  const pills = [item.categoria, item.bairro, item.vibe].filter(Boolean) as string[];
 
   return (
     <DetailHeroLayout
       backPath={backPath}
-      title={activity.title}
-      subtitle={activity.price || null}
+      title={item.nome}
       pills={pills}
-      media={staticMedia}
-      heroImageUrl={heroImage}
+      heroImageUrl={photoUrl || undefined}
       isSaved={isSaved}
-      onSave={handlePrimarySave}
-      footer={`The Lucky Trip — ${neighborhoodName}`}
+      onSave={handleSave}
+      footer={`The Lucky Trip — ${item.bairro || "Rio de Janeiro"}`}
     >
-      {/* Description */}
-      <div className="space-y-3 mb-6">
-        {activity.description.split("\n").map((paragraph, index) => (
-          <p key={index} className="text-base text-white/75 leading-relaxed">{paragraph}</p>
-        ))}
+      {/* Meu olhar */}
+      {item.meu_olhar && (
+        <div className="space-y-3 mb-6">
+          {item.meu_olhar.split("\n").map((paragraph, index) => (
+            <p key={index} className="text-base text-white/75 leading-relaxed">{paragraph}</p>
+          ))}
+        </div>
+      )}
+
+      {/* Como fazer */}
+      {item.como_fazer && (
+        <div className="mb-6 space-y-1.5">
+          <p className="text-xs tracking-[0.2em] uppercase text-white/40 mb-2">Como fazer</p>
+          {item.como_fazer.split("\n").filter(Boolean).map((step, i) => (
+            <div key={i} className="flex items-start gap-2">
+              <span className="text-[10px] text-white/30 font-mono mt-0.5 flex-shrink-0">{i + 1}.</span>
+              <p className="text-sm text-white/60 leading-relaxed">{step.trim()}</p>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Metadata pills */}
+      <div className="flex flex-wrap items-center gap-2 mb-5">
+        {item.duracao_media && (
+          <span className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-white/10 text-white/70">
+            <Clock className="w-3 h-3" /> {item.duracao_media}
+          </span>
+        )}
+        {item.energia && (
+          <span className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-white/10 text-white/70">
+            <Zap className="w-3 h-3" /> {item.energia}
+          </span>
+        )}
+        {item.momento_ideal && (
+          <span className="text-xs px-2.5 py-1 rounded-full bg-white/10 text-white/70">
+            🕐 {item.momento_ideal}
+          </span>
+        )}
       </div>
 
-      {/* Secondary links */}
-      <div className="space-y-3">
-        {activity.googleMaps && (
-          <a href={activity.googleMaps} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm text-white/50 hover:text-white/80 transition-colors">
-            <MapPin className="w-4 h-4" />
-            Ver no Google Maps
-          </a>
-        )}
-        {activity.instagram && (
-          <a href={`https://instagram.com/${activity.instagram.replace("@", "")}`} target="_blank" rel="noopener noreferrer" className="text-sm text-white/50 hover:text-white/80 transition-colors">
-            {activity.instagram}
-          </a>
-        )}
-        {activity.externalLink && (
-          <a href={activity.externalLink} target="_blank" rel="noopener noreferrer" className="text-sm text-white/50 hover:text-white/80 transition-colors underline">
-            Reservar / Saber mais
-          </a>
-        )}
-      </div>
+      {/* Google Maps */}
+      {item.google_maps && (
+        <a
+          href={item.google_maps}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 text-sm text-white/50 hover:text-white/80 transition-colors"
+        >
+          <MapPin className="w-4 h-4" />
+          Ver no Google Maps
+          <ExternalLink className="w-3 h-3 opacity-50" />
+        </a>
+      )}
+
+      {/* Lucky List teaser */}
+      {item.momento_lucky_list && (
+        <Link
+          to="/lucky-list"
+          className="relative block mt-6 rounded-xl overflow-hidden border border-white/15"
+        >
+          <div className="px-4 py-3 backdrop-blur-xl bg-white/5 select-none" style={{ filter: "blur(5px)" }}>
+            <p className="text-xs text-white/50 leading-relaxed line-clamp-2">{item.momento_lucky_list}</p>
+          </div>
+          <div className="absolute inset-0 flex items-center justify-center bg-black/25 backdrop-blur-[1px]">
+            <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 border border-white/20">
+              <Lock className="w-3 h-3 text-white/70" />
+              <span className="text-[11px] font-medium text-white/85 tracking-wide">Descubra o momento certo</span>
+            </div>
+          </div>
+        </Link>
+      )}
     </DetailHeroLayout>
   );
 };

@@ -79,3 +79,50 @@ export function useOQueFazer() {
     select: smartSort,
   });
 }
+
+/** Fetch a single O Que Fazer item by id */
+export function useOQueFazerItem(id: string | undefined) {
+  return useQuery({
+    queryKey: ["o-que-fazer-rio", id],
+    enabled: !!id,
+    queryFn: async (): Promise<OQueFazerItem | null> => {
+      const { data, error } = await (supabase as any)
+        .from("o_que_fazer_rio")
+        .select("*")
+        .eq("id", id!)
+        .eq("ativo", true)
+        .single();
+
+      if (error) return null;
+      if (!data) return null;
+
+      const r = data as any;
+      return {
+        id: r.id,
+        nome: r.nome,
+        categoria: r.categoria ?? "",
+        bairro: r.bairro ?? null,
+        google_maps: r.google_maps ?? null,
+        meu_olhar: r.meu_olhar ?? null,
+        momento_ideal: r.momento_ideal ?? null,
+        momento_lucky_list: r.momento_lucky_list ?? null,
+        como_fazer: r.como_fazer ?? null,
+        tags_ia: r.tags_ia ?? [],
+        vibe: r.vibe ?? null,
+        energia: r.energia ?? null,
+        duracao_media: r.duracao_media ?? null,
+        ordem: r.ordem ?? 0,
+      };
+    },
+  });
+}
+
+/** Slugify helper */
+export function slugifyOQueFazer(s: string): string {
+  return s
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/[^a-z0-9-]/g, "");
+}
