@@ -47,7 +47,7 @@ const WhereToEatDetail = () => {
 
   const neighborhoodData = getNeighborhoodById(neighborhood || "");
   const name = neighborhoodData?.name || neighborhood || "Bairro";
-  const description = neighborhoodDescriptions[neighborhood || ""] || `Descubra onde comer em ${name}.`;
+  const description = `Descubra onde comer em ${name}.`;
   const { heroUrl } = useNeighborhoodHero("rio-de-janeiro", neighborhood || "", "Rio de Janeiro", name, getRestaurantImage(neighborhood || ""));
 
   const from = searchParams.get("from");
