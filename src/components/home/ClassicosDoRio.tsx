@@ -4,6 +4,11 @@ import { Star, MapPin } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useOQueFazer, type OQueFazerItem } from "@/hooks/use-o-que-fazer";
 import { usePlacePhoto, buildPlaceQuery } from "@/hooks/use-place-photo";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+} from "@/components/ui/carousel";
 
 /** Keywords that signal a "classic" experience */
 const CLASSIC_KEYWORDS = [
