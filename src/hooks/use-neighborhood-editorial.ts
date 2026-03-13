@@ -23,7 +23,7 @@ export function useNeighborhoodEditorial(neighborhoodId: string | null) {
         .eq("neighborhood_id", neighborhoodId)
         .maybeSingle();
       if (error) throw error;
-      return data as NeighborhoodEditorial | null;
+      return data as unknown as NeighborhoodEditorial | null;
     },
     enabled: !!neighborhoodId,
   });
