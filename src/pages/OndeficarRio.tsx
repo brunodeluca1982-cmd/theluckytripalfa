@@ -225,7 +225,7 @@ const OndeficarRio = () => {
       {/* Interactive Map */}
       <div
         ref={containerRef}
-        className="relative w-full overflow-hidden cursor-grab active:cursor-grabbing"
+        className="relative z-10 w-full overflow-hidden cursor-grab active:cursor-grabbing"
         style={{ height: "300px", touchAction: "none" }}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
