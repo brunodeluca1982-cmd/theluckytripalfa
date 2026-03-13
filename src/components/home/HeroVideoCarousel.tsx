@@ -198,7 +198,11 @@ const HeroVideoCarousel = () => {
   const slide = heroSlides[current];
 
   return (
-    <section className="relative w-full aspect-[9/16] max-h-[75vh] overflow-hidden">
+    <section
+      className="relative w-full aspect-[9/16] max-h-[75vh] overflow-hidden touch-pan-y"
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+    >
       {/* Media layers */}
       {heroSlides.map((s, i) => {
         const canPlayMov = typeof document !== 'undefined' &&
