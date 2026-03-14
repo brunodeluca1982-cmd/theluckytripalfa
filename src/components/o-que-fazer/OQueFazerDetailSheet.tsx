@@ -1,5 +1,5 @@
 import { Sheet, SheetContent } from "@/components/ui/sheet";
-import { MapPin, ExternalLink, Clock, Zap, Bookmark, ChevronLeft, Lock } from "lucide-react";
+import { MapPin, ExternalLink, Clock, Zap, Bookmark, ChevronLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 import type { OQueFazerItem } from "@/hooks/use-o-que-fazer";
 import { usePlacePhoto, buildPlaceQuery } from "@/hooks/use-place-photo";
