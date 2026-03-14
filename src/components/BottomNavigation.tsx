@@ -54,7 +54,7 @@ const BottomNavigation = forwardRef<HTMLElement>((_, ref) => {
   };
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-white/10 pb-safe backdrop-blur-xl bg-background/70">
+    <nav ref={ref} className="fixed bottom-0 left-0 right-0 z-50 border-t border-white/10 pb-safe backdrop-blur-xl bg-background/70">
       <div className="flex items-center justify-around h-16 max-w-lg mx-auto">
         {navItems.map((item) => {
           const Icon = item.icon;
