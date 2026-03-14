@@ -89,6 +89,8 @@ const BottomNavigation = forwardRef<HTMLElement>((_, ref) => {
       </div>
     </nav>
   );
-};
+});
+
+BottomNavigation.displayName = "BottomNavigation";
 
 export default BottomNavigation;
