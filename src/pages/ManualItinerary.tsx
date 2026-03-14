@@ -231,7 +231,7 @@ const ManualItinerary = () => {
       <header className="sticky top-0 z-50 px-4 py-4 bg-background/95 backdrop-blur-sm border-b border-border">
         <div className="flex items-center gap-4">
           <button
-            onClick={() => navigate('/meu-roteiro/decisao')}
+            onClick={() => navigate('/meu-roteiro/preferencias')}
             className="p-2 -m-2 text-muted-foreground hover:text-foreground transition-colors"
           >
             <ChevronLeft className="w-5 h-5" />

@@ -54,7 +54,7 @@ const TripPreferences = () => {
 
   if (redirectPath) return null;
 
-  const handleContinue = () => navigate('/meu-roteiro/decisao');
+  const handleContinue = () => navigate('/meu-roteiro/manual');
   const handleBack = () => navigate('/meu-roteiro');
 
   const formatDate = (date: Date | null) => {
