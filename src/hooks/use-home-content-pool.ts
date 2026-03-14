@@ -1,9 +1,8 @@
 import { useMemo } from "react";
 import { useOQueFazer, type OQueFazerItem } from "@/hooks/use-o-que-fazer";
-import { useExternalRestaurants, generateRestaurantSlug, type ExternalRestaurant } from "@/hooks/use-external-restaurants";
+import { useExternalRestaurants, normalizeNeighborhood, type ExternalRestaurant } from "@/hooks/use-external-restaurants";
 import { useExternalHotels, type ExternalHotel } from "@/hooks/use-external-hotels";
 import { useLuckyList, type LuckyListItem } from "@/hooks/use-lucky-list";
-import { generateHotelSlug } from "@/pages/HotelDetail";
 import { buildPlaceQuery } from "@/hooks/use-place-photo";
 
 /* ── Unified pool item ── */
