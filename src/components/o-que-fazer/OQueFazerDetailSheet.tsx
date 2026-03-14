@@ -40,10 +40,8 @@ const OQueFazerDetailSheet = ({ open, onOpenChange, item }: OQueFazerDetailSheet
     setIsSaved(true);
   };
 
-  // Get first 2-3 sentences of meu_olhar as excerpt
-  const excerpt = item.meu_olhar
-    ? item.meu_olhar.split("\n")[0].slice(0, 220) + (item.meu_olhar.length > 220 ? "…" : "")
-    : null;
+  // Show full meu_olhar text
+  const fullText = item.meu_olhar || null;
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
