@@ -105,7 +105,7 @@ async function runCurationLayer() {
     else result.hoteis = enrichWithZones(hotelRes.data || [], "hotel");
   }
 
-  console.log(`[Curation] ${result.experiencias.length} exp, ${result.restaurantes.length} rest, ${result.hoteis.length} hotels, ${result.lucky_list.length} lucky`);
+  console.log(`[Curation] ${result.experiencias.length} exp, ${result.restaurantes.length} rest, ${result.hoteis.length} hotels, ${result.lucky_list.length} lucky, ${result.bairros_editorial.length} bairros`);
   return result;
 }
 
