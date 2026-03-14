@@ -1,5 +1,5 @@
 import { Sheet, SheetContent } from "@/components/ui/sheet";
-import { MapPin, ExternalLink, Clock, Zap, Bookmark, ChevronLeft, Lock } from "lucide-react";
+import { MapPin, ExternalLink, Clock, Zap, Bookmark, ChevronLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 import type { OQueFazerItem } from "@/hooks/use-o-que-fazer";
 import { usePlacePhoto, buildPlaceQuery } from "@/hooks/use-place-photo";
@@ -40,10 +40,8 @@ const OQueFazerDetailSheet = ({ open, onOpenChange, item }: OQueFazerDetailSheet
     setIsSaved(true);
   };
 
-  // Get first 2-3 sentences of meu_olhar as excerpt
-  const excerpt = item.meu_olhar
-    ? item.meu_olhar.split("\n")[0].slice(0, 220) + (item.meu_olhar.length > 220 ? "…" : "")
-    : null;
+  // Show full meu_olhar text
+  const fullText = item.meu_olhar || null;
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -81,11 +79,13 @@ const OQueFazerDetailSheet = ({ open, onOpenChange, item }: OQueFazerDetailSheet
               {item.nome}
             </h2>
 
-            {/* Excerpt of meu_olhar */}
-            {excerpt && (
-              <p className="text-sm text-white/65 leading-relaxed mb-5">
-                {excerpt}
-              </p>
+            {/* Meu olhar — full text */}
+            {fullText && (
+              <div className="space-y-3 mb-5">
+                {fullText.split("\n").map((paragraph, index) => (
+                  <p key={index} className="text-sm text-white/65 leading-relaxed">{paragraph}</p>
+                ))}
+              </div>
             )}
 
             {/* Metadata pills */}
@@ -172,23 +172,12 @@ const OQueFazerDetailSheet = ({ open, onOpenChange, item }: OQueFazerDetailSheet
               </Link>
             </div>
 
-            {/* Lucky List teaser */}
+            {/* Momento Lucky List — free text */}
             {item.momento_lucky_list && (
-              <Link
-                to="/lucky-list"
-                onClick={() => onOpenChange(false)}
-                className="relative block mt-5 rounded-xl overflow-hidden border border-white/15"
-              >
-                <div className="px-4 py-3 backdrop-blur-xl bg-white/5 select-none" style={{ filter: "blur(5px)" }}>
-                  <p className="text-xs text-white/50 leading-relaxed line-clamp-2">{item.momento_lucky_list}</p>
-                </div>
-                <div className="absolute inset-0 flex items-center justify-center bg-black/25 backdrop-blur-[1px]">
-                  <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 border border-white/20">
-                    <Lock className="w-3 h-3 text-white/70" />
-                    <span className="text-[11px] font-medium text-white/85 tracking-wide">Descubra o momento certo</span>
-                  </div>
-                </div>
-              </Link>
+              <div className="mt-5 space-y-2">
+                <p className="text-xs tracking-[0.2em] uppercase text-white/40">Momento Lucky</p>
+                <p className="text-xs text-white/55 leading-relaxed">{item.momento_lucky_list}</p>
+              </div>
             )}
           </div>
         </div>

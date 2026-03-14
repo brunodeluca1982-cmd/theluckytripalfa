@@ -1,5 +1,5 @@
 import { Link, useParams, useSearchParams } from "react-router-dom";
-import { Clock, Zap, Loader2, MapPin, ExternalLink, Lock } from "lucide-react";
+import { Clock, Zap, Loader2, MapPin, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useItemSave } from "@/hooks/use-item-save";
 import { useOQueFazerItem } from "@/hooks/use-o-que-fazer";
@@ -174,22 +174,12 @@ const ActivityDetail = () => {
         </a>
       )}
 
-      {/* Lucky List teaser */}
+      {/* Momento Lucky List — shown as free text */}
       {item.momento_lucky_list && (
-        <Link
-          to="/lucky-list"
-          className="relative block mt-6 rounded-xl overflow-hidden border border-white/15"
-        >
-          <div className="px-4 py-3 backdrop-blur-xl bg-white/5 select-none" style={{ filter: "blur(5px)" }}>
-            <p className="text-xs text-white/50 leading-relaxed line-clamp-2">{item.momento_lucky_list}</p>
-          </div>
-          <div className="absolute inset-0 flex items-center justify-center bg-black/25 backdrop-blur-[1px]">
-            <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 border border-white/20">
-              <Lock className="w-3 h-3 text-white/70" />
-              <span className="text-[11px] font-medium text-white/85 tracking-wide">Descubra o momento certo</span>
-            </div>
-          </div>
-        </Link>
+        <div className="mt-6 space-y-2">
+          <p className="text-xs tracking-[0.2em] uppercase text-white/40">Momento Lucky</p>
+          <p className="text-sm text-white/65 leading-relaxed">{item.momento_lucky_list}</p>
+        </div>
       )}
     </DetailHeroLayout>
   );
