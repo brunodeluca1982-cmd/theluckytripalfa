@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { Compass, MapPin, Briefcase, Sparkles, User } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, forwardRef } from "react";
 
 /**
  * GLOBAL BOTTOM NAVIGATION
