@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import DestinationHub, { MapPin, Bed, Utensils, Compass, Sparkles } from "@/components/DestinationHub";
 import { Button } from "@/components/ui/button";
 import { useCityHero } from "@/contexts/CityHeroContext";
@@ -59,12 +59,25 @@ const rioActions = [
 
 const DestinationRio = () => {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const { heroUrl } = useCityHero();
   const isDebug = searchParams.get("debug") === "1";
   const [testResult, setTestResult] = useState<any[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [geocodeResult, setGeocodeResult] = useState<any | null>(null);
   const [geocodeLoading, setGeocodeLoading] = useState(false);
+
+  useEffect(() => {
+    if (isDebug) return;
+    try {
+      const seen = localStorage.getItem("heroVideoSeen:rio-de-janeiro") === "true";
+      if (!seen) {
+        navigate("/destino/rio-de-janeiro/intro", { replace: true });
+      }
+    } catch {
+      navigate("/destino/rio-de-janeiro/intro", { replace: true });
+    }
+  }, [isDebug, navigate]);
 
   const handleTest = async () => {
     setLoading(true);

@@ -1,9 +1,8 @@
 import { useMemo } from "react";
 import { useOQueFazer, type OQueFazerItem } from "@/hooks/use-o-que-fazer";
-import { useExternalRestaurants, generateRestaurantSlug, type ExternalRestaurant } from "@/hooks/use-external-restaurants";
+import { useExternalRestaurants, normalizeNeighborhood, type ExternalRestaurant } from "@/hooks/use-external-restaurants";
 import { useExternalHotels, type ExternalHotel } from "@/hooks/use-external-hotels";
 import { useLuckyList, type LuckyListItem } from "@/hooks/use-lucky-list";
-import { generateHotelSlug } from "@/pages/HotelDetail";
 import { buildPlaceQuery } from "@/hooks/use-place-photo";
 
 /* ── Unified pool item ── */
@@ -121,7 +120,7 @@ function mapExperience(e: OQueFazerItem): PoolItem {
 }
 
 function mapRestaurant(r: ExternalRestaurant): PoolItem {
-  const slug = generateRestaurantSlug(r.nome);
+  const from = normalizeNeighborhood(r.bairro);
   return {
     id: `rest-${r.id}`,
     sourceId: String(r.id),
@@ -129,7 +128,7 @@ function mapRestaurant(r: ExternalRestaurant): PoolItem {
     bairro: r.bairro,
     tipo: "restaurante",
     descricao: r.meu_olhar || undefined,
-    link: `/restaurante/${slug}?from=${r.bairro}`,
+    link: `/restaurante/${r.id}?from=${from}`,
     photoKey: `pool-rest-${r.id}`,
     photoQuery: buildPlaceQuery(r.nome, r.bairro),
     photoType: "restaurant",
@@ -139,7 +138,7 @@ function mapRestaurant(r: ExternalRestaurant): PoolItem {
 }
 
 function mapHotel(h: ExternalHotel): PoolItem {
-  const slug = generateHotelSlug(h.nome);
+  const from = normalizeNeighborhood(h.bairro);
   return {
     id: `hotel-${h.id}`,
     sourceId: h.id,
@@ -147,7 +146,7 @@ function mapHotel(h: ExternalHotel): PoolItem {
     bairro: h.bairro,
     tipo: "hotel",
     descricao: h.meu_olhar || undefined,
-    link: `/hotel/${slug}?from=${h.bairro}`,
+    link: `/hotel/${h.id}?from=${from}`,
     photoKey: `pool-hotel-${h.id}`,
     photoQuery: buildPlaceQuery(h.nome, h.bairro),
     photoType: "hotel",
