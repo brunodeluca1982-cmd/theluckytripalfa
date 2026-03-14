@@ -44,8 +44,6 @@ const ManualItinerary = () => {
     }
   }, [hasRequiredSetup, navigate]);
 
-  if (!hasRequiredSetup) return null;
-
   const actualTripDays = Math.max(1, tripDays);
   
   
