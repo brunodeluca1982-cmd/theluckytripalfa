@@ -60,26 +60,31 @@ async function runCurationLayer() {
   const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
   const SUPABASE_KEY = Deno.env.get("SUPABASE_ANON_KEY");
 
-  const result: { experiencias: any[]; restaurantes: any[]; hoteis: any[]; lucky_list: any[] } = {
-    experiencias: [], restaurantes: [], hoteis: [], lucky_list: [],
+  const result: { experiencias: any[]; restaurantes: any[]; hoteis: any[]; lucky_list: any[]; bairros_editorial: any[] } = {
+    experiencias: [], restaurantes: [], hoteis: [], lucky_list: [], bairros_editorial: [],
   };
 
-  // 1. o_que_fazer_rio (local table — activities)
+  // 1. o_que_fazer_rio, lucky_list_rio, neighborhood_editorial (local tables)
   if (SUPABASE_URL && SUPABASE_KEY) {
     const local = createClient(SUPABASE_URL, SUPABASE_KEY);
-    const [oqfRes, llRes] = await Promise.all([
+    const [oqfRes, llRes, nbRes] = await Promise.all([
       local.from("o_que_fazer_rio")
         .select("nome, bairro, categoria, meu_olhar, vibe, energia, duracao_media, momento_ideal, como_fazer, tags_ia")
         .eq("ativo", true).order("ordem").limit(500),
       local.from("lucky_list_rio")
         .select("nome, bairro, categoria_experiencia, meu_olhar, tipo_item, como_fazer, tags_ia, nivel_esforco, horarios")
         .eq("ativo", true).limit(500),
+      local.from("neighborhood_editorial")
+        .select("neighborhood_name, summary, como_e_ficar, pra_quem, o_que_faz_especial, o_que_considerar")
+        .limit(50),
     ]);
     if (oqfRes.error) console.error("Curation: o_que_fazer_rio error:", oqfRes.error);
     else result.experiencias = enrichWithZones(oqfRes.data || [], "experience");
 
     if (llRes.error) console.error("Curation: lucky_list_rio error:", llRes.error);
     else result.lucky_list = enrichWithZones(llRes.data || [], "lucky-list");
+
+    if (!nbRes.error && nbRes.data) result.bairros_editorial = nbRes.data;
   }
 
   // 2. External restaurants + hotels
@@ -100,7 +105,7 @@ async function runCurationLayer() {
     else result.hoteis = enrichWithZones(hotelRes.data || [], "hotel");
   }
 
-  console.log(`[Curation] ${result.experiencias.length} exp, ${result.restaurantes.length} rest, ${result.hoteis.length} hotels, ${result.lucky_list.length} lucky`);
+  console.log(`[Curation] ${result.experiencias.length} exp, ${result.restaurantes.length} rest, ${result.hoteis.length} hotels, ${result.lucky_list.length} lucky, ${result.bairros_editorial.length} bairros`);
   return result;
 }
 
