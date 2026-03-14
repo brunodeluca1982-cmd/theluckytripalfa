@@ -63,7 +63,9 @@ const MoodCard = ({ mood }: { mood: MoodSet }) => {
       <div className="grid grid-cols-3 gap-1.5 px-3 pb-3">
         {[a, b, c].map((item) => (
           <Link key={item.id} to={item.link} className="block">
-            <MoodCardImage item={item} />
+            <div>
+              <MoodCardImage item={item} />
+            </div>
           </Link>
         ))}
       </div>
