@@ -59,6 +59,7 @@ const rioActions = [
 
 const DestinationRio = () => {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const { heroUrl } = useCityHero();
   const isDebug = searchParams.get("debug") === "1";
   const [testResult, setTestResult] = useState<any[] | null>(null);
