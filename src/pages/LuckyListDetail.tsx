@@ -33,7 +33,7 @@ const LuckyListDetail = () => {
 
   const handleSave = () => {
     if (!item) return;
-    saveItem(item.id, "lucky-list", item.nome, false);
+    saveItem(item.id, "lucky-list", item.nome, false, { neighborhood: item.bairro || undefined });
     setIsSaved(true);
   };
 

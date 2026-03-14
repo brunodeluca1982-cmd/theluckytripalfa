@@ -70,7 +70,7 @@ const ActivityDetail = () => {
 
   const handleSave = () => {
     if (!item) return;
-    saveItem(item.id, "activity", item.nome, false);
+    saveItem(item.id, "activity", item.nome, false, { neighborhood: item.bairro || undefined });
     setIsSaved(true);
   };
 

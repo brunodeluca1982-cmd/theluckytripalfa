@@ -36,7 +36,7 @@ const OQueFazerDetailSheet = ({ open, onOpenChange, item }: OQueFazerDetailSheet
   if (!item) return null;
 
   const handleSave = () => {
-    saveItem(item.id, "activity", item.nome, false);
+    saveItem(item.id, "activity", item.nome, false, { neighborhood: item.bairro || undefined });
     setIsSaved(true);
   };
 
