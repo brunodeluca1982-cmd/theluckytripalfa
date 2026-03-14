@@ -25,7 +25,10 @@ const RestaurantDetail = () => {
 
   const restaurant = useMemo(() => {
     if (!externalRestaurants || !id) return null;
-    return externalRestaurants.find((r) => generateRestaurantSlug(r.nome) === id) || null;
+    // Support lookup by numeric ID, slug, or name slug
+    return externalRestaurants.find((r) => String(r.id) === id)
+      || externalRestaurants.find((r) => generateRestaurantSlug(r.nome) === id)
+      || null;
   }, [externalRestaurants, id]);
 
   useEffect(() => {

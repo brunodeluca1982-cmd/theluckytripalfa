@@ -32,7 +32,10 @@ const HotelDetail = () => {
 
   const hotel = useMemo(() => {
     if (!externalHotels || !id) return null;
-    return externalHotels.find((h) => generateHotelSlug(h.nome) === id) || null;
+    // Support lookup by external ID, slug, or name slug
+    return externalHotels.find((h) => String(h.id) === id)
+      || externalHotels.find((h) => generateHotelSlug(h.nome) === id)
+      || null;
   }, [externalHotels, id]);
 
   useEffect(() => {
