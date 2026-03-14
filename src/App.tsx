@@ -58,6 +58,7 @@ import IARoteirosInteligentes from "./pages/ia/IARoteirosInteligentes";
 import IARevisarRoteiro from "./pages/ia/IARevisarRoteiro";
 import IAPerguntar from "./pages/ia/IAPerguntar";
 import IACriarRoteiro from "./pages/ia/IACriarRoteiro";
+import IAFromSavedRoteiro from "./pages/ia/IAFromSavedRoteiro";
 import IAMelhorarRoteiro from "./pages/ia/IAMelhorarRoteiro";
 import IALuckyTrip from "./pages/ia/IALuckyTrip";
 import InspirationTrip from "./pages/InspirationTrip";
