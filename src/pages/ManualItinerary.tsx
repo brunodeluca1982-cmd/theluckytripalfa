@@ -36,7 +36,16 @@ interface Day {
 const ManualItinerary = () => {
   const navigate = useNavigate();
   const { draft, tripDays } = useTripDraft();
-  
+  const hasRequiredSetup = Boolean(draft.destinationId && draft.arrivalAt && draft.departureAt);
+
+  useEffect(() => {
+    if (!hasRequiredSetup) {
+      navigate('/meu-roteiro', { replace: true });
+    }
+  }, [hasRequiredSetup, navigate]);
+
+  if (!hasRequiredSetup) return null;
+
   const actualTripDays = Math.max(1, tripDays);
   
   

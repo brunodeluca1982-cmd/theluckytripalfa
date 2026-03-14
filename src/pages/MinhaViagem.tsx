@@ -197,7 +197,7 @@ function MinhaViagemInner() {
         {items.length > 0 && (
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.28, delay: 0.15 }} className="flex flex-col gap-3 pt-4">
             <Link to="/ia/roteiro-salvos"><GlassButton className="w-full bg-white/22 border-white/40"><Sparkles className="w-4 h-4" /> Criar Roteiro com IA</GlassButton></Link>
-            <Link to="/meu-roteiro/manual"><GlassButton className="w-full">Montar Roteiro Manual</GlassButton></Link>
+            <Link to="/meu-roteiro"><GlassButton className="w-full">Montar Roteiro Manual</GlassButton></Link>
           </motion.div>
         )}
       </main>
