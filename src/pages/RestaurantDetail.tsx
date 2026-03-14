@@ -32,8 +32,8 @@ const RestaurantDetail = () => {
   }, [externalRestaurants, id]);
 
   useEffect(() => {
-    if (id) setIsSaved(isRestaurantSaved(id));
-  }, [id]);
+    if (restaurant?.id) setIsSaved(isRestaurantSaved(String(restaurant.id)));
+  }, [restaurant?.id]);
 
   const from = searchParams.get("from");
   const backPath = from ? `/onde-comer/${from}` : "/eat-map-view";

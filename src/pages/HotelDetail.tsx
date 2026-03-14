@@ -39,8 +39,8 @@ const HotelDetail = () => {
   }, [externalHotels, id]);
 
   useEffect(() => {
-    if (id) setIsSaved(isHotelSaved(id));
-  }, [id]);
+    if (hotel?.id) setIsSaved(isHotelSaved(String(hotel.id)));
+  }, [hotel?.id]);
 
   const from = searchParams.get("from");
   const backPath = from && from !== "list" && from !== "map" ? `/onde-ficar/${from}` : "/onde-ficar-rio";
