@@ -36,7 +36,14 @@ interface Day {
 const ManualItinerary = () => {
   const navigate = useNavigate();
   const { draft, tripDays } = useTripDraft();
-  
+  const hasRequiredSetup = Boolean(draft.destinationId && draft.arrivalAt && draft.departureAt);
+
+  useEffect(() => {
+    if (!hasRequiredSetup) {
+      navigate('/meu-roteiro', { replace: true });
+    }
+  }, [hasRequiredSetup, navigate]);
+
   const actualTripDays = Math.max(1, tripDays);
   
   
@@ -215,6 +222,8 @@ const ManualItinerary = () => {
     if (!date) return '';
     return format(date, "EEE, d MMM", { locale: ptBR });
   };
+
+  if (!hasRequiredSetup) return null;
 
   return (
     <div className="min-h-screen bg-background pb-32">

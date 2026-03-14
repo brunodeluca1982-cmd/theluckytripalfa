@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon } from "lucide-react";
@@ -18,10 +18,15 @@ const TripDates = () => {
   const [arrivalOpen, setArrivalOpen] = useState(false);
   const [departureOpen, setDepartureOpen] = useState(false);
 
-  if (!isDestinationSelected) {
-    navigate('/meu-roteiro', { replace: true });
-    return null;
-  }
+  const shouldRedirectToSetup = !isDestinationSelected;
+
+  useEffect(() => {
+    if (shouldRedirectToSetup) {
+      navigate('/meu-roteiro', { replace: true });
+    }
+  }, [shouldRedirectToSetup, navigate]);
+
+  if (shouldRedirectToSetup) return null;
 
   const handleContinue = () => navigate('/meu-roteiro/preferencias');
   const handleBack = () => navigate('/meu-roteiro');
