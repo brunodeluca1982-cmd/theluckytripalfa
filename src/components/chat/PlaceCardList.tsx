@@ -96,7 +96,7 @@ function PlaceCard({ item }: { item: PlaceItem }) {
     e.preventDefault();
     e.stopPropagation();
     if (!resolvedId || isSaved) return;
-    const success = saveItem(resolvedId, mapItemType(item.type), item.nome, false);
+    const success = saveItem(resolvedId, mapItemType(item.type), item.nome, false, { neighborhood: item.bairro || undefined });
     if (success) setIsSaved(true);
   };
 

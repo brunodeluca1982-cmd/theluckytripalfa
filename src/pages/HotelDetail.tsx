@@ -74,7 +74,7 @@ const HotelDetail = () => {
   }
 
   const handleSave = () => {
-    saveItem(String(hotel.id), "hotel", hotel.nome, false);
+    saveItem(String(hotel.id), "hotel", hotel.nome, false, { neighborhood: hotel.bairro || undefined });
     setIsSaved(true);
   };
 
