@@ -98,11 +98,7 @@ function OQueFazerCard({ item, index, onTap }: { item: OQueFazerItem; index: num
         )}
       </div>
 
-      <p className="text-xs text-white/55 mt-3">Ver experiência</p>
-
-      {item.momento_lucky_list && (
-        <LuckyListTeaser text={item.momento_lucky_list} index={index} />
-      )}
+      <p className="text-xs text-white/55 mt-3">Ver experiência completa</p>
     </article>
   );
 }
