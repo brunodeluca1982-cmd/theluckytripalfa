@@ -1,45 +1,19 @@
 import { Link, useNavigate } from "react-router-dom";
-import { ChevronLeft, MessageCircle, Send, ArrowRight } from "lucide-react";
-import { useState, useRef, useEffect } from "react";
+import { ChevronLeft, MessageCircle, Send, ArrowRight, MessageSquare } from "lucide-react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { 
-  findKnowledgeMatch, 
-  topicToModuleMap, 
-  AI_FALLBACK_MESSAGE,
-  containsSafetyTopic 
-} from "@/data/rio-knowledge-base";
+import { buildWhatsAppUrl } from "@/lib/whatsapp-concierge";
 
-/**
- * ═══════════════════════════════════════════════════════════════════════════
- * IA PERGUNTAR — CLOSED-SCOPE CHAT (STRICT FALLBACK)
- * ═══════════════════════════════════════════════════════════════════════════
- * 
- * AI SCOPE LOCK:
- * - Answers ONLY from RIO_KB curated database
- * - NEVER invents, assumes, or guesses
- * - NEVER uses external/web knowledge
- * - Uses EXACT fallback message when cannot answer
- * 
- * FALLBACK (VERBATIM):
- * "Ih! Essa aí eu não sei te responder… quer falar com o Bruno? 
- *  Chama ele no WhatsApp! 21998102132"
- * 
- * SAFETY RULE:
- * Medical, legal, financial questions → trigger fallback immediately
- * 
- * LANGUAGE:
- * - All responses in Portuguese (pt-BR)
- * - No emojis
- * - Calm, adult, practical tone
- * ═══════════════════════════════════════════════════════════════════════════
- */
+const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/lucky-trip-ai`;
+
+const WHATSAPP_FALLBACK = "Boa pergunta. Vou perguntar diretamente ao Bruno e te respondo.";
 
 interface Message {
   id: string;
   role: 'user' | 'assistant';
   content: string;
-  suggestions?: { path: string; label: string }[];
+  showWhatsApp?: boolean;
 }
 
 const quickChips = [
@@ -65,33 +39,8 @@ const IAPerguntar = () => {
     scrollToBottom();
   }, [messages]);
 
-  const generateResponse = (query: string): { content: string; suggestions?: { path: string; label: string }[] } => {
-    // SAFETY CHECK — Medical, legal, financial topics trigger fallback
-    if (containsSafetyTopic(query)) {
-      return { content: AI_FALLBACK_MESSAGE };
-    }
-    
-    // STRICT MATCHING — Only answer if grounded in curated content
-    const matches = findKnowledgeMatch(query);
-    
-    if (matches.length === 0) {
-      // No confident match — use exact fallback message
-      return { content: AI_FALLBACK_MESSAGE };
-    }
-
-    // Build response ONLY from curated matches (max 2 entries)
-    const responseTexts = matches.slice(0, 2).map(entry => entry.text);
-    const topics = [...new Set(matches.map(m => m.topic))];
-    const suggestions = topics.slice(0, 2).map(topic => topicToModuleMap[topic]);
-
-    return {
-      content: responseTexts.join('\n\n'),
-      suggestions: suggestions.length > 0 ? suggestions : undefined,
-    };
-  };
-
-  const handleSend = (text: string) => {
-    if (!text.trim()) return;
+  const sendMessage = useCallback(async (text: string) => {
+    if (!text.trim() || isTyping) return;
 
     const userMessage: Message = {
       id: `user-${Date.now()}`,
@@ -103,22 +52,78 @@ const IAPerguntar = () => {
     setInput("");
     setIsTyping(true);
 
-    // Simulate typing delay
-    setTimeout(() => {
-      const response = generateResponse(text);
-      const assistantMessage: Message = {
-        id: `assistant-${Date.now()}`,
-        role: 'assistant',
-        content: response.content,
-        suggestions: response.suggestions,
-      };
-      setMessages(prev => [...prev, assistantMessage]);
+    try {
+      const res = await fetch(CHAT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          messages: [
+            ...messages.map(m => ({ role: m.role, content: m.content })),
+            { role: "user", content: text.trim() },
+          ],
+          context: {
+            selected_city: "Rio de Janeiro",
+            minha_viagem_count: 0,
+            mode: "perguntar",
+          },
+        }),
+      });
+
+      if (!res.ok) throw new Error("fetch failed");
+
+      const reader = res.body?.getReader();
+      if (!reader) throw new Error("no reader");
+
+      let fullContent = "";
+      const decoder = new TextDecoder();
+
+      const assistantId = `assistant-${Date.now()}`;
+      setMessages(prev => [...prev, { id: assistantId, role: 'assistant', content: "" }]);
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const chunk = decoder.decode(value, { stream: true });
+        const lines = chunk.split("\n");
+        for (const line of lines) {
+          if (!line.startsWith("data: ")) continue;
+          const payload = line.slice(6);
+          if (payload === "[DONE]") continue;
+          try {
+            const parsed = JSON.parse(payload);
+            const delta = parsed.choices?.[0]?.delta?.content;
+            if (delta) {
+              fullContent += delta;
+              setMessages(prev =>
+                prev.map(m => m.id === assistantId ? { ...m, content: fullContent } : m)
+              );
+            }
+          } catch { /* skip */ }
+        }
+      }
+
+      // If AI response is very short or empty, show WhatsApp fallback
+      if (!fullContent.trim() || fullContent.trim().length < 10) {
+        setMessages(prev =>
+          prev.map(m => m.id === assistantId
+            ? { ...m, content: WHATSAPP_FALLBACK, showWhatsApp: true }
+            : m
+          )
+        );
+      }
+    } catch {
+      const fallbackId = `assistant-${Date.now()}`;
+      setMessages(prev => [
+        ...prev,
+        { id: fallbackId, role: 'assistant', content: WHATSAPP_FALLBACK, showWhatsApp: true },
+      ]);
+    } finally {
       setIsTyping(false);
-    }, 800);
-  };
+    }
+  }, [messages, isTyping]);
 
   const handleChipClick = (chip: string) => {
-    handleSend(chip);
+    sendMessage(chip);
   };
 
   return (
@@ -136,14 +141,13 @@ const IAPerguntar = () => {
           Pergunte sobre o Rio
         </h1>
         <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
-          Respostas só com base no conteúdo curado do The Lucky Trip.
+          Respostas com base no conteúdo curado do The Lucky Trip.
         </p>
       </header>
 
       {/* Chat Area */}
       <div className="flex-1 overflow-y-auto px-6 py-6">
         {messages.length === 0 ? (
-          /* Empty State */
           <div className="flex flex-col items-center justify-center h-full min-h-[300px]">
             <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mb-6">
               <MessageCircle className="w-6 h-6 text-primary" />
@@ -153,7 +157,6 @@ const IAPerguntar = () => {
               Pergunte qualquer coisa sobre o Rio de Janeiro. Vou responder com base nos nossos guias e recomendações.
             </p>
 
-            {/* Quick Chips */}
             <div className="w-full max-w-sm">
               <p className="text-xs text-muted-foreground uppercase tracking-wider mb-3 text-center">
                 Experimente perguntar
@@ -172,7 +175,6 @@ const IAPerguntar = () => {
             </div>
           </div>
         ) : (
-          /* Messages */
           <div className="space-y-4">
             {messages.map((message) => (
               <div
@@ -190,28 +192,23 @@ const IAPerguntar = () => {
                     {message.content}
                   </p>
                   
-                  {/* Suggestion Buttons */}
-                  {message.suggestions && message.suggestions.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mt-3 pt-3 border-t border-border/50">
-                      {message.suggestions.map((suggestion, idx) => (
-                        <Button
-                          key={idx}
-                          variant="outline"
-                          size="sm"
-                          onClick={() => navigate(suggestion.path)}
-                          className="text-xs h-8"
-                        >
-                          {suggestion.label}
-                          <ArrowRight className="w-3 h-3 ml-1" />
-                        </Button>
-                      ))}
+                  {message.showWhatsApp && (
+                    <div className="mt-3 pt-3 border-t border-border/50">
+                      <a
+                        href={buildWhatsAppUrl({ destino: "Rio de Janeiro" })}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[hsl(141,73%,42%)] text-white text-xs font-medium hover:opacity-90 transition-opacity"
+                      >
+                        <MessageSquare className="w-4 h-4" />
+                        Falar com Bruno no WhatsApp
+                      </a>
                     </div>
                   )}
                 </div>
               </div>
             ))}
             
-            {/* Typing Indicator */}
             {isTyping && (
               <div className="flex justify-start">
                 <div className="bg-muted border border-border rounded-2xl px-4 py-3">
@@ -235,12 +232,12 @@ const IAPerguntar = () => {
           <Input
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleSend(input)}
+            onKeyDown={(e) => e.key === 'Enter' && sendMessage(input)}
             placeholder="Digite sua pergunta..."
             className="flex-1 h-12 rounded-xl bg-muted/50 border-border"
           />
           <button 
-            onClick={() => handleSend(input)}
+            onClick={() => sendMessage(input)}
             className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50"
             disabled={!input.trim() || isTyping}
           >
