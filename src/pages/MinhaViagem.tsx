@@ -59,8 +59,8 @@ function GlassButton({
 
 /** Visual card for a saved item with Google Places photo */
 function SavedItemCard({ item, onRemove, index }: { item: SavedItem; onRemove: () => void; index: number }) {
-  const itemName = item.destinationName || item.id;
-  const placeQuery = buildPlaceQuery(itemName);
+  const itemName = item.title || item.id;
+  const placeQuery = buildPlaceQuery(item.title || item.id);
   const { photoUrl, isLoading } = usePlacePhoto(item.id, item.type === "hotel" ? "hotel" : item.type === "restaurant" ? "restaurant" : "attraction", placeQuery);
 
   const getDetailPath = (): string => {
