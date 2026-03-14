@@ -63,7 +63,7 @@ const RestaurantDetail = () => {
   }
 
   const handleSave = () => {
-    saveItem(id || "", "restaurant", restaurant.nome, false);
+    saveItem(String(restaurant.id), "restaurant", restaurant.nome, false);
     setIsSaved(true);
   };
 

@@ -67,6 +67,18 @@ const DestinationRio = () => {
   const [geocodeResult, setGeocodeResult] = useState<any | null>(null);
   const [geocodeLoading, setGeocodeLoading] = useState(false);
 
+  useEffect(() => {
+    if (isDebug) return;
+    try {
+      const seen = localStorage.getItem("heroVideoSeen:rio-de-janeiro") === "true";
+      if (!seen) {
+        navigate("/destino/rio-de-janeiro/intro", { replace: true });
+      }
+    } catch {
+      navigate("/destino/rio-de-janeiro/intro", { replace: true });
+    }
+  }, [isDebug, navigate]);
+
   const handleTest = async () => {
     setLoading(true);
     setTestResult(null);
