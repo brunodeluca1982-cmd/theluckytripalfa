@@ -1,5 +1,5 @@
 import { Link, useParams, useSearchParams } from "react-router-dom";
-import { Clock, Zap, Loader2, MapPin, ExternalLink, Lock } from "lucide-react";
+import { Clock, Zap, Loader2, MapPin, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useItemSave } from "@/hooks/use-item-save";
 import { useOQueFazerItem } from "@/hooks/use-o-que-fazer";
