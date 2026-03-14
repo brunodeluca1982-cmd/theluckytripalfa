@@ -223,6 +223,8 @@ const ManualItinerary = () => {
     return format(date, "EEE, d MMM", { locale: ptBR });
   };
 
+  if (!hasRequiredSetup) return null;
+
   return (
     <div className="min-h-screen bg-background pb-32">
       {/* Header */}

@@ -8,10 +8,15 @@ const ItineraryDecision = () => {
   const navigate = useNavigate();
   const { draft } = useTripDraft();
 
-  if (!draft.destinationId) {
-    navigate('/meu-roteiro', { replace: true });
-    return null;
-  }
+  const shouldRedirectToSetup = !draft.destinationId;
+
+  useEffect(() => {
+    if (shouldRedirectToSetup) {
+      navigate('/meu-roteiro', { replace: true });
+    }
+  }, [shouldRedirectToSetup, navigate]);
+
+  if (shouldRedirectToSetup) return null;
 
   return (
     <div className="min-h-screen bg-background pb-28">

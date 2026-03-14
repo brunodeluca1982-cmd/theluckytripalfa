@@ -40,15 +40,19 @@ const TripPreferences = () => {
     setTimeout(() => ref.current?.scrollIntoView({ behavior: "smooth", block: "center" }), delay);
   }, []);
 
-  if (!isDestinationSelected) {
-    navigate('/meu-roteiro', { replace: true });
-    return null;
-  }
+  const redirectPath = !isDestinationSelected
+    ? '/meu-roteiro'
+    : (!draft.arrivalAt || !draft.departureAt)
+      ? '/meu-roteiro/datas'
+      : null;
 
-  if (!draft.arrivalAt || !draft.departureAt) {
-    navigate('/meu-roteiro/datas', { replace: true });
-    return null;
-  }
+  useEffect(() => {
+    if (redirectPath) {
+      navigate(redirectPath, { replace: true });
+    }
+  }, [redirectPath, navigate]);
+
+  if (redirectPath) return null;
 
   const handleContinue = () => navigate('/meu-roteiro/decisao');
   const handleBack = () => navigate('/meu-roteiro');
