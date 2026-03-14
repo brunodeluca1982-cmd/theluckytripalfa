@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
-import { Clapperboard, Music, ArrowLeft, Lock, Clock, Zap, Loader2, RefreshCw } from "lucide-react";
+import { Clapperboard, Music, ArrowLeft, Clock, Zap, Loader2, RefreshCw } from "lucide-react";
 import { useCallback } from "react";
 import { useSpotifyPlayer } from "@/contexts/SpotifyPlayerContext";
 import { useEventMode } from "@/contexts/EventModeContext";
