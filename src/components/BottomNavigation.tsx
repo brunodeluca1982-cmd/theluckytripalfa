@@ -25,7 +25,7 @@ const navItems: NavItem[] = [
   { id: "perfil", label: "Perfil", icon: User, path: "/perfil" },
 ];
 
-const BottomNavigation = () => {
+const BottomNavigation = forwardRef<HTMLElement>((_, ref) => {
   const location = useLocation();
   const [savedItemsCount, setSavedItemsCount] = useState(0);
 
