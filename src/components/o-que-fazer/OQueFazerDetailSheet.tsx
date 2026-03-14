@@ -79,11 +79,13 @@ const OQueFazerDetailSheet = ({ open, onOpenChange, item }: OQueFazerDetailSheet
               {item.nome}
             </h2>
 
-            {/* Excerpt of meu_olhar */}
-            {excerpt && (
-              <p className="text-sm text-white/65 leading-relaxed mb-5">
-                {excerpt}
-              </p>
+            {/* Meu olhar — full text */}
+            {fullText && (
+              <div className="space-y-3 mb-5">
+                {fullText.split("\n").map((paragraph, index) => (
+                  <p key={index} className="text-sm text-white/65 leading-relaxed">{paragraph}</p>
+                ))}
+              </div>
             )}
 
             {/* Metadata pills */}
