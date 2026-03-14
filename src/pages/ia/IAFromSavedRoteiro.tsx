@@ -3,99 +3,48 @@ import { useNavigate } from "react-router-dom";
 import { ChevronLeft, Loader2, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
+import type { SavedItem } from "@/hooks/use-item-save";
 
 type SavedType = "hotel" | "restaurant" | "activity" | "lucky-list" | "nightlife" | "local-flavor";
 type PlannedSlot = "morning" | "lunch" | "afternoon" | "sunset" | "dinner" | "night";
 
-interface SavedCloudRow {
+interface PlanItem {
   id: string;
-  place_id: string | null;
-  name: string;
-  neighborhood: string | null;
-  address: string | null;
-  city: string | null;
-  ref_table: string | null;
-  notes: string | null;
-  created_at: string;
-}
-
-interface SavedCloudMeta {
-  item_type?: SavedType;
-  destination_id?: string;
-  destination_name?: string;
-}
-
-interface SavedCloudItem {
-  id: string;
-  placeId: string;
   name: string;
   type: SavedType;
   neighborhood: string | null;
-  address: string | null;
-  city: string | null;
-  refTable: string | null;
-  createdAt: string;
 }
 
-type PageState = "loading" | "empty" | "auth" | "error";
+type PageState = "loading" | "empty" | "error";
 
 const SLOT_SEQUENCE: PlannedSlot[] = ["morning", "lunch", "afternoon", "sunset", "dinner", "night"];
+const LOCAL_STORAGE_KEY = "draft-roteiro";
 
-const slotToDb = (slot: PlannedSlot): { timeSlot: "morning" | "lunch" | "afternoon" | "evening" | "extra"; notePrefix: string } => {
+const slotToDb = (slot: PlannedSlot) => {
   switch (slot) {
-    case "morning":
-      return { timeSlot: "morning", notePrefix: "Manhã" };
-    case "lunch":
-      return { timeSlot: "lunch", notePrefix: "Almoço" };
-    case "afternoon":
-      return { timeSlot: "afternoon", notePrefix: "Tarde" };
-    case "sunset":
-      return { timeSlot: "extra", notePrefix: "Pôr do sol" };
-    case "dinner":
-      return { timeSlot: "evening", notePrefix: "Jantar" };
-    case "night":
-      return { timeSlot: "extra", notePrefix: "Noite" };
+    case "morning": return { timeSlot: "morning", notePrefix: "Manhã" };
+    case "lunch": return { timeSlot: "lunch", notePrefix: "Almoço" };
+    case "afternoon": return { timeSlot: "afternoon", notePrefix: "Tarde" };
+    case "sunset": return { timeSlot: "extra", notePrefix: "Pôr do sol" };
+    case "dinner": return { timeSlot: "evening", notePrefix: "Jantar" };
+    case "night": return { timeSlot: "extra", notePrefix: "Noite" };
   }
 };
 
 const normalize = (value: string | null | undefined): string =>
-  (value || "")
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .trim();
+  (value || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
 
-const parseMeta = (raw: string | null): SavedCloudMeta => {
-  if (!raw) return {};
-  try {
-    const parsed = JSON.parse(raw);
-    return typeof parsed === "object" && parsed ? parsed : {};
-  } catch {
-    return {};
-  }
-};
-
-const inferType = (row: SavedCloudRow, meta: SavedCloudMeta): SavedType => {
-  if (meta.item_type) return meta.item_type;
-  const ref = normalize(row.ref_table);
-  if (ref === "stay_hotels_full" || ref.includes("hotel")) return "hotel";
-  if (ref === "restaurants" || ref === "restaurantes" || ref.includes("restaurant")) return "restaurant";
-  if (ref === "lucky_list_rio") return "lucky-list";
-  return "activity";
-};
-
-const isSunsetCandidate = (item: SavedCloudItem) => {
+const isSunsetCandidate = (item: PlanItem) => {
   const text = normalize(`${item.name} ${item.neighborhood || ""}`);
   return text.includes("por do sol") || text.includes("arpoador") || text.includes("mirante") || text.includes("praia") || text.includes("sunset");
 };
 
-const isNightCandidate = (item: SavedCloudItem) => {
+const isNightCandidate = (item: PlanItem) => {
   const text = normalize(item.name);
   return text.includes("bar") || text.includes("samba") || text.includes("festa") || text.includes("noite") || text.includes("lapa");
 };
 
-const buildPlan = (items: SavedCloudItem[]) => {
+const buildPlan = (items: PlanItem[]) => {
   const hotels = items.filter((i) => i.type === "hotel");
   const restaurants = items.filter((i) => i.type === "restaurant");
   const activities = items.filter((i) => i.type !== "hotel" && i.type !== "restaurant");
@@ -115,9 +64,9 @@ const buildPlan = (items: SavedCloudItem[]) => {
   const usedIds = new Set<string>();
 
   const pick = (
-    pool: SavedCloudItem[],
+    pool: PlanItem[],
     preferredNeighborhood: string | null,
-    predicate?: (item: SavedCloudItem) => boolean
+    predicate?: (item: PlanItem) => boolean
   ) => {
     const available = pool.filter((i) => !usedIds.has(i.id));
     const inNeighborhood = preferredNeighborhood
@@ -125,28 +74,22 @@ const buildPlan = (items: SavedCloudItem[]) => {
       : [];
 
     const scoped = predicate ? inNeighborhood.filter(predicate) : inNeighborhood;
-    if (scoped.length > 0) {
-      usedIds.add(scoped[0].id);
-      return scoped[0];
-    }
+    if (scoped.length > 0) { usedIds.add(scoped[0].id); return scoped[0]; }
 
     const globalScoped = predicate ? available.filter(predicate) : available;
-    if (globalScoped.length > 0) {
-      usedIds.add(globalScoped[0].id);
-      return globalScoped[0];
-    }
+    if (globalScoped.length > 0) { usedIds.add(globalScoped[0].id); return globalScoped[0]; }
 
     return null;
   };
 
-  const days: Array<{ day: number; neighborhood: string | null; slots: Array<{ slot: PlannedSlot; item: SavedCloudItem }> }> = [];
+  const days: Array<{ day: number; neighborhood: string | null; slots: Array<{ slot: PlannedSlot; item: PlanItem }> }> = [];
 
   for (let day = 1; day <= totalDays; day++) {
     const preferredNeighborhood = neighborhoodOrder.length > 0
       ? neighborhoodOrder[(day - 1) % neighborhoodOrder.length]
       : null;
 
-    const slots: Array<{ slot: PlannedSlot; item: SavedCloudItem }> = [];
+    const slots: Array<{ slot: PlannedSlot; item: PlanItem }> = [];
 
     const morning = pick(activities, preferredNeighborhood);
     if (morning) slots.push({ slot: "morning", item: morning });
@@ -168,26 +111,36 @@ const buildPlan = (items: SavedCloudItem[]) => {
 
     if (slots.length === 0) {
       const fallback = pick(items, preferredNeighborhood);
-      if (fallback) {
-        slots.push({ slot: "afternoon", item: fallback });
-      }
+      if (fallback) slots.push({ slot: "afternoon", item: fallback });
     }
 
     if (slots.length > 0) {
       const orderedSlots = SLOT_SEQUENCE
         .map((slotName) => slots.find((s) => s.slot === slotName))
-        .filter((slot): slot is { slot: PlannedSlot; item: SavedCloudItem } => Boolean(slot));
+        .filter((s): s is { slot: PlannedSlot; item: PlanItem } => Boolean(s));
 
-      days.push({
-        day,
-        neighborhood: preferredNeighborhood,
-        slots: orderedSlots,
-      });
+      days.push({ day, neighborhood: preferredNeighborhood, slots: orderedSlots });
     }
   }
 
-  const hotelBase = hotels[0] || null;
-  return { days, hotelBase };
+  return { days, hotelBase: hotels[0] || null };
+};
+
+/** Read saved items from localStorage (same key used by MinhaViagem) */
+const readLocalSavedItems = (): PlanItem[] => {
+  try {
+    const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (!raw) return [];
+    const items: SavedItem[] = JSON.parse(raw);
+    return items.map((item) => ({
+      id: item.id,
+      name: item.title || item.id,
+      type: (item.type || "activity") as SavedType,
+      neighborhood: item.neighborhood || null,
+    }));
+  } catch {
+    return [];
+  }
 };
 
 const IAFromSavedRoteiro = () => {
@@ -198,50 +151,16 @@ const IAFromSavedRoteiro = () => {
   useEffect(() => {
     const run = async () => {
       try {
-        const {
-          data: { user },
-          error: authError,
-        } = await supabase.auth.getUser();
+        // 1. Read saved items from localStorage (source of truth for MinhaViagem)
+        const localItems = readLocalSavedItems();
 
-        if (authError || !user) {
-          setState("auth");
-          return;
-        }
-
-        const savedRoteiroId = `saved-${user.id}`;
-        const { data: rows, error } = await supabase
-          .from("roteiro_itens")
-          .select("id, place_id, name, neighborhood, address, city, ref_table, notes, created_at")
-          .eq("roteiro_id", savedRoteiroId)
-          .eq("source", "saved")
-          .order("created_at", { ascending: true });
-
-        if (error) throw error;
-
-        const savedItems: SavedCloudItem[] = (rows || []).map((row: SavedCloudRow) => {
-          const meta = parseMeta(row.notes);
-          return {
-            id: row.id,
-            placeId: row.place_id || row.id,
-            name: row.name,
-            type: inferType(row, meta),
-            neighborhood: row.neighborhood,
-            address: row.address,
-            city: row.city,
-            refTable: row.ref_table,
-            createdAt: row.created_at,
-          };
-        }).filter((item) => {
-          const city = normalize(item.city);
-          return !city || city.includes("rio");
-        });
-
-        if (savedItems.length === 0) {
+        if (localItems.length === 0) {
           setState("empty");
           return;
         }
 
-        const plan = buildPlan(savedItems);
+        const plan = buildPlan(localItems);
+
         const itineraryRows = plan.days.flatMap((dayPlan) =>
           dayPlan.slots.map(({ slot, item }, index) => {
             const dbSlot = slotToDb(slot);
@@ -249,12 +168,12 @@ const IAFromSavedRoteiro = () => {
               day_index: dayPlan.day,
               order_in_day: index,
               source: "saved-ai",
-              ref_table: item.refTable,
-              place_id: item.placeId,
+              ref_table: null as string | null,
+              place_id: item.id,
               name: item.name,
               neighborhood: item.neighborhood,
-              address: item.address,
-              city: item.city || "Rio de Janeiro",
+              address: null as string | null,
+              city: "Rio de Janeiro",
               time_slot: dbSlot.timeSlot,
               notes: `${dbSlot.notePrefix}${dayPlan.neighborhood ? ` • ${dayPlan.neighborhood}` : ""}`,
             };
@@ -266,19 +185,18 @@ const IAFromSavedRoteiro = () => {
           return;
         }
 
+        // 2. Try to get user for persisting, but work without auth too
+        const { data: { user } } = await supabase.auth.getUser();
+
         const { data: itinerary, error: itineraryError } = await supabase
           .from("user_itineraries")
           .insert({
-            user_id: user.id,
+            user_id: user?.id || null,
             destination_id: "rio-de-janeiro",
             destination_name: "Rio de Janeiro",
             status: "active",
             generated_at: new Date().toISOString(),
             travel_intentions: ["saved-items"],
-            travel_company: null,
-            travel_pace: null,
-            budget_style: null,
-            inspiration_tags: null,
           })
           .select("id")
           .single();
@@ -314,19 +232,10 @@ const IAFromSavedRoteiro = () => {
       );
     }
 
-    if (state === "auth") {
-      return (
-        <div className="space-y-4 text-center py-20">
-          <p className="text-sm text-muted-foreground">Faça login para gerar seu roteiro com IA a partir dos seus itens salvos.</p>
-          <Button onClick={() => navigate("/auth")}>Entrar</Button>
-        </div>
-      );
-    }
-
     if (state === "empty") {
       return (
         <div className="space-y-4 text-center py-20">
-          <p className="text-sm text-muted-foreground">Nenhum item salvo em Rio de Janeiro foi encontrado.</p>
+          <p className="text-sm text-muted-foreground">Nenhum item salvo encontrado. Salve lugares em &quot;O Que Fazer&quot; ou &quot;Lucky List&quot; primeiro.</p>
           <Button variant="outline" onClick={() => navigate("/minha-viagem")}>Voltar para Minha Viagem</Button>
         </div>
       );
