@@ -6,6 +6,10 @@ import CuradosParaVoce from "@/components/home/CuradosDoRio";
 import SeuRioMaisLucky from "@/components/home/SeuRioMaisLucky";
 import PartnersCarousel from "@/components/home/PartnersCarousel";
 import CriarRoteiroCTA from "@/components/home/CriarRoteiroCTA";
+import RestaurantesCarousel from "@/components/home/RestaurantesCarousel";
+import HoteisCarousel from "@/components/home/HoteisCarousel";
+import RoteirosCarousel from "@/components/home/RoteirosCarousel";
+import LuckyListCTA from "@/components/home/LuckyListCTA";
 import { useHomeContentPool } from "@/hooks/use-home-content-pool";
 
 const Index = () => {
@@ -26,13 +30,25 @@ const Index = () => {
       {/* 3) CURADOS PARA VOCÊ — diverse editorial discovery */}
       {!isLoading && <CuradosParaVoce items={editorial} />}
 
-      {/* 4) SEU RIO MAIS LUCKY — identity & aspiration moods */}
+      {/* 4) RESTAURANTES — dedicated restaurant carousel */}
+      <RestaurantesCarousel />
+
+      {/* 5) HOTÉIS — dedicated hotel carousel */}
+      <HoteisCarousel />
+
+      {/* 6) LUCKY LIST CTA — premium teaser */}
+      <LuckyListCTA />
+
+      {/* 7) SEU RIO MAIS LUCKY — identity & aspiration moods */}
       {!isLoading && <SeuRioMaisLucky moods={moods} />}
 
-      {/* 5) VIAJE COMO ELES */}
+      {/* 8) ROTEIROS — itinerary options */}
+      <RoteirosCarousel />
+
+      {/* 9) VIAJE COMO ELES */}
       <PartnersCarousel />
 
-      {/* 6) CRIAR ROTEIRO CTA */}
+      {/* 10) CRIAR ROTEIRO CTA */}
       <CriarRoteiroCTA />
     </div>
   );
