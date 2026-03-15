@@ -98,8 +98,15 @@ function matchesMood(item: PoolItem, keywords: string[]): boolean {
   return keywords.some((kw) => haystack.includes(normalize(kw)));
 }
 
+/** Extract just the place name before any em-dash or long separator */
+function extractPlaceName(nome: string): string {
+  const parts = nome.split(/\s*[—–]\s*|\s+-\s+/);
+  return parts[0].trim();
+}
+
 /* ── Mappers ── */
 function mapExperience(e: OQueFazerItem): PoolItem {
+  const cleanName = extractPlaceName(e.nome);
   return {
     id: `exp-${e.id}`,
     sourceId: e.id,
@@ -109,7 +116,7 @@ function mapExperience(e: OQueFazerItem): PoolItem {
     descricao: e.meu_olhar || undefined,
     link: `/atividade/${e.id}`,
     photoKey: `pool-exp-${e.id}`,
-    photoQuery: buildPlaceQuery(e.nome, e.bairro || undefined),
+    photoQuery: buildPlaceQuery(cleanName, e.bairro || undefined),
     photoType: "attraction",
     tags: e.tags_ia || [],
     vibe: e.vibe || undefined,

@@ -13,6 +13,12 @@ function slugify(s: string) {
   return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
 }
 
+/** Extract just the place name before any em-dash or long separator */
+function extractPlaceName(nome: string): string {
+  const parts = nome.split(/\s*[—–]\s*|\s+-\s+/);
+  return parts[0].trim();
+}
+
 function isActivitySavedLocally(activityId: string) {
   const draft = JSON.parse(localStorage.getItem("draft-roteiro") || "[]");
   return draft.some((item: { id: string; type: string }) => item.id === activityId && item.type === "activity");
@@ -57,8 +63,9 @@ const ActivityDetail = () => {
   const from = searchParams.get("from");
   const backPath = from === "city" ? "/o-que-fazer" : from ? `/o-que-fazer/${from}` : "/o-que-fazer";
 
-  const itemSlug = item ? slugify(item.nome) : idOrSlug || "";
-  const placeQuery = buildPlaceQuery(item?.nome || "", item?.bairro || undefined);
+  const cleanName = item ? extractPlaceName(item.nome) : "";
+  const itemSlug = item ? slugify(cleanName) : idOrSlug || "";
+  const placeQuery = buildPlaceQuery(cleanName || "", item?.bairro || undefined);
   const { photoUrl } = usePlacePhoto(itemSlug, "attraction", placeQuery, !!item);
   const { data: mediaList = [] } = useActivityMedia(itemSlug || undefined);
 
