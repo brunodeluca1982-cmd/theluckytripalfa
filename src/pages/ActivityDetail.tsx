@@ -63,8 +63,9 @@ const ActivityDetail = () => {
   const from = searchParams.get("from");
   const backPath = from === "city" ? "/o-que-fazer" : from ? `/o-que-fazer/${from}` : "/o-que-fazer";
 
-  const itemSlug = item ? slugify(item.nome) : idOrSlug || "";
-  const placeQuery = buildPlaceQuery(item?.nome || "", item?.bairro || undefined);
+  const cleanName = item ? extractPlaceName(item.nome) : "";
+  const itemSlug = item ? slugify(cleanName) : idOrSlug || "";
+  const placeQuery = buildPlaceQuery(cleanName || "", item?.bairro || undefined);
   const { photoUrl } = usePlacePhoto(itemSlug, "attraction", placeQuery, !!item);
   const { data: mediaList = [] } = useActivityMedia(itemSlug || undefined);
 
