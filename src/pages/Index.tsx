@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { trackEvent, Events } from "@/lib/analytics";
 import HeroVideoCarousel from "@/components/home/HeroVideoCarousel";
+import HighlightsCarousel from "@/components/home/HighlightsCarousel";
 import OQueFazerAgora from "@/components/home/OQueFazerAgora";
 import CuradosParaVoce from "@/components/home/CuradosDoRio";
 import SeuRioMaisLucky from "@/components/home/SeuRioMaisLucky";
@@ -23,6 +24,9 @@ const Index = () => {
     <div className="min-h-screen flex flex-col bg-background pb-20">
       {/* 1) HERO VIDEO CAROUSEL */}
       <HeroVideoCarousel />
+
+      {/* 1.5) DESTAQUES — horizontal highlight cards */}
+      <HighlightsCarousel />
 
       {/* 2) O QUE FAZER AGORA — contextual, time-aware */}
       {!isLoading && <OQueFazerAgora items={contextual} />}
