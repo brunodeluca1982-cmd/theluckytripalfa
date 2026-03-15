@@ -347,7 +347,7 @@ SEMPRE gere neste formato:
 **🏨 Base da viagem**
 
 \`\`\`places
-[{"type":"hotel","nome":"NOME EXATO DO CATÁLOGO","bairro":"Bairro","meu_olhar":"Por que este hotel"}]
+[{"type":"hotel","nome":"NOME EXATO DO CATÁLOGO","bairro":"Bairro","meu_olhar":"USE O CAMPO meu_olhar DO CATÁLOGO — a opinião pessoal do curador sobre este lugar"}]
 \`\`\`
 
 ---
