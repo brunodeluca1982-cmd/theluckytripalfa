@@ -398,9 +398,10 @@ REGRAS DO FORMATO:
 FORMATO PARA RECOMENDAÇÕES SIMPLES
 ═══════════════════════════════════════════
 \`\`\`places
-[{"type":"restaurant","nome":"Nome","bairro":"Bairro","meu_olhar":"Descrição"}]
+[{"type":"restaurant","nome":"Nome","bairro":"Bairro","meu_olhar":"COPIE O meu_olhar DO CATÁLOGO — nunca invente"}]
 \`\`\`
 - NUNCA use bullet points. SEMPRE bloco places.
+- O campo "meu_olhar" DEVE vir do catálogo curado, não inventado.
 - Máximo 6 itens por bloco.
 
 ═══════════════════════════════════════════
