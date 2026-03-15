@@ -13,6 +13,12 @@ function slugify(s: string) {
   return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
 }
 
+/** Extract just the place name before any em-dash or long separator */
+function extractPlaceName(nome: string): string {
+  const parts = nome.split(/\s*[—–]\s*|\s+-\s+/);
+  return parts[0].trim();
+}
+
 function isActivitySavedLocally(activityId: string) {
   const draft = JSON.parse(localStorage.getItem("draft-roteiro") || "[]");
   return draft.some((item: { id: string; type: string }) => item.id === activityId && item.type === "activity");
