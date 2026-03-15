@@ -92,10 +92,14 @@ async function runCurationLayer() {
     const ext = createClient(EXTERNAL_URL, EXTERNAL_KEY);
     const [restRes, hotelRes] = await Promise.all([
       ext.from("restaurantes")
-        .select("nome, bairro, cidade, categoria, meu_olhar, tipo_cozinha, especialidade")
-        .eq("ativo", true).order("nome").limit(500),
+        .select("nome, bairro, cidade, categoria, meu_olhar, especialidade, perfil_publico, tipo_cozinha:categoria")
+        .eq("ativo", true)
+        .order("ordem_bairro")
+        .order("nome")
+        .limit(500),
       ext.from("v_stay_hotels_full")
-        .select("nome, bairro, cidade, meu_olhar, preco_medio_diaria, categoria, atmosfera, perfil_publico")
+        .select("nome:hotel_name, bairro:neighborhood_name, cidade:city, meu_olhar:my_view, categoria:hotel_category, atmosfera:identity_phrase, perfil_publico:audience, tags_ia:ai_tags")
+        .eq("active", true)
         .limit(200),
     ]);
     if (restRes.error) console.error("Curation: restaurantes error:", restRes.error);
